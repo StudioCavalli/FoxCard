@@ -9,9 +9,9 @@ const TRACKING_PIXEL = Buffer.from(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { trackingId: string } }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
-  const trackingId = params.trackingId
+  const { trackingId } = await params
 
   try {
     // Find email log by tracking ID (we'll store this in a new field)

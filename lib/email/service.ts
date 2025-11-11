@@ -77,8 +77,8 @@ export class EmailService {
     }
 
     // Render template with tracking pixel
-    const html = render(TemplateComponent({ ...props, trackingPixelUrl }))
-    const text = render(TemplateComponent({ ...props, trackingPixelUrl }), {
+    const html = await render(TemplateComponent({ ...props, trackingPixelUrl } as any))
+    const text = await render(TemplateComponent({ ...props, trackingPixelUrl } as any), {
       plainText: true,
     })
 
