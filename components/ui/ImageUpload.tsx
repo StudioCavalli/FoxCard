@@ -213,6 +213,7 @@ export function ImageUpload({
                 alt={`Upload ${index + 1}`}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 50vw, 200px"
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                 <Button
@@ -249,6 +250,7 @@ export function ImageUpload({
                 alt={`Uploading ${index + 1}`}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 50vw, 200px"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                 {uploadingFile.error ? (
