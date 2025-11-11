@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ProductCard } from '@/components/products/ProductCard'
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { Filter, X, Search, ExternalLink } from 'lucide-react'
 
-export default function ProductsPage() {
+function ProductsContent() {
   const DEMO_STORE_ID = '000000000000000000000001'
   const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
@@ -335,5 +335,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+      <ProductsContent />
+    </Suspense>
   )
 }
