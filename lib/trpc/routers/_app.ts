@@ -12,6 +12,7 @@ import { mediaRouter } from './media'
 import { exportRouter } from './export'
 import { webhookRouter } from './webhook'
 import { apiKeyRouter } from './apiKey'
+import { themeRouter } from './theme'
 
 export const appRouter = router({
   product: productRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
   export: exportRouter,
   webhook: webhookRouter,
   apiKey: apiKeyRouter,
+  theme: themeRouter,
 })
 
 export type AppRouter = typeof appRouter
