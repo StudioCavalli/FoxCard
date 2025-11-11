@@ -13,6 +13,14 @@ export const paymentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Check if Stripe is configured
+      if (!stripe) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Payment provider not configured. Please contact the store administrator.',
+        })
+      }
+
       try {
         // Get the order with items
         const order = await ctx.prisma.order.findUnique({
@@ -54,6 +62,8 @@ export const paymentRouter = router({
               currency: CURRENCY,
               product_data: {
                 name: 'Frais de livraison',
+                description: undefined,
+                images: [],
               },
               unit_amount: formatAmountForStripe(order.shipping),
             },
@@ -68,6 +78,8 @@ export const paymentRouter = router({
               currency: CURRENCY,
               product_data: {
                 name: 'Reduction',
+                description: undefined,
+                images: [],
               },
               unit_amount: -formatAmountForStripe(order.discount),
             },
@@ -119,6 +131,14 @@ export const paymentRouter = router({
   getPaymentStatus: publicProcedure
     .input(z.object({ sessionId: z.string() }))
     .query(async ({ input }) => {
+      // Check if Stripe is configured
+      if (!stripe) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Payment provider not configured.',
+        })
+      }
+
       try {
         const session = await stripe.checkout.sessions.retrieve(input.sessionId)
 

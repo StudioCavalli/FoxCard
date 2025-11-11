@@ -1,13 +1,18 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables')
+// Stripe is optional - only required if you want to use payment features
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
+
+if (!STRIPE_SECRET_KEY) {
+  console.warn('⚠️  STRIPE_SECRET_KEY is not defined - payment features will be disabled')
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
-  typescript: true,
-})
+export const stripe = STRIPE_SECRET_KEY
+  ? new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+      typescript: true,
+    })
+  : null
 
 export const CURRENCY = 'eur'
 export const MIN_AMOUNT = 0.5
