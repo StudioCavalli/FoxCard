@@ -99,6 +99,7 @@ export default function AdminProductsPage() {
                               alt={product.name}
                               fill
                               className="object-contain"
+                              sizes="48px"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">

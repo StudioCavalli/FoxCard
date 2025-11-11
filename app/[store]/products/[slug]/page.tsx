@@ -96,6 +96,7 @@ export default function ProductDetailPage({
               alt={product.name}
               fill
               className="object-contain"
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
             {product.compareAtPrice && product.compareAtPrice > product.price && (
@@ -124,6 +125,7 @@ export default function ProductDetailPage({
                       alt={`${product.name} ${index + 1}`}
                       fill
                       className="object-contain p-2"
+                      sizes="(max-width: 768px) 25vw, 100px"
                     />
                   </div>
                 </button>

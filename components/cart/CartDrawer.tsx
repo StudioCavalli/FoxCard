@@ -74,6 +74,7 @@ export function CartDrawer() {
                         alt={item.name}
                         fill
                         className="object-contain"
+                        sizes="80px"
                       />
                     )}
                   </div>
