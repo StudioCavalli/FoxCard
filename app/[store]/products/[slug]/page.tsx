@@ -60,12 +60,17 @@ export default function ProductDetailPage({
     )
   }
 
-  const images = product.images.length > 0 ? product.images : [product.thumbnail].filter(Boolean)
+  const images = product.images.length > 0
+    ? product.images
+    : product.thumbnail
+    ? [product.thumbnail]
+    : ['/placeholder-product.png']
   const currentImage = images[selectedImage] || '/placeholder-product.png'
   const isOutOfStock = product.quantity <= 0
 
   const handleAddToCart = () => {
     addItem({
+      id: product.id,
       productId: product.id,
       name: product.name,
       slug: product.slug,

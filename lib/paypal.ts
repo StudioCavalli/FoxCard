@@ -1,4 +1,4 @@
-import { PayPalHttpClient, core } from '@paypal/paypal-server-sdk'
+import { Client, Environment } from '@paypal/paypal-server-sdk'
 
 // PayPal is optional - only required if you want to use PayPal payment features
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
@@ -11,21 +11,12 @@ if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
 
 // Initialize PayPal client
 export const paypalClient = PAYPAL_CLIENT_ID && PAYPAL_CLIENT_SECRET
-  ? new PayPalHttpClient({
+  ? new Client({
       clientCredentialsAuthCredentials: {
         oAuthClientId: PAYPAL_CLIENT_ID,
         oAuthClientSecret: PAYPAL_CLIENT_SECRET,
       },
-      environment: PAYPAL_MODE === 'live' ? core.Environment.Production : core.Environment.Sandbox,
-      logging: {
-        logLevel: core.LogLevel.Info,
-        logRequest: {
-          logBody: true,
-        },
-        logResponse: {
-          logHeaders: true,
-        },
-      },
+      environment: PAYPAL_MODE === 'live' ? Environment.Production : Environment.Sandbox,
     })
   : null
 

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { router, publicProcedure, adminProcedure } from '../trpc'
 import { stripe, formatAmountForStripe, CURRENCY } from '@/lib/stripe'
 import { paypalClient, formatAmountForPayPal, PAYPAL_CURRENCY } from '@/lib/paypal'
-import { orders } from '@paypal/paypal-server-sdk'
+import { OrdersController } from '@paypal/paypal-server-sdk'
 import { TRPCError } from '@trpc/server'
 
 export const paymentRouter = router({
@@ -255,23 +255,22 @@ export const paymentRouter = router({
         ]
 
         // Create PayPal order
-        const request = new orders.OrdersCreateRequest()
-        request.prefer('return=representation')
-        request.requestBody({
-          intent: 'CAPTURE' as any,
-          purchaseUnits,
-          applicationContext: {
-            brandName: 'FoxCard',
-            landingPage: 'BILLING' as any,
-            shippingPreference: 'SET_PROVIDED_ADDRESS' as any,
-            userAction: 'PAY_NOW' as any,
-            returnUrl: input.returnUrl,
-            cancelUrl: input.cancelUrl,
+        const ordersController = new OrdersController(paypalClient)
+        const { result: paypalOrder } = await ordersController.ordersCreate({
+          body: {
+            intent: 'CAPTURE',
+            purchaseUnits,
+            applicationContext: {
+              brandName: 'FoxCard',
+              landingPage: 'BILLING',
+              shippingPreference: 'SET_PROVIDED_ADDRESS',
+              userAction: 'PAY_NOW',
+              returnUrl: input.returnUrl,
+              cancelUrl: input.cancelUrl,
+            },
           },
+          prefer: 'return=representation',
         })
-
-        const response = await paypalClient.execute(request)
-        const paypalOrder = response.result
 
         // Update order with PayPal order ID
         await ctx.prisma.order.update({
@@ -319,11 +318,10 @@ export const paymentRouter = router({
 
       try {
         // Capture the PayPal order
-        const request = new orders.OrdersCaptureRequest(input.paypalOrderId)
-        request.requestBody({})
-
-        const response = await paypalClient.execute(request)
-        const captureResult = response.result
+        const ordersController = new OrdersController(paypalClient)
+        const { result: captureResult } = await ordersController.ordersCapture({
+          id: input.paypalOrderId,
+        })
 
         // Update order status
         if (captureResult.status === 'COMPLETED') {
@@ -361,12 +359,14 @@ export const paymentRouter = router({
       }
 
       try {
-        const request = new orders.OrdersGetRequest(input.paypalOrderId)
-        const response = await paypalClient.execute(request)
+        const ordersController = new OrdersController(paypalClient)
+        const { result } = await ordersController.ordersGet({
+          id: input.paypalOrderId,
+        })
 
         return {
-          status: response.result.status,
-          payerEmail: response.result.payer?.emailAddress,
+          status: result.status,
+          payerEmail: result.payer?.emailAddress,
         }
       } catch (error) {
         throw new TRPCError({
