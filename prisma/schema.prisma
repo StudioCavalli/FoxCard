@@ -37,6 +37,9 @@ model Store {
   webhooks    Webhook[]
   apiKeys     ApiKey[]
   envVariables EnvVariable[] @relation("StoreEnvVariables")
+  emailTemplates EmailTemplate[]
+  emailLogs   EmailLog[]
+  newsletterSubscribers NewsletterSubscriber[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -498,4 +501,130 @@ enum EnvCategory {
   R2
   AUTH
   GENERAL
+}
+
+// Email System
+model EmailTemplate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String   // Template name (e.g., "order_confirmation")
+  subject     String   // Email subject with variable support
+  htmlBody    String   // HTML content with variable support
+  textBody    String?  // Plain text fallback
+
+  // Template metadata
+  description String?
+  variables   String[] // List of available variables (e.g., ["orderNumber", "customerName"])
+
+  // Status
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false) // System default templates
+
+  // Usage tracking
+  logs        EmailLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, name])
+  @@index([storeId])
+  @@index([isActive])
+}
+
+model EmailLog {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Template info
+  templateId      String?  @db.ObjectId
+  template        EmailTemplate? @relation(fields: [templateId], references: [id])
+  templateName    String   // Snapshot of template name
+
+  // Email details
+  to              String
+  from            String
+  subject         String
+  htmlBody        String
+  textBody        String?
+
+  // Tracking
+  status          EmailStatus @default(PENDING)
+  attempts        Int      @default(0)
+  error           String?
+
+  // Open tracking
+  opened          Boolean  @default(false)
+  openedAt        DateTime?
+  openCount       Int      @default(0)
+
+  // Click tracking
+  clicked         Boolean  @default(false)
+  clickedAt       DateTime?
+  clickCount      Int      @default(0)
+
+  // Related entities
+  orderId         String?  @db.ObjectId
+  customerId      String?  @db.ObjectId
+
+  sentAt          DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([templateId])
+  @@index([status])
+  @@index([to])
+  @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  email       String
+  firstName   String?
+  lastName    String?
+
+  // Subscription status
+  status      SubscriberStatus @default(PENDING)
+  confirmedAt DateTime?
+
+  // Opt-in tracking
+  source      String?  // Where they subscribed from
+  ipAddress   String?
+  userAgent   String?
+
+  // Preferences
+  tags        String[] // Segmentation tags
+  preferences Json?    // Email preferences
+
+  // Unsubscribe
+  unsubscribedAt DateTime?
+  unsubscribeReason String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, email])
+  @@index([storeId])
+  @@index([status])
+  @@index([email])
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  BOUNCED
+}
+
+enum SubscriberStatus {
+  PENDING      // Awaiting confirmation
+  CONFIRMED    // Confirmed via double opt-in
+  UNSUBSCRIBED // Unsubscribed
 }
