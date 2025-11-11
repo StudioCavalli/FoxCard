@@ -1,14 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Menu, X, User } from 'lucide-react'
+import { Menu, X, User } from 'lucide-react'
 import { useUIStore } from '@/lib/store/ui'
-import { useCartStore } from '@/lib/store/cart'
 import { Button } from '@/components/ui/Button'
+import { CartButton } from './CartButton'
 
 export function Header() {
-  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu } = useUIStore()
-  const totalItems = useCartStore((state) => state.getTotalItems())
+  const { isMobileMenuOpen, toggleMobileMenu } = useUIStore()
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -25,9 +24,6 @@ export function Header() {
             <Link href="/products" className="text-gray-700 hover:text-primary-600 transition-colors">
               Produits
             </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Catégories
-            </Link>
             <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
               À propos
             </Link>
@@ -41,14 +37,7 @@ export function Header() {
             </Button>
 
             {/* Cart */}
-            <Button variant="ghost" size="sm" onClick={toggleCart} className="relative">
-              <ShoppingCart className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-secondary-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
+            <CartButton />
 
             {/* Mobile Menu Toggle */}
             <Button variant="ghost" size="sm" onClick={toggleMobileMenu} className="md:hidden">
@@ -63,9 +52,6 @@ export function Header() {
             <nav className="flex flex-col space-y-4">
               <Link href="/products" className="text-gray-700 hover:text-primary-600 transition-colors">
                 Produits
-              </Link>
-              <Link href="/categories" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Catégories
               </Link>
               <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
                 À propos
