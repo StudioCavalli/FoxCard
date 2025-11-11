@@ -1,0 +1,321 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Multi-tenancy: Each store is isolated
+model Store {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  description String?
+  logo        String?
+  domain      String?  @unique
+
+  // Owner info
+  ownerId     String   @db.ObjectId
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Store settings
+  settings    Json?    // Flexible settings object
+  theme       Json?    // Theme customization
+
+  // Relations
+  products    Product[]
+  categories  Category[]
+  orders      Order[]
+  customers   Customer[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String    // Hashed password
+  role          UserRole  @default(USER)
+
+  stores        Store[]
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+  price       Float
+  compareAtPrice Float?
+  cost        Float?
+
+  // Product type
+  type        ProductType @default(SIMPLE)
+
+  // Inventory
+  sku         String?
+  barcode     String?
+  trackInventory Boolean @default(true)
+  quantity    Int      @default(0)
+  lowStockThreshold Int?
+
+  // Images
+  images      String[] // Array of image URLs
+  thumbnail   String?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Status
+  status      ProductStatus @default(DRAFT)
+  featured    Boolean @default(false)
+
+  // Relations
+  categoryId  String?  @db.ObjectId
+  category    Category? @relation(fields: [categoryId], references: [id])
+  variants    ProductVariant[]
+  orderItems  OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model ProductVariant {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String   @db.ObjectId
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name        String
+  sku         String?
+  price       Float?
+  quantity    Int      @default(0)
+  image       String?
+
+  // Variant options (e.g., color: "red", size: "L")
+  options     Json
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Category {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+  image       String?
+
+  // Hierarchy
+  parentId    String?  @db.ObjectId
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    Category[] @relation("CategoryHierarchy")
+
+  products    Product[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([parentId])
+}
+
+model Customer {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+
+  // Address
+  address     Json?
+
+  orders      Order[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, email])
+  @@index([storeId])
+}
+
+model Order {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String      @db.ObjectId
+  store           Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  orderNumber     String      @unique
+
+  customerId      String?     @db.ObjectId
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+
+  // Customer info (for guest checkout)
+  customerEmail   String
+  customerName    String?
+
+  // Pricing
+  subtotal        Float
+  tax             Float       @default(0)
+  shipping        Float       @default(0)
+  discount        Float       @default(0)
+  total           Float
+
+  // Status
+  status          OrderStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+
+  // Payment
+  paymentMethod   String?
+  paymentIntentId String?
+
+  // Shipping
+  shippingAddress Json?
+  billingAddress  Json?
+
+  // Items
+  items           OrderItem[]
+
+  // Notes
+  notes           String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([storeId])
+  @@index([customerId])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId     String   @db.ObjectId
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId   String   @db.ObjectId
+  product     Product  @relation(fields: [productId], references: [id])
+
+  name        String   // Snapshot of product name
+  price       Float    // Snapshot of price at time of order
+  quantity    Int
+
+  // Variant info
+  variantId   String?
+  variantName String?
+
+  total       Float
+
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProductType {
+  SIMPLE
+  VARIABLE
+  DIGITAL
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RETURNED
+}
