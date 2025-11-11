@@ -34,7 +34,7 @@ export default function ProductDetailPage({
   const { data: relatedProducts } = trpc.product.getAll.useQuery(
     {
       storeId: DEMO_STORE_ID,
-      categoryId: product?.categoryId,
+      categoryId: product?.categoryId ?? undefined,
       status: 'ACTIVE',
       limit: 4,
     },
@@ -73,7 +73,11 @@ export default function ProductDetailPage({
     )
   }
 
-  const images = product.images.length > 0 ? product.images : [product.thumbnail].filter(Boolean)
+  const images = product.images.length > 0
+    ? product.images
+    : product.thumbnail
+    ? [product.thumbnail]
+    : ['/placeholder-product.png']
   const currentImage = images[selectedImage] || '/placeholder-product.png'
   const isOutOfStock = product.quantity <= 0
 
@@ -82,6 +86,7 @@ export default function ProductDetailPage({
 
   const handleAddToCart = () => {
     addItem({
+      id: product.id,
       productId: product.id,
       name: product.name,
       slug: product.slug,

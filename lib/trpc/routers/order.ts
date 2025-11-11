@@ -190,7 +190,6 @@ export const orderRouter = router({
           orderNumber,
           subtotal,
           total,
-          discountCodeId,
           items: {
             create: orderItems,
           },

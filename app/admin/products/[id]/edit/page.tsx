@@ -19,7 +19,18 @@ export default function EditProductPage({
   const router = useRouter()
   const DEMO_STORE_ID = '000000000000000000000001'
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    slug: string
+    description: string
+    price: string
+    compareAtPrice: string
+    sku: string
+    quantity: string
+    images: string[]
+    categoryId: string
+    status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+  }>({
     name: '',
     slug: '',
     description: '',
@@ -27,9 +38,9 @@ export default function EditProductPage({
     compareAtPrice: '',
     sku: '',
     quantity: '',
-    images: [] as string[],
+    images: [],
     categoryId: '',
-    status: 'ACTIVE' as const,
+    status: 'ACTIVE',
   })
 
   const { data: product, isLoading } = trpc.product.getById.useQuery({ id })

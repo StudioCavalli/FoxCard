@@ -83,7 +83,7 @@ class WebhookManager {
         data: {
           webhookId: webhook.id,
           event: payload.event,
-          payload,
+          payload: payload as any,
           status: 'PENDING',
           attempts: 0,
         },

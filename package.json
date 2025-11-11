@@ -65,6 +65,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@types/json2csv": "^5.0.7",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.1",
     "prisma": "^6.19.0",

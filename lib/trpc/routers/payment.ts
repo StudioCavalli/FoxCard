@@ -2,7 +2,13 @@ import { z } from 'zod'
 import { router, publicProcedure, adminProcedure } from '../trpc'
 import { stripe, formatAmountForStripe, CURRENCY } from '@/lib/stripe'
 import { paypalClient, formatAmountForPayPal, PAYPAL_CURRENCY } from '@/lib/paypal'
-import { OrdersController } from '@paypal/paypal-server-sdk'
+import {
+  OrdersController,
+  CheckoutPaymentIntent,
+  OrderApplicationContextLandingPage,
+  OrderApplicationContextShippingPreference,
+  OrderApplicationContextUserAction,
+} from '@paypal/paypal-server-sdk'
 import { TRPCError } from '@trpc/server'
 
 export const paymentRouter = router({
@@ -256,15 +262,15 @@ export const paymentRouter = router({
 
         // Create PayPal order
         const ordersController = new OrdersController(paypalClient)
-        const { result: paypalOrder } = await ordersController.ordersCreate({
+        const { result: paypalOrder } = await ordersController.createOrder({
           body: {
-            intent: 'CAPTURE',
+            intent: CheckoutPaymentIntent.Capture,
             purchaseUnits,
             applicationContext: {
               brandName: 'FoxCard',
-              landingPage: 'BILLING',
-              shippingPreference: 'SET_PROVIDED_ADDRESS',
-              userAction: 'PAY_NOW',
+              landingPage: OrderApplicationContextLandingPage.Billing,
+              shippingPreference: OrderApplicationContextShippingPreference.SetProvidedAddress,
+              userAction: OrderApplicationContextUserAction.PayNow,
               returnUrl: input.returnUrl,
               cancelUrl: input.cancelUrl,
             },
@@ -319,7 +325,7 @@ export const paymentRouter = router({
       try {
         // Capture the PayPal order
         const ordersController = new OrdersController(paypalClient)
-        const { result: captureResult } = await ordersController.ordersCapture({
+        const { result: captureResult } = await ordersController.captureOrder({
           id: input.paypalOrderId,
         })
 
@@ -360,7 +366,7 @@ export const paymentRouter = router({
 
       try {
         const ordersController = new OrdersController(paypalClient)
-        const { result } = await ordersController.ordersGet({
+        const { result } = await ordersController.getOrder({
           id: input.paypalOrderId,
         })
 

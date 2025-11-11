@@ -60,7 +60,7 @@ export default function CartPage() {
                 <Link href={`/products/${item.slug}`} className="flex-shrink-0">
                   <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-primary-500 transition-colors">
                     <Image
-                      src={item.image}
+                      src={item.image || '/placeholder-product.png'}
                       alt={item.name}
                       fill
                       className="object-contain p-2"
@@ -106,9 +106,9 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, Math.min(item.maxQuantity, item.quantity + 1))}
+                        onClick={() => updateQuantity(item.productId, item.maxQuantity ? Math.min(item.maxQuantity, item.quantity + 1) : item.quantity + 1)}
                         className="p-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        disabled={item.quantity >= item.maxQuantity}
+                        disabled={item.maxQuantity !== undefined && item.quantity >= item.maxQuantity}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -119,7 +119,7 @@ export default function CartPage() {
                       <p className="text-xl font-bold text-gray-900">
                         {formatPrice(item.price * item.quantity)}
                       </p>
-                      {item.maxQuantity < 10 && (
+                      {item.maxQuantity !== undefined && item.maxQuantity < 10 && (
                         <p className="text-xs text-yellow-600 mt-1">
                           Plus que {item.maxQuantity} en stock
                         </p>
