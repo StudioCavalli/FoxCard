@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { router, publicProcedure } from '../trpc'
+import { router, publicProcedure, adminProcedure } from '../trpc'
 import { stripe, formatAmountForStripe, CURRENCY } from '@/lib/stripe'
+import { paypalClient, formatAmountForPayPal, PAYPAL_CURRENCY } from '@/lib/paypal'
+import { orders } from '@paypal/paypal-server-sdk'
 import { TRPCError } from '@trpc/server'
 
 export const paymentRouter = router({
@@ -90,7 +92,7 @@ export const paymentRouter = router({
         // Create Stripe checkout session
         const session = await stripe.checkout.sessions.create({
           mode: 'payment',
-          payment_method_types: ['card'],
+          payment_method_types: ['card', 'paypal'], // Stripe also supports PayPal
           line_items: lineItems,
           customer_email: order.customerEmail,
           client_reference_id: order.id,
@@ -102,6 +104,12 @@ export const paymentRouter = router({
           cancel_url: input.cancelUrl,
           shipping_address_collection: {
             allowed_countries: ['FR', 'BE', 'CH', 'LU', 'MC'],
+          },
+          // Enable Apple Pay / Google Pay / Link
+          payment_method_options: {
+            card: {
+              request_three_d_secure: 'automatic',
+            },
           },
         })
 
@@ -155,4 +163,394 @@ export const paymentRouter = router({
         })
       }
     }),
+
+  // PayPal Integration
+  createPayPalOrder: publicProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        returnUrl: z.string(),
+        cancelUrl: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if PayPal is configured
+      if (!paypalClient) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'PayPal not configured. Please contact the store administrator.',
+        })
+      }
+
+      try {
+        // Get the order with items
+        const order = await ctx.prisma.order.findUnique({
+          where: { id: input.orderId },
+          include: {
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        })
+
+        if (!order) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Order not found',
+          })
+        }
+
+        // Build PayPal order items
+        const purchaseUnits = [
+          {
+            referenceId: order.orderNumber,
+            description: `Order #${order.orderNumber}`,
+            customId: order.id,
+            softDescriptor: 'FoxCard',
+            amount: {
+              currencyCode: PAYPAL_CURRENCY as any,
+              value: formatAmountForPayPal(order.total),
+              breakdown: {
+                itemTotal: {
+                  currencyCode: PAYPAL_CURRENCY as any,
+                  value: formatAmountForPayPal(order.subtotal),
+                },
+                shipping: order.shipping > 0 ? {
+                  currencyCode: PAYPAL_CURRENCY as any,
+                  value: formatAmountForPayPal(order.shipping),
+                } : undefined,
+                discount: order.discount > 0 ? {
+                  currencyCode: PAYPAL_CURRENCY as any,
+                  value: formatAmountForPayPal(order.discount),
+                } : undefined,
+              },
+            },
+            items: order.items.map((item) => ({
+              name: item.name,
+              description: item.variantName || undefined,
+              sku: item.productId.substring(0, 127), // PayPal SKU max 127 chars
+              unitAmount: {
+                currencyCode: PAYPAL_CURRENCY as any,
+                value: formatAmountForPayPal(item.price),
+              },
+              quantity: item.quantity.toString(),
+              category: 'PHYSICAL_GOODS' as any,
+            })),
+            shippingDetail: order.shippingAddress ? {
+              name: {
+                fullName: order.customerName || 'Customer',
+              },
+              addressPortable: {
+                addressLine1: (order.shippingAddress as any).address,
+                addressLine2: undefined,
+                adminArea2: (order.shippingAddress as any).city,
+                adminArea1: undefined,
+                postalCode: (order.shippingAddress as any).postalCode,
+                countryCode: getCountryCode((order.shippingAddress as any).country),
+              },
+            } : undefined,
+          },
+        ]
+
+        // Create PayPal order
+        const request = new orders.OrdersCreateRequest()
+        request.prefer('return=representation')
+        request.requestBody({
+          intent: 'CAPTURE' as any,
+          purchaseUnits,
+          applicationContext: {
+            brandName: 'FoxCard',
+            landingPage: 'BILLING' as any,
+            shippingPreference: 'SET_PROVIDED_ADDRESS' as any,
+            userAction: 'PAY_NOW' as any,
+            returnUrl: input.returnUrl,
+            cancelUrl: input.cancelUrl,
+          },
+        })
+
+        const response = await paypalClient.execute(request)
+        const paypalOrder = response.result
+
+        // Update order with PayPal order ID
+        await ctx.prisma.order.update({
+          where: { id: order.id },
+          data: {
+            paymentIntentId: paypalOrder.id,
+            paymentMethod: 'paypal',
+          },
+        })
+
+        // Find approval URL
+        const approvalUrl = paypalOrder.links?.find(
+          (link: any) => link.rel === 'approve'
+        )?.href
+
+        return {
+          orderId: paypalOrder.id,
+          approvalUrl,
+        }
+      } catch (error: any) {
+        console.error('Error creating PayPal order:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create PayPal order',
+          cause: error,
+        })
+      }
+    }),
+
+  capturePayPalOrder: publicProcedure
+    .input(
+      z.object({
+        paypalOrderId: z.string(),
+        orderId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if PayPal is configured
+      if (!paypalClient) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'PayPal not configured.',
+        })
+      }
+
+      try {
+        // Capture the PayPal order
+        const request = new orders.OrdersCaptureRequest(input.paypalOrderId)
+        request.requestBody({})
+
+        const response = await paypalClient.execute(request)
+        const captureResult = response.result
+
+        // Update order status
+        if (captureResult.status === 'COMPLETED') {
+          await ctx.prisma.order.update({
+            where: { id: input.orderId },
+            data: {
+              paymentStatus: 'PAID',
+              status: 'PROCESSING',
+            },
+          })
+        }
+
+        return {
+          status: captureResult.status,
+          captureId: captureResult.id,
+        }
+      } catch (error: any) {
+        console.error('Error capturing PayPal order:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to capture PayPal payment',
+          cause: error,
+        })
+      }
+    }),
+
+  getPayPalOrderStatus: publicProcedure
+    .input(z.object({ paypalOrderId: z.string() }))
+    .query(async ({ input }) => {
+      if (!paypalClient) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'PayPal not configured.',
+        })
+      }
+
+      try {
+        const request = new orders.OrdersGetRequest(input.paypalOrderId)
+        const response = await paypalClient.execute(request)
+
+        return {
+          status: response.result.status,
+          payerEmail: response.result.payer?.emailAddress,
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to retrieve PayPal order status',
+          cause: error,
+        })
+      }
+    }),
+
+  // Bank Transfer
+  generateBankTransferInstructions: publicProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        storeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get the order
+        const order = await ctx.prisma.order.findUnique({
+          where: { id: input.orderId },
+          include: { store: true },
+        })
+
+        if (!order) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Order not found',
+          })
+        }
+
+        // Update order payment method to bank transfer
+        await ctx.prisma.order.update({
+          where: { id: order.id },
+          data: {
+            paymentMethod: 'bank_transfer',
+            paymentStatus: 'PENDING',
+            status: 'PENDING',
+          },
+        })
+
+        // Get bank details from environment variables or store settings
+        // In production, this should be configured per store
+        const bankDetails = {
+          accountHolder: order.store.name || 'FoxCard Store',
+          iban: 'FR76 1234 5678 9012 3456 7890 123', // TODO: Get from store settings
+          bic: 'ABCDEFGHXXX', // TODO: Get from store settings
+          bankName: 'Banque Example',
+          reference: order.orderNumber,
+          amount: order.total,
+          currency: 'EUR',
+        }
+
+        return bankDetails
+      } catch (error: any) {
+        console.error('Error generating bank transfer instructions:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to generate bank transfer instructions',
+          cause: error,
+        })
+      }
+    }),
+
+  confirmBankTransferPayment: publicProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        transactionReference: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Mark order as awaiting bank transfer confirmation
+        await ctx.prisma.order.update({
+          where: { id: input.orderId },
+          data: {
+            paymentStatus: 'PENDING',
+            status: 'PENDING',
+            notes: input.transactionReference
+              ? `Référence de virement : ${input.transactionReference}`
+              : 'En attente de confirmation de virement bancaire',
+          },
+        })
+
+        return { success: true }
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to confirm bank transfer',
+          cause: error,
+        })
+      }
+    }),
+
+  // Admin: Manually confirm payment
+  adminConfirmPayment: adminProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        notes: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const order = await ctx.prisma.order.update({
+          where: { id: input.orderId },
+          data: {
+            paymentStatus: 'PAID',
+            status: 'PROCESSING',
+            notes: input.notes || 'Paiement confirmé manuellement par un administrateur',
+          },
+        })
+
+        return order
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to confirm payment',
+          cause: error,
+        })
+      }
+    }),
+
+  // Admin: Get payment statistics
+  getPaymentStats: adminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const [pending, paid, failed, total] = await Promise.all([
+          ctx.prisma.order.count({
+            where: { storeId: input.storeId, paymentStatus: 'PENDING' },
+          }),
+          ctx.prisma.order.count({
+            where: { storeId: input.storeId, paymentStatus: 'PAID' },
+          }),
+          ctx.prisma.order.count({
+            where: { storeId: input.storeId, paymentStatus: 'FAILED' },
+          }),
+          ctx.prisma.order.count({
+            where: { storeId: input.storeId },
+          }),
+        ])
+
+        const totalRevenue = await ctx.prisma.order.aggregate({
+          where: { storeId: input.storeId, paymentStatus: 'PAID' },
+          _sum: { total: true },
+        })
+
+        return {
+          pending,
+          paid,
+          failed,
+          total,
+          revenue: totalRevenue._sum.total || 0,
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to get payment stats',
+          cause: error,
+        })
+      }
+    }),
 })
+
+/**
+ * Helper: Convert country name to ISO 3166-1 alpha-2 code
+ */
+function getCountryCode(countryName: string): string {
+  const countryMap: Record<string, string> = {
+    France: 'FR',
+    Belgium: 'BE',
+    Belgique: 'BE',
+    Switzerland: 'CH',
+    Suisse: 'CH',
+    Luxembourg: 'LU',
+    Monaco: 'MC',
+  }
+  return countryMap[countryName] || 'FR'
+}

@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card')
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank_transfer'>('card')
   const [discountCode, setDiscountCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState<{
     id: string
@@ -30,20 +30,43 @@ export default function CheckoutPage() {
 
   const createOrder = trpc.order.create.useMutation({
     onSuccess: async (order) => {
-      // Create Stripe checkout session
       try {
-        const session = await createCheckoutSession.mutateAsync({
-          orderId: order.id,
-          successUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/checkout?canceled=true`,
-        })
+        if (paymentMethod === 'bank_transfer') {
+          // Generate bank transfer instructions
+          await generateBankTransferInstructions.mutateAsync({
+            orderId: order.id,
+            storeId: order.storeId,
+          })
 
-        // Redirect to Stripe
-        if (session.url) {
-          window.location.href = session.url
+          // Redirect to bank transfer instructions page
+          router.push(`/order-confirmation/${order.orderNumber}?bank_transfer=true`)
+        } else if (paymentMethod === 'paypal') {
+          // Create PayPal order
+          const paypalOrder = await createPayPalOrder.mutateAsync({
+            orderId: order.id,
+            returnUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?paypal=true&token={TOKEN}`,
+            cancelUrl: `${window.location.origin}/checkout?canceled=true`,
+          })
+
+          // Redirect to PayPal
+          if (paypalOrder.approvalUrl) {
+            window.location.href = paypalOrder.approvalUrl
+          }
+        } else {
+          // Create Stripe checkout session
+          const session = await createCheckoutSession.mutateAsync({
+            orderId: order.id,
+            successUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/checkout?canceled=true`,
+          })
+
+          // Redirect to Stripe
+          if (session.url) {
+            window.location.href = session.url
+          }
         }
       } catch (err) {
-        console.error('Failed to create Stripe session:', err)
+        console.error('Failed to create payment session:', err)
         setError('Erreur lors de la creation de la session de paiement')
         setIsProcessing(false)
       }
@@ -55,6 +78,8 @@ export default function CheckoutPage() {
   })
 
   const createCheckoutSession = trpc.payment.createCheckoutSession.useMutation()
+  const createPayPalOrder = trpc.payment.createPayPalOrder.useMutation()
+  const generateBankTransferInstructions = trpc.payment.generateBankTransferInstructions.useMutation()
 
   const validateDiscount = trpc.discount.validateCode.useQuery(
     {
@@ -301,6 +326,34 @@ export default function CheckoutPage() {
               <h2 className="text-xl font-bold text-gray-900">Mode de paiement</h2>
             </div>
 
+            {/* Payment Methods Accepted */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+              <p className="text-sm text-gray-700 mb-3 font-medium">Moyens de paiement accept\u00e9s :</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="px-3 py-2 bg-white rounded-lg border border-gray-200 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-gray-600" />
+                  <span className="text-xs font-medium text-gray-700">Carte</span>
+                </div>
+                <div className="px-3 py-2 bg-black text-white rounded-lg flex items-center gap-1">
+                  <svg className="w-8 h-4" viewBox="0 0 32 14" fill="currentColor">
+                    <path d="M6.8 3.4c-.4.5-1 .8-1.6.8-.1-.6.2-1.2.6-1.6.4-.5 1.1-.8 1.6-.8.1.6-.2 1.2-.6 1.6zm.6.9c-.9-.1-1.7.5-2.1.5-.5 0-1.1-.5-1.8-.5-.9 0-1.8.5-2.2 1.3-.9 1.6-.2 4.1.7 5.4.5.7 1 1.4 1.7 1.4.7 0 .9-.5 1.8-.5s1.1.5 1.8.5c.8 0 1.2-.6 1.7-1.3.5-.8.8-1.5.8-1.5 0 0-1.5-.6-1.5-2.3-.1-1.4 1.2-2.1 1.2-2.1-.7-1-1.7-1.1-2-.1v.1z"/>
+                  </svg>
+                  <span className="text-xs font-medium">Pay</span>
+                </div>
+                <div className="px-3 py-2 bg-white rounded-lg border border-gray-200 flex items-center gap-1">
+                  <svg className="w-8 h-4" viewBox="0 0 32 14" fill="none">
+                    <path d="M15.7 7.2v2.7h-.7v-6.4h1.8c.5 0 .8.2 1.1.5.3.3.5.7.5 1.1s-.2.8-.5 1.1c-.3.3-.7.5-1.1.5h-1.1v-.5zm0-3v2.3h1.1c.3 0 .5-.1.7-.3.2-.2.3-.5.3-.8s-.1-.5-.3-.8c-.2-.2-.4-.3-.7-.3h-1.1z" fill="#5F6368"/>
+                  </svg>
+                  <span className="text-xs font-medium text-gray-700">Pay</span>
+                </div>
+                <div className="px-3 py-2 bg-white rounded-lg border border-gray-200 flex items-center gap-1">
+                  <svg className="w-5 h-4" viewBox="0 0 24 24" fill="#003087">
+                    <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-3 mb-6">
               <div
                 onClick={() => setPaymentMethod('card')}
@@ -337,6 +390,30 @@ export default function CheckoutPage() {
                     <span className="font-medium text-gray-900">PayPal</span>
                   </div>
                   {paymentMethod === 'paypal' && (
+                    <CheckCircle className="w-5 h-5 text-primary-600" />
+                  )}
+                </div>
+              </div>
+
+              <div
+                onClick={() => setPaymentMethod('bank_transfer')}
+                className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  paymentMethod === 'bank_transfer'
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Virement bancaire</span>
+                      <span className="text-xs text-gray-600">Paiement sous 2-3 jours</span>
+                    </div>
+                  </div>
+                  {paymentMethod === 'bank_transfer' && (
                     <CheckCircle className="w-5 h-5 text-primary-600" />
                   )}
                 </div>
