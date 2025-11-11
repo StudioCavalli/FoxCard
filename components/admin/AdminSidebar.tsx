@@ -12,7 +12,8 @@ import {
   Store,
   LogOut,
   Percent,
-  Truck
+  Truck,
+  Palette
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
   { name: 'Livraison', href: '/admin/shipping', icon: Truck },
   { name: 'Boutique', href: '/admin/store', icon: Store },
+  { name: 'Thème', href: '/admin/theme', icon: Palette },
   { name: 'Parametres', href: '/admin/settings', icon: Settings },
 ]
 
