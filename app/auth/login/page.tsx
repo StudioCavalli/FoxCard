@@ -13,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const from = searchParams.get('from') || '/account'
+  const registered = searchParams.get('registered') === 'true'
 
   const [formData, setFormData] = useState({
     email: '',
@@ -67,6 +68,15 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
             <p className="text-gray-600">Accédez à votre compte FoxCard</p>
           </div>
+
+          {/* Success Message */}
+          {registered && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <p className="text-sm text-green-600">
+                Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.
+              </p>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (

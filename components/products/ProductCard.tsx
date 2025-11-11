@@ -48,7 +48,7 @@ export function ProductCard({ product, storeSlug, colorVariant }: ProductCardPro
   const isOutOfStock = product.quantity <= 0
 
   return (
-    <Link href={`/${storeSlug}/products/${product.slug}`}>
+    <Link href={`/products/${product.slug}`}>
       <Card variant={variant} hover className="group overflow-hidden">
         {/* Image Container */}
         <div className="relative aspect-square p-6">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -15,6 +15,120 @@ export default function AccountPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'settings'>('orders')
+
+  // Profile state
+  const [profileData, setProfileData] = useState({
+    name: '',
+  })
+  const [profileError, setProfileError] = useState('')
+  const [profileSuccess, setProfileSuccess] = useState(false)
+
+  // Password state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+
+  // Get user profile
+  const { data: userProfile, isLoading: profileLoading } = trpc.user.getProfile.useQuery(undefined, {
+    enabled: status === 'authenticated',
+  })
+
+  // Update profile when data is loaded
+  useEffect(() => {
+    if (userProfile) {
+      setProfileData({
+        name: userProfile.name || '',
+      })
+    }
+  }, [userProfile])
+
+  // Profile update mutation
+  const updateProfileMutation = trpc.user.updateProfile.useMutation({
+    onSuccess: () => {
+      setProfileSuccess(true)
+      setProfileError('')
+      setTimeout(() => setProfileSuccess(false), 3000)
+    },
+    onError: (error) => {
+      setProfileError(error.message)
+      setProfileSuccess(false)
+    },
+  })
+
+  // Password change mutation
+  const changePasswordMutation = trpc.user.changePassword.useMutation({
+    onSuccess: () => {
+      setPasswordSuccess(true)
+      setPasswordError('')
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      })
+      setTimeout(() => setPasswordSuccess(false), 3000)
+    },
+    onError: (error) => {
+      setPasswordError(error.message)
+      setPasswordSuccess(false)
+    },
+  })
+
+  // Fetch user orders - MUST be before any conditional returns
+  const DEMO_STORE_ID = '000000000000000000000001'
+  const { data: ordersData } = trpc.order.getAll.useQuery(
+    {
+      storeId: DEMO_STORE_ID,
+    },
+    {
+      enabled: status === 'authenticated',
+    }
+  )
+
+  // Handlers
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setProfileError('')
+    setProfileSuccess(false)
+
+    if (!profileData.name || profileData.name.length < 2) {
+      setProfileError('Le nom doit contenir au moins 2 caractères')
+      return
+    }
+
+    updateProfileMutation.mutate({
+      name: profileData.name,
+    })
+  }
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordError('')
+    setPasswordSuccess(false)
+
+    if (!passwordData.currentPassword) {
+      setPasswordError('Veuillez entrer votre mot de passe actuel')
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Le nouveau mot de passe doit contenir au moins 6 caractères')
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Les mots de passe ne correspondent pas')
+      return
+    }
+
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    })
+  }
 
   // Redirect if not authenticated
   if (status === 'loading') {
@@ -32,13 +146,6 @@ export default function AccountPage() {
     router.push('/auth/login')
     return null
   }
-
-  const DEMO_STORE_ID = '000000000000000000000001'
-
-  // Fetch user orders (this will need proper user ID from session)
-  const { data: ordersData } = trpc.order.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
 
   const orders = ordersData?.orders || []
 
@@ -63,8 +170,8 @@ export default function AccountPage() {
               <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mx-auto mb-3">
                 <User className="w-10 h-10 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900">{session?.user?.name || 'Utilisateur'}</h3>
-              <p className="text-sm text-gray-600">{session?.user?.email}</p>
+              <h3 className="font-bold text-gray-900">{userProfile?.name || session?.user?.name || 'Utilisateur'}</h3>
+              <p className="text-sm text-gray-600">{userProfile?.email || session?.user?.email}</p>
             </div>
 
             {/* Navigation */}
@@ -158,7 +265,7 @@ export default function AccountPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-gray-900">
-                              {formatPrice(order.totalAmount)}
+                              {formatPrice(order.total)}
                             </p>
                             <span
                               className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 ${
@@ -211,39 +318,46 @@ export default function AccountPage() {
             <Card className="p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon Profil</h2>
 
-              <form className="space-y-4">
+              {profileSuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <p className="text-sm text-green-600">
+                    Profil mis à jour avec succès !
+                  </p>
+                </div>
+              )}
+
+              {profileError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-sm text-red-600">{profileError}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <Input
                   label="Nom complet"
-                  defaultValue={session?.user?.name || ''}
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                   placeholder="Jean Dupont"
+                  disabled={profileLoading}
                 />
 
                 <Input
                   label="Email"
                   type="email"
-                  defaultValue={session?.user?.email || ''}
+                  value={userProfile?.email || ''}
                   placeholder="votre@email.com"
+                  disabled
+                  helperText="L'email ne peut pas être modifié"
                 />
-
-                <Input
-                  label="Téléphone"
-                  type="tel"
-                  placeholder="+33 6 12 34 56 78"
-                />
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Adresse
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
-                    rows={3}
-                    placeholder="123 Rue de la Paix, 75001 Paris"
-                  />
-                </div>
 
                 <div className="pt-4">
-                  <Button variant="primary" size="lg">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    isLoading={updateProfileMutation.isPending}
+                    disabled={profileLoading}
+                  >
                     Enregistrer les modifications
                   </Button>
                 </div>
@@ -257,27 +371,56 @@ export default function AccountPage() {
               <Card className="p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Sécurité</h2>
 
-                <form className="space-y-4">
+                {passwordSuccess && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                    <p className="text-sm text-green-600">
+                      Mot de passe changé avec succès !
+                    </p>
+                  </div>
+                )}
+
+                {passwordError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-sm text-red-600">{passwordError}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <Input
                     label="Mot de passe actuel"
                     type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                     placeholder="••••••••"
+                    required
                   />
 
                   <Input
                     label="Nouveau mot de passe"
                     type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                     placeholder="••••••••"
+                    helperText="Minimum 6 caractères"
+                    required
                   />
 
                   <Input
                     label="Confirmer le nouveau mot de passe"
                     type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                     placeholder="••••••••"
+                    required
                   />
 
                   <div className="pt-4">
-                    <Button variant="primary" size="lg">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      isLoading={changePasswordMutation.isPending}
+                    >
                       Changer le mot de passe
                     </Button>
                   </div>

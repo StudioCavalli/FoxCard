@@ -17,11 +17,24 @@ export default function RegisterPage() {
     confirmPassword: '',
   })
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const registerMutation = trpc.user.register.useMutation({
+    onSuccess: () => {
+      setSuccess(true)
+      setTimeout(() => {
+        router.push('/auth/login?registered=true')
+      }, 1500)
+    },
+    onError: (error) => {
+      setError(error.message)
+    },
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess(false)
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
@@ -34,17 +47,16 @@ export default function RegisterPage() {
       return
     }
 
-    setIsLoading(true)
-
-    try {
-      // TODO: Implement user registration via tRPC
-      // For now, redirect to login
-      router.push('/auth/login')
-    } catch (error) {
-      setError('Une erreur est survenue lors de la création du compte')
-    } finally {
-      setIsLoading(false)
+    if (formData.name.length < 2) {
+      setError('Le nom doit contenir au moins 2 caractères')
+      return
     }
+
+    registerMutation.mutate({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    })
   }
 
   return (
@@ -68,6 +80,15 @@ export default function RegisterPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Créer un compte</h1>
             <p className="text-gray-600">Rejoignez FoxCard gratuitement</p>
           </div>
+
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <p className="text-sm text-green-600">
+                Compte créé avec succès ! Redirection vers la page de connexion...
+              </p>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -180,7 +201,8 @@ export default function RegisterPage() {
               variant="primary"
               size="lg"
               className="w-full"
-              isLoading={isLoading}
+              isLoading={registerMutation.isPending}
+              disabled={success}
             >
               Créer mon compte
             </Button>
