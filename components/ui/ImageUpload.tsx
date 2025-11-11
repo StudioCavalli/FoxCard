@@ -1,138 +1,278 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
-import Image from 'next/image'
-import { Upload, X, Image as ImageIcon } from 'lucide-react'
+import { useState, useCallback, useRef } from 'react'
+import { trpc } from '@/lib/trpc/client'
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { Button } from './Button'
+import Image from 'next/image'
 
 interface ImageUploadProps {
   value: string[]
   onChange: (urls: string[]) => void
   maxImages?: number
+  folder?: 'products' | 'categories' | 'store' | 'users'
   disabled?: boolean
+}
+
+interface UploadingFile {
+  file: File
+  preview: string
+  progress: number
+  error?: string
 }
 
 export function ImageUpload({
   value = [],
   onChange,
   maxImages = 5,
+  folder = 'products',
   disabled = false,
 }: ImageUploadProps) {
-  const [isUploading, setIsUploading] = useState(false)
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      if (disabled) return
+  const getUploadUrl = trpc.media.getUploadUrl.useMutation()
+  const deleteFile = trpc.media.delete.useMutation()
 
-      setIsUploading(true)
+  const handleFileSelect = useCallback(
+    async (files: FileList | null) => {
+      if (!files || disabled) return
 
-      try {
-        // Upload to Cloudinary or your preferred service
-        const uploadedUrls: string[] = []
+      const fileArray = Array.from(files).filter((file) =>
+        file.type.startsWith('image/')
+      )
 
-        for (const file of acceptedFiles) {
-          // For demo purposes, we'll use a base64 data URL
-          // In production, replace this with actual upload to Cloudinary/S3
-          const reader = new FileReader()
-          await new Promise((resolve) => {
-            reader.onload = () => {
-              const dataUrl = reader.result as string
-              // In production, upload to Cloudinary here and get the URL
-              // For now, using Unsplash placeholder
-              const placeholderUrl = `https://images.unsplash.com/photo-${Date.now()}?w=400&h=400&fit=crop`
-              uploadedUrls.push(placeholderUrl)
-              resolve(null)
-            }
-            reader.readAsDataURL(file)
+      if (value.length + fileArray.length > maxImages) {
+        alert(`Vous ne pouvez uploader que ${maxImages} images maximum`)
+        return
+      }
+
+      // Create preview URLs and uploading state
+      const newUploadingFiles: UploadingFile[] = fileArray.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        progress: 0,
+      }))
+
+      setUploadingFiles((prev) => [...prev, ...newUploadingFiles])
+
+      // Upload each file
+      for (let i = 0; i < newUploadingFiles.length; i++) {
+        const uploadingFile = newUploadingFiles[i]
+
+        try {
+          // Get presigned URL
+          const { uploadUrl, publicUrl } = await getUploadUrl.mutateAsync({
+            filename: uploadingFile.file.name,
+            contentType: uploadingFile.file.type,
+            folder,
           })
-        }
 
-        onChange([...value, ...uploadedUrls].slice(0, maxImages))
-      } catch (error) {
-        console.error('Upload failed:', error)
-      } finally {
-        setIsUploading(false)
+          // Upload to R2 using presigned URL
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: uploadingFile.file,
+            headers: {
+              'Content-Type': uploadingFile.file.type,
+            },
+          })
+
+          if (!uploadResponse.ok) {
+            throw new Error('Upload failed')
+          }
+
+          // Update progress
+          setUploadingFiles((prev) =>
+            prev.map((f) =>
+              f.file === uploadingFile.file ? { ...f, progress: 100 } : f
+            )
+          )
+
+          // Add to value
+          onChange([...value, publicUrl])
+
+          // Remove from uploading after a short delay
+          setTimeout(() => {
+            setUploadingFiles((prev) =>
+              prev.filter((f) => f.file !== uploadingFile.file)
+            )
+            URL.revokeObjectURL(uploadingFile.preview)
+          }, 500)
+        } catch (error) {
+          console.error('Upload error:', error)
+          setUploadingFiles((prev) =>
+            prev.map((f) =>
+              f.file === uploadingFile.file
+                ? { ...f, error: 'Échec de l\'upload' }
+                : f
+            )
+          )
+        }
       }
     },
-    [value, onChange, maxImages, disabled]
+    [value, onChange, maxImages, folder, disabled, getUploadUrl]
   )
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
-    },
-    maxFiles: maxImages - value.length,
-    disabled: disabled || value.length >= maxImages,
-  })
+  const handleRemove = async (url: string) => {
+    if (disabled) return
 
-  const removeImage = (index: number) => {
-    onChange(value.filter((_, i) => i !== index))
+    // Extract key from URL
+    const key = url.split('/').slice(-2).join('/')
+
+    try {
+      await deleteFile.mutateAsync({ key })
+      onChange(value.filter((v) => v !== url))
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Erreur lors de la suppression de l\'image')
+    }
   }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    if (!disabled) {
+      setIsDragging(true)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    handleFileSelect(e.dataTransfer.files)
+  }
+
+  const handleClick = () => {
+    if (!disabled) {
+      fileInputRef.current?.click()
+    }
+  }
+
+  const canAddMore = value.length + uploadingFiles.length < maxImages
 
   return (
     <div className="space-y-4">
-      {/* Image Grid */}
+      {/* Upload Zone */}
+      {canAddMore && (
+        <div
+          onClick={handleClick}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`
+            relative border-2 border-dashed rounded-xl p-8
+            transition-all cursor-pointer
+            ${isDragging
+              ? 'border-primary-500 bg-primary-50'
+              : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+            }
+            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+          `}
+        >
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
+              isDragging ? 'bg-primary-100' : 'bg-gray-100'
+            }`}>
+              <Upload className={`w-6 h-6 ${
+                isDragging ? 'text-primary-600' : 'text-gray-600'
+              }`} />
+            </div>
+            <p className="text-sm font-medium text-gray-900 mb-1">
+              Cliquez pour uploader ou glissez-déposez
+            </p>
+            <p className="text-xs text-gray-500">
+              PNG, JPG, GIF jusqu'à 10MB ({value.length}/{maxImages})
+            </p>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleFileSelect(e.target.files)}
+            className="hidden"
+            disabled={disabled}
+          />
+        </div>
+      )}
+
+      {/* Uploaded Images Grid */}
       {value.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {value.map((url, index) => (
             <div
-              key={index}
-              className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group"
+              key={url}
+              className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group"
             >
-              <Image src={url} alt={`Upload ${index + 1}`} fill className="object-cover" />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <Image
+                src={url}
+                alt={`Upload ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemove(url)}
+                  disabled={disabled || deleteFile.isPending}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-red-600 hover:bg-red-50"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              {index === 0 && (
+                <div className="absolute top-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-semibold rounded">
+                  Principal
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Upload Area */}
-      {value.length < maxImages && (
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-            isDragActive
-              ? 'border-primary-500 bg-primary-50'
-              : 'border-gray-300 hover:border-gray-400'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center gap-2">
-            {isUploading ? (
-              <>
-                <div className="w-12 h-12 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
-                <p className="text-sm text-gray-600">Upload en cours...</p>
-              </>
-            ) : (
-              <>
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                  {isDragActive ? (
-                    <Upload className="w-6 h-6 text-primary-600" />
-                  ) : (
-                    <ImageIcon className="w-6 h-6 text-gray-400" />
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">
-                    {isDragActive
-                      ? 'Déposez les images ici'
-                      : 'Glissez-déposez ou cliquez pour sélectionner'}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    PNG, JPG, GIF jusqu'à 10MB ({value.length}/{maxImages} images)
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
+      {/* Uploading Files */}
+      {uploadingFiles.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {uploadingFiles.map((uploadingFile, index) => (
+            <div
+              key={index}
+              className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
+            >
+              <Image
+                src={uploadingFile.preview}
+                alt={`Uploading ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                {uploadingFile.error ? (
+                  <div className="text-center px-2">
+                    <X className="w-6 h-6 text-red-500 mx-auto mb-1" />
+                    <p className="text-xs text-white">{uploadingFile.error}</p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin mx-auto mb-1" />
+                    <p className="text-xs text-white">{uploadingFile.progress}%</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {value.length === 0 && uploadingFiles.length === 0 && (
+        <div className="text-center py-8 px-4 bg-gray-50 rounded-lg">
+          <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-600">Aucune image uploadée</p>
         </div>
       )}
     </div>

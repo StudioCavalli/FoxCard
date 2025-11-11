@@ -8,6 +8,10 @@ import { customerRouter } from './customer'
 import { paymentRouter } from './payment'
 import { discountRouter } from './discount'
 import { shippingRouter } from './shipping'
+import { mediaRouter } from './media'
+import { exportRouter } from './export'
+import { webhookRouter } from './webhook'
+import { apiKeyRouter } from './apiKey'
 
 export const appRouter = router({
   product: productRouter,
@@ -19,6 +23,10 @@ export const appRouter = router({
   payment: paymentRouter,
   discount: discountRouter,
   shipping: shippingRouter,
+  media: mediaRouter,
+  export: exportRouter,
+  webhook: webhookRouter,
+  apiKey: apiKeyRouter,
 })
 
 export type AppRouter = typeof appRouter

@@ -1,6 +1,6 @@
 # 🦊 FoxCard - E-commerce Open Source
 
-**Version 0.3.0**
+**Version 0.4.0** ✅ Complétée
 
 Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. FoxCard est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 
@@ -421,15 +421,201 @@ Après le seed, utilisez ces credentials :
   STRIPE_WEBHOOK_SECRET=whsec_...
   ```
 
-### 🚧 Roadmap v0.4.0 et Au-delà
+### ✅ Version 0.4.0 - Fonctionnalités Avancées
 
-#### Phase 4 (v0.4.0) - Avancé
-- [ ] Upload d'images (S3/Cloudflare R2)
-- [ ] Système de plugins
-- [ ] Multi-langue (i18n)
-- [ ] Export de données
-- [ ] Webhooks
-- [ ] API REST publique
+#### 📤 Upload d'Images - Cloudflare R2
+- [x] **Configuration Cloudflare R2** (`lib/r2.ts`) :
+  - Client S3 compatible pour Cloudflare R2
+  - Fonctions helper : `uploadToR2`, `deleteFromR2`, `getUploadUrl`, `generateFileKey`
+  - Support des presigned URLs (expiration 1h) pour upload sécurisé
+  - Organisation par dossiers : products, categories, store, users
+- [x] **Router tRPC Media** (`lib/trpc/routers/media.ts`) :
+  - `getUploadUrl` : Génération de presigned URL pour upload direct depuis navigateur
+  - `delete` : Suppression de fichier
+  - `deleteMany` : Suppression de plusieurs fichiers
+  - Aucune clé secrète exposée côté client
+- [x] **Composant ImageUpload** (`components/ui/ImageUpload.tsx`) :
+  - Drag & Drop complet avec états visuels
+  - Upload parallèle de plusieurs images
+  - Preview en temps réel pendant l'upload
+  - Barre de progression par image
+  - Gestion d'erreurs avec affichage visuel
+  - Suppression d'images avec confirmation
+  - Badge "Principal" sur la première image
+  - Grid responsive (2/3/5 colonnes)
+  - Validation des types de fichiers
+  - Limite configurable de nombre d'images
+- [x] **Variables d'environnement** :
+  ```env
+  R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+  R2_ACCESS_KEY_ID=...
+  R2_SECRET_ACCESS_KEY=...
+  R2_BUCKET_NAME=...
+  R2_PUBLIC_URL=https://your-custom-domain.com
+  ```
+
+#### 🔌 Système de Plugins
+- [x] **Architecture de Plugins** (`lib/plugins/`) :
+  - Types définis : Plugin, HookHandler, UIHookHandler, HookRegistry
+  - Métadonnées : id, name, version, description, author, enabled
+  - Lifecycle hooks : onInstall, onUninstall, onEnable, onDisable
+- [x] **Plugin Manager** (`lib/plugins/manager.ts`) :
+  - Singleton pour gérer tous les plugins
+  - Enregistrement/désenregistrement de plugins
+  - Activation/désactivation de plugins
+  - Exécution de hooks (sync et async)
+  - Méthodes : `registerPlugin`, `unregisterPlugin`, `enablePlugin`, `disablePlugin`
+- [x] **Hooks Disponibles** :
+  - **Order hooks** : onOrderCreated, onOrderStatusChanged, onOrderPaid
+  - **Product hooks** : onProductCreated, onProductUpdated, onProductDeleted
+  - **Customer hooks** : onCustomerCreated
+  - **UI hooks** : onDashboardWidget, onProductPageSection
+- [x] **Plugins d'Exemple** :
+  - `email-notifications.ts` : Envoie des emails pour les événements de commande
+  - `analytics-widget.tsx` : Ajoute un widget d'analytics au dashboard
+- [x] **Documentation** :
+  - Guide de création de plugins
+  - Exemples de hooks et d'utilisation
+  - Architecture extensible pour futures extensions
+
+#### 🌍 Internationalisation (i18n)
+- [x] **Configuration next-intl** (`i18n.ts`) :
+  - Support de 4 langues : Français (FR), English (EN), Español (ES), Deutsch (DE)
+  - Langue par défaut : Français
+  - Chargement dynamique des traductions
+- [x] **Fichiers de Traduction** (`messages/`) :
+  - `fr.json` : Traductions françaises complètes
+  - `en.json` : Traductions anglaises
+  - `es.json` : Traductions espagnoles
+  - `de.json` : Traductions allemandes
+- [x] **Catégories de Traduction** :
+  - common : Termes génériques (save, cancel, delete, etc.)
+  - nav : Navigation (home, products, cart, etc.)
+  - home : Page d'accueil
+  - products : Catalogue produits
+  - cart : Panier d'achat
+  - checkout : Processus de commande
+  - admin : Interface d'administration
+  - auth : Authentification
+  - errors : Messages d'erreur
+- [x] **Composant LanguageSwitcher** (`components/LanguageSwitcher.tsx`) :
+  - Sélecteur de langue avec drapeaux emoji
+  - Dropdown avec liste de langues disponibles
+  - Persistance de la préférence dans localStorage
+  - Navigation automatique vers la nouvelle langue
+  - Indication visuelle de la langue active
+
+#### 📊 Export de Données
+- [x] **Router tRPC Export** (`lib/trpc/routers/export.ts`) :
+  - `exportProductsCSV` : Export des produits au format CSV
+  - `exportProductsJSON` : Export des produits au format JSON
+  - `exportOrdersCSV` : Export des commandes au format CSV
+  - `exportOrdersJSON` : Export des commandes au format JSON
+  - `exportCustomersCSV` : Export des clients au format CSV
+  - `exportCustomersJSON` : Export des clients au format JSON
+- [x] **Filtres disponibles** :
+  - **Produits** : Par catégorie, statut (ACTIVE, DRAFT, ARCHIVED)
+  - **Commandes** : Par statut, statut de paiement, statut de livraison, date (plage)
+  - **Clients** : Par recherche textuelle (nom, email)
+- [x] **Packages utilisés** :
+  - `json2csv` : Génération de fichiers CSV
+  - Prisma pour extraction des données
+  - Support de l'inclusion de relations (category, items, customer)
+- [x] **Format CSV** :
+  - En-têtes en français
+  - Données formatées pour Excel/LibreOffice
+  - Horodatage dans les noms de fichiers
+- [x] **Format JSON** :
+  - Données complètes avec relations
+  - Format pretty-printed (indentation)
+  - Structure prête pour import/backup
+
+#### 🔗 Système de Webhooks
+- [x] **Modèles de Données** :
+  - `Webhook` : Configuration webhook par boutique
+    - URL de destination
+    - Liste d'événements souscrits
+    - Secret pour signature HMAC
+    - Headers personnalisés (optionnel)
+    - Statut actif/inactif
+  - `WebhookDelivery` : Logs des envois
+    - Payload complet
+    - Nombre de tentatives
+    - Statut (PENDING, SUCCESS, FAILED)
+    - Code de réponse HTTP
+    - Message d'erreur éventuel
+- [x] **Types d'Événements** :
+  - **Commandes** : order.created, order.updated, order.completed, order.cancelled
+  - **Produits** : product.created, product.updated, product.deleted
+  - **Clients** : customer.created
+  - **Paiements** : payment.succeeded, payment.failed
+- [x] **Webhook Manager** (`lib/webhooks/manager.ts`) :
+  - Signature HMAC SHA-256 pour sécurité
+  - Retry automatique avec exponential backoff (max 3 tentatives)
+  - Délai entre tentatives : 2s, 4s, 8s
+  - Logging complet dans la base de données
+  - Livraison parallèle pour plusieurs webhooks
+- [x] **Router tRPC Webhook** (`lib/trpc/routers/webhook.ts`) :
+  - `list` : Liste des webhooks d'une boutique
+  - `create` : Création avec génération de secret automatique
+  - `update` : Modification (URL, events, enabled)
+  - `delete` : Suppression
+  - `test` : Envoi d'un payload de test
+  - `regenerateSecret` : Régénération du secret
+  - `getDeliveries` : Historique des envois avec pagination
+- [x] **Headers HTTP envoyés** :
+  - `X-Webhook-Signature` : Signature HMAC pour vérification
+  - `X-Webhook-Event` : Type d'événement
+  - `X-Webhook-ID` : ID du webhook
+  - `X-Webhook-Timestamp` : Timestamp ISO 8601
+  - Headers personnalisés configurables
+
+#### 🔌 API REST Publique
+- [x] **Authentification API Key** (`lib/api/auth.ts`) :
+  - Authentification Bearer Token
+  - Clés API hachées (SHA-256)
+  - Vérification de l'expiration
+  - Système de scopes/permissions
+  - Mise à jour automatique de lastUsedAt
+- [x] **Modèle ApiKey** :
+  - Nom descriptif
+  - Clé hachée (non réversible)
+  - Préfixe pour identification (8 premiers caractères)
+  - Scopes : *, products:read, products:write, orders:read, orders:write, customers:read, customers:write
+  - Rate limit configurable (100-10000 requêtes/heure)
+  - Date d'expiration optionnelle
+  - Statut actif/inactif
+- [x] **Endpoints disponibles** :
+  - **GET** `/api/v1/products` : Liste des produits
+    - Pagination : page, limit (max 100)
+    - Filtres : status, category_id, search
+    - Inclut : category, variants
+  - **GET** `/api/v1/products/:id` : Détail d'un produit
+  - **GET** `/api/v1/orders` : Liste des commandes
+    - Pagination : page, limit (max 100)
+    - Filtres : status, payment_status, fulfillment_status, customer_email
+    - Inclut : items, products, customer
+  - **GET** `/api/v1/orders/:id` : Détail d'une commande
+  - **GET** `/api/v1/customers` : Liste des clients
+    - Pagination : page, limit (max 100)
+    - Filtres : search (email, nom)
+    - Inclut : nombre de commandes
+  - **GET** `/api/v1/customers/:id` : Détail d'un client avec historique
+- [x] **Router tRPC ApiKey** (`lib/trpc/routers/apiKey.ts`) :
+  - `list` : Liste des API keys (sans révéler la clé)
+  - `create` : Génération de clé (retour une seule fois)
+  - `update` : Modification (name, scopes, rateLimit, isActive, expiresAt)
+  - `delete` : Suppression
+  - `getUsageStats` : Statistiques d'utilisation
+- [x] **Format de Clé** :
+  - Préfixe : `foxcard_`
+  - 64 caractères hexadécimaux aléatoires
+  - Exemple : `foxcard_a1b2c3d4e5f6...`
+- [x] **Réponses API** :
+  - Format JSON standard
+  - Pagination : `{ data: [], pagination: { page, limit, total, pages } }`
+  - Erreurs : `{ error: { message, status } }`
+  - Codes HTTP appropriés (200, 400, 401, 403, 404, 500)
 
 #### Phase 5 (v1.0.0) - Production Ready
 - [ ] PWA (Progressive Web App)

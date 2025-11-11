@@ -34,6 +34,8 @@ model Store {
   customers   Customer[]
   discountCodes DiscountCode[]
   shippingZones ShippingZone[]
+  webhooks    Webhook[]
+  apiKeys     ApiKey[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -386,7 +388,86 @@ model ShippingRate {
   @@index([shippingZoneId])
 }
 
+model Webhook {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  url         String
+  events      String[] // Array of webhook event types
+  secret      String   // Secret for HMAC signature
+  enabled     Boolean  @default(true)
+
+  // Custom headers
+  headers     Json?    // Custom headers to send with webhook
+
+  // Deliveries
+  deliveries  WebhookDelivery[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+model WebhookDelivery {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  webhookId   String   @db.ObjectId
+  webhook     Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  event       String   // Webhook event type
+  payload     Json     // Full webhook payload
+
+  status      WebhookDeliveryStatus @default(PENDING)
+  attempts    Int      @default(0)
+
+  // Response info
+  statusCode  Int?
+  response    String?
+  error       String?
+
+  deliveredAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([webhookId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ApiKey {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String   // Descriptive name for the API key
+  key         String   @unique // The actual API key (hashed)
+  prefix      String   // First 8 characters for identification
+
+  // Permissions
+  scopes      String[] // Array of permission scopes (e.g., "products:read", "orders:write")
+
+  // Rate limiting
+  rateLimit   Int      @default(1000) // Requests per hour
+
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([isActive])
+}
+
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

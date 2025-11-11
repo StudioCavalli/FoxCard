@@ -1,0 +1,101 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "actions": "Aktionen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "close": "Schließen"
+  },
+  "nav": {
+    "home": "Startseite",
+    "products": "Produkte",
+    "categories": "Kategorien",
+    "cart": "Warenkorb",
+    "account": "Mein Konto",
+    "admin": "Verwaltung",
+    "logout": "Abmelden"
+  },
+  "home": {
+    "welcome": "Willkommen bei FoxCard",
+    "subtitle": "Die moderne E-Commerce-Plattform",
+    "featuredProducts": "Empfohlene Produkte",
+    "shopByCategory": "Nach Kategorie Einkaufen",
+    "viewAll": "Alle Anzeigen"
+  },
+  "products": {
+    "title": "Unsere Produkte",
+    "addToCart": "In den Warenkorb",
+    "outOfStock": "Ausverkauft",
+    "inStock": "Auf Lager",
+    "price": "Preis",
+    "description": "Beschreibung",
+    "specifications": "Spezifikationen",
+    "reviews": "Bewertungen",
+    "relatedProducts": "Ähnliche Produkte"
+  },
+  "cart": {
+    "title": "Mein Warenkorb",
+    "empty": "Ihr Warenkorb ist leer",
+    "subtotal": "Zwischensumme",
+    "shipping": "Versand",
+    "total": "Gesamt",
+    "checkout": "Zur Kasse",
+    "continueShopping": "Weiter Einkaufen",
+    "remove": "Entfernen",
+    "quantity": "Menge"
+  },
+  "checkout": {
+    "title": "Kasse",
+    "contactInfo": "Kontaktinformationen",
+    "shippingAddress": "Lieferadresse",
+    "paymentMethod": "Zahlungsmethode",
+    "orderSummary": "Bestellübersicht",
+    "placeOrder": "Bestellung Aufgeben",
+    "processing": "Wird verarbeitet...",
+    "success": "Bestellung Bestätigt!",
+    "error": "Ein Fehler ist aufgetreten"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "products": "Produkte",
+    "orders": "Bestellungen",
+    "customers": "Kunden",
+    "categories": "Kategorien",
+    "discounts": "Rabattcodes",
+    "shipping": "Versand",
+    "settings": "Einstellungen",
+    "analytics": "Analytik"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort Bestätigen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren"
+  },
+  "errors": {
+    "required": "Dieses Feld ist erforderlich",
+    "invalidEmail": "Ungültige E-Mail",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "generic": "Ein Fehler ist aufgetreten",
+    "notFound": "Seite nicht gefunden",
+    "unauthorized": "Nicht autorisiert"
+  }
+}
