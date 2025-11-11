@@ -11,12 +11,29 @@ export const productRouter = router({
         status: z.nativeEnum(ProductStatus).optional(),
         featured: z.boolean().optional(),
         search: z.string().optional(),
+        minPrice: z.number().optional(),
+        maxPrice: z.number().optional(),
+        sortBy: z.enum(['createdAt', 'price', 'name', 'featured']).optional(),
+        sortOrder: z.enum(['asc', 'desc']).optional(),
         limit: z.number().min(1).max(100).default(20),
         cursor: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { storeId, categoryId, status, featured, search, limit, cursor } = input
+      const { storeId, categoryId, status, featured, search, minPrice, maxPrice, sortBy, sortOrder, limit, cursor } = input
+
+      // Build orderBy based on sortBy and sortOrder
+      const orderBy: any = []
+      if (sortBy) {
+        if (sortBy === 'featured') {
+          orderBy.push({ featured: sortOrder || 'desc' })
+          orderBy.push({ createdAt: 'desc' })
+        } else {
+          orderBy.push({ [sortBy]: sortOrder || 'desc' })
+        }
+      } else {
+        orderBy.push({ createdAt: 'desc' })
+      }
 
       const products = await ctx.prisma.product.findMany({
         take: limit + 1,
@@ -32,11 +49,20 @@ export const productRouter = router({
               { sku: { contains: search, mode: 'insensitive' } },
             ],
           }),
+          ...(minPrice !== undefined && {
+            price: {
+              gte: minPrice,
+              ...(maxPrice !== undefined && { lte: maxPrice }),
+            },
+          }),
+          ...(maxPrice !== undefined && minPrice === undefined && {
+            price: {
+              lte: maxPrice,
+            },
+          }),
         },
         cursor: cursor ? { id: cursor } : undefined,
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy,
         include: {
           category: true,
           variants: true,

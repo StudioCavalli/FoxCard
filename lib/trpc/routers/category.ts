@@ -42,6 +42,31 @@ export const categoryRouter = router({
       })
     }),
 
+  getBySlug: publicProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        slug: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.category.findUnique({
+        where: {
+          storeId_slug: {
+            storeId: input.storeId,
+            slug: input.slug,
+          },
+        },
+        include: {
+          children: true,
+          parent: true,
+          _count: {
+            select: { products: true },
+          },
+        },
+      })
+    }),
+
   create: adminProcedure
     .input(
       z.object({

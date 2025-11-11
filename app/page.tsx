@@ -1,12 +1,18 @@
 'use client'
 
+import Link from 'next/link'
 import { ProductCard } from '@/components/products/ProductCard'
 import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 import { trpc } from '@/lib/trpc/client'
 
 export default function HomePage() {
   // For demo, we'll use a default store ID
   const DEMO_STORE_ID = '000000000000000000000001' // Will be replaced with actual store
+
+  const { data: categories } = trpc.category.getAll.useQuery({
+    storeId: DEMO_STORE_ID,
+  })
 
   const { data, isLoading, fetchNextPage, hasNextPage } = trpc.product.getAll.useInfiniteQuery(
     {
@@ -20,6 +26,18 @@ export default function HomePage() {
   )
 
   const products = data?.pages.flatMap((page) => page.products) ?? []
+
+  // Category emoji mapping
+  const categoryEmojis: Record<string, string> = {
+    'electronique': '🎧',
+    'mode': '👗',
+    'maison': '🏠',
+    'beaute': '💄',
+    'sports': '⚽',
+    'livres': '📚',
+    'jouets': '🧸',
+    'jardin': '🌱',
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -38,27 +56,47 @@ export default function HomePage() {
 
       {/* Featured Categories */}
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Catégories populaires</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Catégories populaires</h2>
+          <Link href="/products">
+            <Button variant="ghost" size="sm">
+              Voir tout
+            </Button>
+          </Link>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {['Électronique', 'Mode', 'Maison', 'Beauté'].map((category, index) => (
-            <div
-              key={category}
-              className={`p-6 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 hover:shadow-card-hover ${
-                index === 0
-                  ? 'bg-primary-100'
-                  : index === 1
-                  ? 'bg-secondary-100'
-                  : index === 2
-                  ? 'bg-yellow-50'
-                  : 'bg-blue-50'
-              }`}
-            >
-              <div className="text-4xl mb-2">
-                {index === 0 ? '🎧' : index === 1 ? '👗' : index === 2 ? '🏠' : '💄'}
-              </div>
-              <h3 className="font-semibold text-gray-900">{category}</h3>
-            </div>
-          ))}
+          {categories?.slice(0, 8).map((category, index) => {
+            const bgColors = [
+              'bg-primary-100 hover:bg-primary-200',
+              'bg-secondary-100 hover:bg-secondary-200',
+              'bg-yellow-50 hover:bg-yellow-100',
+              'bg-blue-50 hover:bg-blue-100',
+              'bg-green-50 hover:bg-green-100',
+              'bg-purple-50 hover:bg-purple-100',
+              'bg-pink-50 hover:bg-pink-100',
+              'bg-orange-50 hover:bg-orange-100',
+            ]
+            const emoji = categoryEmojis[category.slug.toLowerCase()] || '📦'
+
+            return (
+              <Link key={category.id} href={`/categories/${category.slug}`}>
+                <Card
+                  variant="default"
+                  className={`p-6 text-center cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                    bgColors[index % bgColors.length]
+                  }`}
+                >
+                  <div className="text-4xl mb-2">{emoji}</div>
+                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  {category._count?.products !== undefined && (
+                    <p className="text-xs text-gray-600 mt-1">
+                      {category._count.products} produit{category._count.products > 1 ? 's' : ''}
+                    </p>
+                  )}
+                </Card>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
