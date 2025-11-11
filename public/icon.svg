@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGradient)"/>
+
+  <!-- Fox icon simplified -->
+  <g transform="translate(256, 256)" fill="#ffffff">
+    <!-- Ears -->
+    <path d="M -80,-120 L -60,-60 L -100,-80 Z" />
+    <path d="M 80,-120 L 60,-60 L 100,-80 Z" />
+
+    <!-- Head -->
+    <circle cx="0" cy="0" r="100" />
+
+    <!-- Eyes -->
+    <circle cx="-35" cy="-20" r="15" fill="#0d9488" />
+    <circle cx="35" cy="-20" r="15" fill="#0d9488" />
+
+    <!-- Pupils -->
+    <circle cx="-35" cy="-20" r="8" fill="#ffffff" />
+    <circle cx="35" cy="-20" r="8" fill="#ffffff" />
+
+    <!-- Nose -->
+    <path d="M 0,10 L -8,25 L 8,25 Z" fill="#0d9488" />
+
+    <!-- Mouth -->
+    <path d="M -25,35 Q 0,50 25,35" stroke="#0d9488" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Text FC (FoxCard) -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#ffffff" text-anchor="middle">FC</text>
+</svg>
