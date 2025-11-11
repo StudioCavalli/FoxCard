@@ -38,7 +38,7 @@ export const exportRouter = router({
         Description: p.description,
         Prix: p.price,
         'Prix Comparatif': p.compareAtPrice || '',
-        Stock: p.stockQuantity,
+        Stock: p.quantity,
         Catégorie: p.category?.name || '',
         Statut: p.status,
         'Date de Création': p.createdAt.toISOString(),
@@ -196,9 +196,9 @@ export const exportRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const customers = await ctx.prisma.user.findMany({
+      const customers = await ctx.prisma.customer.findMany({
         where: {
-          role: 'CUSTOMER',
+          storeId: input.storeId,
         },
         include: {
           _count: {
@@ -223,9 +223,10 @@ export const exportRouter = router({
       // Transform data for CSV
       const data = customers.map((c) => {
         const totalSpent = c.orders.reduce((sum, order) => sum + order.total, 0)
+        const fullName = [c.firstName, c.lastName].filter(Boolean).join(' ')
         return {
           ID: c.id,
-          Nom: c.name || '',
+          Nom: fullName || '',
           Email: c.email,
           Téléphone: c.phone || '',
           'Nombre de Commandes': c._count.orders,
@@ -253,9 +254,9 @@ export const exportRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const customers = await ctx.prisma.user.findMany({
+      const customers = await ctx.prisma.customer.findMany({
         where: {
-          role: 'CUSTOMER',
+          storeId: input.storeId,
         },
         include: {
           orders: {

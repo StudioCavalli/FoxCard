@@ -70,7 +70,7 @@ export const webhookRouter = router({
         url: z.string().url(),
         events: z.array(webhookEventTypeEnum).min(1),
         enabled: z.boolean().default(true),
-        headers: z.record(z.string()).optional(),
+        headers: z.record(z.string(), z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -99,7 +99,7 @@ export const webhookRouter = router({
         url: z.string().url().optional(),
         events: z.array(webhookEventTypeEnum).min(1).optional(),
         enabled: z.boolean().optional(),
-        headers: z.record(z.string()).optional(),
+        headers: z.record(z.string(), z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

@@ -287,16 +287,19 @@ export default function AccountPage() {
                           </div>
                         </div>
 
-                        {order.shippingAddress && (
-                          <div className="flex items-start gap-2 text-sm text-gray-600 border-t border-gray-200 pt-4">
-                            <MapPin className="w-4 h-4 mt-0.5" />
-                            <div>
-                              <p className="font-medium text-gray-900">Adresse de livraison</p>
-                              <p>{order.shippingAddress.address}</p>
-                              <p>{order.shippingAddress.postalCode} {order.shippingAddress.city}</p>
+                        {order.shippingAddress && (() => {
+                          const address = order.shippingAddress as { address?: string; postalCode?: string; city?: string }
+                          return (
+                            <div className="flex items-start gap-2 text-sm text-gray-600 border-t border-gray-200 pt-4">
+                              <MapPin className="w-4 h-4 mt-0.5" />
+                              <div>
+                                <p className="font-medium text-gray-900">Adresse de livraison</p>
+                                <p>{address.address}</p>
+                                <p>{address.postalCode} {address.city}</p>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )
+                        })()}
 
                         <div className="mt-4 flex justify-end">
                           <Link href={`/order-confirmation/${order.orderNumber}`}>

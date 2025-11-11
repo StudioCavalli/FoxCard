@@ -64,7 +64,7 @@ export const envVariableRouter = router({
   testConnection: adminProcedure
     .input(z.object({
       category: z.nativeEnum(EnvCategory),
-      variables: z.record(z.string())
+      variables: z.record(z.string(), z.string())
     }))
     .mutation(async ({ input }) => {
       try {

@@ -36,6 +36,7 @@ export function ProductCard({ product, storeSlug, colorVariant }: ProductCardPro
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     addItem({
+      id: product.id,
       productId: product.id,
       name: product.name,
       slug: product.slug,

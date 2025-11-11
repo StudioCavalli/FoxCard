@@ -1,23 +1,26 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import superjson from 'superjson'
+import type { Session } from 'next-auth'
+import type { PrismaClient } from '@prisma/client'
 
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts
+export type TRPCContext = {
+  session: Session | null
+  prisma: PrismaClient
+}
+
+export const createTRPCContext = async (): Promise<TRPCContext> => {
   const session = await getServerSession(authOptions)
 
   return {
     session,
     prisma,
-    req,
-    res,
   }
 }
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
 })
 

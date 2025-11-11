@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react'
 
 export default function AdminProductsPage() {
   const DEMO_STORE_ID = '000000000000000000000001'

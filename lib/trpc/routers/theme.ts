@@ -107,7 +107,7 @@ export const themeRouter = router({
     .input(
       z.object({
         themeId: z.string(),
-        customColors: z.record(z.string()).optional(),
+        customColors: z.record(z.string(), z.string()).optional(),
       })
     )
     .query(({ input }) => {
