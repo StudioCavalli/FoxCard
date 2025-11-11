@@ -766,13 +766,56 @@ Après le seed, utilisez ces credentials :
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Pour contribuer :
+Les contributions sont les bienvenues ! FoxCard est un projet open source qui vit grâce à sa communauté.
 
-1. Fork le projet
-2. Créez une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
+### 📚 Documentation Complète
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guide complet de contribution
+- **[.github/ROADMAP.md](.github/ROADMAP.md)** - Roadmap v1.0.0 → v2.0.0
+- **[CHANGELOG.md](CHANGELOG.md)** - Historique des versions
+- **[.github/ISSUES.md](.github/ISSUES.md)** - Liste des 50 issues planifiées
+
+### 🚀 Démarrage Rapide
+
+```bash
+# 1. Fork et clone le repo
+git clone https://github.com/VOTRE-USERNAME/FoxCard.git
+cd FoxCard
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Configurer .env
+cp .env.example .env
+# Éditez .env avec vos credentials
+
+# 4. Setup la base de données
+npm run db:push
+npm run db:seed
+
+# 5. Démarrer le dev server
+npm run dev
+```
+
+### 🎯 Comment Contribuer
+
+1. Consultez les [issues ouvertes](https://github.com/StudioCavalli/FoxCard/issues)
+2. Cherchez le label `good first issue` pour débuter
+3. Commentez l'issue pour l'annoncer
+4. Créez une branche : `git checkout -b feature/ma-feature`
+5. Développez en suivant les [standards de code](CONTRIBUTING.md#standards-de-code)
+6. Créez une Pull Request
+
+### 📋 Prochaines Versions
+
+| Version | Date | Focus |
+|---------|------|-------|
+| **1.1.0** | Fév 2025 | Installeur & Configuration |
+| **1.2.0** | Mar 2025 | Paiements Additionnels |
+| **1.3.0** | Avr 2025 | Notifications & Communication |
+| **2.0.0** | Déc 2025 | Applications Mobiles |
+
+[Voir la roadmap complète](.github/ROADMAP.md)
 
 ## 📝 License
 
