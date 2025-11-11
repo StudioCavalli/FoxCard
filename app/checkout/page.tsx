@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle } from 'lucide-react'
+import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X } from 'lucide-react'
 import Link from 'next/link'
 
 export default function CheckoutPage() {
@@ -18,17 +18,80 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card')
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string
+    code: string
+    type: string
+    value: number
+    discountAmount: number
+  } | null>(null)
+  const [discountError, setDiscountError] = useState('')
 
   const createOrder = trpc.order.create.useMutation({
-    onSuccess: (order) => {
-      clearCart()
-      router.push(`/order-confirmation/${order.orderNumber}`)
+    onSuccess: async (order) => {
+      // Create Stripe checkout session
+      try {
+        const session = await createCheckoutSession.mutateAsync({
+          orderId: order.id,
+          successUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/checkout?canceled=true`,
+        })
+
+        // Redirect to Stripe
+        if (session.url) {
+          window.location.href = session.url
+        }
+      } catch (err) {
+        console.error('Failed to create Stripe session:', err)
+        setError('Erreur lors de la creation de la session de paiement')
+        setIsProcessing(false)
+      }
     },
     onError: (error) => {
-      setError(error.message || 'Une erreur est survenue lors de la création de la commande')
+      setError(error.message || 'Une erreur est survenue lors de la creation de la commande')
       setIsProcessing(false)
     },
   })
+
+  const createCheckoutSession = trpc.payment.createCheckoutSession.useMutation()
+
+  const validateDiscount = trpc.discount.validateCode.useQuery(
+    {
+      storeId: '000000000000000000000001',
+      code: discountCode,
+      orderAmount: getTotalPrice(),
+    },
+    {
+      enabled: false, // Don't run automatically
+    }
+  )
+
+  const incrementUsage = trpc.discount.incrementUsage.useMutation()
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) {
+      setDiscountError('Veuillez entrer un code promo')
+      return
+    }
+
+    setDiscountError('')
+
+    try {
+      const result = await validateDiscount.refetch()
+      if (result.data) {
+        setAppliedDiscount(result.data)
+        setDiscountCode('')
+      }
+    } catch (err: any) {
+      setDiscountError(err.message || 'Code promo invalide')
+    }
+  }
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null)
+    setDiscountError('')
+  }
 
   const [formData, setFormData] = useState({
     email: '',
@@ -66,15 +129,35 @@ export default function CheckoutPage() {
           country: formData.country,
           phone: formData.phone,
         },
+        discountCodeId: appliedDiscount?.id,
       })
+
+      // Increment discount usage count if discount was applied
+      if (appliedDiscount) {
+        incrementUsage.mutate({ id: appliedDiscount.id })
+      }
     } catch (err) {
       console.error('Order creation failed:', err)
     }
   }
 
   const subtotal = getTotalPrice()
-  const shipping = subtotal > 50 ? 0 : 5.99
-  const total = subtotal + shipping
+
+  // Calculate shipping dynamically based on country
+  const { data: shippingCalculation } = trpc.shipping.calculateShipping.useQuery(
+    {
+      storeId: '000000000000000000000001',
+      country: formData.country || 'France',
+      orderAmount: subtotal,
+    },
+    {
+      enabled: !!formData.country && subtotal > 0,
+    }
+  )
+
+  const shipping = shippingCalculation?.rate.price || 0
+  const discount = appliedDiscount?.discountAmount || 0
+  const total = Math.max(0, subtotal + shipping - discount)
 
   if (items.length === 0) {
     return (
@@ -310,29 +393,113 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between text-gray-600">
-                <span>Sous-total</span>
-                <span>{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Livraison</span>
-                <span>
-                  {shipping === 0 ? (
-                    <span className="text-green-600 font-semibold">Gratuite</span>
-                  ) : (
-                    formatPrice(shipping)
+            <div className="border-t pt-4 space-y-4">
+              {/* Discount Code Input */}
+              {!appliedDiscount && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Code promo
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={discountCode}
+                      onChange={(e) => {
+                        setDiscountCode(e.target.value.toUpperCase())
+                        setDiscountError('')
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleApplyDiscount()
+                        }
+                      }}
+                      placeholder="PROMO2024"
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApplyDiscount}
+                      disabled={!discountCode.trim() || validateDiscount.isFetching}
+                      isLoading={validateDiscount.isFetching}
+                    >
+                      Appliquer
+                    </Button>
+                  </div>
+                  {discountError && (
+                    <p className="text-xs text-red-600">{discountError}</p>
                   )}
-                </span>
-              </div>
-              {subtotal > 0 && subtotal < 50 && (
-                <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-                  Plus que {formatPrice(50 - subtotal)} pour la livraison gratuite !
                 </div>
               )}
-              <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
+
+              {/* Applied Discount */}
+              {appliedDiscount && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Percent className="w-4 h-4 text-green-600" />
+                      <div>
+                        <p className="text-sm font-semibold text-green-900">
+                          {appliedDiscount.code}
+                        </p>
+                        <p className="text-xs text-green-700">
+                          {appliedDiscount.type === 'PERCENTAGE'
+                            ? `${appliedDiscount.value}% de réduction`
+                            : `${formatPrice(appliedDiscount.value)} de réduction`}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveDiscount}
+                      className="text-green-600 hover:text-green-800 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Order Summary */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-gray-600">
+                  <span>Sous-total</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <div className="flex flex-col">
+                    <span>Livraison</span>
+                    {shippingCalculation?.rate.estimatedDays && (
+                      <span className="text-xs text-gray-500">
+                        Délai: {shippingCalculation.rate.estimatedDays}
+                      </span>
+                    )}
+                  </div>
+                  <span>
+                    {shipping === 0 ? (
+                      <span className="text-green-600 font-semibold">Gratuite</span>
+                    ) : (
+                      formatPrice(shipping)
+                    )}
+                  </span>
+                </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Réduction</span>
+                    <span>-{formatPrice(discount)}</span>
+                  </div>
+                )}
+                {shippingCalculation?.rate.name && (
+                  <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                    {shippingCalculation.rate.name} - {shippingCalculation.shippingZone.name}
+                  </div>
+                )}
+                <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t">
+                  <span>Total</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
               </div>
             </div>
           </Card>

@@ -32,6 +32,8 @@ model Store {
   categories  Category[]
   orders      Order[]
   customers   Customer[]
+  discountCodes DiscountCode[]
+  shippingZones ShippingZone[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -318,4 +320,73 @@ enum FulfillmentStatus {
   PARTIALLY_FULFILLED
   FULFILLED
   RETURNED
+}
+
+model DiscountCode {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  code            String
+  description     String?
+
+  // Discount type
+  type            DiscountType
+  value           Float    // Percentage (0-100) or fixed amount
+
+  // Usage limits
+  usageLimit      Int?     // Max number of uses
+  usageCount      Int      @default(0)
+  minOrderAmount  Float?   // Minimum order amount to apply
+
+  // Validity
+  startsAt        DateTime?
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([storeId, code])
+  @@index([storeId])
+}
+
+model ShippingZone {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  countries   String[] // Array of country codes (FR, BE, etc.)
+
+  // Shipping rates
+  rates       ShippingRate[]
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+model ShippingRate {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  shippingZoneId  String   @db.ObjectId
+  shippingZone    ShippingZone @relation(fields: [shippingZoneId], references: [id], onDelete: Cascade)
+
+  name            String
+  price           Float
+  minOrderAmount  Float?   // Free shipping threshold
+  estimatedDays   String?  // "3-5 days"
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([shippingZoneId])
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }

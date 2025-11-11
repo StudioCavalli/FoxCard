@@ -1,6 +1,6 @@
 # 🦊 FoxCard - E-commerce Open Source
 
-**Version 0.2.0**
+**Version 0.3.0**
 
 Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. FoxCard est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 
@@ -276,15 +276,152 @@ Après le seed, utilisez ces credentials :
 - [x] **Suppression de clients** avec confirmation
 - [x] **Endpoint tRPC** dédié avec calcul du total dépensé
 
-### 🚧 Roadmap v0.3.0 et Au-delà
+### ✅ Version 0.3.0 - Paiements & Expédition (COMPLETE)
 
-#### Phase 3 (v0.3.0) - Paiements & Expédition
-- [ ] Intégration Stripe/PayPal
-- [ ] Gestion des méthodes de paiement
-- [ ] Calcul des frais de port avancés
-- [ ] Intégrations transporteurs
-- [ ] Codes promo et réductions
-- [ ] Gestion des taxes
+#### 💳 Intégration Stripe
+- [x] **Configuration Stripe** :
+  - Installation et configuration complète (stripe, @stripe/stripe-js)
+  - Variables d'environnement (clés API, webhook secret)
+  - Helper functions pour formater les montants (euros ↔ cents)
+  - API Version: 2024-12-18.acacia
+- [x] **Stripe Checkout** :
+  - Création automatique de session de paiement après création de commande
+  - Redirection vers Stripe pour le paiement sécurisé
+  - Support des cartes bancaires
+  - URLs de succès et d'annulation personnalisées
+- [x] **Router tRPC Payment** (`lib/trpc/routers/payment.ts`) :
+  - `createCheckoutSession` : Création des sessions Stripe
+  - Conversion des items de commande en line items Stripe
+  - Gestion des métadonnées (orderId, orderNumber)
+  - `getPaymentStatus` : Récupération du statut de paiement
+- [x] **Webhook Stripe** (`/api/webhooks/stripe/route.ts`) :
+  - Vérification de signature pour sécurité
+  - Gestion des événements :
+    - `checkout.session.completed` : Mise à jour commande → PROCESSING/PAID
+    - `checkout.session.async_payment_succeeded` : Paiement asynchrone réussi
+    - `checkout.session.async_payment_failed` : Annulation de commande
+    - `charge.refunded` : Gestion des remboursements
+  - Confirmation automatique des paiements
+  - Création automatique de client après paiement
+
+#### 🎟️ Codes Promo & Réductions
+- [x] **Modèle de données DiscountCode** :
+  - Code unique par boutique (unique composite: storeId + code)
+  - Type : PERCENTAGE ou FIXED
+  - Valeur de la réduction
+  - Limite d'utilisation (usageLimit) et compteur (usageCount)
+  - Montant minimum de commande (minOrderAmount)
+  - Dates de validité (startsAt / expiresAt)
+  - Statut actif/inactif
+  - Description optionnelle
+- [x] **Router tRPC Discount** (`lib/trpc/routers/discount.ts`) :
+  - `getAll` : Liste des codes promo pour une boutique (admin)
+  - `validateCode` : Validation et calcul de réduction (public)
+  - `create` : Création avec vérification d'unicité
+  - `update` : Modification de codes existants
+  - `delete` : Suppression
+  - `incrementUsage` : Incrémentation automatique du compteur
+- [x] **Validation complète** :
+  - Vérification du statut actif
+  - Vérification des dates de début/fin
+  - Vérification de la limite d'utilisation
+  - Vérification du montant minimum de commande
+  - Calcul automatique du montant de réduction
+- [x] **Page Admin Codes Promo** (`/admin/discounts`) :
+  - Liste complète avec statistiques d'utilisation
+  - Formulaire de création/modification
+  - Badges visuels (actif/inactif, type de réduction)
+  - Affichage du compteur d'utilisation
+  - Suppression avec confirmation
+  - Support des deux types de réduction (% et €)
+- [x] **Application dans le Checkout** :
+  - Champ de saisie de code promo dans le récapitulatif
+  - Validation en temps réel via tRPC
+  - Affichage de la réduction appliquée
+  - Possibilité de retirer le code
+  - Mise à jour automatique du total
+  - Passage du discountCodeId à la commande
+  - Incrémentation du compteur après application
+- [x] **Intégration dans Order Router** :
+  - Acceptation du paramètre discountCodeId
+  - Calcul automatique de la réduction lors de la création
+  - Soustraction du montant du total final
+
+#### 🚚 Gestion des Zones de Livraison
+- [x] **Modèle de données ShippingZone** :
+  - Nom de la zone
+  - Liste de pays (codes ISO : FR, BE, CH, etc.)
+  - Relations avec ShippingRate (tarifs multiples)
+  - Statut actif/inactif
+- [x] **Modèle de données ShippingRate** :
+  - Nom du tarif (ex: "Livraison Standard")
+  - Prix de livraison
+  - Montant minimum pour ce tarif (optional)
+  - Délai estimé (ex: "3-5 jours")
+  - Relation avec ShippingZone
+- [x] **Router tRPC Shipping** (`lib/trpc/routers/shipping.ts`) :
+  - `getAll` : Liste des zones pour une boutique (admin)
+  - `calculateShipping` : Calcul automatique des frais (public)
+    - Recherche de la zone par pays
+    - Sélection du tarif applicable selon montant
+    - Retour du tarif et estimation de délai
+  - `create` : Création de zone avec tarifs multiples
+  - `update` : Modification de zones
+  - `delete` : Suppression
+  - `createRate`, `updateRate`, `deleteRate` : Gestion des tarifs
+- [x] **Page Admin Livraison** (`/admin/shipping`) :
+  - Interface complète de gestion des zones
+  - Sélection visuelle des pays (10 pays européens communs)
+  - Gestion de tarifs multiples par zone
+  - Formulaire avec :
+    - Nom de la zone
+    - Sélection multi-pays
+    - Ajout/suppression de tarifs
+    - Prix, montant minimum, délai estimé
+    - Statut actif/inactif
+  - Liste des zones avec tous les détails
+  - Badges visuels pour le statut
+  - Modification et suppression
+- [x] **Calcul Dynamique dans Checkout** :
+  - Requête automatique vers `calculateShipping`
+  - Basé sur le pays de livraison sélectionné
+  - Mise à jour en temps réel lors du changement de pays
+  - Affichage du délai estimé
+  - Affichage du nom du tarif et de la zone
+  - Fallback vers tarif par défaut si zone introuvable
+- [x] **Intégration dans Order Router** :
+  - Calcul automatique lors de la création de commande
+  - Recherche de la zone par pays de livraison
+  - Sélection du tarif applicable selon montant
+  - Fallback vers logique par défaut (gratuit > 50€)
+  - Gestion des erreurs avec fallback
+
+#### 💰 Gestion des Paiements
+- [x] **Statuts de paiement** :
+  - PENDING (en attente)
+  - PAID (payé)
+  - FAILED (échoué)
+  - REFUNDED (remboursé)
+- [x] **Intégration complète** dans le flux de commande :
+  1. Création de commande avec adresse
+  2. Création de session Stripe
+  3. Redirection vers Stripe
+  4. Paiement sécurisé
+  5. Webhook de confirmation
+  6. Mise à jour statut commande
+  7. Page de confirmation
+- [x] **Sécurité** :
+  - Paiements traités par Stripe (PCI DSS compliant)
+  - Webhooks sécurisés avec signature
+  - Pas de données de carte stockées
+- [x] **Configuration environnement** requise :
+  ```env
+  STRIPE_SECRET_KEY=sk_test_...
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+  STRIPE_WEBHOOK_SECRET=whsec_...
+  ```
+
+### 🚧 Roadmap v0.4.0 et Au-delà
 
 #### Phase 4 (v0.4.0) - Avancé
 - [ ] Upload d'images (S3/Cloudflare R2)

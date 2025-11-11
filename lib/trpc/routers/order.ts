@@ -96,10 +96,11 @@ export const orderRouter = router({
         shippingAddress: z.any(),
         billingAddress: z.any().optional(),
         notes: z.string().optional(),
+        discountCodeId: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { items, ...orderData } = input
+      const { items, discountCodeId, ...orderData } = input
 
       // Generate order number
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
@@ -128,7 +129,59 @@ export const orderRouter = router({
       })
 
       const subtotal = orderItems.reduce((sum, item) => sum + item.total, 0)
-      const total = subtotal // Add tax and shipping calculation later
+
+      // Calculate discount if applicable
+      let discountAmount = 0
+      if (discountCodeId) {
+        const discountCode = await ctx.prisma.discountCode.findUnique({
+          where: { id: discountCodeId },
+        })
+
+        if (discountCode && discountCode.isActive) {
+          if (discountCode.type === 'PERCENTAGE') {
+            discountAmount = (subtotal * discountCode.value) / 100
+          } else {
+            discountAmount = discountCode.value
+          }
+        }
+      }
+
+      // Calculate shipping dynamically based on shipping address country
+      let shippingCost = 0
+      try {
+        const shippingZone = await ctx.prisma.shippingZone.findFirst({
+          where: {
+            storeId: orderData.storeId,
+            countries: {
+              has: orderData.shippingAddress?.country || 'France',
+            },
+            isActive: true,
+          },
+          include: {
+            rates: true,
+          },
+        })
+
+        if (shippingZone && shippingZone.rates.length > 0) {
+          // Find applicable rate based on order amount
+          const applicableRate = shippingZone.rates.find((rate) => {
+            if (rate.minOrderAmount) {
+              return subtotal >= rate.minOrderAmount
+            }
+            return true
+          })
+
+          shippingCost = applicableRate?.price || shippingZone.rates[0].price
+        } else {
+          // Fallback to default shipping cost if no zone found
+          shippingCost = subtotal > 50 ? 0 : 5.99
+        }
+      } catch (err) {
+        // Fallback to default shipping cost on error
+        shippingCost = subtotal > 50 ? 0 : 5.99
+      }
+
+      const total = Math.max(0, subtotal + shippingCost - discountAmount)
 
       // Create order with items
       return ctx.prisma.order.create({
@@ -137,6 +190,7 @@ export const orderRouter = router({
           orderNumber,
           subtotal,
           total,
+          discountCodeId,
           items: {
             create: orderItems,
           },

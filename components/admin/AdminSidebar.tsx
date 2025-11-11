@@ -10,7 +10,9 @@ import {
   FolderTree,
   Settings,
   Store,
-  LogOut
+  LogOut,
+  Percent,
+  Truck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -19,9 +21,11 @@ const navigation = [
   { name: 'Produits', href: '/admin/products', icon: Package },
   { name: 'Commandes', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Clients', href: '/admin/customers', icon: Users },
-  { name: 'Catégories', href: '/admin/categories', icon: FolderTree },
+  { name: 'Categories', href: '/admin/categories', icon: FolderTree },
+  { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
+  { name: 'Livraison', href: '/admin/shipping', icon: Truck },
   { name: 'Boutique', href: '/admin/store', icon: Store },
-  { name: 'Paramètres', href: '/admin/settings', icon: Settings },
+  { name: 'Parametres', href: '/admin/settings', icon: Settings },
 ]
 
 export function AdminSidebar() {
