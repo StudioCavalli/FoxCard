@@ -1,18 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/ui/ImageUpload'
-import { VariantManager, type ProductVariant } from '@/components/products/VariantManager'
 import { trpc } from '@/lib/trpc/client'
-import { generateSlug } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
-export default function NewProductPage() {
+export default function EditProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = use(params)
   const router = useRouter()
   const DEMO_STORE_ID = '000000000000000000000001'
 
@@ -23,41 +26,79 @@ export default function NewProductPage() {
     price: '',
     compareAtPrice: '',
     sku: '',
-    quantity: '0',
+    quantity: '',
     images: [] as string[],
     categoryId: '',
+    status: 'ACTIVE' as const,
   })
-  const [variants, setVariants] = useState<ProductVariant[]>([])
 
+  const { data: product, isLoading } = trpc.product.getById.useQuery({ id })
   const { data: categories } = trpc.category.getAll.useQuery({
     storeId: DEMO_STORE_ID,
   })
 
-  const createProduct = trpc.product.create.useMutation({
+  const updateProduct = trpc.product.update.useMutation({
     onSuccess: () => {
       router.push('/admin/products')
     },
   })
 
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name,
+        slug: product.slug,
+        description: product.description || '',
+        price: product.price.toString(),
+        compareAtPrice: product.compareAtPrice?.toString() || '',
+        sku: product.sku || '',
+        quantity: product.quantity.toString(),
+        images: product.images,
+        categoryId: product.categoryId || '',
+        status: product.status,
+      })
+    }
+  }, [product])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    createProduct.mutate({
-      storeId: DEMO_STORE_ID,
+    updateProduct.mutate({
+      id,
       name: formData.name,
-      slug: formData.slug || generateSlug(formData.name),
+      slug: formData.slug,
       description: formData.description || undefined,
       price: parseFloat(formData.price),
       compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
       sku: formData.sku || undefined,
       quantity: parseInt(formData.quantity),
       images: formData.images,
-      type: 'SIMPLE',
-      status: 'ACTIVE',
-      trackInventory: true,
-      featured: false,
+      status: formData.status,
       categoryId: formData.categoryId || undefined,
     })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl space-y-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 w-48 bg-gray-200 rounded"></div>
+          <Card className="p-6 space-y-4">
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-32 bg-gray-200 rounded"></div>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Produit introuvable</p>
+      </div>
+    )
   }
 
   return (
@@ -70,8 +111,8 @@ export default function NewProductPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nouveau Produit</h1>
-          <p className="text-gray-600">Créez un nouveau produit dans votre catalogue</p>
+          <h1 className="text-3xl font-bold text-gray-900">Modifier le produit</h1>
+          <p className="text-gray-600">{product.name}</p>
         </div>
       </div>
 
@@ -84,19 +125,13 @@ export default function NewProductPage() {
             label="Nom du produit *"
             required
             value={formData.name}
-            onChange={(e) => {
-              setFormData({ ...formData, name: e.target.value })
-              if (!formData.slug) {
-                setFormData({ ...formData, name: e.target.value, slug: generateSlug(e.target.value) })
-              }
-            }}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
 
           <Input
             label="Slug (URL)"
             value={formData.slug}
             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-            placeholder="nom-du-produit"
           />
 
           <div>
@@ -125,6 +160,21 @@ export default function NewProductPage() {
                   {category.name}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Statut
+            </label>
+            <select
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+            >
+              <option value="ACTIVE">Actif</option>
+              <option value="DRAFT">Brouillon</option>
+              <option value="ARCHIVED">Archivé</option>
             </select>
           </div>
         </Card>
@@ -171,28 +221,13 @@ export default function NewProductPage() {
         <Card className="p-6 space-y-4">
           <h2 className="text-xl font-bold text-gray-900">Images</h2>
           <p className="text-sm text-gray-600">
-            Ajoutez des images pour votre produit (maximum 5)
+            Ajoutez ou modifiez les images du produit (maximum 5)
           </p>
 
           <ImageUpload
             value={formData.images}
             onChange={(urls) => setFormData({ ...formData, images: urls })}
             maxImages={5}
-          />
-        </Card>
-
-        <Card className="p-6 space-y-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Variantes</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Gérez les différentes options du produit (taille, couleur, etc.)
-            </p>
-          </div>
-
-          <VariantManager
-            variants={variants}
-            onChange={setVariants}
-            basePrice={parseFloat(formData.price) || 0}
           />
         </Card>
 
@@ -207,9 +242,9 @@ export default function NewProductPage() {
             type="submit"
             variant="primary"
             size="lg"
-            isLoading={createProduct.isPending}
+            isLoading={updateProduct.isPending}
           >
-            Créer le Produit
+            Enregistrer les modifications
           </Button>
         </div>
       </form>

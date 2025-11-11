@@ -10,12 +10,13 @@ export const productRouter = router({
         categoryId: z.string().optional(),
         status: z.nativeEnum(ProductStatus).optional(),
         featured: z.boolean().optional(),
+        search: z.string().optional(),
         limit: z.number().min(1).max(100).default(20),
         cursor: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { storeId, categoryId, status, featured, limit, cursor } = input
+      const { storeId, categoryId, status, featured, search, limit, cursor } = input
 
       const products = await ctx.prisma.product.findMany({
         take: limit + 1,
@@ -24,6 +25,13 @@ export const productRouter = router({
           ...(categoryId && { categoryId }),
           ...(status && { status }),
           ...(featured !== undefined && { featured }),
+          ...(search && {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { description: { contains: search, mode: 'insensitive' } },
+              { sku: { contains: search, mode: 'insensitive' } },
+            ],
+          }),
         },
         cursor: cursor ? { id: cursor } : undefined,
         orderBy: {

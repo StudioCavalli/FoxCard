@@ -1,16 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ProductCard } from '@/components/products/ProductCard'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
-import { Filter, X } from 'lucide-react'
+import { Filter, X, Search } from 'lucide-react'
 
 export default function ProductsPage() {
   const DEMO_STORE_ID = '000000000000000000000001'
+  const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
   const [showFilters, setShowFilters] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Initialize search query from URL
+  useEffect(() => {
+    const urlSearch = searchParams.get('search')
+    if (urlSearch) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   const { data: categories } = trpc.category.getAll.useQuery({
     storeId: DEMO_STORE_ID,
@@ -21,6 +33,7 @@ export default function ProductsPage() {
       storeId: DEMO_STORE_ID,
       status: 'ACTIVE',
       categoryId: selectedCategory,
+      search: searchQuery || undefined,
       limit: 12,
     },
     {
@@ -36,6 +49,30 @@ export default function ProductsPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Tous les produits</h1>
         <p className="text-gray-600">Découvrez notre collection complète</p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="relative max-w-2xl">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Rechercher un produit par nom, description ou SKU..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-8">

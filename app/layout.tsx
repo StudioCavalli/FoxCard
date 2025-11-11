@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { TRPCProvider } from '@/lib/trpc/Provider'
 import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import { CartDrawerWrapper } from '@/components/cart/CartDrawerWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -25,6 +26,7 @@ export default function RootLayout({
           <main className="min-h-screen bg-gray-50">
             {children}
           </main>
+          <Footer />
           <CartDrawerWrapper />
         </TRPCProvider>
       </body>
