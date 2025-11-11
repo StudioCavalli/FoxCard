@@ -15,6 +15,7 @@ import { apiKeyRouter } from './apiKey'
 import { themeRouter } from './theme'
 import { installRouter } from './install'
 import { envVariableRouter } from './envVariable'
+import { emailRouter } from './email'
 
 export const appRouter = router({
   product: productRouter,
@@ -33,6 +34,7 @@ export const appRouter = router({
   theme: themeRouter,
   install: installRouter,
   envVariable: envVariableRouter,
+  email: emailRouter,
 })
 
 export type AppRouter = typeof appRouter

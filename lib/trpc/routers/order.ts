@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
 import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@prisma/client'
+import { emailService } from '@/lib/email/service'
 
 export const orderRouter = router({
   getAll: adminProcedure
@@ -184,12 +185,15 @@ export const orderRouter = router({
       const total = Math.max(0, subtotal + shippingCost - discountAmount)
 
       // Create order with items
-      return ctx.prisma.order.create({
+      const order = await ctx.prisma.order.create({
         data: {
           ...orderData,
           orderNumber,
           subtotal,
           total,
+          shipping: shippingCost,
+          discount: discountAmount,
+          tax: 0, // TODO: Calculate tax based on shipping address
           items: {
             create: orderItems,
           },
@@ -198,6 +202,13 @@ export const orderRouter = router({
           items: true,
         },
       })
+
+      // Send order confirmation email (async, don't block response)
+      emailService.sendOrderConfirmation(order.id, order.storeId).catch((err) => {
+        console.error('Failed to send order confirmation email:', err)
+      })
+
+      return order
     }),
 
   updateStatus: adminProcedure
@@ -211,9 +222,19 @@ export const orderRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input
-      return ctx.prisma.order.update({
+
+      const order = await ctx.prisma.order.update({
         where: { id },
         data,
       })
+
+      // Send status update email if order status changed (async, don't block response)
+      if (input.status) {
+        emailService.sendOrderStatusUpdate(order.id, order.storeId).catch((err) => {
+          console.error('Failed to send order status update email:', err)
+        })
+      }
+
+      return order
     }),
 })
