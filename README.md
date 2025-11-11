@@ -1,6 +1,6 @@
 # 🦊 FoxCard - E-commerce Open Source
 
-**Version 0.1.0**
+**Version 0.2.0**
 
 Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. FoxCard est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 
@@ -207,15 +207,76 @@ Après le seed, utilisez ces credentials :
 - [x] **Seed de données** de démonstration
 - [x] **Validation Zod** sur toutes les entrées
 
-### 🚧 Roadmap v0.2.0 et Au-delà
+### ✅ Version 0.2.0 - Dashboard Admin (COMPLETE)
 
-#### Phase 2 (v0.2.0) - Dashboard Admin
-- [ ] Dashboard admin complet
-- [ ] Gestion CRUD produits avec upload d'images
-- [ ] Gestion des commandes (statuts, fulfillment)
-- [ ] Gestion des catégories
-- [ ] Statistiques et analytics
-- [ ] Gestion des utilisateurs et rôles
+#### 🎨 Interface Admin
+- [x] **Layout admin complet** avec sidebar et header
+- [x] **Middleware de protection** (rôles ADMIN/SUPER_ADMIN requis)
+- [x] **Dashboard principal** avec statistiques en temps réel :
+  - Revenu total (calculé sur commandes complétées/en cours)
+  - Nombre de commandes
+  - Nombre de produits
+  - Nombre de clients
+  - Tableau des commandes récentes
+  - Quick actions avec liens directs
+- [x] **Design cohérent** avec la charte graphique (pastels, coins arrondis)
+
+#### 📦 Gestion des Produits
+- [x] **Liste des produits** avec tableau complet :
+  - Image, nom, catégorie
+  - SKU, stock (avec indicateurs visuels)
+  - Prix, statut
+  - Actions : Voir, Éditer, Supprimer
+- [x] **Création de produits** avec formulaire complet :
+  - Informations générales (nom, slug auto, description)
+  - Catégorie
+  - Prix & prix comparatif
+  - SKU, quantité en stock
+  - Upload d'images (jusqu'à 5)
+  - Support des variantes
+- [x] **Modification de produits** :
+  - Formulaire pré-rempli
+  - Modification du statut (ACTIVE, DRAFT, ARCHIVED)
+  - Mise à jour des images
+- [x] **Suppression de produits** avec confirmation
+- [x] **Recherche** par nom ou SKU
+
+#### 🛒 Gestion des Commandes
+- [x] **Liste des commandes** avec tableau détaillé :
+  - Numéro de commande
+  - Client (nom, email)
+  - Date de création
+  - Nombre d'articles
+  - Total
+  - Statut avec badges colorés
+- [x] **Visualisation des commandes** (lien vers page confirmation)
+- [x] **Tri et filtrage** des commandes
+
+#### 📁 Gestion des Catégories
+- [x] **Liste des catégories** en grid cards
+- [x] **Création de catégories** :
+  - Nom, slug auto-généré
+  - Description
+  - Compteur de produits
+- [x] **Modification de catégories** (formulaire inline)
+- [x] **Suppression de catégories** avec confirmation
+- [x] **Affichage du nombre de produits** par catégorie
+
+#### 👥 Gestion des Clients
+- [x] **Liste des clients** avec tableau complet :
+  - Nom, email, téléphone
+  - Nombre de commandes
+  - Total dépensé (calculé)
+  - Date d'inscription
+- [x] **Recherche de clients** par nom ou email
+- [x] **Statistiques clients** :
+  - Total clients
+  - Revenu total généré
+  - Panier moyen
+- [x] **Suppression de clients** avec confirmation
+- [x] **Endpoint tRPC** dédié avec calcul du total dépensé
+
+### 🚧 Roadmap v0.3.0 et Au-delà
 
 #### Phase 3 (v0.3.0) - Paiements & Expédition
 - [ ] Intégration Stripe/PayPal

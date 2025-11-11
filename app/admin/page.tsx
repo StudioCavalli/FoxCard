@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { StatCard } from '@/components/admin/StatCard'
 import { Card } from '@/components/ui/Card'
 import { trpc } from '@/lib/trpc/client'
@@ -19,11 +20,26 @@ export default function AdminDashboard() {
     limit: 100,
   })
 
+  const { data: customersData } = trpc.customer.getAll.useQuery({
+    storeId: DEMO_STORE_ID,
+    limit: 100,
+  })
+
   const totalProducts = products?.products.length || 0
   const totalOrders = ordersData?.orders.length || 0
+  const totalCustomers = customersData?.customers.length || 0
 
-  // Calculate total revenue
-  const totalRevenue = ordersData?.orders.reduce((sum, order) => sum + order.total, 0) || 0
+  // Calculate total revenue from completed and processing orders
+  const totalRevenue =
+    ordersData?.orders
+      .filter((order) => order.status === 'COMPLETED' || order.status === 'PROCESSING')
+      .reduce((sum, order) => sum + order.total, 0) || 0
+
+  // Calculate average order value
+  const completedOrders = ordersData?.orders.filter(
+    (order) => order.status === 'COMPLETED' || order.status === 'PROCESSING'
+  ) || []
+  const averageOrderValue = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0
 
   // Get recent orders
   const recentOrders = ordersData?.orders.slice(0, 5) || []
@@ -54,9 +70,8 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Clients"
-          value="0"
+          value={totalCustomers}
           icon={Users}
-          trend={{ value: -2.4, isPositive: false }}
           colorVariant="blue"
         />
       </div>
@@ -113,23 +128,29 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card variant="teal" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
-          <Package className="w-8 h-8 text-primary-600 mb-3" />
-          <h3 className="font-semibold text-gray-900 mb-1">Ajouter un Produit</h3>
-          <p className="text-sm text-gray-600">Créez un nouveau produit dans votre catalogue</p>
-        </Card>
+        <Link href="/admin/products/new">
+          <Card variant="teal" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
+            <Package className="w-8 h-8 text-primary-600 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Ajouter un Produit</h3>
+            <p className="text-sm text-gray-600">Creez un nouveau produit dans votre catalogue</p>
+          </Card>
+        </Link>
 
-        <Card variant="pink" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
-          <ShoppingCart className="w-8 h-8 text-secondary-600 mb-3" />
-          <h3 className="font-semibold text-gray-900 mb-1">Voir les Commandes</h3>
-          <p className="text-sm text-gray-600">Gérez toutes vos commandes en cours</p>
-        </Card>
+        <Link href="/admin/orders">
+          <Card variant="pink" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
+            <ShoppingCart className="w-8 h-8 text-secondary-600 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Voir les Commandes</h3>
+            <p className="text-sm text-gray-600">Gerez toutes vos commandes en cours</p>
+          </Card>
+        </Link>
 
-        <Card variant="yellow" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
-          <Users className="w-8 h-8 text-yellow-600 mb-3" />
-          <h3 className="font-semibold text-gray-900 mb-1">Clients</h3>
-          <p className="text-sm text-gray-600">Consultez votre base de clients</p>
-        </Card>
+        <Link href="/admin/customers">
+          <Card variant="yellow" className="p-6 hover:shadow-card-hover transition-shadow cursor-pointer">
+            <Users className="w-8 h-8 text-yellow-600 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Clients</h3>
+            <p className="text-sm text-gray-600">Consultez votre base de clients</p>
+          </Card>
+        </Link>
       </div>
     </div>
   )
