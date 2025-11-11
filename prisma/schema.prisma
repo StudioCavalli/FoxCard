@@ -40,6 +40,7 @@ model Store {
   emailTemplates EmailTemplate[]
   emailLogs   EmailLog[]
   newsletterSubscribers NewsletterSubscriber[]
+  invoices    Invoice[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -252,6 +253,9 @@ model Order {
 
   // Items
   items           OrderItem[]
+
+  // Invoice
+  invoice         Invoice?
 
   // Notes
   notes           String?
@@ -627,4 +631,56 @@ enum SubscriberStatus {
   PENDING      // Awaiting confirmation
   CONFIRMED    // Confirmed via double opt-in
   UNSUBSCRIBED // Unsubscribed
+}
+
+model Invoice {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  orderId         String   @unique @db.ObjectId
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Invoice details
+  invoiceNumber   String   @unique // Sequential number (e.g., INV-2025-0001)
+  invoiceDate     DateTime @default(now())
+  dueDate         DateTime?
+
+  // Customer info (snapshot)
+  customerName    String
+  customerEmail   String
+  customerAddress Json?
+
+  // Merchant info (snapshot)
+  merchantName    String
+  merchantAddress Json?
+  merchantTax     String?  // Tax ID / SIRET / VAT number
+
+  // Line items (snapshot from order)
+  items           Json     // Array of invoice items
+
+  // Amounts
+  subtotal        Float
+  tax             Float
+  shipping        Float
+  discount        Float
+  total           Float
+
+  // Payment
+  paymentStatus   PaymentStatus @default(PENDING)
+  paidAt          DateTime?
+
+  // PDF
+  pdfUrl          String?  // URL to R2/S3
+  pdfGenerated    Boolean  @default(false)
+  pdfGeneratedAt  DateTime?
+
+  // Notes
+  notes           String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([invoiceDate])
 }
