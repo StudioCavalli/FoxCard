@@ -36,6 +36,7 @@ model Store {
   shippingZones ShippingZone[]
   webhooks    Webhook[]
   apiKeys     ApiKey[]
+  envVariables EnvVariable[] @relation("StoreEnvVariables")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -461,6 +462,24 @@ model ApiKey {
   @@index([isActive])
 }
 
+model EnvVariable {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade, name: "StoreEnvVariables")
+
+  key         String   // Variable name (e.g., "STRIPE_SECRET_KEY")
+  value       String   // Encrypted value
+  category    EnvCategory
+  isSecret    Boolean  @default(false) // If true, value is encrypted
+  description String?  // Optional description
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, key])
+  @@index([storeId])
+}
+
 enum DiscountType {
   PERCENTAGE
   FIXED
@@ -470,4 +489,13 @@ enum WebhookDeliveryStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum EnvCategory {
+  DATABASE
+  SMTP
+  STRIPE
+  R2
+  AUTH
+  GENERAL
 }

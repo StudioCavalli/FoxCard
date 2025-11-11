@@ -13,6 +13,8 @@ import { exportRouter } from './export'
 import { webhookRouter } from './webhook'
 import { apiKeyRouter } from './apiKey'
 import { themeRouter } from './theme'
+import { installRouter } from './install'
+import { envVariableRouter } from './envVariable'
 
 export const appRouter = router({
   product: productRouter,
@@ -29,6 +31,8 @@ export const appRouter = router({
   webhook: webhookRouter,
   apiKey: apiKeyRouter,
   theme: themeRouter,
+  install: installRouter,
+  envVariable: envVariableRouter,
 })
 
 export type AppRouter = typeof appRouter
