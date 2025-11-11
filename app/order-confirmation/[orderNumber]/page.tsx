@@ -1,13 +1,14 @@
 'use client'
 
-import { use } from 'react'
+import { use, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { CheckCircle, Package, Mail, MapPin, Home } from 'lucide-react'
+import { CheckCircle, Package, Mail, MapPin, Home, Loader2 } from 'lucide-react'
 
 export default function OrderConfirmationPage({
   params,
@@ -15,10 +16,66 @@ export default function OrderConfirmationPage({
   params: Promise<{ orderNumber: string }>
 }) {
   const { orderNumber } = use(params)
+  const searchParams = useSearchParams()
+  const [isCapturingPayment, setIsCapturingPayment] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
+  const [bankTransferDetails, setBankTransferDetails] = useState<any>(null)
 
-  const { data: order, isLoading } = trpc.order.getByOrderNumber.useQuery({
+  const { data: order, isLoading, refetch } = trpc.order.getByOrderNumber.useQuery({
     orderNumber,
   })
+
+  const capturePayPalOrder = trpc.payment.capturePayPalOrder.useMutation()
+  const generateBankTransferInstructions = trpc.payment.generateBankTransferInstructions.useMutation()
+
+  // Handle PayPal return
+  useEffect(() => {
+    const isPayPalReturn = searchParams.get('paypal') === 'true'
+    const paypalToken = searchParams.get('token')
+
+    if (isPayPalReturn && paypalToken && order && order.paymentIntentId && order.paymentStatus !== 'PAID') {
+      setIsCapturingPayment(true)
+
+      capturePayPalOrder.mutate(
+        {
+          paypalOrderId: order.paymentIntentId,
+          orderId: order.id,
+        },
+        {
+          onSuccess: () => {
+            setIsCapturingPayment(false)
+            refetch() // Refresh order to show updated status
+          },
+          onError: (error) => {
+            setIsCapturingPayment(false)
+            setPaymentError(error.message || 'Erreur lors de la capture du paiement PayPal')
+          },
+        }
+      )
+    }
+  }, [order, searchParams, capturePayPalOrder, refetch])
+
+  // Handle Bank Transfer return
+  useEffect(() => {
+    const isBankTransfer = searchParams.get('bank_transfer') === 'true'
+
+    if (isBankTransfer && order && !bankTransferDetails) {
+      generateBankTransferInstructions.mutate(
+        {
+          orderId: order.id,
+          storeId: order.storeId,
+        },
+        {
+          onSuccess: (details) => {
+            setBankTransferDetails(details)
+          },
+          onError: (error) => {
+            setPaymentError(error.message || 'Erreur lors de la génération des instructions de virement')
+          },
+        }
+      )
+    }
+  }, [order, searchParams, bankTransferDetails, generateBankTransferInstructions])
 
   if (isLoading) {
     return (
@@ -71,8 +128,34 @@ export default function OrderConfirmationPage({
   const shipping = order.subtotal > 50 ? 0 : 5.99
   const total = order.subtotal + shipping
 
+  // Show loading state while capturing PayPal payment
+  if (isCapturingPayment) {
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-2xl mx-auto text-center">
+          <Card variant="default" className="p-12">
+            <Loader2 className="w-16 h-16 text-primary-600 animate-spin mx-auto mb-6" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Finalisation du paiement...</h1>
+            <p className="text-gray-600">
+              Veuillez patienter pendant que nous confirmons votre paiement PayPal.
+            </p>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Payment Error */}
+      {paymentError && (
+        <div className="max-w-3xl mx-auto mb-6">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm text-red-600">{paymentError}</p>
+          </div>
+        </div>
+      )}
+
       {/* Success Header */}
       <div className="max-w-3xl mx-auto mb-8">
         <Card variant="default" className="p-8 text-center">
@@ -92,6 +175,66 @@ export default function OrderConfirmationPage({
       </div>
 
       <div className="max-w-3xl mx-auto space-y-6">
+        {/* Bank Transfer Instructions */}
+        {bankTransferDetails && (
+          <Card variant="default" className="p-6 bg-blue-50 border-2 border-blue-200">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Instructions de virement</h2>
+                <p className="text-sm text-gray-700">Effectuez votre virement avec ces informations</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">Bénéficiaire</p>
+                  <p className="text-base font-semibold text-gray-900">{bankTransferDetails.accountHolder}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">Banque</p>
+                  <p className="text-base font-semibold text-gray-900">{bankTransferDetails.bankName}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-xs font-medium text-gray-500 uppercase mb-1">IBAN</p>
+                <p className="text-lg font-mono font-bold text-gray-900">{bankTransferDetails.iban}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase mb-1">BIC / SWIFT</p>
+                <p className="text-lg font-mono font-bold text-gray-900">{bankTransferDetails.bic}</p>
+              </div>
+
+              <div className="border-t pt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">Montant</p>
+                  <p className="text-2xl font-bold text-primary-600">{formatPrice(bankTransferDetails.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">Référence (IMPORTANT)</p>
+                  <p className="text-xl font-mono font-bold text-red-600">{bankTransferDetails.reference}</p>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                <p className="text-sm font-semibold text-yellow-900 mb-2">⚠️ Important</p>
+                <ul className="text-sm text-yellow-800 space-y-1">
+                  <li>• N'oubliez pas d'indiquer la référence : <span className="font-bold">{bankTransferDetails.reference}</span></li>
+                  <li>• Votre commande sera traitée dès réception du paiement (2-3 jours ouvrés)</li>
+                  <li>• Conservez ces informations pour effectuer votre virement</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Order Items */}
         <Card variant="default" className="p-6">
           <div className="flex items-center gap-3 mb-6">

@@ -13,7 +13,8 @@ import {
   LogOut,
   Percent,
   Truck,
-  Palette
+  Palette,
+  DollarSign
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Produits', href: '/admin/products', icon: Package },
   { name: 'Commandes', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Paiements', href: '/admin/payments', icon: DollarSign },
   { name: 'Clients', href: '/admin/customers', icon: Users },
   { name: 'Categories', href: '/admin/categories', icon: FolderTree },
   { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
