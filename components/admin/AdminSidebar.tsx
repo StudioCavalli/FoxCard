@@ -14,7 +14,8 @@ import {
   Percent,
   Truck,
   Palette,
-  DollarSign
+  DollarSign,
+  Key
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Livraison', href: '/admin/shipping', icon: Truck },
   { name: 'Boutique', href: '/admin/store', icon: Store },
   { name: 'Thème', href: '/admin/theme', icon: Palette },
+  { name: 'Variables ENV', href: '/admin/env-variables', icon: Key },
   { name: 'Parametres', href: '/admin/settings', icon: Settings },
 ]
 

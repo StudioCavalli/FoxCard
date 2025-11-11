@@ -280,9 +280,9 @@ export default function AccountPage() {
                             >
                               {order.status === 'PENDING' && 'En attente'}
                               {order.status === 'PROCESSING' && 'En cours'}
-                              {order.status === 'SHIPPED' && 'Expédiée'}
                               {order.status === 'COMPLETED' && 'Livrée'}
                               {order.status === 'CANCELLED' && 'Annulée'}
+                              {order.status === 'REFUNDED' && 'Remboursée'}
                             </span>
                           </div>
                         </div>
