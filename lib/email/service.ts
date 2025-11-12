@@ -22,7 +22,35 @@ export class EmailService {
   private maxRetries = 3
 
   /**
-   * Send an email using a React Email template
+   * Replace template variables with actual values
+   * Supports {{variableName}} and nested properties like {{object.property}}
+   */
+  private replaceVariables(template: string, props: Record<string, any>): string {
+    return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+      const trimmedKey = key.trim()
+
+      // Handle nested properties (e.g., shippingAddress.city)
+      const value = trimmedKey.split('.').reduce((obj, prop) => {
+        return obj?.[prop]
+      }, props)
+
+      // Handle arrays (e.g., items) - convert to JSON for display
+      if (Array.isArray(value)) {
+        return JSON.stringify(value, null, 2)
+      }
+
+      // Handle objects - convert to JSON for display
+      if (typeof value === 'object' && value !== null) {
+        return JSON.stringify(value, null, 2)
+      }
+
+      // Return string value or empty string if undefined
+      return value !== undefined && value !== null ? String(value) : ''
+    })
+  }
+
+  /**
+   * Send an email using a React Email template or custom DB template
    */
   async sendEmail(options: SendEmailOptions): Promise<boolean> {
     const {
@@ -40,13 +68,6 @@ export class EmailService {
     const transporter = getTransporter()
     if (!transporter) {
       console.error('Email service not configured')
-      return false
-    }
-
-    // Get template component
-    const TemplateComponent = templates[templateName]
-    if (!TemplateComponent) {
-      console.error(`Template ${templateName} not found`)
       return false
     }
 
@@ -76,11 +97,45 @@ export class EmailService {
       trackingPixelUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/email/track/${trackingId}`
     }
 
-    // Render template with tracking pixel
-    const html = await render(TemplateComponent({ ...props, trackingPixelUrl } as any))
-    const text = await render(TemplateComponent({ ...props, trackingPixelUrl } as any), {
-      plainText: true,
+    // Add tracking pixel to props
+    const propsWithTracking = { ...props, trackingPixelUrl }
+
+    // Check for custom template in database first
+    const customTemplate = await prisma.emailTemplate.findUnique({
+      where: {
+        storeId_name: {
+          storeId,
+          name: templateName as string,
+        },
+      },
     })
+
+    let html: string
+    let text: string
+
+    if (customTemplate && customTemplate.isActive) {
+      // Use custom template from database with variable replacement
+      html = this.replaceVariables(customTemplate.htmlBody, propsWithTracking)
+      text = customTemplate.textBody
+        ? this.replaceVariables(customTemplate.textBody, propsWithTracking)
+        : ''
+
+      console.log(`📧 Using custom template: ${templateName}`)
+    } else {
+      // Fallback to React Email templates
+      const TemplateComponent = templates[templateName]
+      if (!TemplateComponent) {
+        console.error(`Template ${templateName} not found`)
+        return false
+      }
+
+      html = await render(TemplateComponent(propsWithTracking as any))
+      text = await render(TemplateComponent(propsWithTracking as any), {
+        plainText: true,
+      })
+
+      console.log(`📧 Using default React Email template: ${templateName}`)
+    }
 
     // Update email log with rendered content
     await prisma.emailLog.update({

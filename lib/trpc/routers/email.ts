@@ -176,6 +176,261 @@ export const emailRouter = router({
         })
       }
     }),
+
+  // Email Template Management
+
+  // Get all templates for a store
+  getTemplates: adminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        includeInactive: z.boolean().default(false),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {
+        storeId: input.storeId,
+      }
+
+      if (!input.includeInactive) {
+        where.isActive = true
+      }
+
+      const templates = await ctx.prisma.emailTemplate.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+
+      return templates
+    }),
+
+  // Get a single template by ID
+  getTemplateById: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const template = await ctx.prisma.emailTemplate.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Email template not found',
+        })
+      }
+
+      return template
+    }),
+
+  // Get a template by name (used by email service)
+  getTemplateByName: adminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        name: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const template = await ctx.prisma.emailTemplate.findUnique({
+        where: {
+          storeId_name: {
+            storeId: input.storeId,
+            name: input.name,
+          },
+        },
+      })
+
+      return template
+    }),
+
+  // Create a new template
+  createTemplate: adminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        name: z.string(),
+        subject: z.string(),
+        htmlBody: z.string(),
+        textBody: z.string().optional(),
+        designJson: z.any().optional(),
+        description: z.string().optional(),
+        variables: z.array(z.string()).default([]),
+        isActive: z.boolean().default(true),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if template with same name exists
+      const existing = await ctx.prisma.emailTemplate.findUnique({
+        where: {
+          storeId_name: {
+            storeId: input.storeId,
+            name: input.name,
+          },
+        },
+      })
+
+      if (existing) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'A template with this name already exists',
+        })
+      }
+
+      const template = await ctx.prisma.emailTemplate.create({
+        data: {
+          storeId: input.storeId,
+          name: input.name,
+          subject: input.subject,
+          htmlBody: input.htmlBody,
+          textBody: input.textBody,
+          designJson: input.designJson,
+          description: input.description,
+          variables: input.variables,
+          isActive: input.isActive,
+        },
+      })
+
+      return template
+    }),
+
+  // Update a template
+  updateTemplate: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        subject: z.string().optional(),
+        htmlBody: z.string().optional(),
+        textBody: z.string().optional(),
+        designJson: z.any().optional(),
+        description: z.string().optional(),
+        variables: z.array(z.string()).optional(),
+        isActive: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input
+
+      const template = await ctx.prisma.emailTemplate.findUnique({
+        where: { id },
+      })
+
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Email template not found',
+        })
+      }
+
+      // Don't allow updating default templates
+      if (template.isDefault) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Cannot update default system templates',
+        })
+      }
+
+      const updated = await ctx.prisma.emailTemplate.update({
+        where: { id },
+        data,
+      })
+
+      return updated
+    }),
+
+  // Delete a template
+  deleteTemplate: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const template = await ctx.prisma.emailTemplate.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Email template not found',
+        })
+      }
+
+      // Don't allow deleting default templates
+      if (template.isDefault) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Cannot delete default system templates',
+        })
+      }
+
+      await ctx.prisma.emailTemplate.delete({
+        where: { id: input.id },
+      })
+
+      return { success: true }
+    }),
+
+  // Clone/duplicate a template
+  cloneTemplate: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        newName: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const template = await ctx.prisma.emailTemplate.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Email template not found',
+        })
+      }
+
+      // Check if new name is available
+      const existing = await ctx.prisma.emailTemplate.findUnique({
+        where: {
+          storeId_name: {
+            storeId: template.storeId,
+            name: input.newName,
+          },
+        },
+      })
+
+      if (existing) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'A template with this name already exists',
+        })
+      }
+
+      const cloned = await ctx.prisma.emailTemplate.create({
+        data: {
+          storeId: template.storeId,
+          name: input.newName,
+          subject: template.subject,
+          htmlBody: template.htmlBody,
+          textBody: template.textBody,
+          designJson: template.designJson,
+          description: template.description ? `${template.description} (copie)` : 'Copie',
+          variables: template.variables,
+          isActive: false, // Start as inactive
+          isDefault: false, // Never clone as default
+        },
+      })
+
+      return cloned
+    }),
 })
 
 /**
