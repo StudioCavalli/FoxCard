@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
 import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@prisma/client'
 import { emailService } from '@/lib/email/service'
+import { pdfService } from '@/lib/pdf/service'
 
 export const orderRouter = router({
   getAll: adminProcedure
@@ -232,6 +233,13 @@ export const orderRouter = router({
       if (input.status) {
         emailService.sendOrderStatusUpdate(order.id, order.storeId).catch((err) => {
           console.error('Failed to send order status update email:', err)
+        })
+      }
+
+      // Generate invoice if payment status changed to PAID (async, don't block response)
+      if (input.paymentStatus === 'PAID') {
+        pdfService.generateInvoice(order.id).catch((err) => {
+          console.error('Failed to generate invoice:', err)
         })
       }
 
