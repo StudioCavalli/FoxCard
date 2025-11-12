@@ -17,6 +17,8 @@ import { installRouter } from './install'
 import { envVariableRouter } from './envVariable'
 import { emailRouter } from './email'
 import { newsletterRouter } from './newsletter'
+import { roleRouter } from './role'
+import { auditRouter } from './audit'
 
 export const appRouter = router({
   product: productRouter,
@@ -37,6 +39,8 @@ export const appRouter = router({
   envVariable: envVariableRouter,
   email: emailRouter,
   newsletter: newsletterRouter,
+  role: roleRouter,
+  audit: auditRouter,
 })
 
 export type AppRouter = typeof appRouter

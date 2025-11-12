@@ -61,10 +61,14 @@ export const shippingRouter = router({
       })
 
       if (!shippingZone) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
+        // Return null instead of throwing error
+        // This allows the frontend to handle gracefully
+        return {
+          available: false,
           message: 'Aucune zone de livraison disponible pour ce pays',
-        })
+          shippingZone: null,
+          rate: null,
+        }
       }
 
       // Find applicable rate based on order amount
@@ -76,13 +80,20 @@ export const shippingRouter = router({
       })
 
       if (!applicableRate) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
+        return {
+          available: false,
           message: 'Aucun tarif de livraison disponible',
-        })
+          shippingZone: {
+            id: shippingZone.id,
+            name: shippingZone.name,
+          },
+          rate: null,
+        }
       }
 
       return {
+        available: true,
+        message: null,
         shippingZone: {
           id: shippingZone.id,
           name: shippingZone.name,

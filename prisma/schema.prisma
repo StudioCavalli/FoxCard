@@ -41,6 +41,9 @@ model Store {
   emailLogs   EmailLog[]
   newsletterSubscribers NewsletterSubscriber[]
   invoices    Invoice[]
+  roles       Role[]
+  storeUsers  StoreUser[]
+  auditLogs   AuditLog[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -60,6 +63,8 @@ model User {
   stores        Store[]
   accounts      Account[]
   sessions      Session[]
+  storeUsers    StoreUser[]
+  auditLogs     AuditLog[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -684,4 +689,105 @@ model Invoice {
 
   @@index([storeId])
   @@index([invoiceDate])
+}
+
+// RBAC System (Role-Based Access Control)
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String   // Role name (e.g., "Manager", "Staff")
+  description String?
+
+  // Permissions (array of permission keys)
+  permissions String[] // e.g., ["products.create", "products.update", "orders.view"]
+
+  // System roles cannot be deleted or modified
+  isSystem    Boolean  @default(false)
+
+  // Users with this role
+  users       StoreUser[]
+
+  // Audit
+  auditLogs   AuditLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, name])
+  @@index([storeId])
+}
+
+// Association between User and Store with a Role
+model StoreUser {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  storeId   String   @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  roleId    String   @db.ObjectId
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  // Invitation tracking
+  invitedBy String?  @db.ObjectId
+  invitedAt DateTime @default(now())
+  acceptedAt DateTime?
+
+  // Status
+  status    StoreUserStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, storeId])
+  @@index([storeId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+enum StoreUserStatus {
+  PENDING   // Invitation sent, not yet accepted
+  ACTIVE    // Active user in the store
+  SUSPENDED // Temporarily suspended
+  REMOVED   // Removed from store
+}
+
+// Audit log for tracking administrative actions
+model AuditLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Who performed the action
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Action details
+  action      String   // e.g., "product.create", "order.update", "user.delete"
+  entity      String   // e.g., "Product", "Order", "User"
+  entityId    String?  // ID of the affected entity
+
+  // Role at the time of action
+  roleId      String?  @db.ObjectId
+  role        Role?    @relation(fields: [roleId], references: [id])
+
+  // Metadata
+  metadata    Json?    // Additional context (before/after values, etc.)
+  ipAddress   String?
+  userAgent   String?
+
+  // Result
+  success     Boolean  @default(true)
+  errorMessage String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

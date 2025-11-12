@@ -180,7 +180,7 @@ export default function CheckoutPage() {
     }
   )
 
-  const shipping = shippingCalculation?.rate.price || 0
+  const shipping = shippingCalculation?.rate?.price || 0
   const discount = appliedDiscount?.discountAmount || 0
   const total = Math.max(0, subtotal + shipping - discount)
 
@@ -548,7 +548,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-gray-600">
                   <div className="flex flex-col">
                     <span>Livraison</span>
-                    {shippingCalculation?.rate.estimatedDays && (
+                    {shippingCalculation?.rate?.estimatedDays && (
                       <span className="text-xs text-gray-500">
                         Délai: {shippingCalculation.rate.estimatedDays}
                       </span>
@@ -568,7 +568,7 @@ export default function CheckoutPage() {
                     <span>-{formatPrice(discount)}</span>
                   </div>
                 )}
-                {shippingCalculation?.rate.name && (
+                {shippingCalculation?.rate?.name && shippingCalculation?.shippingZone && (
                   <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
                     {shippingCalculation.rate.name} - {shippingCalculation.shippingZone.name}
                   </div>

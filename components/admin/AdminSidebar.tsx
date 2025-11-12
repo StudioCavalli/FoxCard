@@ -18,7 +18,10 @@ import {
   Key,
   Mail,
   FileText,
-  Send
+  Send,
+  Shield,
+  UserCog,
+  Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +34,9 @@ const navigation = [
   { name: 'Newsletter', href: '/admin/newsletter', icon: Send },
   { name: 'Paiements', href: '/admin/payments', icon: DollarSign },
   { name: 'Clients', href: '/admin/customers', icon: Users },
+  { name: 'Utilisateurs', href: '/admin/users', icon: UserCog },
+  { name: 'Rôles & Permissions', href: '/admin/roles', icon: Shield },
+  { name: 'Journal d\'audit', href: '/admin/audit', icon: Activity },
   { name: 'Categories', href: '/admin/categories', icon: FolderTree },
   { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
   { name: 'Livraison', href: '/admin/shipping', icon: Truck },
