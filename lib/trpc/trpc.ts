@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import superjson from 'superjson'
 import type { Session } from 'next-auth'
 import type { PrismaClient } from '@prisma/client'
+import { getUserPermissions } from '@/lib/rbac/seed'
 
 export type TRPCContext = {
   session: Session | null
@@ -53,3 +54,125 @@ export const adminProcedure = t.procedure.use(({ ctx, next }) => {
     },
   })
 })
+
+/**
+ * Permission-based middleware
+ * Usage:
+ * - requirePermission('products.create') - requires a single permission
+ * - requirePermissions(['products.create', 'products.update']) - requires ALL permissions
+ * - requireAnyPermission(['products.create', 'products.update']) - requires ANY permission
+ *
+ * The input must contain a storeId field for permission checking
+ */
+export const requirePermission = (permission: string) =>
+  protectedProcedure.use(async ({ ctx, next, input }) => {
+    const storeId = (input as any)?.storeId
+
+    if (!storeId) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'storeId is required for permission check',
+      })
+    }
+
+    // Get user's permissions for this store
+    const userPermissions = await getUserPermissions(
+      ctx.session.user.id,
+      storeId,
+      ctx.prisma
+    )
+
+    // Check if user has the required permission
+    if (!userPermissions.includes(permission)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `You do not have permission: ${permission}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        storeId,
+        permissions: userPermissions,
+      },
+    })
+  })
+
+export const requirePermissions = (permissions: string[]) =>
+  protectedProcedure.use(async ({ ctx, next, input }) => {
+    const storeId = (input as any)?.storeId
+
+    if (!storeId) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'storeId is required for permission check',
+      })
+    }
+
+    // Get user's permissions for this store
+    const userPermissions = await getUserPermissions(
+      ctx.session.user.id,
+      storeId,
+      ctx.prisma
+    )
+
+    // Check if user has ALL required permissions
+    const missingPermissions = permissions.filter(
+      permission => !userPermissions.includes(permission)
+    )
+
+    if (missingPermissions.length > 0) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Missing permissions: ${missingPermissions.join(', ')}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        storeId,
+        permissions: userPermissions,
+      },
+    })
+  })
+
+export const requireAnyPermission = (permissions: string[]) =>
+  protectedProcedure.use(async ({ ctx, next, input }) => {
+    const storeId = (input as any)?.storeId
+
+    if (!storeId) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'storeId is required for permission check',
+      })
+    }
+
+    // Get user's permissions for this store
+    const userPermissions = await getUserPermissions(
+      ctx.session.user.id,
+      storeId,
+      ctx.prisma
+    )
+
+    // Check if user has ANY of the required permissions
+    const hasPermission = permissions.some(permission =>
+      userPermissions.includes(permission)
+    )
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `You need at least one of these permissions: ${permissions.join(', ')}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        storeId,
+        permissions: userPermissions,
+      },
+    })
+  })
