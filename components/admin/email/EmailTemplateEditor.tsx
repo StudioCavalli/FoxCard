@@ -3,7 +3,6 @@
 import { useRef, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import type { EmailEditorProps } from 'react-email-editor'
-import type EmailEditor from 'react-email-editor'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Loader2, Eye, Save, Download } from 'lucide-react'
@@ -40,7 +39,7 @@ export const EmailTemplateEditor = ({
   onExport,
   readOnly = false,
 }: EmailTemplateEditorProps) => {
-  const emailEditorRef = useRef<EmailEditor>(null)
+  const emailEditorRef = useRef<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [previewHtml, setPreviewHtml] = useState('')
@@ -60,7 +59,7 @@ export const EmailTemplateEditor = ({
         return
       }
 
-      emailEditorRef.current.exportHtml((data) => {
+      emailEditorRef.current.exportHtml((data: any) => {
         const { design, html } = data
         resolve({ design, html })
       })
@@ -121,13 +120,13 @@ export const EmailTemplateEditor = ({
   // Configure Unlayer options
   const editorOptions: EmailEditorProps['options'] = {
     displayMode: readOnly ? 'email' : 'email',
-    mergeTags: mergeTagsConfig.length > 0 ? {
+    mergeTags: mergeTagsConfig.length > 0 ? ({
       order_confirmation: mergeTagsConfig.map(tag => ({
         name: tag.label,
         value: tag.value,
         sample: tag.sample || tag.value,
       })),
-    } : undefined,
+    } as any) : undefined,
     features: {
       preview: true,
       imageEditor: true,

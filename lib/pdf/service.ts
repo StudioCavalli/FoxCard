@@ -93,7 +93,7 @@ export class PDFService {
 
     // Generate PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoiceDocument, invoiceProps)
+      React.createElement(InvoiceDocument, invoiceProps) as any
     )
 
     // Update invoice record

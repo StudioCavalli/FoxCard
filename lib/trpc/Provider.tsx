@@ -16,16 +16,34 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
     },
   }))
 
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
+  const [trpcClient] = useState(() => {
+    // Determine the base URL
+    // In browser: use current origin
+    // In SSR: use NEXT_PUBLIC_APP_URL or fallback to localhost
+    const getBaseUrl = () => {
+      if (typeof window !== 'undefined') {
+        // Browser: use current origin
+        return window.location.origin
+      }
+
+      // SSR: use env variable or fallback
+      if (process.env.NEXT_PUBLIC_APP_URL) {
+        return process.env.NEXT_PUBLIC_APP_URL
+      }
+
+      // Development fallback
+      return 'http://localhost:3000'
+    }
+
+    return trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/api/trpc`,
+          url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
         }),
       ],
     })
-  )
+  })
 
   return (
     <SessionProvider>
