@@ -11,7 +11,7 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 
-interface BaseLayoutProps {
+export interface BaseLayoutProps {
   children: React.ReactNode
   storeName?: string
   storeLogo?: string
