@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { CheckCircle, Package, Mail, MapPin, Home, Loader2 } from 'lucide-react'
+import { CheckCircle, Package, Mail, MapPin, Home, Loader2, Download } from 'lucide-react'
 
 export default function OrderConfirmationPage({
   params,
@@ -353,6 +353,20 @@ export default function OrderConfirmationPage({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
+          {/* Download Invoice Button - Only show if payment is complete */}
+          {order.paymentStatus === 'PAID' && (
+            <a
+              href={`/api/invoices/${order.orderNumber}`}
+              download
+              className="flex-1"
+            >
+              <Button variant="outline" size="lg" className="w-full">
+                <Download className="w-5 h-5 mr-2" />
+                Télécharger la facture
+              </Button>
+            </a>
+          )}
+
           <Link href="/products" className="flex-1">
             <Button variant="primary" size="lg" className="w-full">
               <Home className="w-5 h-5 mr-2" />
