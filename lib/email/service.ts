@@ -30,9 +30,9 @@ export class EmailService {
       const trimmedKey = key.trim()
 
       // Handle nested properties (e.g., shippingAddress.city)
-      const value = trimmedKey.split('.').reduce((obj, prop) => {
+      const value = trimmedKey.split('.').reduce((obj: any, prop: string) => {
         return obj?.[prop]
-      }, props)
+      }, props as any)
 
       // Handle arrays (e.g., items) - convert to JSON for display
       if (Array.isArray(value)) {

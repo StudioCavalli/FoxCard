@@ -38,8 +38,8 @@ export async function GET(
       pdfBuffer = await pdfService.generateInvoice(order.id)
     }
 
-    // Return PDF
-    return new NextResponse(pdfBuffer, {
+    // Return PDF (convert Buffer to Uint8Array for Response compatibility)
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Facture-${orderNumber}.pdf"`,
