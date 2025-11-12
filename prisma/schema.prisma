@@ -517,6 +517,7 @@ model EmailTemplate {
   subject     String   // Email subject with variable support
   htmlBody    String   // HTML content with variable support
   textBody    String?  // Plain text fallback
+  designJson  Json?    // WYSIWYG editor design (Unlayer JSON)
 
   // Template metadata
   description String?

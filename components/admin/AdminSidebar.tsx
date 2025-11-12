@@ -16,7 +16,8 @@ import {
   Palette,
   DollarSign,
   Key,
-  Mail
+  Mail,
+  FileText
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Produits', href: '/admin/products', icon: Package },
   { name: 'Commandes', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
+  { name: 'Templates Email', href: '/admin/email-templates', icon: FileText },
   { name: 'Paiements', href: '/admin/payments', icon: DollarSign },
   { name: 'Clients', href: '/admin/customers', icon: Users },
   { name: 'Categories', href: '/admin/categories', icon: FolderTree },
