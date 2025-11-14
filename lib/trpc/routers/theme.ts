@@ -1,128 +1,664 @@
 import { z } from 'zod'
-import { router, adminProcedure } from '../trpc'
-import { themeManager } from '@/lib/themes/manager'
-import { defaultTheme } from '@/lib/themes/default'
+import { router, publicProcedure, adminProcedure, protectedProcedure } from '../trpc'
+import { PERMISSIONS } from '@/lib/rbac/roles'
+import { TRPCError } from '@trpc/server'
+import { seedSystemThemes, hasSystemThemes, seedThemePresets, hasThemePresets } from '@/lib/themes/seed'
+import { checkPermission } from '../permissions'
 
 export const themeRouter = router({
-  // Get all available themes
-  getAll: adminProcedure.query(() => {
-    return themeManager.getAllThemes()
-  }),
-
-  // Get current theme for a store
-  getCurrent: adminProcedure
+  // Get all themes for a store
+  getAll: protectedProcedure
     .input(
       z.object({
         storeId: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const store = await ctx.prisma.store.findUnique({
-        where: { id: input.storeId },
-        select: { theme: true },
-      })
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_VIEW)
 
-      if (!store?.theme) {
-        return defaultTheme
-      }
-
-      const themeSettings = store.theme as any
-      const baseTheme = themeManager.getTheme(themeSettings.themeId || 'default')
-
-      if (!baseTheme) {
-        return defaultTheme
-      }
-
-      return themeManager.applyCustomizations(baseTheme, themeSettings)
-    }),
-
-  // Update theme settings for a store
-  update: adminProcedure
-    .input(
-      z.object({
-        storeId: z.string(),
-        themeId: z.string(),
-        customColors: z
-          .object({
-            primary: z.string().optional(),
-            secondary: z.string().optional(),
-            accent: z.string().optional(),
-            background: z.string().optional(),
-            foreground: z.string().optional(),
-            muted: z.string().optional(),
-            border: z.string().optional(),
-            input: z.string().optional(),
-            ring: z.string().optional(),
-            success: z.string().optional(),
-            warning: z.string().optional(),
-            error: z.string().optional(),
-          })
-          .optional(),
-        customTypography: z
-          .object({
-            fontFamily: z.string().optional(),
-            headingFont: z.string().optional(),
-          })
-          .optional(),
-        customCSS: z.string().optional(),
-        darkMode: z.enum(['auto', 'light', 'dark']).optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { storeId, ...themeSettings } = input
-
-      const store = await ctx.prisma.store.update({
-        where: { id: storeId },
-        data: {
-          theme: themeSettings as any,
+      return ctx.prisma.theme.findMany({
+        where: {
+          storeId: input.storeId,
+        },
+        include: {
+          components: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+          sourcePreset: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
         },
       })
-
-      return store
     }),
 
-  // Reset theme to default
-  reset: adminProcedure
+  // Get active theme for a store
+  getActive: publicProcedure
     .input(
       z.object({
         storeId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const store = await ctx.prisma.store.update({
-        where: { id: input.storeId },
-        data: {
-          theme: {
-            themeId: 'default',
-            darkMode: 'auto',
-          } as any,
+    .query(async ({ ctx, input }) => {
+      const activeTheme = await ctx.prisma.theme.findFirst({
+        where: {
+          storeId: input.storeId,
+          isActive: true,
+        },
+        include: {
+          components: {
+            where: {
+              isEnabled: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+          },
         },
       })
 
-      return store
+      return activeTheme
     }),
 
-  // Preview theme with custom settings
-  preview: adminProcedure
+  // Get a theme by ID
+  getById: protectedProcedure
     .input(
       z.object({
-        themeId: z.string(),
-        customColors: z.record(z.string(), z.string()).optional(),
+        storeId: z.string(),
+        id: z.string(),
       })
     )
-    .query(({ input }) => {
-      const theme = themeManager.getTheme(input.themeId)
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_VIEW)
 
-      if (!theme) {
-        return null
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.id },
+        include: {
+          components: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
       }
 
-      const settings = {
-        themeId: input.themeId,
-        customColors: input.customColors,
-        darkMode: 'light' as const,
-      }
-
-      return themeManager.applyCustomizations(theme, settings)
+      return theme
     }),
+
+  // Create a new theme
+  create: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        name: z.string().min(1),
+        description: z.string().optional(),
+        config: z.object({
+          colors: z.object({
+            primary: z.string().default('#3B82F6'),
+            secondary: z.string().default('#10B981'),
+            accent: z.string().default('#F59E0B'),
+            background: z.string().default('#FFFFFF'),
+            text: z.string().default('#111827'),
+            textSecondary: z.string().default('#6B7280'),
+          }),
+          fonts: z.object({
+            heading: z.string().default('Inter'),
+            body: z.string().default('Inter'),
+          }),
+          spacing: z.object({
+            containerMaxWidth: z.string().default('1280px'),
+            sectionPadding: z.string().default('4rem'),
+          }),
+          borderRadius: z.string().default('0.5rem'),
+        }),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_CREATE)
+
+      const { storeId, ...data } = input
+
+      return ctx.prisma.theme.create({
+        data: {
+          ...data,
+          storeId,
+        },
+        include: {
+          components: true,
+        },
+      })
+    }),
+
+  // Update a theme
+  update: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        config: z
+          .object({
+            colors: z
+              .object({
+                primary: z.string(),
+                secondary: z.string(),
+                accent: z.string(),
+                background: z.string(),
+                text: z.string(),
+                textSecondary: z.string(),
+              })
+              .optional(),
+            fonts: z
+              .object({
+                heading: z.string(),
+                body: z.string(),
+              })
+              .optional(),
+            spacing: z
+              .object({
+                containerMaxWidth: z.string(),
+                sectionPadding: z.string(),
+              })
+              .optional(),
+            borderRadius: z.string().optional(),
+          })
+          .optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const { storeId, id, ...data } = input
+
+      // Verify theme belongs to store
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id },
+      })
+
+      if (!theme || theme.storeId !== storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      return ctx.prisma.theme.update({
+        where: { id },
+        data,
+        include: {
+          components: true,
+        },
+      })
+    }),
+
+  // Delete a theme
+  delete: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_DELETE)
+
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      if (theme.isActive) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Cannot delete active theme',
+        })
+      }
+
+      if (theme.isSystem) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Cannot delete system theme',
+        })
+      }
+
+      return ctx.prisma.theme.delete({
+        where: { id: input.id },
+      })
+    }),
+
+  // Activate a theme
+  activate: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_ACTIVATE)
+
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      // Deactivate all other themes for this store
+      await ctx.prisma.theme.updateMany({
+        where: {
+          storeId: input.storeId,
+          isActive: true,
+        },
+        data: {
+          isActive: false,
+        },
+      })
+
+      // Activate the selected theme
+      return ctx.prisma.theme.update({
+        where: { id: input.id },
+        data: {
+          isActive: true,
+        },
+        include: {
+          components: true,
+        },
+      })
+    }),
+
+  // Duplicate a theme
+  duplicate: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+        name: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_CREATE)
+
+      const originalTheme = await ctx.prisma.theme.findUnique({
+        where: { id: input.id },
+        include: {
+          components: true,
+        },
+      })
+
+      if (!originalTheme || originalTheme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      const newTheme = await ctx.prisma.theme.create({
+        data: {
+          storeId: input.storeId,
+          name: input.name || `${originalTheme.name} (copie)`,
+          description: originalTheme.description,
+          config: originalTheme.config as any,
+          version: originalTheme.version,
+          components: {
+            create: originalTheme.components.map((component) => ({
+              name: component.name,
+              type: component.type,
+              html: component.html,
+              css: component.css,
+              designJson: component.designJson as any,
+              props: component.props as any,
+              order: component.order,
+              isEnabled: component.isEnabled,
+            })),
+          },
+        },
+        include: {
+          components: true,
+        },
+      })
+
+      return newTheme
+    }),
+
+  // Component operations
+  createComponent: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+        name: z.string().min(1),
+        type: z.string(),
+        html: z.string().optional(),
+        css: z.string().optional(),
+        designJson: z.any().optional(),
+        props: z.any().optional(),
+        order: z.number().default(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const { storeId, themeId, ...componentData } = input
+
+      // Verify theme belongs to store
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: themeId },
+      })
+
+      if (!theme || theme.storeId !== storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      return ctx.prisma.themeComponent.create({
+        data: {
+          ...componentData,
+          themeId,
+        },
+      })
+    }),
+
+  updateComponent: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+        name: z.string().optional(),
+        type: z.string().optional(),
+        html: z.string().optional(),
+        css: z.string().optional(),
+        designJson: z.any().optional(),
+        props: z.any().optional(),
+        order: z.number().optional(),
+        isEnabled: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const { storeId, id, ...data } = input
+
+      // Verify component's theme belongs to store
+      const component = await ctx.prisma.themeComponent.findUnique({
+        where: { id },
+        include: { theme: true },
+      })
+
+      if (!component || component.theme.storeId !== storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Component not found',
+        })
+      }
+
+      return ctx.prisma.themeComponent.update({
+        where: { id },
+        data,
+      })
+    }),
+
+  deleteComponent: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const component = await ctx.prisma.themeComponent.findUnique({
+        where: { id: input.id },
+        include: { theme: true },
+      })
+
+      if (!component || component.theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Component not found',
+        })
+      }
+
+      return ctx.prisma.themeComponent.delete({
+        where: { id: input.id },
+      })
+    }),
+
+  // Seed system themes for a store
+  seedSystemThemes: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check permissions
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_CREATE)
+
+      // Check if system themes already exist
+      const hasThemes = await hasSystemThemes(input.storeId, ctx.prisma)
+
+      if (hasThemes) {
+        return {
+          success: true,
+          message: 'Les thèmes système existent déjà',
+          themes: await ctx.prisma.theme.findMany({
+            where: {
+              storeId: input.storeId,
+              isSystem: true,
+            },
+            include: {
+              components: true,
+            },
+          }),
+        }
+      }
+
+      // Seed the themes
+      const themes = await seedSystemThemes(input.storeId, ctx.prisma)
+
+      return {
+        success: true,
+        message: `${themes.length} thèmes système créés avec succès`,
+        themes,
+      }
+    }),
+
+  // ============================================
+  // MARKETPLACE ENDPOINTS
+  // ============================================
+
+  // Get all public theme presets
+  getPresets: publicProcedure
+    .input(
+      z
+        .object({
+          tags: z.array(z.string()).optional(),
+          search: z.string().optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {
+        isPublic: true,
+      }
+
+      if (input?.tags && input.tags.length > 0) {
+        where.tags = {
+          hasSome: input.tags,
+        }
+      }
+
+      if (input?.search) {
+        where.OR = [
+          { name: { contains: input.search, mode: 'insensitive' } },
+          { description: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      return ctx.prisma.themePreset.findMany({
+        where,
+        orderBy: [{ installCount: 'desc' }, { rating: 'desc' }],
+      })
+    }),
+
+  // Get a theme preset by ID or slug
+  getPresetById: publicProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        slug: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      if (!input.id && !input.slug) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Either id or slug must be provided',
+        })
+      }
+
+      const preset = await ctx.prisma.themePreset.findUnique({
+        where: input.id ? { id: input.id } : { slug: input.slug },
+      })
+
+      if (!preset) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme preset not found',
+        })
+      }
+
+      return preset
+    }),
+
+  // Install a theme from a preset
+  installFromPreset: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        presetId: z.string(),
+        customName: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_CREATE)
+
+      const preset = await ctx.prisma.themePreset.findUnique({
+        where: { id: input.presetId },
+      })
+
+      if (!preset) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme preset not found',
+        })
+      }
+
+      // Check if already installed
+      const existingTheme = await ctx.prisma.theme.findFirst({
+        where: {
+          storeId: input.storeId,
+          sourcePresetId: input.presetId,
+        },
+      })
+
+      if (existingTheme) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Ce thème est déjà installé',
+        })
+      }
+
+      // Create theme from preset
+      const components = preset.components as any
+
+      const theme = await ctx.prisma.theme.create({
+        data: {
+          storeId: input.storeId,
+          name: input.customName || preset.name,
+          description: preset.description,
+          config: preset.config as any,
+          version: preset.version,
+          sourcePresetId: preset.id,
+          components: {
+            create: components.map((comp: any) => ({
+              name: comp.name,
+              type: comp.type,
+              html: comp.html,
+              css: comp.css,
+              props: comp.props as any,
+              order: comp.order,
+              isEnabled: comp.isEnabled,
+            })),
+          },
+        },
+        include: {
+          components: true,
+        },
+      })
+
+      // Increment install count
+      await ctx.prisma.themePreset.update({
+        where: { id: preset.id },
+        data: {
+          installCount: {
+            increment: 1,
+          },
+        },
+      })
+
+      return theme
+    }),
+
+  // Seed theme presets for marketplace (admin only)
+  seedPresets: adminProcedure.mutation(async ({ ctx }) => {
+    const hasPresets = await hasThemePresets(ctx.prisma)
+
+    if (hasPresets) {
+      return {
+        success: true,
+        message: 'Les presets existent déjà',
+        presets: await ctx.prisma.themePreset.findMany({
+          where: { isPublic: true },
+        }),
+      }
+    }
+
+    const presets = await seedThemePresets(ctx.prisma)
+
+    return {
+      success: true,
+      message: `${presets.length} presets créés avec succès`,
+      presets,
+    }
+  }),
 })

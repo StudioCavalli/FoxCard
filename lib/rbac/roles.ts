@@ -95,6 +95,13 @@ export const PERMISSIONS = {
 
   // Audit Logs
   AUDIT_VIEW: 'audit.view',
+
+  // Themes
+  THEMES_VIEW: 'themes.view',
+  THEMES_CREATE: 'themes.create',
+  THEMES_UPDATE: 'themes.update',
+  THEMES_DELETE: 'themes.delete',
+  THEMES_ACTIVATE: 'themes.activate',
 } as const
 
 // All permissions as array for easy iteration
@@ -194,6 +201,13 @@ export const SYSTEM_ROLES: Record<string, RoleDefinition> = {
 
       // Audit
       PERMISSIONS.AUDIT_VIEW,
+
+      // Themes
+      PERMISSIONS.THEMES_VIEW,
+      PERMISSIONS.THEMES_CREATE,
+      PERMISSIONS.THEMES_UPDATE,
+      PERMISSIONS.THEMES_DELETE,
+      PERMISSIONS.THEMES_ACTIVATE,
     ],
     isSystem: true,
   },
@@ -363,6 +377,11 @@ export const PERMISSION_GROUPS = {
     PERMISSIONS.ENV_VIEW,
     PERMISSIONS.ENV_UPDATE,
     PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.THEMES_VIEW,
+    PERMISSIONS.THEMES_CREATE,
+    PERMISSIONS.THEMES_UPDATE,
+    PERMISSIONS.THEMES_DELETE,
+    PERMISSIONS.THEMES_ACTIVATE,
   ],
 } as const
 
@@ -453,4 +472,11 @@ export const PERMISSION_LABELS: Record<string, string> = {
 
   // Audit
   'audit.view': 'Voir les logs d\'audit',
+
+  // Themes
+  'themes.view': 'Voir les thèmes',
+  'themes.create': 'Créer des thèmes',
+  'themes.update': 'Modifier les thèmes',
+  'themes.delete': 'Supprimer des thèmes',
+  'themes.activate': 'Activer un thème',
 }

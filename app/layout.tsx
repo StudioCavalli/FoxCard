@@ -4,6 +4,7 @@ import './globals.css'
 import { TRPCProvider } from '@/lib/trpc/Provider'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { CartDrawerWrapper } from '@/components/cart/CartDrawerWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -78,12 +79,14 @@ export default function RootLayout({
     <html lang="fr">
       <body className={inter.className}>
         <TRPCProvider>
-          <Header />
-          <main className="min-h-screen bg-gray-50">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawerWrapper />
+          <ThemeProvider>
+            <Header />
+            <main className="min-h-screen bg-theme-background">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawerWrapper />
+          </ThemeProvider>
         </TRPCProvider>
       </body>
     </html>

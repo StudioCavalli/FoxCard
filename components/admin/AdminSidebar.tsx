@@ -21,7 +21,8 @@ import {
   Send,
   Shield,
   UserCog,
-  Activity
+  Activity,
+  ShoppingBag
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -41,7 +42,8 @@ const navigation = [
   { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
   { name: 'Livraison', href: '/admin/shipping', icon: Truck },
   { name: 'Boutique', href: '/admin/store', icon: Store },
-  { name: 'Thème', href: '/admin/theme', icon: Palette },
+  { name: 'Thèmes', href: '/admin/themes', icon: Palette },
+  { name: 'Marketplace', href: '/admin/marketplace', icon: ShoppingBag },
   { name: 'Variables ENV', href: '/admin/env-variables', icon: Key },
   { name: 'Parametres', href: '/admin/settings', icon: Settings },
 ]

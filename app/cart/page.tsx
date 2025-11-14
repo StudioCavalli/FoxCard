@@ -20,209 +20,242 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto text-center">
-          <Card variant="default" className="p-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ShoppingBag className="w-12 h-12 text-gray-400" />
+      <div style={{ fontFamily: 'var(--theme-font-body)' }}>
+        <div className="mx-auto px-6 lg:px-8 py-16" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="p-12 bg-theme-surface border border-theme-border rounded-2xl">
+              <div className="w-24 h-24 bg-theme-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <ShoppingBag className="w-12 h-12 text-theme-primary" />
+              </div>
+              <h1
+                className="text-3xl md:text-4xl font-bold text-theme-text mb-4"
+                style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+              >
+                Votre panier est vide
+              </h1>
+              <p className="text-theme-text-secondary mb-8 text-lg">
+                Découvrez nos produits et ajoutez-les à votre panier pour continuer vos achats.
+              </p>
+              <Link href="/products">
+                <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 inline-flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+                  Découvrir nos produits
+                </button>
+              </Link>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Votre panier est vide</h1>
-            <p className="text-gray-600 mb-8">
-              Découvrez nos produits et ajoutez-les à votre panier pour continuer vos achats.
-            </p>
-            <Link href="/products">
-              <Button variant="primary" size="lg">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Découvrir nos produits
-              </Button>
-            </Link>
-          </Card>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Panier</h1>
-        <p className="text-gray-600">{getTotalItems()} article{getTotalItems() > 1 ? 's' : ''} dans votre panier</p>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <Card key={item.productId} variant="default" className="p-6">
-              <div className="flex gap-6">
-                {/* Product Image */}
-                <Link href={`/products/${item.slug}`} className="flex-shrink-0">
-                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-primary-500 transition-colors">
-                    <Image
-                      src={item.image || '/placeholder-product.png'}
-                      alt={item.name}
-                      fill
-                      className="object-contain p-2"
-                      sizes="96px"
-                    />
-                  </div>
-                </Link>
-
-                {/* Product Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/products/${item.slug}`}
-                        className="font-semibold text-gray-900 hover:text-primary-600 transition-colors line-clamp-2"
-                      >
-                        {item.name}
-                      </Link>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {formatPrice(item.price)} × {item.quantity}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.productId)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      aria-label="Retirer du panier"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    {/* Quantity Controls */}
-                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
-                        className="p-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        disabled={item.quantity <= 1}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="px-4 py-2 font-semibold min-w-[60px] text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.productId, item.maxQuantity ? Math.min(item.maxQuantity, item.quantity + 1) : item.quantity + 1)}
-                        className="p-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        disabled={item.maxQuantity !== undefined && item.quantity >= item.maxQuantity}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Item Total */}
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-gray-900">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                      {item.maxQuantity !== undefined && item.maxQuantity < 10 && (
-                        <p className="text-xs text-yellow-600 mt-1">
-                          Plus que {item.maxQuantity} en stock
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-
-          {/* Clear Cart Button */}
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
-                  clearCart()
-                }
-              }}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Vider le panier
-            </Button>
-          </div>
+    <div style={{ fontFamily: 'var(--theme-font-body)' }}>
+      <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
+        {/* Header */}
+        <div className="mb-10">
+          <h1
+            className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
+            style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+          >
+            Panier
+          </h1>
+          <p className="text-xl text-theme-text-secondary">
+            {getTotalItems()} article{getTotalItems() > 1 ? 's' : ''} dans votre panier
+          </p>
         </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <Card variant="teal" className="p-6 sticky top-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Résumé</h2>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-4">
+            {items.map((item) => (
+              <div key={item.productId} className="group p-6 bg-theme-surface border border-theme-border rounded-2xl hover:shadow-xl hover:shadow-theme-primary/10 transition-all duration-300">
+                <div className="flex gap-6">
+                  {/* Product Image */}
+                  <Link href={`/products/${item.slug}`} className="flex-shrink-0">
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-theme-background border border-theme-border hover:border-theme-primary transition-all duration-200">
+                      <Image
+                        src={item.image || '/placeholder-product.png'}
+                        alt={item.name}
+                        fill
+                        className="object-contain p-2"
+                        sizes="96px"
+                      />
+                    </div>
+                  </Link>
 
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between text-gray-600">
-                <span>Sous-total</span>
-                <span className="font-semibold">{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex items-center justify-between text-gray-600">
-                <span>Livraison</span>
-                <span className="font-semibold">
-                  {shipping === 0 ? (
-                    <span className="text-green-600">Gratuite</span>
-                  ) : (
-                    formatPrice(shipping)
-                  )}
-                </span>
-              </div>
-              {subtotal > 0 && subtotal < 50 && (
-                <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-                  Plus que {formatPrice(50 - subtotal)} pour la livraison gratuite !
+                  {/* Product Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/products/${item.slug}`}
+                          className="font-semibold text-theme-text hover:text-theme-primary transition-colors line-clamp-2 text-lg"
+                          style={{ fontFamily: 'var(--theme-font-heading)' }}
+                        >
+                          {item.name}
+                        </Link>
+                        <p className="text-sm text-theme-text-secondary mt-1.5">
+                          {formatPrice(item.price)} × {item.quantity}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeItem(item.productId)}
+                        className="p-2 text-theme-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        aria-label="Retirer du panier"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      {/* Quantity Controls */}
+                      <div className="flex items-center bg-theme-background border border-theme-border rounded-xl overflow-hidden">
+                        <button
+                          onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
+                          className="p-2.5 text-theme-text hover:bg-theme-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="px-4 py-2 font-semibold min-w-[60px] text-center text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.productId, item.maxQuantity ? Math.min(item.maxQuantity, item.quantity + 1) : item.quantity + 1)}
+                          className="p-2.5 text-theme-text hover:bg-theme-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={item.maxQuantity !== undefined && item.quantity >= item.maxQuantity}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Item Total */}
+                      <div className="text-right">
+                        <p
+                          className="text-xl font-bold text-theme-text"
+                          style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                        >
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
+                        {item.maxQuantity !== undefined && item.maxQuantity < 10 && (
+                          <p className="text-xs text-yellow-600 mt-1 font-medium">
+                            Plus que {item.maxQuantity} en stock
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div className="border-t border-gray-200 pt-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {formatPrice(total)}
+              </div>
+            ))}
+
+            {/* Clear Cart Button */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+                    clearCart()
+                  }
+                }}
+                className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg font-medium transition-all duration-200 inline-flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Vider le panier
+              </button>
+            </div>
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl sticky top-24">
+              <h2
+                className="text-2xl font-bold text-theme-text mb-6"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
+                Résumé
+              </h2>
+
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between text-theme-text-secondary">
+                  <span>Sous-total</span>
+                  <span className="font-semibold text-theme-text">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-theme-text-secondary">
+                  <span>Livraison</span>
+                  <span className="font-semibold">
+                    {shipping === 0 ? (
+                      <span className="text-green-600">Gratuite</span>
+                    ) : (
+                      <span className="text-theme-text">{formatPrice(shipping)}</span>
+                    )}
                   </span>
                 </div>
+                {subtotal > 0 && subtotal < 50 && (
+                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-600 font-medium">
+                    Plus que {formatPrice(50 - subtotal)} pour la livraison gratuite !
+                  </div>
+                )}
+                <div className="border-t border-theme-border pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                      Total
+                    </span>
+                    <span
+                      className="text-3xl font-bold text-theme-text"
+                      style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                    >
+                      {formatPrice(total)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => router.push('/checkout')}
+                className="w-full px-6 py-4 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 mb-3"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
+                Passer la commande
+                <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+
+              <Link href="/products">
+                <button className="w-full px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+                  <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+                  Continuer mes achats
+                </button>
+              </Link>
+
+              {/* Trust Badges */}
+              <div className="mt-6 pt-6 border-t border-theme-border space-y-3">
+                <div className="flex items-center gap-3 text-theme-text-secondary">
+                  <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Paiement 100% sécurisé</span>
+                </div>
+                <div className="flex items-center gap-3 text-theme-text-secondary">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Retours sous 30 jours</span>
+                </div>
+                <div className="flex items-center gap-3 text-theme-text-secondary">
+                  <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Livraison rapide</span>
+                </div>
               </div>
             </div>
-
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full mb-4"
-              onClick={() => router.push('/checkout')}
-            >
-              Passer la commande
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-
-            <Link href="/products">
-              <Button variant="outline" size="lg" className="w-full">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Continuer mes achats
-              </Button>
-            </Link>
-
-            {/* Trust Badges */}
-            <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Paiement 100% sécurisé</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span>Retours sous 30 jours</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span>Livraison rapide</span>
-              </div>
-            </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

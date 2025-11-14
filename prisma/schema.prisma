@@ -44,6 +44,7 @@ model Store {
   roles       Role[]
   storeUsers  StoreUser[]
   auditLogs   AuditLog[]
+  themes      Theme[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -790,4 +791,103 @@ model AuditLog {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+// Theme System
+model Theme {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  version     String   @default("1.0.0")
+
+  // Theme configuration (colors, fonts, spacing, etc.)
+  config      Json     // { colors: {...}, fonts: {...}, spacing: {...} }
+
+  // Status
+  isActive    Boolean  @default(false)
+  isSystem    Boolean  @default(false) // System themes (Minimal, Luxe, Tech)
+
+  // Components
+  components  ThemeComponent[]
+
+  // Source (if installed from marketplace)
+  sourcePresetId String?  @db.ObjectId
+  sourcePreset   ThemePreset? @relation(fields: [sourcePresetId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([isActive])
+  @@index([sourcePresetId])
+}
+
+model ThemeComponent {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  themeId     String   @db.ObjectId
+  theme       Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  // Component details
+  name        String   // e.g., "Header", "Footer", "Product Card"
+  type        String   // Component type (header, footer, hero, product-grid, etc.)
+
+  // Visual editor data (GrapesJS or similar)
+  html        String?  // Generated HTML
+  css         String?  // Generated CSS
+  designJson  Json?    // Editor's JSON structure
+
+  // Configuration
+  props       Json?    // Component-specific props
+
+  // Order
+  order       Int      @default(0)
+  isEnabled   Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([themeId])
+  @@index([type])
+}
+
+model ThemePreset {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String   @unique
+  slug        String   @unique
+  description String?
+
+  // Preview
+  thumbnail   String?
+  screenshots String[] // Array of screenshot URLs
+
+  // Theme data (base template)
+  config      Json     // Default colors, fonts, etc.
+  components  Json     // Default components
+
+  // Metadata
+  author      String?
+  version     String   @default("1.0.0")
+  tags        String[] // ["minimal", "modern", "ecommerce"]
+
+  // Marketplace
+  isPublic    Boolean  @default(false)
+  isPremium   Boolean  @default(false)
+  price       Float?
+
+  // Stats
+  installCount Int     @default(0)
+  rating      Float?
+  reviewCount Int      @default(0)
+
+  // Installations
+  installations Theme[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublic])
 }
