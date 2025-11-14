@@ -68,10 +68,13 @@ export const requirePermission = (permission: string) =>
   protectedProcedure.use(async ({ ctx, next, input }) => {
     const storeId = (input as any)?.storeId
 
+    console.log('requirePermission middleware - input:', input)
+    console.log('requirePermission middleware - storeId:', storeId)
+
     if (!storeId) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'storeId is required for permission check',
+        message: `storeId is required for permission check. Received input: ${JSON.stringify(input)}`,
       })
     }
 
@@ -82,11 +85,13 @@ export const requirePermission = (permission: string) =>
       ctx.prisma
     )
 
+    console.log('User permissions for storeId', storeId, ':', userPermissions)
+
     // Check if user has the required permission
     if (!userPermissions.includes(permission)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
-        message: `You do not have permission: ${permission}`,
+        message: `You do not have permission: ${permission}. Your permissions: ${userPermissions.join(', ')}`,
       })
     }
 

@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
-import { Mail, Lock, User, ArrowLeft } from 'lucide-react'
+import { Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -60,31 +58,48 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 via-white to-primary-50 flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-theme-background via-theme-surface/30 to-theme-background flex items-center justify-center px-4 py-16" style={{ fontFamily: 'var(--theme-font-body)' }}>
+      {/* Background Effects */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-theme-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-theme-accent/10 rounded-full blur-3xl" />
+
+      <div className="relative w-full max-w-md">
         {/* Back Button */}
         <Link
           href="/"
-          className="inline-flex items-center text-gray-600 hover:text-primary-600 mb-6 transition-colors"
+          className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-6 transition-colors duration-200"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
           Retour à l'accueil
         </Link>
 
-        <Card className="p-8">
+        <div className="p-8 bg-theme-surface/80 backdrop-blur-xl border border-theme-border rounded-2xl shadow-2xl shadow-theme-primary/10">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-secondary-500 to-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <User className="w-8 h-8 text-white" />
+            <div className="relative inline-block mb-4">
+              <div className="absolute inset-0 bg-gradient-to-br from-theme-primary to-theme-accent rounded-2xl blur-xl opacity-30" />
+              <div className="relative w-16 h-16 bg-gradient-to-br from-theme-primary to-theme-accent rounded-2xl flex items-center justify-center">
+                <User className="w-8 h-8 text-theme-background" />
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Créer un compte</h1>
-            <p className="text-gray-600">Rejoignez FoxCard gratuitement</p>
+            <h1
+              className="text-3xl md:text-4xl font-bold text-theme-text mb-2"
+              style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+            >
+              Créer un compte
+            </h1>
+            <p className="text-theme-text-secondary text-lg">Rejoignez FoxCard gratuitement</p>
           </div>
 
           {/* Success Message */}
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-              <p className="text-sm text-green-600">
+            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-start gap-3">
+              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-sm text-green-600 font-medium">
                 Compte créé avec succès ! Redirection vers la page de connexion...
               </p>
             </div>
@@ -92,87 +107,100 @@ export default function RegisterPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-600 font-medium">{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-semibold text-theme-text mb-2"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
                 Nom complet
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="w-5 h-5 text-theme-text-muted" />
                 </div>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
                   placeholder="Jean Dupont"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-semibold text-theme-text mb-2"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
                 Email
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="w-5 h-5 text-theme-text-muted" />
                 </div>
                 <input
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
                   placeholder="votre@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-semibold text-theme-text mb-2"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
                 Mot de passe
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="w-5 h-5 text-theme-text-muted" />
                 </div>
                 <input
                   type="password"
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
                   placeholder="••••••••"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-theme-text-muted mt-1.5">
                 Minimum 6 caractères
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-semibold text-theme-text mb-2"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
                 Confirmer le mot de passe
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="w-5 h-5 text-theme-text-muted" />
                 </div>
                 <input
                   type="password"
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -182,49 +210,67 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 required
-                className="rounded text-primary-600 mt-1 mr-2"
+                className="w-4 h-4 rounded border-theme-border text-theme-primary focus:ring-theme-primary/20 cursor-pointer mt-1 mr-3"
               />
-              <label className="text-sm text-gray-600">
+              <label className="text-sm text-theme-text-secondary">
                 J'accepte les{' '}
-                <Link href="/terms" className="text-primary-600 hover:text-primary-700">
+                <Link href="/terms" className="text-theme-primary hover:text-theme-primary/80 font-medium transition-colors">
                   conditions d'utilisation
                 </Link>{' '}
                 et la{' '}
-                <Link href="/privacy" className="text-primary-600 hover:text-primary-700">
+                <Link href="/privacy" className="text-theme-primary hover:text-theme-primary/80 font-medium transition-colors">
                   politique de confidentialité
                 </Link>
               </label>
             </div>
 
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              isLoading={registerMutation.isPending}
-              disabled={success}
+              disabled={registerMutation.isPending || success}
+              className="w-full px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 disabled:bg-theme-primary/50 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Créer mon compte
-            </Button>
+              {registerMutation.isPending ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Création en cours...
+                </>
+              ) : success ? (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Compte créé !
+                </>
+              ) : (
+                'Créer mon compte'
+              )}
+            </button>
           </form>
 
           {/* Divider */}
           <div className="my-6 flex items-center">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-sm text-gray-500">ou</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+            <div className="flex-1 border-t border-theme-border"></div>
+            <span className="px-4 text-sm text-theme-text-muted">ou</span>
+            <div className="flex-1 border-t border-theme-border"></div>
           </div>
 
           {/* Login Link */}
           <div className="text-center">
-            <p className="text-gray-600">
+            <p className="text-theme-text-secondary">
               Vous avez déjà un compte ?{' '}
-              <Link href="/auth/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link
+                href="/auth/login"
+                className="text-theme-primary hover:text-theme-primary/80 font-semibold transition-colors"
+              >
                 Se connecter
               </Link>
             </p>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )

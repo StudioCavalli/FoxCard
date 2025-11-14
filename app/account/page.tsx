@@ -4,12 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
-import { User, Package, Settings, LogOut, ShoppingBag, Clock, MapPin, Mail, Phone } from 'lucide-react'
+import { User, Package, Settings, LogOut, ShoppingBag, Clock, MapPin, Mail, Phone, AlertCircle } from 'lucide-react'
 
 export default function AccountPage() {
   const { data: session, status } = useSession()
@@ -133,10 +130,12 @@ export default function AccountPage() {
   // Redirect if not authenticated
   if (status === 'loading') {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Chargement...</p>
+      <div style={{ fontFamily: 'var(--theme-font-body)' }}>
+        <div className="mx-auto px-6 lg:px-8 py-16" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-theme-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-theme-text-secondary text-lg">Chargement...</p>
+          </div>
         </div>
       </div>
     )
@@ -154,315 +153,451 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Mon Compte</h1>
-        <p className="text-gray-600">Gérez vos informations et commandes</p>
-      </div>
+    <div style={{ fontFamily: 'var(--theme-font-body)' }}>
+      <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
+        {/* Header */}
+        <div className="mb-10">
+          <h1
+            className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
+            style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+          >
+            Mon Compte
+          </h1>
+          <p className="text-xl text-theme-text-secondary">
+            Gérez vos informations et commandes
+          </p>
+        </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <aside className="lg:col-span-1">
-          <Card className="p-6">
-            {/* User Info */}
-            <div className="text-center mb-6 pb-6 border-b border-gray-200">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                <User className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="font-bold text-gray-900">{userProfile?.name || session?.user?.name || 'Utilisateur'}</h3>
-              <p className="text-sm text-gray-600">{userProfile?.email || session?.user?.email}</p>
-            </div>
-
-            {/* Navigation */}
-            <nav className="space-y-2">
-              <button
-                onClick={() => setActiveTab('orders')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'orders'
-                    ? 'bg-primary-100 text-primary-700 font-medium'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
-              >
-                <Package className="w-5 h-5" />
-                Mes Commandes
-              </button>
-
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'profile'
-                    ? 'bg-primary-100 text-primary-700 font-medium'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
-              >
-                <User className="w-5 h-5" />
-                Mon Profil
-              </button>
-
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'settings'
-                    ? 'bg-primary-100 text-primary-700 font-medium'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
-              >
-                <Settings className="w-5 h-5" />
-                Paramètres
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-600 transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                Déconnexion
-              </button>
-            </nav>
-          </Card>
-        </aside>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3">
-          {/* Orders Tab */}
-          {activeTab === 'orders' && (
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Mes Commandes</h2>
-
-                {orders.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <ShoppingBag className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Aucune commande
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      Vous n'avez pas encore passé de commande
-                    </p>
-                    <Link href="/products">
-                      <Button variant="primary">Découvrir nos produits</Button>
-                    </Link>
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <aside className="lg:col-span-1">
+            <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl sticky top-24">
+              {/* User Info */}
+              <div className="text-center mb-6 pb-6 border-b border-theme-border">
+                <div className="relative inline-block mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-theme-primary to-theme-accent rounded-full blur-xl opacity-30" />
+                  <div className="relative w-20 h-20 bg-gradient-to-br from-theme-primary to-theme-accent rounded-full flex items-center justify-center">
+                    <User className="w-10 h-10 text-theme-background" />
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <Card key={order.id} variant="default" className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="font-bold text-gray-900">
-                              Commande #{order.orderNumber}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {formatDate(order.createdAt)}
-                              </span>
-                              <span>{order.items.length} article(s)</span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">
-                              {formatPrice(order.total)}
-                            </p>
-                            <span
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 ${
-                                order.status === 'COMPLETED'
-                                  ? 'bg-green-100 text-green-700'
-                                  : order.status === 'PROCESSING'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : order.status === 'CANCELLED'
-                                  ? 'bg-red-100 text-red-700'
-                                  : 'bg-yellow-100 text-yellow-700'
-                              }`}
-                            >
-                              {order.status === 'PENDING' && 'En attente'}
-                              {order.status === 'PROCESSING' && 'En cours'}
-                              {order.status === 'COMPLETED' && 'Livrée'}
-                              {order.status === 'CANCELLED' && 'Annulée'}
-                              {order.status === 'REFUNDED' && 'Remboursée'}
-                            </span>
-                          </div>
-                        </div>
+                </div>
+                <h3
+                  className="font-bold text-theme-text text-lg mb-1"
+                  style={{ fontFamily: 'var(--theme-font-heading)' }}
+                >
+                  {userProfile?.name || session?.user?.name || 'Utilisateur'}
+                </h3>
+                <p className="text-sm text-theme-text-secondary">
+                  {userProfile?.email || session?.user?.email}
+                </p>
+              </div>
 
-                        {order.shippingAddress && (() => {
-                          const address = order.shippingAddress as { address?: string; postalCode?: string; city?: string }
-                          return (
-                            <div className="flex items-start gap-2 text-sm text-gray-600 border-t border-gray-200 pt-4">
-                              <MapPin className="w-4 h-4 mt-0.5" />
-                              <div>
-                                <p className="font-medium text-gray-900">Adresse de livraison</p>
-                                <p>{address.address}</p>
-                                <p>{address.postalCode} {address.city}</p>
+              {/* Navigation */}
+              <nav className="space-y-2">
+                <button
+                  onClick={() => setActiveTab('orders')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'orders'
+                      ? 'bg-theme-primary/10 text-theme-primary font-semibold shadow-lg shadow-theme-primary/10'
+                      : 'hover:bg-theme-background text-theme-text-secondary hover:text-theme-text'
+                  }`}
+                >
+                  <Package className="w-5 h-5" />
+                  Mes Commandes
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'profile'
+                      ? 'bg-theme-primary/10 text-theme-primary font-semibold shadow-lg shadow-theme-primary/10'
+                      : 'hover:bg-theme-background text-theme-text-secondary hover:text-theme-text'
+                  }`}
+                >
+                  <User className="w-5 h-5" />
+                  Mon Profil
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'settings'
+                      ? 'bg-theme-primary/10 text-theme-primary font-semibold shadow-lg shadow-theme-primary/10'
+                      : 'hover:bg-theme-background text-theme-text-secondary hover:text-theme-text'
+                  }`}
+                >
+                  <Settings className="w-5 h-5" />
+                  Paramètres
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-600 transition-all duration-200"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Déconnexion
+                </button>
+              </nav>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Orders Tab */}
+            {activeTab === 'orders' && (
+              <div className="space-y-6">
+                <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
+                  <h2
+                    className="text-3xl font-bold text-theme-text mb-6"
+                    style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                  >
+                    Mes Commandes
+                  </h2>
+
+                  {orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="w-24 h-24 bg-theme-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <ShoppingBag className="w-12 h-12 text-theme-primary" />
+                      </div>
+                      <h3
+                        className="text-2xl font-bold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Aucune commande
+                      </h3>
+                      <p className="text-theme-text-secondary mb-8 text-lg">
+                        Vous n'avez pas encore passé de commande
+                      </p>
+                      <Link href="/products">
+                        <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200">
+                          Découvrir nos produits
+                        </button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders.map((order) => (
+                        <div key={order.id} className="group p-6 bg-theme-background border border-theme-border rounded-2xl hover:shadow-xl hover:shadow-theme-primary/10 transition-all duration-300">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h3
+                                className="font-bold text-theme-text text-lg"
+                                style={{ fontFamily: 'var(--theme-font-heading)' }}
+                              >
+                                Commande #{order.orderNumber}
+                              </h3>
+                              <div className="flex items-center gap-4 text-sm text-theme-text-secondary mt-2">
+                                <span className="flex items-center gap-1.5">
+                                  <Clock className="w-4 h-4" />
+                                  {formatDate(order.createdAt)}
+                                </span>
+                                <span>{order.items.length} article(s)</span>
                               </div>
                             </div>
-                          )
-                        })()}
+                            <div className="text-right">
+                              <p
+                                className="text-3xl font-bold text-theme-text"
+                                style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                              >
+                                {formatPrice(order.total)}
+                              </p>
+                              <span
+                                className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold mt-2 ${
+                                  order.status === 'COMPLETED'
+                                    ? 'bg-green-500/10 text-green-600 border border-green-500/20'
+                                    : order.status === 'PROCESSING'
+                                    ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                                    : order.status === 'CANCELLED'
+                                    ? 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                    : 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
+                                }`}
+                              >
+                                {order.status === 'PENDING' && 'En attente'}
+                                {order.status === 'PROCESSING' && 'En cours'}
+                                {order.status === 'COMPLETED' && 'Livrée'}
+                                {order.status === 'CANCELLED' && 'Annulée'}
+                                {order.status === 'REFUNDED' && 'Remboursée'}
+                              </span>
+                            </div>
+                          </div>
 
-                        <div className="mt-4 flex justify-end">
-                          <Link href={`/order-confirmation/${order.orderNumber}`}>
-                            <Button variant="outline" size="sm">
-                              Voir les détails
-                            </Button>
-                          </Link>
+                          {order.shippingAddress && (() => {
+                            const address = order.shippingAddress as { address?: string; postalCode?: string; city?: string }
+                            return (
+                              <div className="flex items-start gap-3 text-sm text-theme-text-secondary border-t border-theme-border pt-4">
+                                <MapPin className="w-5 h-5 mt-0.5 text-theme-primary" />
+                                <div>
+                                  <p className="font-semibold text-theme-text mb-1">Adresse de livraison</p>
+                                  <p>{address.address}</p>
+                                  <p>{address.postalCode} {address.city}</p>
+                                </div>
+                              </div>
+                            )
+                          })()}
+
+                          <div className="mt-4 flex justify-end">
+                            <Link href={`/order-confirmation/${order.orderNumber}`}>
+                              <button className="px-6 py-2.5 bg-theme-surface hover:bg-theme-background border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200">
+                                Voir les détails
+                              </button>
+                            </Link>
+                          </div>
                         </div>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </div>
-          )}
-
-          {/* Profile Tab */}
-          {activeTab === 'profile' && (
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon Profil</h2>
-
-              {profileSuccess && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                  <p className="text-sm text-green-600">
-                    Profil mis à jour avec succès !
-                  </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {profileError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-sm text-red-600">{profileError}</p>
-                </div>
-              )}
+            {/* Profile Tab */}
+            {activeTab === 'profile' && (
+              <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
+                <h2
+                  className="text-3xl font-bold text-theme-text mb-6"
+                  style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                >
+                  Mon Profil
+                </h2>
 
-              <form onSubmit={handleProfileSubmit} className="space-y-4">
-                <Input
-                  label="Nom complet"
-                  value={profileData.name}
-                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                  placeholder="Jean Dupont"
-                  disabled={profileLoading}
-                />
-
-                <Input
-                  label="Email"
-                  type="email"
-                  value={userProfile?.email || ''}
-                  placeholder="votre@email.com"
-                  disabled
-                  helperText="L'email ne peut pas être modifié"
-                />
-
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    isLoading={updateProfileMutation.isPending}
-                    disabled={profileLoading}
-                  >
-                    Enregistrer les modifications
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === 'settings' && (
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Sécurité</h2>
-
-                {passwordSuccess && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <p className="text-sm text-green-600">
-                      Mot de passe changé avec succès !
+                {profileSuccess && (
+                  <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-start gap-3">
+                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-green-600 font-medium">
+                      Profil mis à jour avec succès !
                     </p>
                   </div>
                 )}
 
-                {passwordError && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <p className="text-sm text-red-600">{passwordError}</p>
+                {profileError && (
+                  <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-600 font-medium">{profileError}</p>
                   </div>
                 )}
 
-                <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <Input
-                    label="Mot de passe actuel"
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    placeholder="••••••••"
-                    required
-                  />
+                <form onSubmit={handleProfileSubmit} className="space-y-5">
+                  <div>
+                    <label
+                      className="block text-sm font-semibold text-theme-text mb-2"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
+                    >
+                      Nom complet
+                    </label>
+                    <input
+                      type="text"
+                      value={profileData.name}
+                      onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                      placeholder="Jean Dupont"
+                      disabled={profileLoading}
+                    />
+                  </div>
 
-                  <Input
-                    label="Nouveau mot de passe"
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    placeholder="••••••••"
-                    helperText="Minimum 6 caractères"
-                    required
-                  />
-
-                  <Input
-                    label="Confirmer le nouveau mot de passe"
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    placeholder="••••••••"
-                    required
-                  />
+                  <div>
+                    <label
+                      className="block text-sm font-semibold text-theme-text mb-2"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={userProfile?.email || ''}
+                      className="w-full px-4 py-3.5 rounded-xl bg-theme-surface border border-theme-border text-theme-text-muted placeholder:text-theme-text-muted outline-none cursor-not-allowed"
+                      placeholder="votre@email.com"
+                      disabled
+                    />
+                    <p className="text-xs text-theme-text-muted mt-1.5">
+                      L'email ne peut pas être modifié
+                    </p>
+                  </div>
 
                   <div className="pt-4">
-                    <Button
+                    <button
                       type="submit"
-                      variant="primary"
-                      size="lg"
-                      isLoading={changePasswordMutation.isPending}
+                      disabled={updateProfileMutation.isPending || profileLoading}
+                      className="px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 disabled:bg-theme-primary/50 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Changer le mot de passe
-                    </Button>
+                      {updateProfileMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Enregistrement...
+                        </>
+                      ) : (
+                        'Enregistrer les modifications'
+                      )}
+                    </button>
                   </div>
                 </form>
-              </Card>
+              </div>
+            )}
 
-              <Card className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Préférences</h2>
+            {/* Settings Tab */}
+            {activeTab === 'settings' && (
+              <div className="space-y-6">
+                <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
+                  <h2
+                    className="text-3xl font-bold text-theme-text mb-6"
+                    style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                  >
+                    Sécurité
+                  </h2>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Newsletter</h3>
-                      <p className="text-sm text-gray-600">
-                        Recevoir les offres et nouveautés par email
+                  {passwordSuccess && (
+                    <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-start gap-3">
+                      <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-sm text-green-600 font-medium">
+                        Mot de passe changé avec succès !
                       </p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
-                  </div>
+                  )}
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  {passwordError && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-600 font-medium">{passwordError}</p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handlePasswordSubmit} className="space-y-5">
                     <div>
-                      <h3 className="font-semibold text-gray-900">Notifications SMS</h3>
-                      <p className="text-sm text-gray-600">
-                        Recevoir des alertes par SMS pour vos commandes
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Mot de passe actuel
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="••••••••"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Nouveau mot de passe
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <p className="text-xs text-theme-text-muted mt-1.5">
+                        Minimum 6 caractères
                       </p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
+
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Confirmer le nouveau mot de passe
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="••••••••"
+                        required
+                      />
+                    </div>
+
+                    <div className="pt-4">
+                      <button
+                        type="submit"
+                        disabled={changePasswordMutation.isPending}
+                        className="px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 disabled:bg-theme-primary/50 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        {changePasswordMutation.isPending ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Changement en cours...
+                          </>
+                        ) : (
+                          'Changer le mot de passe'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
+                  <h2
+                    className="text-3xl font-bold text-theme-text mb-6"
+                    style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+                  >
+                    Préférences
+                  </h2>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-theme-background border border-theme-border rounded-xl hover:border-theme-border-light transition-all duration-200">
+                      <div>
+                        <h3
+                          className="font-bold text-theme-text mb-1"
+                          style={{ fontFamily: 'var(--theme-font-heading)' }}
+                        >
+                          Newsletter
+                        </h3>
+                        <p className="text-sm text-theme-text-secondary">
+                          Recevoir les offres et nouveautés par email
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-theme-border peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-theme-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-theme-background border border-theme-border rounded-xl hover:border-theme-border-light transition-all duration-200">
+                      <div>
+                        <h3
+                          className="font-bold text-theme-text mb-1"
+                          style={{ fontFamily: 'var(--theme-font-heading)' }}
+                        >
+                          Notifications SMS
+                        </h3>
+                        <p className="text-sm text-theme-text-secondary">
+                          Recevoir des alertes par SMS pour vos commandes
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" />
+                        <div className="w-11 h-6 bg-theme-border peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-theme-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary"></div>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
