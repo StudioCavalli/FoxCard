@@ -44,7 +44,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!theme?.config) return
 
-    const config = theme.config as ThemeConfig
+    const config = theme.config as unknown as ThemeConfig
 
     // Generate and inject CSS variables
     const css = generateThemeCSS(config)

@@ -182,7 +182,7 @@ export const reportRouter = router({
         return {
           id: customer.id,
           email: customer.email,
-          name: customer.name || '',
+          name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email,
           createdAt: customer.createdAt,
           totalSpent,
           orderCount,
@@ -225,7 +225,7 @@ export const reportRouter = router({
         newCustomersList: newCustomers.map((c) => ({
           id: c.id,
           email: c.email,
-          name: c.name || '',
+          name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email,
           createdAt: c.createdAt,
         })),
       }

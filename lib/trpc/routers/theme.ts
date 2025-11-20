@@ -227,7 +227,7 @@ export const themeRouter = router({
           themeId: id,
           name: theme.name,
           description: theme.description,
-          config: theme.config,
+          config: theme.config || {},
           version: theme.version,
           changeDescription: 'Manual update via theme editor',
           changedBy: ctx.session?.user?.email || 'Unknown',
@@ -294,7 +294,7 @@ export const themeRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_READ)
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_VIEW)
 
       // Verify theme belongs to store
       const theme = await ctx.prisma.theme.findUnique({
@@ -357,7 +357,7 @@ export const themeRouter = router({
           themeId: input.themeId,
           name: theme.name,
           description: theme.description,
-          config: theme.config,
+          config: theme.config || {},
           version: theme.version,
           changeDescription: 'Before restore to previous version',
           changedBy: ctx.session?.user?.email || 'Unknown',
@@ -370,7 +370,7 @@ export const themeRouter = router({
         data: {
           name: history.name,
           description: history.description,
-          config: history.config,
+          config: history.config || {},
         },
         include: {
           components: true,
@@ -636,7 +636,7 @@ export const themeRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_READ)
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_VIEW)
 
       const theme = await ctx.prisma.theme.findUnique({
         where: { id: input.themeId },
@@ -670,15 +670,16 @@ export const themeRouter = router({
         }
       }
 
+      const baseThemeVersion = '1.0.0' // System themes don't have versions
       const hasUpdates = hasThemeUpdates(
         theme.baseThemeVersion || theme.version,
-        baseTheme.version
+        baseThemeVersion
       )
 
       return {
         hasUpdates,
         currentVersion: theme.baseThemeVersion || theme.version,
-        latestVersion: baseTheme.version,
+        latestVersion: baseThemeVersion,
         baseThemeName: baseTheme.name,
       }
     }),
@@ -757,9 +758,9 @@ export const themeRouter = router({
           themeId: input.themeId,
           name: theme.name,
           description: theme.description,
-          config: theme.config,
+          config: theme.config || {},
           version: theme.version,
-          changeDescription: `Merged updates from ${baseTheme.name} v${baseTheme.version}`,
+          changeDescription: `Merged updates from ${baseTheme.name} v1.0.0`,
           changedBy: ctx.session?.user?.email || 'System',
         },
       })
@@ -768,9 +769,9 @@ export const themeRouter = router({
       return ctx.prisma.theme.update({
         where: { id: input.themeId },
         data: {
-          config: mergedConfig,
-          baseThemeVersion: baseTheme.version,
-          version: baseTheme.version,
+          config: mergedConfig as any,
+          baseThemeVersion: '1.0.0',
+          version: '1.0.0',
         },
         include: {
           components: true,
@@ -824,8 +825,8 @@ export const themeRouter = router({
       return ctx.prisma.theme.update({
         where: { id: input.themeId },
         data: {
-          overrides,
-          baseThemeVersion: baseTheme.version,
+          overrides: overrides as any,
+          baseThemeVersion: '1.0.0',
           sourcePresetId: preset?.id,
         },
         include: {

@@ -115,7 +115,7 @@ export default function ThemeEditorPage() {
     if (theme) {
       const loadedConfig = {
         ...defaultConfig,
-        ...theme.config,
+        ...(theme.config as any),
         colors: { ...defaultConfig.colors, ...(theme.config as any)?.colors },
         fonts: { ...defaultConfig.fonts, ...(theme.config as any)?.fonts },
         spacing: { ...defaultConfig.spacing, ...(theme.config as any)?.spacing },
@@ -134,7 +134,7 @@ export default function ThemeEditorPage() {
     const configChanged = JSON.stringify(config) !== JSON.stringify(originalConfig)
     const nameChanged = theme && themeName !== theme.name
     const descChanged = theme && themeDescription !== (theme.description || '')
-    setHasChanges(configChanged || nameChanged || descChanged)
+    setHasChanges(!!(configChanged || nameChanged || descChanged))
   }, [config, originalConfig, themeName, themeDescription, theme])
 
   // Update config with history
@@ -275,7 +275,7 @@ export default function ThemeEditorPage() {
         onSuccess: (restoredTheme) => {
           const restoredConfig = {
             ...defaultConfig,
-            ...restoredTheme.config,
+            ...(restoredTheme.config as any),
             colors: { ...defaultConfig.colors, ...(restoredTheme.config as any)?.colors },
             fonts: { ...defaultConfig.fonts, ...(restoredTheme.config as any)?.fonts },
             spacing: { ...defaultConfig.spacing, ...(restoredTheme.config as any)?.spacing },

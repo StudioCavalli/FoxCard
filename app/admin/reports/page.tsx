@@ -581,7 +581,7 @@ export default function ReportsPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Segments Clients</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-yellow-700">VIP (>500€)</p>
+                    <p className="text-sm text-yellow-700">VIP (&gt;500€)</p>
                     <p className="text-2xl font-bold text-yellow-900">{customerReport.segments.vip}</p>
                   </div>
                   <div className="p-4 bg-green-50 rounded-lg">

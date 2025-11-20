@@ -65,7 +65,7 @@ export default function ThemeMarketplacePage() {
         case 'popular':
           return b.installCount - a.installCount
         case 'rating':
-          return b.rating - a.rating
+          return (b.rating || 0) - (a.rating || 0)
         case 'newest':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         default:
@@ -331,7 +331,7 @@ export default function ThemeMarketplacePage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span>{preset.rating.toFixed(1)}</span>
+                      <span>{preset.rating?.toFixed(1) || '0.0'}</span>
                       {preset.reviewCount > 0 && (
                         <span className="text-gray-400">({preset.reviewCount})</span>
                       )}
