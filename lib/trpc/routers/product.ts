@@ -12,6 +12,7 @@ export const productRouter = router({
         status: z.nativeEnum(ProductStatus).optional(),
         featured: z.boolean().optional(),
         search: z.string().optional(),
+        tags: z.array(z.string()).optional(), // Filter by tags
         minPrice: z.number().optional(),
         maxPrice: z.number().optional(),
         sortBy: z.enum(['createdAt', 'price', 'name', 'featured']).optional(),
@@ -21,7 +22,7 @@ export const productRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { storeId, categoryId, status, featured, search, minPrice, maxPrice, sortBy, sortOrder, limit, cursor } = input
+      const { storeId, categoryId, status, featured, search, tags, minPrice, maxPrice, sortBy, sortOrder, limit, cursor } = input
 
       // Build orderBy based on sortBy and sortOrder
       const orderBy: any = []
@@ -43,6 +44,11 @@ export const productRouter = router({
           ...(categoryId && { categoryId }),
           ...(status && { status }),
           ...(featured !== undefined && { featured }),
+          ...(tags && tags.length > 0 && {
+            tags: {
+              hasSome: tags, // Match products that have any of the specified tags
+            },
+          }),
           ...(search && {
             OR: [
               { name: { contains: search, mode: 'insensitive' } },
@@ -136,6 +142,7 @@ export const productRouter = router({
         thumbnail: z.string().optional(),
         metaTitle: z.string().optional(),
         metaDescription: z.string().optional(),
+        tags: z.array(z.string()).default([]), // Product tags
         status: z.nativeEnum(ProductStatus),
         featured: z.boolean().default(false),
         categoryId: z.string().optional(),
@@ -180,6 +187,7 @@ export const productRouter = router({
         thumbnail: z.string().optional(),
         metaTitle: z.string().optional(),
         metaDescription: z.string().optional(),
+        tags: z.array(z.string()).optional(), // Product tags
         status: z.nativeEnum(ProductStatus).optional(),
         featured: z.boolean().optional(),
         categoryId: z.string().optional(),
@@ -231,5 +239,114 @@ export const productRouter = router({
       })
 
       return product
+    }),
+
+  // ============================================
+  // PRODUCT VARIANTS CRUD
+  // ============================================
+
+  // Create a product variant
+  createVariant: adminProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        name: z.string().min(1),
+        sku: z.string().optional(),
+        price: z.number().min(0).optional(),
+        quantity: z.number().int().min(0).default(0),
+        image: z.string().optional(),
+        options: z.record(z.string(), z.any()), // e.g., { color: "red", size: "L" }
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify product exists
+      const product = await ctx.prisma.product.findUnique({
+        where: { id: input.productId },
+      })
+
+      if (!product) {
+        throw new Error('Product not found')
+      }
+
+      const variant = await ctx.prisma.productVariant.create({
+        data: {
+          productId: input.productId,
+          name: input.name,
+          sku: input.sku,
+          price: input.price,
+          quantity: input.quantity,
+          image: input.image,
+          options: input.options as any,
+        },
+      })
+
+      return variant
+    }),
+
+  // Update a product variant
+  updateVariant: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().min(1).optional(),
+        sku: z.string().optional(),
+        price: z.number().min(0).optional(),
+        quantity: z.number().int().min(0).optional(),
+        image: z.string().optional(),
+        options: z.record(z.string(), z.any()).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input
+
+      const variant = await ctx.prisma.productVariant.update({
+        where: { id },
+        data: {
+          ...data,
+          ...(data.options && { options: data.options as any }),
+        },
+      })
+
+      return variant
+    }),
+
+  // Delete a product variant
+  deleteVariant: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const variant = await ctx.prisma.productVariant.delete({
+        where: { id: input.id },
+      })
+
+      return variant
+    }),
+
+  // Update variant stock (for inventory management)
+  updateVariantStock: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        quantity: z.number().int().min(0),
+        operation: z.enum(['set', 'increment', 'decrement']).default('set'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, quantity, operation } = input
+
+      let updateData: any
+      if (operation === 'set') {
+        updateData = { quantity }
+      } else if (operation === 'increment') {
+        updateData = { quantity: { increment: quantity } }
+      } else if (operation === 'decrement') {
+        updateData = { quantity: { decrement: quantity } }
+      }
+
+      const variant = await ctx.prisma.productVariant.update({
+        where: { id },
+        data: updateData,
+      })
+
+      return variant
     }),
 })

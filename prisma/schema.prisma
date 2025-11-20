@@ -141,6 +141,9 @@ model Product {
   metaTitle       String?
   metaDescription String?
 
+  // Tags
+  tags        String[] // Product tags for filtering and search
+
   // Status
   status      ProductStatus @default(DRAFT)
   featured    Boolean @default(false)
