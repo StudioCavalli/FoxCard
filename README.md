@@ -695,22 +695,60 @@ Après le seed, utilisez ces credentials :
   - JSON-LD pour organisation
   - Breadcrumbs schema
 
-#### 🎨 Système de Thèmes Customisables
+#### 🎨 Système de Thèmes Multi-Store (M2)
+- [x] **3 Thèmes de Base** (`lib/themes/presets.ts`) :
+  - **Minimal** : Design épuré et intemporel, typographie soignée, espacements généreux
+  - **Elegant** : Raffinement absolu, palette sophistiquée, détails dorés, typographie classique (Playfair Display + Lora)
+  - **Bold** : Design audacieux et énergique, couleurs vibrantes, contrastes marqués, mode sombre
+- [x] **Système CSS Variables** :
+  - Variables thème complètes : --theme-primary, --theme-secondary, --theme-accent
+  - Arrière-plans : --theme-background, --theme-surface
+  - Texte : --theme-text, --theme-text-secondary, --theme-text-muted
+  - Bordures : --theme-border, --theme-border-light
+  - Typographie : --theme-font-heading, --theme-font-body
+  - Espacements : --theme-container-max-width, --theme-section-padding
+  - Border radius et shadows personnalisables
+- [x] **Éditeur Visuel de Thèmes** (`/admin/themes/editor/[id]`) :
+  - Color picker pour toutes les couleurs (10 couleurs personnalisables)
+  - Sélecteur de fonts (Google Fonts : Inter, Roboto, Playfair Display, Montserrat, etc.)
+  - Preview en temps réel avec ThemePreview component
+  - Éditeur de spacing (container max width, section padding)
+  - Éditeur de border radius
+  - Export/Import des configurations en JSON
+  - Undo/Redo avec historique (50 états max)
+  - Raccourcis clavier (Cmd+S pour sauvegarder, Cmd+Z pour annuler)
+- [x] **Système d'Historique des Modifications** :
+  - Modèle ThemeHistory en base de données
+  - Snapshot automatique créé à chaque modification de thème
+  - Capture complète : config, nom, description, version, utilisateur, timestamp
+  - API tRPC pour récupérer l'historique (`getHistory`)
+  - Restauration de versions précédentes (`restoreFromHistory`)
+  - Description du changement et email de l'utilisateur enregistrés
+- [x] **Gestion Admin des Thèmes** (`/admin/themes`) :
+  - Liste de tous les thèmes avec preview de la palette de couleurs
+  - Activation/désactivation de thèmes
+  - Badge "Actif" et "Système" pour identification
+  - Duplication de thèmes pour customisation
+  - Installation des 3 thèmes système en un clic
+  - Éditeur visuel pour chaque thème
+  - Suppression (sauf thèmes actifs et système)
+- [x] **ThemeProvider & Intégration** (`components/theme/ThemeProvider.tsx`) :
+  - Context provider React pour injection du thème actif
+  - Génération et injection dynamique des CSS variables dans :root
+  - Chargement automatique des Google Fonts personnalisées
+  - Détection des fonts système (Inter, Roboto, etc.)
+  - Mise à jour en temps réel lors du changement de thème
+- [x] **Marketplace de Thèmes** (`/admin/themes/marketplace`) :
+  - 8 thèmes marketplace préinstallés : Minimal, Elegant, Bold, Nature, Océan, Vintage, Neon, Rose Gold
+  - Tags et catégorisation des thèmes
+  - Installation en un clic depuis le marketplace
+  - Preview des thèmes avant installation
 - [x] **Architecture de Thèmes** (`lib/themes/`) :
   - Types TypeScript : Theme, ThemeColors, ThemeTypography, ThemeSpacing, ThemeLayout
   - Support Light/Dark mode
   - Customisation complète des couleurs
   - Customisation de la typographie
   - Customisation des espacements et bordures
-- [x] **Thème par Défaut** (`lib/themes/default.ts`) :
-  - Couleurs : Primary (Teal), Secondary (Pink), Accent (Amber)
-  - 12 couleurs système (background, foreground, muted, border, etc.)
-  - Mode sombre complet avec couleurs adaptées
-  - Typographie : Inter font, 8 tailles de police
-  - 4 poids de police (normal, medium, semibold, bold)
-  - Border radius : 6 niveaux (sm à full)
-  - Spacing personnalisable (container, section)
-  - Layout : max-width 1280px, header 64px
 - [x] **Theme Manager** (`lib/themes/manager.ts`) :
   - Singleton pour gérer tous les thèmes
   - Enregistrement de thèmes personnalisés
@@ -722,12 +760,7 @@ Après le seed, utilisez ces credentials :
   - StoreThemeSettings : themeId, customColors, customTypography, customCSS
   - Dark mode : auto, light, dark
   - Override partiel ou complet du thème
-- [x] **CSS Variables Générées** :
-  - --color-* pour toutes les couleurs
-  - --font-* pour typographie
-  - --radius-* pour border radius
-  - --padding-* pour espacements
-  - --max-width, --header-height, --footer-height
+  - Historique des modifications avec restauration
 
 #### ⚡ Optimisations Performances
 - [x] **Code Splitting** :
