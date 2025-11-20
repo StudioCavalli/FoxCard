@@ -811,6 +811,10 @@ model Theme {
   // Theme configuration (colors, fonts, spacing, etc.)
   config      Json     // { colors: {...}, fonts: {...}, spacing: {...} }
 
+  // Override system for partial customization
+  overrides   Json?    // Partial overrides applied on top of base theme
+  baseThemeVersion String? // Version of the base theme when overrides were created
+
   // Status
   isActive    Boolean  @default(false)
   isSystem    Boolean  @default(false) // System themes (Minimal, Luxe, Tech)
