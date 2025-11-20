@@ -1,4 +1,5 @@
 export { pluginManager } from './manager'
+export { HookExecutor, createHookExecutor } from './hook-executor'
 export type {
   Plugin,
   PluginMetadata,
