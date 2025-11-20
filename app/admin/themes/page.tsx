@@ -193,7 +193,7 @@ export default function ThemesPage() {
   }
 
   const handleSeedSystemThemes = async () => {
-    if (!confirm('Voulez-vous installer les 3 thèmes système (Minimal, Luxe, Tech) ?')) return
+    if (!confirm('Voulez-vous installer les 3 thèmes système (Minimal, Elegant, Bold) ?')) return
 
     seedSystemThemesMutation.mutate(
       { storeId },

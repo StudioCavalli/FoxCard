@@ -818,6 +818,9 @@ model Theme {
   // Components
   components  ThemeComponent[]
 
+  // History tracking
+  history     ThemeHistory[]
+
   // Source (if installed from marketplace)
   sourcePresetId String?  @db.ObjectId
   sourcePreset   ThemePreset? @relation(fields: [sourcePresetId], references: [id])
@@ -856,6 +859,27 @@ model ThemeComponent {
 
   @@index([themeId])
   @@index([type])
+}
+
+model ThemeHistory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  themeId     String   @db.ObjectId
+  theme       Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  // Snapshot data
+  name        String
+  description String?
+  config      Json     // Snapshot of theme config at this point
+  version     String
+
+  // Change metadata
+  changeDescription String? // What changed in this version
+  changedBy   String?  // User who made the change
+
+  createdAt   DateTime @default(now())
+
+  @@index([themeId])
+  @@index([createdAt])
 }
 
 model ThemePreset {
