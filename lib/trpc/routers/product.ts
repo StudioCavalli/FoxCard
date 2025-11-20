@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
 import { ProductStatus, ProductType } from '@prisma/client'
+import { createHookExecutor } from '@/lib/plugins/hook-executor'
 
 export const productRouter = router({
   getAll: publicProcedure
@@ -141,9 +142,22 @@ export const productRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.prisma.product.create({
+      const product = await ctx.prisma.product.create({
         data: input,
       })
+
+      // Execute plugin hooks (async, don't block response)
+      const hookExecutor = createHookExecutor(ctx.prisma)
+      hookExecutor.onProductCreated(input.storeId, {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        sku: product.sku || '',
+      }).catch((err) => {
+        console.error('Failed to execute product created hooks:', err)
+      })
+
+      return product
     }),
 
   update: adminProcedure
@@ -173,17 +187,49 @@ export const productRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input
-      return ctx.prisma.product.update({
+      const product = await ctx.prisma.product.update({
         where: { id },
         data,
       })
+
+      // Execute plugin hooks (async, don't block response)
+      const hookExecutor = createHookExecutor(ctx.prisma)
+      hookExecutor.onProductUpdated(product.storeId, {
+        productId: product.id,
+        name: product.name,
+        changes: data,
+      }).catch((err) => {
+        console.error('Failed to execute product updated hooks:', err)
+      })
+
+      return product
     }),
 
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.prisma.product.delete({
+      // Get product before deletion for hook data
+      const product = await ctx.prisma.product.findUnique({
         where: { id: input.id },
       })
+
+      if (!product) {
+        throw new Error('Product not found')
+      }
+
+      await ctx.prisma.product.delete({
+        where: { id: input.id },
+      })
+
+      // Execute plugin hooks (async, don't block response)
+      const hookExecutor = createHookExecutor(ctx.prisma)
+      hookExecutor.onProductDeleted(product.storeId, {
+        productId: product.id,
+        name: product.name,
+      }).catch((err) => {
+        console.error('Failed to execute product deleted hooks:', err)
+      })
+
+      return product
     }),
 })

@@ -3,6 +3,7 @@ import { router, publicProcedure, protectedProcedure, adminProcedure } from '../
 import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@prisma/client'
 import { emailService } from '@/lib/email/service'
 import { pdfService } from '@/lib/pdf/service'
+import { createHookExecutor } from '@/lib/plugins/hook-executor'
 
 export const orderRouter = router({
   getAll: adminProcedure
@@ -209,6 +210,17 @@ export const orderRouter = router({
         console.error('Failed to send order confirmation email:', err)
       })
 
+      // Execute plugin hooks (async, don't block response)
+      const hookExecutor = createHookExecutor(ctx.prisma)
+      hookExecutor.onOrderCreated(orderData.storeId, {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        total: order.total,
+        customerEmail: order.customerEmail,
+      }).catch((err) => {
+        console.error('Failed to execute order created hooks:', err)
+      })
+
       return order
     }),
 
@@ -223,6 +235,15 @@ export const orderRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input
+
+      // Get current order for comparison
+      const currentOrder = await ctx.prisma.order.findUnique({
+        where: { id },
+      })
+
+      if (!currentOrder) {
+        throw new Error('Order not found')
+      }
 
       const order = await ctx.prisma.order.update({
         where: { id },
@@ -240,6 +261,33 @@ export const orderRouter = router({
       if (input.paymentStatus === 'PAID') {
         pdfService.generateInvoice(order.id).catch((err) => {
           console.error('Failed to generate invoice:', err)
+        })
+      }
+
+      // Execute plugin hooks (async, don't block response)
+      const hookExecutor = createHookExecutor(ctx.prisma)
+
+      // Status changed hook
+      if (input.status && input.status !== currentOrder.status) {
+        hookExecutor.onOrderStatusChanged(order.storeId, {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          oldStatus: currentOrder.status,
+          newStatus: input.status,
+        }).catch((err) => {
+          console.error('Failed to execute order status changed hooks:', err)
+        })
+      }
+
+      // Payment completed hook
+      if (input.paymentStatus === 'PAID' && currentOrder.paymentStatus !== 'PAID') {
+        hookExecutor.onOrderPaid(order.storeId, {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          total: order.total,
+          paymentMethod: 'unknown', // TODO: Get from payment provider
+        }).catch((err) => {
+          console.error('Failed to execute order paid hooks:', err)
         })
       }
 

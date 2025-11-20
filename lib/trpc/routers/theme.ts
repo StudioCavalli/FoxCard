@@ -112,8 +112,12 @@ export const themeRouter = router({
             secondary: z.string().default('#10B981'),
             accent: z.string().default('#F59E0B'),
             background: z.string().default('#FFFFFF'),
+            surface: z.string().default('#FAFAFA'),
             text: z.string().default('#111827'),
             textSecondary: z.string().default('#6B7280'),
+            textMuted: z.string().default('#9CA3AF'),
+            border: z.string().default('#E5E5E5'),
+            borderLight: z.string().default('#F5F5F5'),
           }),
           fonts: z.object({
             heading: z.string().default('Inter'),
@@ -124,6 +128,12 @@ export const themeRouter = router({
             sectionPadding: z.string().default('4rem'),
           }),
           borderRadius: z.string().default('0.5rem'),
+          shadows: z.object({
+            sm: z.string().default('0 1px 2px 0 rgba(0, 0, 0, 0.05)'),
+            md: z.string().default('0 4px 6px -1px rgba(0, 0, 0, 0.1)'),
+            lg: z.string().default('0 10px 15px -3px rgba(0, 0, 0, 0.1)'),
+            xl: z.string().default('0 20px 25px -5px rgba(0, 0, 0, 0.1)'),
+          }).optional(),
         }),
       })
     )
@@ -159,8 +169,12 @@ export const themeRouter = router({
                 secondary: z.string(),
                 accent: z.string(),
                 background: z.string(),
+                surface: z.string(),
                 text: z.string(),
                 textSecondary: z.string(),
+                textMuted: z.string(),
+                border: z.string(),
+                borderLight: z.string(),
               })
               .optional(),
             fonts: z
@@ -176,6 +190,14 @@ export const themeRouter = router({
               })
               .optional(),
             borderRadius: z.string().optional(),
+            shadows: z
+              .object({
+                sm: z.string(),
+                md: z.string(),
+                lg: z.string(),
+                xl: z.string(),
+              })
+              .optional(),
           })
           .optional(),
       })
