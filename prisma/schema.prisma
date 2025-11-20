@@ -1449,3 +1449,51 @@ enum InventoryCountStatus {
   APPLIED     // Adjustments applied to stock
   CANCELLED   // Cancelled
 }
+
+// Abandoned Cart Recovery System
+model AbandonedCart {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  // Customer info
+  email       String
+  customerName String?
+  phone       String?
+
+  // Cart data (snapshot from localStorage)
+  cartData    Json     // Full cart state with items
+
+  // Recovery status
+  status      AbandonedCartStatus @default(PENDING)
+
+  // Email tracking
+  firstEmailSentAt  DateTime?
+  secondEmailSentAt DateTime?
+  recoveredAt       DateTime?
+
+  // Recovery incentive
+  discountCodeId String? @db.ObjectId
+
+  // Conversion tracking
+  wasRecovered     Boolean @default(false)
+  recoveryOrderId  String? @db.ObjectId
+
+  // Timestamps
+  abandonedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([email])
+  @@index([status])
+  @@index([abandonedAt])
+  @@index([wasRecovered])
+}
+
+enum AbandonedCartStatus {
+  PENDING           // Just abandoned, no emails sent yet
+  FIRST_EMAIL_SENT  // D+1 email sent
+  SECOND_EMAIL_SENT // D+3 email sent
+  RECOVERED         // Customer completed purchase
+  EXPIRED           // Too old to pursue (30+ days)
+}

@@ -1,17 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, AlertCircle } from 'lucide-react'
+import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check } from 'lucide-react'
 import Link from 'next/link'
+
+const STEPS = [
+  { id: 1, name: 'Contact', icon: Mail },
+  { id: 2, name: 'Livraison', icon: MapPin },
+  { id: 3, name: 'Paiement', icon: CreditCard },
+]
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, getTotalPrice, clearCart } = useCartStore()
+  const [currentStep, setCurrentStep] = useState(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank_transfer'>('card')
@@ -25,43 +32,73 @@ export default function CheckoutPage() {
   } | null>(null)
   const [discountError, setDiscountError] = useState('')
 
+  const [formData, setFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: 'France',
+    phone: '',
+  })
+
+  // Load saved checkout data from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('foxcard-checkout')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        setFormData(parsed.formData || formData)
+        setCurrentStep(parsed.currentStep || 1)
+        setPaymentMethod(parsed.paymentMethod || 'card')
+      } catch (e) {
+        console.error('Failed to load saved checkout data:', e)
+      }
+    }
+  }, [])
+
+  // Auto-save checkout data to localStorage
+  useEffect(() => {
+    const saveData = {
+      formData,
+      currentStep,
+      paymentMethod,
+      timestamp: new Date().toISOString(),
+    }
+    localStorage.setItem('foxcard-checkout', JSON.stringify(saveData))
+  }, [formData, currentStep, paymentMethod])
+
   const createOrder = trpc.order.create.useMutation({
     onSuccess: async (order) => {
       try {
         if (paymentMethod === 'bank_transfer') {
-          // Generate bank transfer instructions
           await generateBankTransferInstructions.mutateAsync({
             orderId: order.id,
             storeId: order.storeId,
           })
-
-          // Redirect to bank transfer instructions page
           router.push(`/order-confirmation/${order.orderNumber}?bank_transfer=true`)
         } else if (paymentMethod === 'paypal') {
-          // Create PayPal order
           const paypalOrder = await createPayPalOrder.mutateAsync({
             orderId: order.id,
             returnUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?paypal=true&token={TOKEN}`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
-
-          // Redirect to PayPal
           if (paypalOrder.approvalUrl) {
             window.location.href = paypalOrder.approvalUrl
           }
         } else {
-          // Create Stripe checkout session
           const session = await createCheckoutSession.mutateAsync({
             orderId: order.id,
             successUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?session_id={CHECKOUT_SESSION_ID}`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
-
-          // Redirect to Stripe
           if (session.url) {
             window.location.href = session.url
           }
         }
+        // Clear saved checkout data on success
+        localStorage.removeItem('foxcard-checkout')
       } catch (err) {
         console.error('Failed to create payment session:', err)
         setError('Erreur lors de la creation de la session de paiement')
@@ -85,7 +122,7 @@ export default function CheckoutPage() {
       orderAmount: getTotalPrice(),
     },
     {
-      enabled: false, // Don't run automatically
+      enabled: false,
     }
   )
 
@@ -115,19 +152,7 @@ export default function CheckoutPage() {
     setDiscountError('')
   }
 
-  const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: 'France',
-    phone: '',
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setError('')
     setIsProcessing(true)
 
@@ -154,7 +179,6 @@ export default function CheckoutPage() {
         discountCodeId: appliedDiscount?.id,
       })
 
-      // Increment discount usage count if discount was applied
       if (appliedDiscount) {
         incrementUsage.mutate({ id: appliedDiscount.id })
       }
@@ -163,9 +187,39 @@ export default function CheckoutPage() {
     }
   }
 
+  const validateStep = (step: number) => {
+    if (step === 1) {
+      return formData.email.trim() !== '' && formData.email.includes('@')
+    }
+    if (step === 2) {
+      return (
+        formData.firstName.trim() !== '' &&
+        formData.lastName.trim() !== '' &&
+        formData.address.trim() !== '' &&
+        formData.city.trim() !== '' &&
+        formData.postalCode.trim() !== '' &&
+        formData.country.trim() !== ''
+      )
+    }
+    return true
+  }
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(currentStep + 1)
+      setError('')
+    } else {
+      setError('Veuillez remplir tous les champs requis')
+    }
+  }
+
+  const handlePrevious = () => {
+    setCurrentStep(currentStep - 1)
+    setError('')
+  }
+
   const subtotal = getTotalPrice()
 
-  // Calculate shipping dynamically based on country
   const { data: shippingCalculation } = trpc.shipping.calculateShipping.useQuery(
     {
       storeId: '000000000000000000000001',
@@ -228,9 +282,56 @@ export default function CheckoutPage() {
           </p>
         </div>
 
+        {/* Progress Bar */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
+            {STEPS.map((step, index) => {
+              const Icon = step.icon
+              const isCompleted = currentStep > step.id
+              const isCurrent = currentStep === step.id
+
+              return (
+                <div key={step.id} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center flex-1">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        isCompleted
+                          ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                          : isCurrent
+                          ? 'bg-theme-primary text-theme-background shadow-lg shadow-theme-primary/30'
+                          : 'bg-theme-surface border-2 border-theme-border text-theme-text-muted'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-6 h-6" strokeWidth={3} />
+                      ) : (
+                        <Icon className="w-6 h-6" />
+                      )}
+                    </div>
+                    <span
+                      className={`mt-2 text-sm font-semibold ${
+                        isCurrent ? 'text-theme-primary' : isCompleted ? 'text-green-600' : 'text-theme-text-muted'
+                      }`}
+                    >
+                      {step.name}
+                    </span>
+                  </div>
+                  {index < STEPS.length - 1 && (
+                    <div
+                      className={`flex-1 h-1 mx-2 rounded transition-all duration-300 ${
+                        isCompleted ? 'bg-green-500' : 'bg-theme-border'
+                      }`}
+                    />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 max-w-4xl mx-auto">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-red-600 font-medium">{error}</p>
           </div>
@@ -239,321 +340,359 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Contact Information */}
-            <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-theme-primary/10 rounded-xl flex items-center justify-center">
-                  <Mail className="w-6 h-6 text-theme-primary" />
-                </div>
-                <h2
-                  className="text-2xl font-bold text-theme-text"
-                  style={{ fontFamily: 'var(--theme-font-heading)' }}
-                >
-                  Informations de contact
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label
-                    className="block text-sm font-semibold text-theme-text mb-2"
+            {/* Step 1: Contact Information */}
+            {currentStep === 1 && (
+              <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-theme-primary/10 rounded-xl flex items-center justify-center">
+                    <Mail className="w-6 h-6 text-theme-primary" />
+                  </div>
+                  <h2
+                    className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                    placeholder="votre@email.com"
-                  />
-                  <p className="text-xs text-theme-text-muted mt-1.5">
-                    Nous vous enverrons une confirmation de commande
-                  </p>
+                    Informations de contact
+                  </h2>
                 </div>
 
-                <div>
-                  <label
-                    className="block text-sm font-semibold text-theme-text mb-2"
-                    style={{ fontFamily: 'var(--theme-font-heading)' }}
-                  >
-                    Téléphone (optionnel)
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                    placeholder="+33 6 12 34 56 78"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Shipping Address */}
-            <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                </div>
-                <h2
-                  className="text-2xl font-bold text-theme-text"
-                  style={{ fontFamily: 'var(--theme-font-heading)' }}
-                >
-                  Adresse de livraison
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label
                       className="block text-sm font-semibold text-theme-text mb-2"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Prénom
+                      Email *
                     </label>
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="Jean"
+                      placeholder="votre@email.com"
                     />
+                    <p className="text-xs text-theme-text-muted mt-1.5">
+                      Nous vous enverrons une confirmation de commande
+                    </p>
                   </div>
+
                   <div>
                     <label
                       className="block text-sm font-semibold text-theme-text mb-2"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Nom
+                      Téléphone (optionnel)
                     </label>
                     <input
-                      type="text"
-                      required
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="Dupont"
+                      placeholder="+33 6 12 34 56 78"
                     />
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <label
-                    className="block text-sm font-semibold text-theme-text mb-2"
+            {/* Step 2: Shipping Address */}
+            {currentStep === 2 && (
+              <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h2
+                    className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Adresse
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                    placeholder="123 Rue de la Paix"
-                  />
+                    Adresse de livraison
+                  </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      className="block text-sm font-semibold text-theme-text mb-2"
-                      style={{ fontFamily: 'var(--theme-font-heading)' }}
-                    >
-                      Ville
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="Paris"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="block text-sm font-semibold text-theme-text mb-2"
-                      style={{ fontFamily: 'var(--theme-font-heading)' }}
-                    >
-                      Code postal
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.postalCode}
-                      onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                      className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="75001"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    className="block text-sm font-semibold text-theme-text mb-2"
-                    style={{ fontFamily: 'var(--theme-font-heading)' }}
-                  >
-                    Pays
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                    placeholder="France"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-green-600" />
-                </div>
-                <h2
-                  className="text-2xl font-bold text-theme-text"
-                  style={{ fontFamily: 'var(--theme-font-heading)' }}
-                >
-                  Mode de paiement
-                </h2>
-              </div>
-
-              {/* Payment Methods Accepted */}
-              <div className="mb-6 p-4 bg-theme-background border border-theme-border rounded-xl">
-                <p className="text-sm text-theme-text mb-3 font-semibold">
-                  Moyens de paiement acceptés :
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-theme-text-secondary" />
-                    <span className="text-xs font-medium text-theme-text">Carte</span>
-                  </div>
-                  <div className="px-3 py-2 bg-black text-white rounded-lg flex items-center gap-1">
-                    <svg className="w-8 h-4" viewBox="0 0 32 14" fill="currentColor">
-                      <path d="M6.8 3.4c-.4.5-1 .8-1.6.8-.1-.6.2-1.2.6-1.6.4-.5 1.1-.8 1.6-.8.1.6-.2 1.2-.6 1.6zm.6.9c-.9-.1-1.7.5-2.1.5-.5 0-1.1-.5-1.8-.5-.9 0-1.8.5-2.2 1.3-.9 1.6-.2 4.1.7 5.4.5.7 1 1.4 1.7 1.4.7 0 .9-.5 1.8-.5s1.1.5 1.8.5c.8 0 1.2-.6 1.7-1.3.5-.8.8-1.5.8-1.5 0 0-1.5-.6-1.5-2.3-.1-1.4 1.2-2.1 1.2-2.1-.7-1-1.7-1.1-2-.1v.1z"/>
-                    </svg>
-                    <span className="text-xs font-medium">Pay</span>
-                  </div>
-                  <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-1">
-                    <svg className="w-8 h-4" viewBox="0 0 32 14" fill="none">
-                      <path d="M15.7 7.2v2.7h-.7v-6.4h1.8c.5 0 .8.2 1.1.5.3.3.5.7.5 1.1s-.2.8-.5 1.1c-.3.3-.7.5-1.1.5h-1.1v-.5zm0-3v2.3h1.1c.3 0 .5-.1.7-.3.2-.2.3-.5.3-.8s-.1-.5-.3-.8c-.2-.2-.4-.3-.7-.3h-1.1z" fill="#5F6368"/>
-                    </svg>
-                    <span className="text-xs font-medium text-theme-text">Pay</span>
-                  </div>
-                  <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-1">
-                    <svg className="w-5 h-4" viewBox="0 0 24 24" fill="#003087">
-                      <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                <div
-                  onClick={() => setPaymentMethod('card')}
-                  className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    paymentMethod === 'card'
-                      ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                      : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CreditCard className="w-5 h-5 text-theme-text-secondary" />
-                      <span className="font-semibold text-theme-text">Carte bancaire</span>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Prénom *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="Jean"
+                      />
                     </div>
-                    {paymentMethod === 'card' && (
-                      <CheckCircle className="w-5 h-5 text-theme-primary" />
-                    )}
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Nom *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="Dupont"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-semibold text-theme-text mb-2"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
+                    >
+                      Adresse *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                      placeholder="123 Rue de la Paix"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Ville *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="Paris"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="block text-sm font-semibold text-theme-text mb-2"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Code postal *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.postalCode}
+                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                        placeholder="75001"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-semibold text-theme-text mb-2"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
+                    >
+                      Pays *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
+                      placeholder="France"
+                    />
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div
-                  onClick={() => setPaymentMethod('paypal')}
-                  className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    paymentMethod === 'paypal'
-                      ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                      : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#003087">
+            {/* Step 3: Payment Method */}
+            {currentStep === 3 && (
+              <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <CreditCard className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h2
+                    className="text-2xl font-bold text-theme-text"
+                    style={{ fontFamily: 'var(--theme-font-heading)' }}
+                  >
+                    Mode de paiement
+                  </h2>
+                </div>
+
+                {/* Payment Methods Accepted */}
+                <div className="mb-6 p-4 bg-theme-background border border-theme-border rounded-xl">
+                  <p className="text-sm text-theme-text mb-3 font-semibold">
+                    Moyens de paiement acceptés :
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-theme-text-secondary" />
+                      <span className="text-xs font-medium text-theme-text">Carte</span>
+                    </div>
+                    <div className="px-3 py-2 bg-black text-white rounded-lg flex items-center gap-1">
+                      <svg className="w-8 h-4" viewBox="0 0 32 14" fill="currentColor">
+                        <path d="M6.8 3.4c-.4.5-1 .8-1.6.8-.1-.6.2-1.2.6-1.6.4-.5 1.1-.8 1.6-.8.1.6-.2 1.2-.6 1.6zm.6.9c-.9-.1-1.7.5-2.1.5-.5 0-1.1-.5-1.8-.5-.9 0-1.8.5-2.2 1.3-.9 1.6-.2 4.1.7 5.4.5.7 1 1.4 1.7 1.4.7 0 .9-.5 1.8-.5s1.1.5 1.8.5c.8 0 1.2-.6 1.7-1.3.5-.8.8-1.5.8-1.5 0 0-1.5-.6-1.5-2.3-.1-1.4 1.2-2.1 1.2-2.1-.7-1-1.7-1.1-2-.1v.1z"/>
+                      </svg>
+                      <span className="text-xs font-medium">Pay</span>
+                    </div>
+                    <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-1">
+                      <svg className="w-8 h-4" viewBox="0 0 32 14" fill="none">
+                        <path d="M15.7 7.2v2.7h-.7v-6.4h1.8c.5 0 .8.2 1.1.5.3.3.5.7.5 1.1s-.2.8-.5 1.1c-.3.3-.7.5-1.1.5h-1.1v-.5zm0-3v2.3h1.1c.3 0 .5-.1.7-.3.2-.2.3-.5.3-.8s-.1-.5-.3-.8c-.2-.2-.4-.3-.7-.3h-1.1z" fill="#5F6368"/>
+                      </svg>
+                      <span className="text-xs font-medium text-theme-text">Pay</span>
+                    </div>
+                    <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-1">
+                      <svg className="w-5 h-4" viewBox="0 0 24 24" fill="#003087">
                         <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
                       </svg>
-                      <span className="font-semibold text-theme-text">PayPal</span>
                     </div>
-                    {paymentMethod === 'paypal' && (
-                      <CheckCircle className="w-5 h-5 text-theme-primary" />
-                    )}
                   </div>
                 </div>
 
-                <div
-                  onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    paymentMethod === 'bank_transfer'
-                      ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                      : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-theme-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      <div>
-                        <span className="font-semibold text-theme-text block">Virement bancaire</span>
-                        <span className="text-xs text-theme-text-muted">Paiement sous 2-3 jours</span>
+                <div className="space-y-3 mb-6">
+                  <div
+                    onClick={() => setPaymentMethod('card')}
+                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'card'
+                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="w-5 h-5 text-theme-text-secondary" />
+                        <span className="font-semibold text-theme-text">Carte bancaire</span>
                       </div>
+                      {paymentMethod === 'card' && (
+                        <CheckCircle className="w-5 h-5 text-theme-primary" />
+                      )}
                     </div>
-                    {paymentMethod === 'bank_transfer' && (
-                      <CheckCircle className="w-5 h-5 text-theme-primary" />
-                    )}
+                  </div>
+
+                  <div
+                    onClick={() => setPaymentMethod('paypal')}
+                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'paypal'
+                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#003087">
+                          <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
+                        </svg>
+                        <span className="font-semibold text-theme-text">PayPal</span>
+                      </div>
+                      {paymentMethod === 'paypal' && (
+                        <CheckCircle className="w-5 h-5 text-theme-primary" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-theme-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <div>
+                          <span className="font-semibold text-theme-text block">Virement bancaire</span>
+                          <span className="text-xs text-theme-text-muted">Paiement sous 2-3 jours</span>
+                        </div>
+                      </div>
+                      {paymentMethod === 'bank_transfer' && (
+                        <CheckCircle className="w-5 h-5 text-theme-primary" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+                  <Lock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-semibold mb-1">Paiement 100% sécurisé</p>
+                    <p className="text-blue-700">
+                      Vos informations de paiement sont cryptées et sécurisées
+                    </p>
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
-                <Lock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-900">
-                  <p className="font-semibold mb-1">Paiement 100% sécurisé</p>
-                  <p className="text-blue-700">
-                    Vos informations de paiement sont cryptées et sécurisées
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isProcessing}
-              onClick={handleSubmit}
-              className="w-full px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 disabled:bg-theme-primary/50 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-              style={{ fontFamily: 'var(--theme-font-heading)' }}
-            >
-              {isProcessing ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Traitement en cours...
-                </>
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between gap-4">
+              {currentStep > 1 ? (
+                <button
+                  onClick={handlePrevious}
+                  className="px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Retour
+                </button>
               ) : (
-                'Passer la commande'
+                <Link href="/cart">
+                  <button className="px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2">
+                    <ArrowLeft className="w-5 h-5" />
+                    Panier
+                  </button>
+                </Link>
               )}
-            </button>
+
+              {currentStep < STEPS.length ? (
+                <button
+                  onClick={handleNext}
+                  className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2 ml-auto"
+                  style={{ fontFamily: 'var(--theme-font-heading)' }}
+                >
+                  Continuer
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isProcessing}
+                  className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 disabled:bg-theme-primary/50 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 ml-auto"
+                  style={{ fontFamily: 'var(--theme-font-heading)' }}
+                >
+                  {isProcessing ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Traitement...
+                    </>
+                  ) : (
+                    <>
+                      Passer commande
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Order Summary */}
