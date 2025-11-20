@@ -24,6 +24,10 @@ import { analyticsRouter } from './analytics'
 import { reportRouter } from './report'
 import { forecastRouter } from './forecast'
 import { abtestRouter } from './abtest'
+import { warehouseRouter } from './warehouse'
+import { allocationRouter } from './allocation'
+import { inventoryRouter } from './inventory'
+import { inventoryReportRouter } from './inventory-report'
 
 export const appRouter = router({
   product: productRouter,
@@ -51,6 +55,10 @@ export const appRouter = router({
   report: reportRouter,
   forecast: forecastRouter,
   abtest: abtestRouter,
+  warehouse: warehouseRouter,
+  allocation: allocationRouter,
+  inventory: inventoryRouter,
+  inventoryReport: inventoryReportRouter,
 })
 
 export type AppRouter = typeof appRouter
