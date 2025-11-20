@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { trpc } from '@/lib/trpc/client'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
 import {
   Palette,
   Plus,
@@ -14,9 +15,11 @@ import {
   Eye,
   X,
   Download,
+  Paintbrush,
 } from 'lucide-react'
 
 export default function ThemesPage() {
+  const router = useRouter()
   const storeId = '000000000000000000000001' // TODO: Get from context
 
   const { data: themes, refetch: refetchThemes } = trpc.theme.getAll.useQuery({
@@ -296,6 +299,14 @@ export default function ThemesPage() {
                   Activer
                 </Button>
               )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => router.push(`/admin/themes/editor/${theme.id}`)}
+                title="Éditeur visuel"
+              >
+                <Paintbrush className="w-4 h-4" />
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"
