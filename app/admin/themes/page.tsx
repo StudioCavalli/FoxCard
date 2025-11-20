@@ -16,6 +16,7 @@ import {
   X,
   Download,
   Paintbrush,
+  Store,
 } from 'lucide-react'
 
 export default function ThemesPage() {
@@ -218,6 +219,13 @@ export default function ThemesPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => router.push('/admin/themes/marketplace')}
+          >
+            <Store className="w-4 h-4 mr-2" />
+            Marketplace
+          </Button>
           <Button
             variant="secondary"
             onClick={handleSeedSystemThemes}
