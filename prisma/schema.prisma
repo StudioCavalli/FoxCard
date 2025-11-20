@@ -46,6 +46,7 @@ model Store {
   auditLogs   AuditLog[]
   themes      Theme[]
   plugins     Plugin[]
+  abTests     ABTest[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -998,4 +999,99 @@ enum PluginType {
   ANALYTICS
   INTEGRATION
   UTILITY
+}
+
+// ============================================
+// A/B TESTING SYSTEM
+// ============================================
+
+model ABTest {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  // Test configuration
+  type        ABTestType   // PAGE, ELEMENT, CHECKOUT
+  targetPage  String       // "product", "checkout", "homepage"
+  targetElement String?    // CSS selector or element ID
+
+  // Variants
+  variants    ABTestVariant[]
+
+  // Traffic allocation
+  trafficPercent Int      @default(100) // % of visitors included in test
+
+  // Status
+  status      ABTestStatus @default(DRAFT)
+  startDate   DateTime?
+  endDate     DateTime?
+
+  // Goal
+  goalType    ABTestGoal   // CONVERSION, CLICKS, REVENUE
+  goalTarget  String?      // Target element for goal tracking
+
+  // Results
+  winnerVariantId String?  @db.ObjectId
+  declaredAt  DateTime?
+  confidence  Float?       // Statistical confidence when winner was declared
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([status])
+  @@index([type])
+}
+
+model ABTestVariant {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  testId      String   @db.ObjectId
+  test        ABTest   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  name        String   // "Control", "Variant A", "Variant B"
+  isControl   Boolean  @default(false)
+
+  // Variant configuration
+  config      Json     // Changes to apply (text, image, style, etc.)
+
+  // Traffic weight (relative to other variants)
+  weight      Int      @default(50) // Sum of all weights = 100%
+
+  // Statistics
+  visitors    Int      @default(0)
+  conversions Int      @default(0)
+  revenue     Float    @default(0)
+
+  // Calculated metrics (updated periodically)
+  conversionRate Float @default(0)
+  revenuePerVisitor Float @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([testId])
+}
+
+enum ABTestType {
+  PAGE       // Full page test
+  ELEMENT    // Specific element test
+  CHECKOUT   // Checkout flow test
+  PRICE      // Price testing
+}
+
+enum ABTestStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+
+enum ABTestGoal {
+  CONVERSION // Add to cart, checkout completion
+  CLICKS     // Click on specific element
+  REVENUE    // Total revenue generated
+  ENGAGEMENT // Time on page, scroll depth
 }
