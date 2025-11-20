@@ -47,6 +47,8 @@ model Store {
   themes      Theme[]
   plugins     Plugin[]
   abTests     ABTest[]
+  warehouses  Warehouse[]
+  allocationRules AllocationRule[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -148,6 +150,7 @@ model Product {
   category    Category? @relation(fields: [categoryId], references: [id])
   variants    ProductVariant[]
   orderItems  OrderItem[]
+  warehouseStocks WarehouseStock[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -1094,4 +1097,324 @@ enum ABTestGoal {
   CLICKS     // Click on specific element
   REVENUE    // Total revenue generated
   ENGAGEMENT // Time on page, scroll depth
+}
+
+// ============================================
+// MULTI-WAREHOUSE INVENTORY SYSTEM
+// ============================================
+
+model Warehouse {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  code        String   // Short code (e.g., "WH-PARIS", "WH-LYON")
+  description String?
+
+  // Address
+  address     String
+  city        String
+  postalCode  String
+  country     String   @default("FR")
+
+  // Contact
+  phone       String?
+  email       String?
+  manager     String?  // Manager name
+
+  // Location (for distance calculations)
+  latitude    Float?
+  longitude   Float?
+
+  // Settings
+  isActive    Boolean  @default(true)
+  isPrimary   Boolean  @default(false) // Main warehouse
+  priority    Int      @default(0)     // For allocation rules
+
+  // Relations
+  stockItems  WarehouseStock[]
+  transfersFrom StockTransfer[] @relation("TransferFrom")
+  transfersTo   StockTransfer[] @relation("TransferTo")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, code])
+  @@index([storeId])
+  @@index([isActive])
+}
+
+// Stock per product per warehouse
+model WarehouseStock {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  warehouseId String   @db.ObjectId
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  productId   String   @db.ObjectId
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Stock quantities
+  quantity    Int      @default(0)
+  reserved    Int      @default(0) // Reserved for pending orders
+  available   Int      @default(0) // quantity - reserved
+
+  // Thresholds
+  minStock    Int?     // Low stock alert threshold
+  maxStock    Int?     // Maximum capacity
+
+  // Location within warehouse
+  location    String?  // Aisle/shelf location (e.g., "A-12-3")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([warehouseId, productId])
+  @@index([warehouseId])
+  @@index([productId])
+}
+
+// Stock transfers between warehouses
+model StockTransfer {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+
+  // Transfer details
+  transferNumber  String   @unique // e.g., "TRF-2025-0001"
+
+  fromWarehouseId String   @db.ObjectId
+  fromWarehouse   Warehouse @relation("TransferFrom", fields: [fromWarehouseId], references: [id])
+
+  toWarehouseId   String   @db.ObjectId
+  toWarehouse     Warehouse @relation("TransferTo", fields: [toWarehouseId], references: [id])
+
+  // Status
+  status          TransferStatus @default(PENDING)
+
+  // Items
+  items           StockTransferItem[]
+
+  // Notes
+  notes           String?
+  reason          String?  // Reason for transfer
+
+  // Tracking
+  createdBy       String?  @db.ObjectId // User who created
+  approvedBy      String?  @db.ObjectId // User who approved
+  completedBy     String?  @db.ObjectId // User who completed
+
+  // Dates
+  requestedAt     DateTime @default(now())
+  approvedAt      DateTime?
+  shippedAt       DateTime?
+  receivedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
+  @@index([status])
+}
+
+model StockTransferItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  transferId  String   @db.ObjectId
+  transfer    StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+
+  productId   String   @db.ObjectId
+  productName String   // Snapshot
+
+  // Quantities
+  quantity    Int      // Requested quantity
+  received    Int      @default(0) // Actually received (for partial transfers)
+
+  createdAt   DateTime @default(now())
+
+  @@index([transferId])
+  @@index([productId])
+}
+
+// Stock movement history (for audit)
+model StockMovement {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  warehouseId String   @db.ObjectId
+  productId   String   @db.ObjectId
+
+  // Movement details
+  type        MovementType
+  quantity    Int      // Positive for in, negative for out
+  reference   String?  // Order number, transfer number, etc.
+
+  // Before/after for audit
+  quantityBefore Int
+  quantityAfter  Int
+
+  // Metadata
+  reason      String?
+  userId      String?  @db.ObjectId // User who made the change
+
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([warehouseId])
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum TransferStatus {
+  PENDING     // Awaiting approval
+  APPROVED    // Approved, ready to ship
+  IN_TRANSIT  // Being shipped
+  RECEIVED    // Received at destination
+  CANCELLED   // Cancelled
+}
+
+enum MovementType {
+  PURCHASE    // Stock received from supplier
+  SALE        // Stock sold to customer
+  TRANSFER_IN // Received from another warehouse
+  TRANSFER_OUT // Sent to another warehouse
+  ADJUSTMENT  // Manual adjustment
+  RETURN      // Customer return
+  DAMAGED     // Damaged/lost inventory
+}
+
+// Allocation rules for intelligent warehouse selection
+model AllocationRule {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0) // Higher = more important
+
+  // Rule type
+  type        AllocationRuleType
+
+  // Rule configuration
+  config      Json     // Type-specific configuration
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([isActive])
+}
+
+// Allocation decision history
+model AllocationDecision {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  orderId     String   @db.ObjectId
+
+  // Decision details
+  allocations Json     // Array of { warehouseId, productId, quantity, reason }
+
+  // Metrics
+  totalDistance Float? // Total km
+  estimatedShippingCost Float?
+  splitCount  Int      @default(1) // Number of warehouses used
+
+  // Decision factors
+  factors     Json     // Detailed scoring for each warehouse
+
+  // Override
+  wasOverridden Boolean @default(false)
+  overriddenBy String?  @db.ObjectId
+  overrideReason String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+enum AllocationRuleType {
+  DISTANCE      // Prioritize nearest warehouse
+  STOCK_LEVEL   // Prioritize warehouse with most stock
+  COST          // Minimize shipping cost
+  PRIORITY      // Use warehouse priority
+  ZONE          // Specific zone mapping
+  SPLIT_ALLOWED // Allow order splitting
+}
+
+// Physical inventory count sessions
+model InventoryCount {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  warehouseId String   @db.ObjectId
+
+  // Count details
+  countNumber String   @unique // e.g., "INV-2025-0001"
+  name        String
+  description String?
+
+  // Status
+  status      InventoryCountStatus @default(DRAFT)
+
+  // Items
+  items       InventoryCountItem[]
+
+  // Summary (calculated after completion)
+  totalCounted Int     @default(0)
+  totalVariance Int    @default(0)
+  varianceValue Float  @default(0)
+
+  // Audit
+  startedBy   String?  @db.ObjectId
+  completedBy String?  @db.ObjectId
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([warehouseId])
+  @@index([status])
+}
+
+model InventoryCountItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  countId     String   @db.ObjectId
+  count       InventoryCount @relation(fields: [countId], references: [id], onDelete: Cascade)
+
+  productId   String   @db.ObjectId
+  productName String   // Snapshot
+
+  // Quantities
+  expectedQty Int      // System quantity
+  countedQty  Int?     // Physical count
+  variance    Int?     // countedQty - expectedQty
+
+  // Location
+  location    String?  // Shelf location
+
+  // Notes
+  notes       String?
+
+  countedAt   DateTime?
+  countedBy   String?  @db.ObjectId
+
+  createdAt   DateTime @default(now())
+
+  @@index([countId])
+  @@index([productId])
+}
+
+enum InventoryCountStatus {
+  DRAFT       // Being prepared
+  IN_PROGRESS // Counting in progress
+  COMPLETED   // Counting done
+  APPLIED     // Adjustments applied to stock
+  CANCELLED   // Cancelled
 }
