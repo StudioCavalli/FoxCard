@@ -4,6 +4,8 @@ import { PERMISSIONS } from '@/lib/rbac/roles'
 import { TRPCError } from '@trpc/server'
 import { seedSystemThemes, hasSystemThemes, seedThemePresets, hasThemePresets } from '@/lib/themes/seed'
 import { checkPermission } from '../permissions'
+import { mergeThemeConfigs, extractOverrides, hasThemeUpdates, detectConflicts, mergeWithUpdates } from '@/lib/themes/merge'
+import { systemThemes } from '@/lib/themes/presets'
 
 export const themeRouter = router({
   // Get all themes for a store
@@ -619,6 +621,218 @@ export const themeRouter = router({
         message: `${themes.length} thèmes système créés avec succès`,
         themes,
       }
+    }),
+
+  // ============================================
+  // THEME OVERRIDE & MERGE SYSTEM
+  // ============================================
+
+  // Check if a theme has updates available from its base theme
+  checkForUpdates: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_READ)
+
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.themeId },
+        include: { sourcePreset: true },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      // Check if theme is based on a system theme
+      if (!theme.sourcePreset && !theme.isSystem) {
+        return {
+          hasUpdates: false,
+          message: 'Theme is not based on a system theme',
+        }
+      }
+
+      // Find the current version of the base theme
+      const baseTheme = systemThemes.find(
+        (t) => t.slug === theme.sourcePreset?.slug || (theme.isSystem && t.name === theme.name)
+      )
+
+      if (!baseTheme) {
+        return {
+          hasUpdates: false,
+          message: 'Base theme not found',
+        }
+      }
+
+      const hasUpdates = hasThemeUpdates(
+        theme.baseThemeVersion || theme.version,
+        baseTheme.version
+      )
+
+      return {
+        hasUpdates,
+        currentVersion: theme.baseThemeVersion || theme.version,
+        latestVersion: baseTheme.version,
+        baseThemeName: baseTheme.name,
+      }
+    }),
+
+  // Merge base theme updates with user overrides
+  mergeThemeUpdates: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+        acceptConflicts: z.enum(['base', 'user']).default('user'), // Which wins in conflicts
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.themeId },
+        include: { sourcePreset: true },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      // Find the latest base theme
+      const baseTheme = systemThemes.find(
+        (t) => t.slug === theme.sourcePreset?.slug || (theme.isSystem && t.name === theme.name)
+      )
+
+      if (!baseTheme) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Base theme not found',
+        })
+      }
+
+      const userOverrides = theme.overrides as any || {}
+      const newBaseConfig = baseTheme.config
+
+      // Detect conflicts
+      const conflicts = detectConflicts(userOverrides, newBaseConfig)
+
+      // Merge based on strategy
+      let mergedConfig
+      if (input.acceptConflicts === 'user') {
+        // User overrides win
+        mergedConfig = mergeThemeConfigs(newBaseConfig, userOverrides)
+      } else {
+        // Base theme wins - discard conflicting user overrides
+        const nonConflictingOverrides: any = {}
+        Object.entries(userOverrides).forEach(([category, values]) => {
+          if (typeof values === 'object' && values !== null) {
+            const filteredValues: any = {}
+            Object.entries(values).forEach(([key, value]) => {
+              if (!conflicts.includes(`${category}.${key}`)) {
+                filteredValues[key] = value
+              }
+            })
+            if (Object.keys(filteredValues).length > 0) {
+              nonConflictingOverrides[category] = filteredValues
+            }
+          } else if (!conflicts.includes(category)) {
+            nonConflictingOverrides[category] = values
+          }
+        })
+        mergedConfig = mergeThemeConfigs(newBaseConfig, nonConflictingOverrides)
+      }
+
+      // Create history snapshot before updating
+      await ctx.prisma.themeHistory.create({
+        data: {
+          themeId: input.themeId,
+          name: theme.name,
+          description: theme.description,
+          config: theme.config,
+          version: theme.version,
+          changeDescription: `Merged updates from ${baseTheme.name} v${baseTheme.version}`,
+          changedBy: ctx.session?.user?.email || 'System',
+        },
+      })
+
+      // Update theme with merged config
+      return ctx.prisma.theme.update({
+        where: { id: input.themeId },
+        data: {
+          config: mergedConfig,
+          baseThemeVersion: baseTheme.version,
+          version: baseTheme.version,
+        },
+        include: {
+          components: true,
+        },
+      })
+    }),
+
+  // Convert an existing theme to use the override system
+  convertToOverrides: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+        baseThemeSlug: z.string(), // Which system theme to base it on
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.themeId },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      // Find the base theme
+      const baseTheme = systemThemes.find((t) => t.slug === input.baseThemeSlug)
+
+      if (!baseTheme) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Base theme not found',
+        })
+      }
+
+      // Extract only the differences as overrides
+      const currentConfig = theme.config as any
+      const overrides = extractOverrides(baseTheme.config, currentConfig)
+
+      // Find the preset ID for this base theme
+      const preset = await ctx.prisma.themePreset.findUnique({
+        where: { slug: input.baseThemeSlug },
+      })
+
+      // Update theme to use override system
+      return ctx.prisma.theme.update({
+        where: { id: input.themeId },
+        data: {
+          overrides,
+          baseThemeVersion: baseTheme.version,
+          sourcePresetId: preset?.id,
+        },
+        include: {
+          components: true,
+          sourcePreset: true,
+        },
+      })
     }),
 
   // ============================================

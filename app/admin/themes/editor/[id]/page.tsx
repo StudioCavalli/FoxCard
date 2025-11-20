@@ -20,9 +20,11 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  History,
+  Clock,
 } from 'lucide-react'
 
-type TabType = 'colors' | 'typography' | 'spacing' | 'advanced'
+type TabType = 'colors' | 'typography' | 'spacing' | 'advanced' | 'history'
 
 interface ThemeConfig {
   colors: {
@@ -253,11 +255,48 @@ export default function ThemeEditorPage() {
     )
   }
 
+  // Fetch theme history
+  const { data: themeHistory } = trpc.theme.getHistory.useQuery(
+    { storeId, themeId, limit: 20 },
+    { enabled: !!themeId && themeId !== 'new' }
+  )
+
+  // Restore from history mutation
+  const restoreFromHistoryMutation = trpc.theme.restoreFromHistory.useMutation()
+
+  const handleRestoreFromHistory = async (historyId: string) => {
+    if (!confirm('Voulez-vous restaurer cette version ? Vos modifications actuelles seront sauvegardées dans l\'historique.')) {
+      return
+    }
+
+    restoreFromHistoryMutation.mutate(
+      { storeId, themeId, historyId },
+      {
+        onSuccess: (restoredTheme) => {
+          const restoredConfig = {
+            ...defaultConfig,
+            ...restoredTheme.config,
+            colors: { ...defaultConfig.colors, ...(restoredTheme.config as any)?.colors },
+            fonts: { ...defaultConfig.fonts, ...(restoredTheme.config as any)?.fonts },
+            spacing: { ...defaultConfig.spacing, ...(restoredTheme.config as any)?.spacing },
+          }
+          setConfig(restoredConfig)
+          setOriginalConfig(restoredConfig)
+          alert('Version restaurée avec succès')
+        },
+        onError: (error) => {
+          alert(error.message)
+        },
+      }
+    )
+  }
+
   const tabs = [
     { id: 'colors' as TabType, label: 'Couleurs', icon: Palette },
     { id: 'typography' as TabType, label: 'Typographie', icon: Type },
     { id: 'spacing' as TabType, label: 'Espacement', icon: Layout },
     { id: 'advanced' as TabType, label: 'Avancé', icon: Layers },
+    { id: 'history' as TabType, label: 'Historique', icon: History },
   ]
 
   return (
@@ -627,6 +666,85 @@ export default function ThemeEditorPage() {
                     <p>Historique: {historyIndex + 1} / {history.length}</p>
                   </div>
                 </div>
+              </>
+            )}
+
+            {activeTab === 'history' && (
+              <>
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-gray-900">Historique des Modifications</h3>
+
+                  {!themeHistory || themeHistory.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Clock className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                      <p className="text-gray-600">Aucune modification enregistrée</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Les modifications seront automatiquement sauvegardées dans l'historique
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {themeHistory.map((historyItem: any) => (
+                        <div
+                          key={historyItem.id}
+                          className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50/30 transition-all"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 text-sm truncate">
+                                {historyItem.name}
+                              </h4>
+                              {historyItem.changeDescription && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {historyItem.changeDescription}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(historyItem.createdAt).toLocaleString('fr-FR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                                {historyItem.changedBy && (
+                                  <span className="text-gray-400">•</span>
+                                )}
+                                {historyItem.changedBy && (
+                                  <span>{historyItem.changedBy}</span>
+                                )}
+                                <span className="text-gray-400">•</span>
+                                <span className="px-2 py-0.5 bg-gray-100 rounded-full">
+                                  v{historyItem.version}
+                                </span>
+                              </div>
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRestoreFromHistory(historyItem.id)}
+                              disabled={restoreFromHistoryMutation.isPending}
+                            >
+                              {restoreFromHistoryMutation.isPending ? 'Restauration...' : 'Restaurer'}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {themeHistory && themeHistory.length >= 20 && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800">
+                      💡 Seules les 20 dernières modifications sont affichées. Les versions plus anciennes sont conservées en base de données.
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </div>
