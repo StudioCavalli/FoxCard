@@ -102,13 +102,13 @@ export const minimalTheme: ThemeDefinition = {
 }
 
 /**
- * LUXE THEME
- * Inspired by: Hermès, Cartier, Rolex
- * Sophisticated elegance with gold accents and classical typography
+ * ELEGANT THEME
+ * Inspired by: Hermès, Cartier, Rolex, Chanel
+ * Sophisticated elegance with refined accents and classical typography
  */
-export const luxeTheme: ThemeDefinition = {
-  name: 'Luxe',
-  slug: 'luxe',
+export const elegantTheme: ThemeDefinition = {
+  name: 'Elegant',
+  slug: 'elegant',
   description: 'Raffinement absolu et élégance intemporelle. Palette sophistiquée, détails dorés subtils, typographie classique. L\'excellence à chaque détail.',
   config: {
     colors: {
@@ -143,14 +143,14 @@ export const luxeTheme: ThemeDefinition = {
 }
 
 /**
- * TECH THEME
- * Inspired by: Stripe, GitHub, Figma
- * Modern, futuristic design with glassmorphism and vibrant gradients
+ * BOLD THEME
+ * Inspired by: Stripe, GitHub, Figma, Spotify
+ * Modern, vibrant design with strong contrasts and bold typography
  */
-export const techTheme: ThemeDefinition = {
-  name: 'Tech',
-  slug: 'tech',
-  description: 'Design système moderne et futuriste. Glassmorphism, gradients sophistiqués, animations fluides. L\'innovation à son paroxysme.',
+export const boldTheme: ThemeDefinition = {
+  name: 'Bold',
+  slug: 'bold',
+  description: 'Design audacieux et énergique. Couleurs vibrantes, contrastes marqués, typographie puissante. L\'impact visuel maximal.',
   config: {
     colors: {
       primary: '#0EA5E9',
@@ -188,8 +188,8 @@ export const techTheme: ThemeDefinition = {
  */
 export const systemThemes: ThemeDefinition[] = [
   minimalTheme,
-  luxeTheme,
-  techTheme,
+  elegantTheme,
+  boldTheme,
 ]
 
 /**

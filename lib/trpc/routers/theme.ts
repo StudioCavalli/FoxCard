@@ -219,6 +219,19 @@ export const themeRouter = router({
         })
       }
 
+      // Create history snapshot before updating
+      await ctx.prisma.themeHistory.create({
+        data: {
+          themeId: id,
+          name: theme.name,
+          description: theme.description,
+          config: theme.config,
+          version: theme.version,
+          changeDescription: 'Manual update via theme editor',
+          changedBy: ctx.session?.user?.email || 'Unknown',
+        },
+      })
+
       return ctx.prisma.theme.update({
         where: { id },
         data,
@@ -266,6 +279,100 @@ export const themeRouter = router({
 
       return ctx.prisma.theme.delete({
         where: { id: input.id },
+      })
+    }),
+
+  // Get theme history
+  getHistory: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+        limit: z.number().default(20),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_READ)
+
+      // Verify theme belongs to store
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.themeId },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      return ctx.prisma.themeHistory.findMany({
+        where: { themeId: input.themeId },
+        orderBy: { createdAt: 'desc' },
+        take: input.limit,
+      })
+    }),
+
+  // Restore theme from history
+  restoreFromHistory: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        themeId: z.string(),
+        historyId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx, input.storeId, PERMISSIONS.THEMES_UPDATE)
+
+      // Verify theme belongs to store
+      const theme = await ctx.prisma.theme.findUnique({
+        where: { id: input.themeId },
+      })
+
+      if (!theme || theme.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Theme not found',
+        })
+      }
+
+      // Get history record
+      const history = await ctx.prisma.themeHistory.findUnique({
+        where: { id: input.historyId },
+      })
+
+      if (!history || history.themeId !== input.themeId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'History record not found',
+        })
+      }
+
+      // Create snapshot of current state before restoring
+      await ctx.prisma.themeHistory.create({
+        data: {
+          themeId: input.themeId,
+          name: theme.name,
+          description: theme.description,
+          config: theme.config,
+          version: theme.version,
+          changeDescription: 'Before restore to previous version',
+          changedBy: ctx.session?.user?.email || 'Unknown',
+        },
+      })
+
+      // Restore theme from history
+      return ctx.prisma.theme.update({
+        where: { id: input.themeId },
+        data: {
+          name: history.name,
+          description: history.description,
+          config: history.config,
+        },
+        include: {
+          components: true,
+        },
       })
     }),
 
