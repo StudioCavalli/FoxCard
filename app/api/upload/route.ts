@@ -5,18 +5,10 @@ import { optimizeImage, isValidImage } from '@/lib/utils/image-optimizer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Configure max file size (10MB)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-}
-
 /**
  * POST /api/upload
  * Upload and optimize images
+ * Max file size: 10MB (enforced in code)
  */
 export async function POST(request: NextRequest) {
   try {
