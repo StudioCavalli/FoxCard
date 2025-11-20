@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { useCartStore } from '@/lib/store/cart'
-import { ShoppingCart, Plus } from 'lucide-react'
+import { ShoppingCart, Plus, Tag } from 'lucide-react'
 
 interface ProductCardProps {
   product: {
@@ -16,6 +16,7 @@ interface ProductCardProps {
     images: string[]
     thumbnail?: string | null
     quantity: number
+    tags?: string[]
   }
   storeSlug: string
   colorVariant?: 'teal' | 'pink' | 'yellow' | 'blue' | 'green' | 'purple' | 'orange'
@@ -103,11 +104,31 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
         <div className="relative p-5">
           {/* Product Name */}
           <h3
-            className="font-semibold text-theme-text text-base mb-3 line-clamp-2 group-hover:text-theme-primary transition-colors duration-200"
+            className="font-semibold text-theme-text text-base mb-2 line-clamp-2 group-hover:text-theme-primary transition-colors duration-200"
             style={{ fontFamily: 'var(--theme-font-heading)', lineHeight: '1.4' }}
           >
             {product.name}
           </h3>
+
+          {/* Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {product.tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-theme-primary/10 text-theme-primary font-medium rounded text-xs"
+                >
+                  <Tag className="w-2.5 h-2.5" />
+                  {tag}
+                </span>
+              ))}
+              {product.tags.length > 2 && (
+                <span className="inline-flex items-center px-2 py-0.5 bg-theme-surface border border-theme-border text-theme-text-muted font-medium rounded text-xs">
+                  +{product.tags.length - 2}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Price Section */}
           <div className="flex items-baseline gap-2.5">

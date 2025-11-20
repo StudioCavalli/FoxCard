@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
-import { ShoppingCart, ArrowLeft, Check, Minus, Plus, Star } from 'lucide-react'
+import { ShoppingCart, ArrowLeft, Check, Minus, Plus, Star, Tag } from 'lucide-react'
 
 export default function ProductDetailPage({
   params,
@@ -22,6 +22,7 @@ export default function ProductDetailPage({
 
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null)
 
   const addItem = useCartStore((state) => state.addItem)
 
@@ -237,6 +238,21 @@ export default function ProductDetailPage({
               )}
             </div>
 
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {product.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-theme-surface border border-theme-border text-theme-text-secondary font-medium rounded-full text-sm hover:bg-theme-primary/5 hover:border-theme-primary/30 transition-all duration-200"
+                  >
+                    <Tag className="w-3.5 h-3.5" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Description */}
             {product.description && (
               <div className="border-t border-theme-border pt-6">
@@ -247,6 +263,42 @@ export default function ProductDetailPage({
                   Description
                 </h3>
                 <p className="text-theme-text-secondary leading-relaxed whitespace-pre-wrap">{product.description}</p>
+              </div>
+            )}
+
+            {/* Variants Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="border-t border-theme-border pt-6">
+                <label
+                  className="block text-sm font-semibold text-theme-text mb-3"
+                  style={{ fontFamily: 'var(--theme-font-heading)' }}
+                >
+                  Options disponibles
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      onClick={() => setSelectedVariant(variant.id)}
+                      className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                        selectedVariant === variant.id
+                          ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                          : 'border-theme-border hover:border-theme-border-light hover:bg-theme-surface'
+                      }`}
+                    >
+                      <div className="font-semibold text-theme-text mb-1">{variant.name}</div>
+                      <div className="text-sm text-theme-text-secondary">
+                        {formatPrice(variant.price || product.price)}
+                      </div>
+                      {variant.quantity <= 0 && (
+                        <div className="text-xs text-red-600 mt-1">Rupture de stock</div>
+                      )}
+                      {variant.quantity > 0 && variant.quantity < 5 && (
+                        <div className="text-xs text-yellow-600 mt-1">Plus que {variant.quantity}</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
