@@ -19,6 +19,7 @@ import { emailRouter } from './email'
 import { newsletterRouter } from './newsletter'
 import { roleRouter } from './role'
 import { auditRouter } from './audit'
+import { pluginRouter } from './plugin'
 
 export const appRouter = router({
   product: productRouter,
@@ -41,6 +42,7 @@ export const appRouter = router({
   newsletter: newsletterRouter,
   role: roleRouter,
   audit: auditRouter,
+  plugin: pluginRouter,
 })
 
 export type AppRouter = typeof appRouter
