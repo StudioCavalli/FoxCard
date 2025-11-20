@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { trpc } from '@/lib/trpc/client'
 
 // Generate or retrieve visitor ID from localStorage
@@ -78,15 +78,21 @@ export function useABTest(storeId: string, targetPage: string): UseABTestResult 
       // Check if we already have a stored assignment for this test
       const storedVariantId = getStoredAssignment(assignment.testId)
 
+      // Cast assignment to match ABTestAssignment type
+      const typedAssignment: ABTestAssignment = {
+        ...assignment,
+        config: (assignment.config || {}) as Record<string, any>
+      }
+
       if (storedVariantId && storedVariantId !== assignment.variantId) {
         // Use stored assignment for consistency
         // In a real scenario, you'd fetch the config for the stored variant
         // For now, we'll use the new assignment but this could be improved
-        processedAssignments.push(assignment)
+        processedAssignments.push(typedAssignment)
       } else {
         // Store the new assignment
         storeAssignment(assignment.testId, assignment.variantId)
-        processedAssignments.push(assignment)
+        processedAssignments.push(typedAssignment)
 
         // Record the visitor
         recordVisitor.mutate({
@@ -165,7 +171,7 @@ export function withABTest<P extends object>(
     const { config, isControl, isLoading } = useABTestVariant(storeId, targetPage, testId)
 
     if (isLoading) {
-      return <WrappedComponent {...props} />
+      return React.createElement(WrappedComponent, props)
     }
 
     // Merge config into props
@@ -173,8 +179,8 @@ export function withABTest<P extends object>(
       ...props,
       abTestConfig: config,
       isControl,
-    }
+    } as P & { abTestConfig: Record<string, any>; isControl: boolean }
 
-    return <WrappedComponent {...enhancedProps} />
+    return React.createElement(WrappedComponent, enhancedProps)
   }
 }

@@ -504,7 +504,7 @@ export default function InventoryReportsPage() {
               </div>
 
               {/* Recommendations */}
-              {abc.recommendations.length > 0 && (
+              {abc.recommendations && abc.recommendations.length > 0 && (
                 <div className="space-y-2">
                   {abc.recommendations.map((rec: any, i: number) => (
                     <div key={i} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">

@@ -96,6 +96,13 @@ export const PERMISSIONS = {
   // Audit Logs
   AUDIT_VIEW: 'audit.view',
 
+  // Analytics & A/B Testing
+  ANALYTICS_VIEW: 'analytics.view',
+  ABTEST_VIEW: 'abtest.view',
+  ABTEST_CREATE: 'abtest.create',
+  ABTEST_UPDATE: 'abtest.update',
+  ABTEST_DELETE: 'abtest.delete',
+
   // Themes
   THEMES_VIEW: 'themes.view',
   THEMES_CREATE: 'themes.create',

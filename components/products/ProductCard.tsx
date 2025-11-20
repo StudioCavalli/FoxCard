@@ -41,7 +41,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
   const isOutOfStock = product.quantity <= 0
   const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price
-  const discountPercent = hasDiscount
+  const discountPercent = hasDiscount && product.compareAtPrice
     ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
     : 0
 

@@ -89,7 +89,7 @@ export const pluginRouter = router({
       z.object({
         storeId: z.string(),
         id: z.string(),
-        config: z.record(z.any()),
+        config: z.record(z.string(), z.any()),
       })
     )
     .mutation(async ({ ctx, input }) => {

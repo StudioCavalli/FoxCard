@@ -70,7 +70,7 @@ export default function ThemesPage() {
           fonts: formData.fonts,
           spacing: formData.spacing,
           borderRadius: formData.borderRadius,
-        },
+        } as any,
       },
       {
         onSuccess: () => {
@@ -120,7 +120,7 @@ export default function ThemesPage() {
           fonts: formData.fonts,
           spacing: formData.spacing,
           borderRadius: formData.borderRadius,
-        },
+        } as any,
       },
       {
         onSuccess: () => {

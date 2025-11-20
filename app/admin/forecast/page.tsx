@@ -268,7 +268,6 @@ export default function ForecastPage() {
                 stroke="#3B82F6"
                 strokeWidth={2}
                 dot={false}
-                strokeDasharray={(d: any) => d.type === 'forecast' ? '5 5' : '0'}
               />
             </LineChart>
           </ResponsiveContainer>
