@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/ui/ImageUpload'
+import { TagInput } from '@/components/ui/TagInput'
 import { VariantManager, type ProductVariant } from '@/components/products/VariantManager'
 import { trpc } from '@/lib/trpc/client'
 import { generateSlug } from '@/lib/utils'
@@ -25,6 +26,7 @@ export default function NewProductPage() {
     sku: '',
     quantity: '0',
     images: [] as string[],
+    tags: [] as string[],
     categoryId: '',
   })
   const [variants, setVariants] = useState<ProductVariant[]>([])
@@ -52,6 +54,7 @@ export default function NewProductPage() {
       sku: formData.sku || undefined,
       quantity: parseInt(formData.quantity),
       images: formData.images,
+      tags: formData.tags,
       type: 'SIMPLE',
       status: 'ACTIVE',
       trackInventory: true,
@@ -127,6 +130,12 @@ export default function NewProductPage() {
               ))}
             </select>
           </div>
+
+          <TagInput
+            value={formData.tags}
+            onChange={(tags) => setFormData({ ...formData, tags })}
+            placeholder="Ajouter des tags (ex: promo, nouveau, soldes...)"
+          />
         </Card>
 
         <Card className="p-6 space-y-4">
