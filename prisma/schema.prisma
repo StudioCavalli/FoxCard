@@ -45,6 +45,7 @@ model Store {
   storeUsers  StoreUser[]
   auditLogs   AuditLog[]
   themes      Theme[]
+  plugins     Plugin[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -890,4 +891,111 @@ model ThemePreset {
   updatedAt   DateTime @updatedAt
 
   @@index([isPublic])
+}
+
+// ============================================
+// PLUGIN SYSTEM
+// ============================================
+
+// Plugin registry (marketplace presets)
+model PluginPreset {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String   @unique
+  slug        String   @unique
+  description String?
+
+  // Plugin metadata
+  type        PluginType
+  category    String   // "payment", "shipping", "marketing", "seo", "analytics"
+  icon        String?  // Icon URL or emoji
+  thumbnail   String?
+  screenshots String[]
+
+  // Plugin code/config
+  version     String   @default("1.0.0")
+  config      Json     // Default configuration schema
+  hooks       String[] // Events the plugin listens to
+  permissions String[] // Required permissions
+
+  // Author info
+  author      String?
+  authorUrl   String?
+  documentation String?
+  repository  String?
+
+  // Marketplace
+  isPublic    Boolean  @default(false)
+  isPremium   Boolean  @default(false)
+  price       Float?
+  tags        String[]
+
+  // Stats
+  installCount Int     @default(0)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+
+  // Requirements
+  minVersion  String?  // Minimum FoxCard version
+  dependencies String[] // Other required plugins
+
+  // Installations
+  installations Plugin[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublic])
+  @@index([type])
+  @@index([category])
+}
+
+// Installed plugin instance for a store
+model Plugin {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Source preset (if from marketplace)
+  presetId    String?  @db.ObjectId
+  preset      PluginPreset? @relation(fields: [presetId], references: [id])
+
+  name        String
+  slug        String
+  description String?
+  type        PluginType
+  category    String
+  icon        String?
+  version     String   @default("1.0.0")
+
+  // Configuration (store-specific overrides)
+  config      Json     // Plugin settings
+
+  // State
+  isEnabled   Boolean  @default(true)
+  isInstalled Boolean  @default(true)
+
+  // Timestamps
+  installedAt DateTime @default(now())
+  enabledAt   DateTime?
+  disabledAt  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([type])
+  @@index([isEnabled])
+}
+
+enum PluginType {
+  PAYMENT
+  SHIPPING
+  MARKETING
+  SEO
+  ANALYTICS
+  INTEGRATION
+  UTILITY
 }
