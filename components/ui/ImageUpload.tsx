@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-import { trpc } from '@/lib/trpc/client'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { Button } from './Button'
 import Image from 'next/image'
@@ -10,7 +9,7 @@ interface ImageUploadProps {
   value: string[]
   onChange: (urls: string[]) => void
   maxImages?: number
-  folder?: 'products' | 'categories' | 'store' | 'users'
+  storeId?: string
   disabled?: boolean
 }
 
@@ -25,15 +24,12 @@ export function ImageUpload({
   value = [],
   onChange,
   maxImages = 5,
-  folder = 'products',
+  storeId = '000000000000000000000001', // Demo store ID
   disabled = false,
 }: ImageUploadProps) {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const getUploadUrl = trpc.media.getUploadUrl.useMutation()
-  const deleteFile = trpc.media.delete.useMutation()
 
   const handleFileSelect = useCallback(
     async (files: FileList | null) => {
@@ -62,25 +58,24 @@ export function ImageUpload({
         const uploadingFile = newUploadingFiles[i]
 
         try {
-          // Get presigned URL
-          const { uploadUrl, publicUrl } = await getUploadUrl.mutateAsync({
-            filename: uploadingFile.file.name,
-            contentType: uploadingFile.file.type,
-            folder,
-          })
+          // Create FormData for upload
+          const formData = new FormData()
+          formData.append('file', uploadingFile.file)
+          formData.append('storeId', storeId)
+          formData.append('optimize', 'true')
 
-          // Upload to R2 using presigned URL
-          const uploadResponse = await fetch(uploadUrl, {
-            method: 'PUT',
-            body: uploadingFile.file,
-            headers: {
-              'Content-Type': uploadingFile.file.type,
-            },
+          // Upload to our API with optimization
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
           })
 
           if (!uploadResponse.ok) {
-            throw new Error('Upload failed')
+            const errorData = await uploadResponse.json()
+            throw new Error(errorData.error || 'Upload failed')
           }
+
+          const result = await uploadResponse.json()
 
           // Update progress
           setUploadingFiles((prev) =>
@@ -89,8 +84,9 @@ export function ImageUpload({
             )
           )
 
-          // Add to value
-          onChange([...value, publicUrl])
+          // Use the original optimized image URL
+          const imageUrl = result.original?.url || result.url
+          onChange([...value, imageUrl])
 
           // Remove from uploading after a short delay
           setTimeout(() => {
@@ -99,34 +95,24 @@ export function ImageUpload({
             )
             URL.revokeObjectURL(uploadingFile.preview)
           }, 500)
-        } catch (error) {
+        } catch (error: any) {
           console.error('Upload error:', error)
           setUploadingFiles((prev) =>
             prev.map((f) =>
               f.file === uploadingFile.file
-                ? { ...f, error: 'Échec de l\'upload' }
+                ? { ...f, error: error.message || 'Échec de l\'upload' }
                 : f
             )
           )
         }
       }
     },
-    [value, onChange, maxImages, folder, disabled, getUploadUrl]
+    [value, onChange, maxImages, storeId, disabled]
   )
 
-  const handleRemove = async (url: string) => {
+  const handleRemove = (url: string) => {
     if (disabled) return
-
-    // Extract key from URL
-    const key = url.split('/').slice(-2).join('/')
-
-    try {
-      await deleteFile.mutateAsync({ key })
-      onChange(value.filter((v) => v !== url))
-    } catch (error) {
-      console.error('Delete error:', error)
-      alert('Erreur lors de la suppression de l\'image')
-    }
+    onChange(value.filter((v) => v !== url))
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -221,7 +207,7 @@ export function ImageUpload({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemove(url)}
-                  disabled={disabled || deleteFile.isPending}
+                  disabled={disabled}
                   className="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-red-600 hover:bg-red-50"
                 >
                   <X className="w-4 h-4" />
