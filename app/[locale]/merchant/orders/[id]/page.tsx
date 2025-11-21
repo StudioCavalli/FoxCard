@@ -43,7 +43,7 @@ const paymentStatusLabels: Record<string, string> = {
 
 const fulfillmentStatusLabels: Record<string, string> = {
   UNFULFILLED: 'Non expédié',
-  PARTIAL: 'Partiellement expédié',
+  PARTIALLY_FULFILLED: 'Partiellement expédié',
   FULFILLED: 'Expédié',
   RETURNED: 'Retourné',
 }
@@ -352,7 +352,7 @@ export default function OrderDetailPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
                   <option value="UNFULFILLED">Non expédié</option>
-                  <option value="PARTIAL">Partiellement expédié</option>
+                  <option value="PARTIALLY_FULFILLED">Partiellement expédié</option>
                   <option value="FULFILLED">Expédié</option>
                   <option value="RETURNED">Retourné</option>
                 </select>
@@ -409,7 +409,7 @@ export default function OrderDetailPage() {
                 <span className="text-gray-500">Statut</span>
                 <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
                   order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-700' :
-                  order.fulfillmentStatus === 'PARTIAL' ? 'bg-blue-100 text-blue-700' :
+                  order.fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'bg-blue-100 text-blue-700' :
                   order.fulfillmentStatus === 'RETURNED' ? 'bg-red-100 text-red-700' :
                   'bg-gray-100 text-gray-700'
                 }`}>
