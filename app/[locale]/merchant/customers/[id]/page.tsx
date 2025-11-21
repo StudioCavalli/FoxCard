@@ -254,7 +254,17 @@ export default function CustomerDetailPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div className="text-sm text-gray-600">
-                  <p>{customer.address}</p>
+                  {typeof customer.address === 'string' ? (
+                    <p>{customer.address}</p>
+                  ) : (
+                    <>
+                      {(customer.address as any).street && <p>{(customer.address as any).street}</p>}
+                      {(customer.address as any).city && (
+                        <p>{(customer.address as any).postalCode} {(customer.address as any).city}</p>
+                      )}
+                      {(customer.address as any).country && <p>{(customer.address as any).country}</p>}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
