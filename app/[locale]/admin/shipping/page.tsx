@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { Plus, Edit, Trash2, Truck, MapPin, Clock, DollarSign, Globe } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 const COMMON_COUNTRIES = [
   { code: 'FR', name: 'France' },
@@ -22,7 +23,7 @@ const COMMON_COUNTRIES = [
 ]
 
 export default function AdminShippingPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedCountries, setSelectedCountries] = useState<string[]>([])
@@ -41,9 +42,14 @@ export default function AdminShippingPage() {
     { name: '', price: '', minOrderAmount: '', estimatedDays: '' }
   ])
 
-  const { data: shippingZones, refetch } = trpc.shipping.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: shippingZones, refetch } = trpc.shipping.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const createZone = trpc.shipping.create.useMutation({
     onSuccess: () => {
@@ -97,7 +103,7 @@ export default function AdminShippingPage() {
     }
 
     const data = {
-      storeId: DEMO_STORE_ID,
+      storeId: storeId!,
       name: formData.name,
       countries: selectedCountries,
       isActive: formData.isActive,
