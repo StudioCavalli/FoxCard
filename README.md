@@ -990,6 +990,45 @@ Après le seed, utilisez ces credentials :
   - Override partiel ou complet du thème
   - Historique des modifications avec restauration
 
+#### 🏪 Système Multi-Shop (M9) - IN PROGRESS
+- [x] **Architecture Multi-Tenant Complète** :
+  - Store context avec `useStoreContext()` hook
+  - Gestion dynamique des stores (owned + member stores)
+  - Persistance localStorage du store sélectionné
+  - Support multi-stores pour un seul utilisateur
+- [x] **Sécurité & Permissions** (`lib/trpc/trpc.ts`) :
+  - Middleware `requireStoreAccess` pour vérification d'accès
+  - Vérification propriétaire (ownerId) ou membre actif (StoreUser)
+  - Flag `isStoreOwner` dans le contexte pour permissions différenciées
+  - Protection NOT_FOUND et FORBIDDEN appropriées
+- [x] **Store Router Sécurisé** (`lib/trpc/routers/store.ts`) :
+  - `getUserStores`: Retourne stores owned + member stores avec status ACTIVE
+  - `update`: Middleware `requireStoreAccess` (owner ou member)
+  - `delete`: Restriction owner uniquement
+  - Paramètre unifié `storeId` au lieu de `id`
+- [x] **Interface Admin** :
+  - StoreSelector dans header admin avec icônes (Store, ChevronDown)
+  - Design moderne avec hover states et transitions
+  - Affichage intelligent (dropdown multi-stores, badge single-store)
+  - Changement de store dynamique sans rechargement
+  - 21 pages admin mises à jour avec contexte dynamique
+- [x] **Pages Admin Converties** :
+  - Analytics, Audit, Reports, Store, Users, Roles
+  - CrsdPay: Dashboard, Crypto, Customers, Reconciliation, Reports, Settings
+  - Emails, Forecast, Marketplace
+  - Plugins: Main, Marketplace, Settings
+  - Themes: Main, Editor, Marketplace
+- [ ] **Mode "All Stores"** (TODO) :
+  - Listing produits multi-stores sur le front public
+  - Grille de produits avec indication du store
+  - Filtrage par store
+- [ ] **Intégrations Multi-Shop** (TODO) :
+  - Panier et checkout multi-stores
+  - Theme switcher intégré à la sélection de store
+  - URLs et SEO spécifiques par store
+  - Tests d'intégration multi-shop
+  - Documentation setup et usage
+
 #### ⚡ Optimisations Performances
 - [x] **Code Splitting** :
   - Lazy loading automatique avec Next.js
