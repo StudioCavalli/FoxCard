@@ -10,15 +10,17 @@ interface SidebarLinkProps {
   icon: LucideIcon
   children: React.ReactNode
   badge?: number | string
+  onClick?: () => void
 }
 
-export function SidebarLink({ href, icon: Icon, children, badge }: SidebarLinkProps) {
+export function SidebarLink({ href, icon: Icon, children, badge, onClick }: SidebarLinkProps) {
   const pathname = usePathname()
   const isActive = pathname === href || (href !== '/admin' && pathname?.startsWith(href))
 
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
         'flex items-center justify-between pl-6 pr-3 py-2 rounded-lg transition-colors text-sm',
         isActive
