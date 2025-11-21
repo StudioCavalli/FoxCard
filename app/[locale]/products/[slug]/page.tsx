@@ -11,6 +11,8 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { ShoppingCart, ArrowLeft, Check, Minus, Plus, Star, Tag } from 'lucide-react'
 
+import { usePublicStore } from '@/lib/context/public-store-context'
+
 export default function ProductDetailPage({
   params,
 }: {
@@ -18,7 +20,7 @@ export default function ProductDetailPage({
 }) {
   const { slug } = use(params)
   const router = useRouter()
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { selectedStore } = usePublicStore()
 
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
@@ -26,21 +28,22 @@ export default function ProductDetailPage({
 
   const addItem = useCartStore((state) => state.addItem)
 
+  // Find product by slug across all stores or specific store
   const { data: product, isLoading } = trpc.product.getBySlug.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: selectedStore === 'all' ? undefined : selectedStore,
     slug,
   })
 
-  // Get related products from same category
+  // Get related products from same category and store
   const { data: relatedProducts } = trpc.product.getAll.useQuery(
     {
-      storeId: DEMO_STORE_ID,
+      storeId: product?.storeId, // Use product's actual storeId for related products
       categoryId: product?.categoryId ?? undefined,
       status: 'ACTIVE',
       limit: 4,
     },
     {
-      enabled: !!product?.categoryId,
+      enabled: !!product?.categoryId && !!product?.storeId,
     }
   )
 
@@ -103,7 +106,8 @@ export default function ProductDetailPage({
     addItem({
       id: product.id,
       productId: product.id,
-      storeId: DEMO_STORE_ID, // Multi-store support (using demo store for detail page)
+      storeId: product.storeId, // Use product's actual storeId
+      storeName: product.store?.name, // Include store name for cart display
       name: product.name,
       slug: product.slug,
       price: product.price,

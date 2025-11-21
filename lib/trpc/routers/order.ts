@@ -82,6 +82,159 @@ export const orderRouter = router({
       })
     }),
 
+  /**
+   * Create multiple orders from cart (multi-store support)
+   * Groups cart items by store and creates separate orders
+   */
+  createFromCart: publicProcedure
+    .input(
+      z.object({
+        customerEmail: z.string().email(),
+        customerName: z.string().optional(),
+        items: z.array(
+          z.object({
+            productId: z.string(),
+            storeId: z.string(), // Multi-store: each item has its storeId
+            quantity: z.number().min(1),
+            variantId: z.string().optional(),
+            variantName: z.string().optional(),
+          })
+        ),
+        shippingAddress: z.any(),
+        billingAddress: z.any().optional(),
+        notes: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { items, ...customerData } = input
+
+      // Group items by storeId
+      const itemsByStore = items.reduce((acc, item) => {
+        if (!acc[item.storeId]) {
+          acc[item.storeId] = []
+        }
+        acc[item.storeId].push(item)
+        return acc
+      }, {} as Record<string, typeof items>)
+
+      // Create one order per store
+      const orders = await Promise.all(
+        Object.entries(itemsByStore).map(async ([storeId, storeItems]) => {
+          // Generate order number
+          const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
+
+          // Calculate totals for this store
+          const productsData = await ctx.prisma.product.findMany({
+            where: {
+              id: { in: storeItems.map((item) => item.productId) },
+            },
+          })
+
+          const orderItems = storeItems.map((item) => {
+            const product = productsData.find((p) => p.id === item.productId)
+            if (!product) throw new Error(`Product ${item.productId} not found`)
+
+            const itemTotal = product.price * item.quantity
+            return {
+              productId: item.productId,
+              name: product.name,
+              price: product.price,
+              quantity: item.quantity,
+              variantId: item.variantId,
+              variantName: item.variantName,
+              total: itemTotal,
+            }
+          })
+
+          const subtotal = orderItems.reduce((sum, item) => sum + item.total, 0)
+
+          // Calculate shipping for this store
+          let shippingCost = 0
+          try {
+            const shippingZone = await ctx.prisma.shippingZone.findFirst({
+              where: {
+                storeId,
+                countries: {
+                  has: customerData.shippingAddress?.country || 'France',
+                },
+                isActive: true,
+              },
+              include: {
+                rates: true,
+              },
+            })
+
+            if (shippingZone && shippingZone.rates.length > 0) {
+              const applicableRate = shippingZone.rates.find((rate) => {
+                if (rate.minOrderAmount) {
+                  return subtotal >= rate.minOrderAmount
+                }
+                return true
+              })
+              shippingCost = applicableRate?.price || shippingZone.rates[0].price
+            } else {
+              shippingCost = subtotal > 50 ? 0 : 5.99
+            }
+          } catch (err) {
+            shippingCost = subtotal > 50 ? 0 : 5.99
+          }
+
+          const total = Math.max(0, subtotal + shippingCost)
+
+          // Create order for this store
+          const order = await ctx.prisma.order.create({
+            data: {
+              storeId,
+              ...customerData,
+              orderNumber,
+              subtotal,
+              total,
+              shipping: shippingCost,
+              discount: 0,
+              tax: 0,
+              items: {
+                create: orderItems,
+              },
+            },
+            include: {
+              items: true,
+              store: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          })
+
+          // Send order confirmation email (async, don't block response)
+          emailService.sendOrderConfirmation(order.id, storeId).catch((err) => {
+            console.error(`Failed to send order confirmation email for store ${storeId}:`, err)
+          })
+
+          // Execute plugin hooks (async, don't block response)
+          const hookExecutor = createHookExecutor(ctx.prisma)
+          hookExecutor.onOrderCreated(storeId, {
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            total: order.total,
+            customerEmail: order.customerEmail,
+          }).catch((err) => {
+            console.error(`Failed to execute order created hooks for store ${storeId}:`, err)
+          })
+
+          return order
+        })
+      )
+
+      return {
+        orders,
+        totalOrders: orders.length,
+        totalAmount: orders.reduce((sum, order) => sum + order.total, 0),
+      }
+    }),
+
   create: publicProcedure
     .input(
       z.object({

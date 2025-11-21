@@ -77,19 +77,30 @@ export default function CheckoutPage() {
     localStorage.setItem('foxcard-checkout', JSON.stringify(saveData))
   }, [formData, currentStep, paymentMethod])
 
-  const createOrder = trpc.order.create.useMutation({
-    onSuccess: async (order) => {
+  const createOrder = trpc.order.createFromCart.useMutation({
+    onSuccess: async (result) => {
       try {
+        const { orders } = result
+
+        // For multi-store orders, use first order for payment redirect
+        const primaryOrder = orders[0]
+
         if (paymentMethod === 'bank_transfer') {
-          await generateBankTransferInstructions.mutateAsync({
-            orderId: order.id,
-            storeId: order.storeId,
-          })
-          router.push(`/order-confirmation/${order.orderNumber}?bank_transfer=true`)
+          // Generate bank transfer for each store
+          await Promise.all(
+            orders.map(order =>
+              generateBankTransferInstructions.mutateAsync({
+                orderId: order.id,
+                storeId: order.storeId,
+              })
+            )
+          )
+          // Redirect to first order confirmation (will show all orders)
+          router.push(`/order-confirmation/${primaryOrder.orderNumber}?bank_transfer=true&multi_store=true`)
         } else if (paymentMethod === 'paypal') {
           const paypalOrder = await createPayPalOrder.mutateAsync({
-            orderId: order.id,
-            returnUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?paypal=true&token={TOKEN}`,
+            orderId: primaryOrder.id,
+            returnUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?paypal=true&token={TOKEN}&multi_store=true`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
           if (paypalOrder.approvalUrl) {
@@ -97,8 +108,8 @@ export default function CheckoutPage() {
           }
         } else {
           const session = await createCheckoutSession.mutateAsync({
-            orderId: order.id,
-            successUrl: `${window.location.origin}/order-confirmation/${order.orderNumber}?session_id={CHECKOUT_SESSION_ID}`,
+            orderId: primaryOrder.id,
+            successUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?session_id={CHECKOUT_SESSION_ID}&multi_store=true`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
           if (session.url) {
@@ -223,12 +234,12 @@ export default function CheckoutPage() {
     setIsProcessing(true)
 
     try {
-      const order = await createOrder.mutateAsync({
-        storeId: '000000000000000000000001',
+      const result = await createOrder.mutateAsync({
         customerEmail: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`,
         items: items.map((item) => ({
           productId: item.productId,
+          storeId: item.storeId, // Multi-store support
           quantity: item.quantity,
           variantId: item.variantId,
           variantName: item.variantName,
@@ -242,20 +253,19 @@ export default function CheckoutPage() {
           country: formData.country,
           phone: formData.phone,
         },
-        discountCodeId: appliedDiscount?.id,
       })
 
       if (appliedDiscount) {
         incrementUsage.mutate({ id: appliedDiscount.id })
       }
 
-      // Redeem loyalty points if used
-      if (loyaltyPointsUsed > 0 && order) {
+      // Redeem loyalty points if used (apply to first order only)
+      if (loyaltyPointsUsed > 0 && result.orders[0]) {
         try {
           await redeemPoints.mutateAsync({
             customerId: DEMO_CUSTOMER_ID,
             points: loyaltyPointsUsed,
-            orderId: order.id,
+            orderId: result.orders[0].id,
           })
         } catch (loyaltyErr) {
           console.error('Failed to redeem loyalty points:', loyaltyErr)
