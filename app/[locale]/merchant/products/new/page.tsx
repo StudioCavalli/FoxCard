@@ -40,7 +40,7 @@ export default function NewProductPage() {
     price: '',
     compareAtPrice: '',
     cost: '',
-    type: ProductType.SIMPLE,
+    type: ProductType.SIMPLE as ProductType,
     sku: '',
     barcode: '',
     trackInventory: true,
@@ -51,7 +51,7 @@ export default function NewProductPage() {
     metaTitle: '',
     metaDescription: '',
     tags: [] as string[],
-    status: ProductStatus.DRAFT,
+    status: ProductStatus.DRAFT as ProductStatus,
     featured: false,
     categoryId: '',
   })
