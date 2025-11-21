@@ -260,6 +260,7 @@ model Order {
   // Payment
   paymentMethod   String?
   paymentIntentId String?
+  paymentExpiresAt DateTime? // For bank transfer payments
 
   // Shipping
   shippingAddress Json?
@@ -336,6 +337,7 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  PARTIALLY_REFUNDED
   REFUNDED
 }
 
