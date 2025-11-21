@@ -1018,16 +1018,86 @@ Après le seed, utilisez ces credentials :
   - Emails, Forecast, Marketplace
   - Plugins: Main, Marketplace, Settings
   - Themes: Main, Editor, Marketplace
-- [ ] **Mode "All Stores"** (TODO) :
+- [x] **Mode "All Stores"** (COMPLETE) :
   - Listing produits multi-stores sur le front public
   - Grille de produits avec indication du store
   - Filtrage par store
-- [ ] **Intégrations Multi-Shop** (TODO) :
-  - Panier et checkout multi-stores
-  - Theme switcher intégré à la sélection de store
-  - URLs et SEO spécifiques par store
-  - Tests d'intégration multi-shop
-  - Documentation setup et usage
+  - Products from suspended stores hidden automatically
+- [x] **Multi-Store Cart & Checkout** (COMPLETE) :
+  - Panier groupe par store automatiquement
+  - Checkout multi-stores avec commandes separees par store
+  - Theme switcher integre a la selection de store
+  - Support des differents modes de paiement par store
+
+### ✅ M11: SuperAdmin Space Redesign (COMPLETE)
+
+#### 🛡️ Espace SuperAdmin
+- [x] **Dashboard SuperAdmin** (`/superadmin`) :
+  - Vue d'ensemble de toute la plateforme
+  - Statistiques globales : stores, utilisateurs, commandes, revenus
+  - Graphiques de performance
+  - Actions rapides
+- [x] **Gestion des Boutiques** (`/superadmin/stores`) :
+  - Liste complete avec statuts (ACTIVE, SUSPENDED, PENDING, CLOSED)
+  - Cartes de statistiques par statut avec filtrage
+  - Creation de boutique pour un utilisateur existant
+  - Suspension avec raison obligatoire
+  - Reactivation de boutiques suspendues
+  - Approbation de boutiques en attente
+
+#### 🚫 Systeme de Suspension des Marchands
+- [x] **Modele de donnees StoreStatus** (`prisma/schema.prisma`) :
+  - Enum StoreStatus : ACTIVE, SUSPENDED, PENDING, CLOSED
+  - Champs : status, suspendedAt, suspendedReason
+- [x] **Middleware de Blocage** (`lib/trpc/trpc.ts`) :
+  - `requireStoreAccess` bloque les boutiques suspendues
+  - Messages d'erreur personnalises par statut
+  - Super admins contournent les restrictions
+- [x] **Filtrage Public Automatique** :
+  - `store.getDirectory` : boutiques suspendues cachees
+  - `product.getAll` : produits des boutiques suspendues caches
+  - Aucun acces public aux contenus suspendus
+
+#### ⚖️ Systeme d'Appel de Suspension
+- [x] **Modele SuspensionAppeal** (`prisma/schema.prisma`) :
+  - Relations Store et User
+  - Statuts : PENDING, REVIEWING, APPROVED, REJECTED
+  - Message du marchand et reponse admin
+  - Historique des appels
+- [x] **Endpoints Marchands** (`lib/trpc/routers/store.ts`) :
+  - `getStoreStatus` : statut de suspension et info d'appel
+  - `submitAppeal` : soumettre un appel (min 50 caracteres)
+  - Verification qu'un seul appel en cours par boutique
+- [x] **Endpoints SuperAdmin** (`lib/trpc/routers/superadmin.ts`) :
+  - `getAllAppeals` : liste des appels avec filtres par statut
+  - `updateAppealStatus` : approuver/rejeter avec reponse
+  - Option de reactivation automatique si approuve
+  - Logs d'audit pour chaque action
+- [x] **Interface Marchand Suspendu** (`components/merchant/`) :
+  - `SuspendedStoreView.tsx` : page de suspension
+  - Affichage de la raison de suspension
+  - Formulaire d'appel avec validation
+  - Statut de l'appel en cours
+  - Historique des appels precedents
+  - `MerchantContent.tsx` : wrapper qui detecte la suspension
+- [x] **Page Gestion des Appels** (`/superadmin/appeals`) :
+  - Liste de tous les appels avec statistiques
+  - Filtrage par statut (en attente, en examen, approuve, rejete)
+  - Modal de detail avec informations completes
+  - Actions : marquer en examen, approuver, rejeter
+  - Reactivation automatique optionnelle
+  - Lien dans la sidebar SuperAdmin
+
+#### 👤 Gestion des Utilisateurs
+- [x] **Page Utilisateurs** (`/superadmin/users`) :
+  - Liste de tous les utilisateurs de la plateforme
+  - Filtrage par role (USER, ADMIN, SUPER_ADMIN)
+  - Modification des roles
+  - Visualisation des stores associes
+- [x] **Gestion des Commandes** (`/superadmin/orders`) :
+  - Vue de toutes les commandes de la plateforme
+  - Filtres par statut, boutique, date
+  - Endpoint `getAllOrders` pour vue globale
 
 #### ⚡ Optimisations Performances
 - [x] **Code Splitting** :

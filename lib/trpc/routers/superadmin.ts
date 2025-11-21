@@ -10,7 +10,7 @@ export const superadminRouter = router({
         limit: z.number().min(1).max(100).default(50),
         offset: z.number().min(0).default(0),
         search: z.string().optional(),
-        status: z.enum(['active', 'suspended', 'all']).default('all'),
+        status: z.enum(['ACTIVE', 'SUSPENDED', 'PENDING', 'CLOSED', 'all']).default('all'),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -25,10 +25,12 @@ export const superadminRouter = router({
         ]
       }
 
-      // Filter by status (for future use if we add status field)
-      // Currently all stores are considered 'active' unless we add a status field
+      // Filter by store status
+      if (input.status !== 'all') {
+        where.status = input.status
+      }
 
-      const [stores, total] = await Promise.all([
+      const [stores, total, statusCounts] = await Promise.all([
         ctx.prisma.store.findMany({
           where,
           include: {
@@ -53,6 +55,13 @@ export const superadminRouter = router({
           skip: input.offset,
         }),
         ctx.prisma.store.count({ where }),
+        // Get counts per status
+        Promise.all([
+          ctx.prisma.store.count({ where: { status: 'ACTIVE' } }),
+          ctx.prisma.store.count({ where: { status: 'SUSPENDED' } }),
+          ctx.prisma.store.count({ where: { status: 'PENDING' } }),
+          ctx.prisma.store.count({ where: { status: 'CLOSED' } }),
+        ]),
       ])
 
       // Calculate revenue per store
@@ -79,6 +88,12 @@ export const superadminRouter = router({
         stores: storesWithRevenue,
         total,
         hasMore: input.offset + input.limit < total,
+        statusCounts: {
+          active: statusCounts[0],
+          suspended: statusCounts[1],
+          pending: statusCounts[2],
+          closed: statusCounts[3],
+        },
       }
     }),
 
@@ -298,12 +313,12 @@ export const superadminRouter = router({
       return storesWithRevenue
     }),
 
-  // Update store status (activate/suspend)
+  // Update store status (activate/suspend/close)
   updateStoreStatus: superAdminProcedure
     .input(
       z.object({
         storeId: z.string(),
-        action: z.enum(['activate', 'suspend']),
+        status: z.enum(['ACTIVE', 'SUSPENDED', 'PENDING', 'CLOSED']),
         reason: z.string().optional(),
       })
     )
@@ -316,16 +331,27 @@ export const superadminRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
       }
 
+      // Update store status
+      const updatedStore = await ctx.prisma.store.update({
+        where: { id: input.storeId },
+        data: {
+          status: input.status,
+          suspendedAt: input.status === 'SUSPENDED' ? new Date() : null,
+          suspendedReason: input.status === 'SUSPENDED' ? input.reason : null,
+        },
+      })
+
       // Log the action in audit log
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
           storeId: input.storeId,
-          action: `STORE_${input.action.toUpperCase()}`,
+          action: `STORE_STATUS_${input.status}`,
           entity: 'Store',
           entityId: input.storeId,
           metadata: {
-            action: input.action,
+            previousStatus: store.status,
+            newStatus: input.status,
             reason: input.reason,
             storeName: store.name,
             performedBy: ctx.session.user.email,
@@ -333,14 +359,146 @@ export const superadminRouter = router({
         },
       })
 
-      // For now, we don't have a status field on Store
-      // This would require a schema migration to add status: StoreStatus
-      // TODO: Add status field to Store model
-
       return {
         success: true,
-        message: `Store ${input.action}d successfully`,
+        store: updatedStore,
+        message: `Boutique ${input.status === 'ACTIVE' ? 'activée' : input.status === 'SUSPENDED' ? 'suspendue' : input.status === 'CLOSED' ? 'fermée' : 'mise en attente'}`,
       }
+    }),
+
+  // Create a new store (by superadmin)
+  createStore: superAdminProcedure
+    .input(
+      z.object({
+        name: z.string().min(2),
+        slug: z.string().min(2).regex(/^[a-z0-9-]+$/),
+        description: z.string().optional(),
+        ownerEmail: z.string().email(),
+        status: z.enum(['ACTIVE', 'PENDING']).default('ACTIVE'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if slug already exists
+      const existingStore = await ctx.prisma.store.findUnique({
+        where: { slug: input.slug },
+      })
+
+      if (existingStore) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Ce slug est déjà utilisé',
+        })
+      }
+
+      // Find or create owner
+      let owner = await ctx.prisma.user.findUnique({
+        where: { email: input.ownerEmail },
+      })
+
+      if (!owner) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Utilisateur non trouvé. Créez d\'abord un compte utilisateur.',
+        })
+      }
+
+      // Create the store
+      const store = await ctx.prisma.store.create({
+        data: {
+          name: input.name,
+          slug: input.slug,
+          description: input.description,
+          ownerId: owner.id,
+          status: input.status,
+        },
+        include: {
+          owner: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      })
+
+      // Log the action
+      await ctx.prisma.auditLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          storeId: store.id,
+          action: 'STORE_CREATE',
+          entity: 'Store',
+          entityId: store.id,
+          metadata: {
+            storeName: store.name,
+            storeSlug: store.slug,
+            ownerEmail: owner.email,
+            performedBy: ctx.session.user.email,
+          },
+        },
+      })
+
+      return store
+    }),
+
+  // Update store details
+  updateStore: superAdminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        name: z.string().min(2).optional(),
+        slug: z.string().min(2).regex(/^[a-z0-9-]+$/).optional(),
+        description: z.string().optional(),
+        domain: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { storeId, ...data } = input
+
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: storeId },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
+      }
+
+      // Check slug uniqueness if changing
+      if (data.slug && data.slug !== store.slug) {
+        const existing = await ctx.prisma.store.findUnique({
+          where: { slug: data.slug },
+        })
+        if (existing) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Ce slug est déjà utilisé',
+          })
+        }
+      }
+
+      const updatedStore = await ctx.prisma.store.update({
+        where: { id: storeId },
+        data,
+        include: {
+          owner: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      })
+
+      // Log the action
+      await ctx.prisma.auditLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          storeId: storeId,
+          action: 'STORE_UPDATE',
+          entity: 'Store',
+          entityId: storeId,
+          metadata: {
+            changes: data,
+            performedBy: ctx.session.user.email,
+          },
+        },
+      })
+
+      return updatedStore
     }),
 
   // Delete store (with confirmation)
@@ -461,6 +619,76 @@ export const superadminRouter = router({
       }
     }),
 
+  // Get all orders platform-wide
+  getAllOrders: superAdminProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+        search: z.string().optional(),
+        status: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+
+      if (input.status) {
+        where.status = input.status
+      }
+
+      if (input.search) {
+        where.OR = [
+          { orderNumber: { contains: input.search, mode: 'insensitive' } },
+          { customerEmail: { contains: input.search, mode: 'insensitive' } },
+          { customerName: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      const [orders, total, stats] = await Promise.all([
+        ctx.prisma.order.findMany({
+          where,
+          include: {
+            store: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+            items: {
+              select: {
+                id: true,
+                quantity: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.order.count({ where }),
+        // Get stats by status
+        Promise.all([
+          ctx.prisma.order.count({ where: { status: 'PENDING' } }),
+          ctx.prisma.order.count({ where: { status: 'PROCESSING' } }),
+          ctx.prisma.order.count({ where: { status: 'COMPLETED' } }),
+          ctx.prisma.order.count({ where: { status: 'CANCELLED' } }),
+        ]),
+      ])
+
+      return {
+        orders,
+        total,
+        hasMore: input.offset + input.limit < total,
+        stats: {
+          pending: stats[0],
+          processing: stats[1],
+          completed: stats[2],
+          cancelled: stats[3],
+        },
+      }
+    }),
+
   // Update user role
   updateUserRole: superAdminProcedure
     .input(
@@ -530,6 +758,165 @@ export const superadminRouter = router({
       return {
         success: true,
         message: `User role updated to ${input.role}`,
+      }
+    }),
+
+  // ============================================
+  // SUSPENSION APPEALS MANAGEMENT
+  // ============================================
+
+  // Get all suspension appeals
+  getAllAppeals: superAdminProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+        status: z.enum(['PENDING', 'REVIEWING', 'APPROVED', 'REJECTED', 'all']).default('all'),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+
+      if (input.status !== 'all') {
+        where.status = input.status
+      }
+
+      const [appeals, total, statusCounts] = await Promise.all([
+        ctx.prisma.suspensionAppeal.findMany({
+          where,
+          include: {
+            store: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                suspendedAt: true,
+                suspendedReason: true,
+              },
+            },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.suspensionAppeal.count({ where }),
+        // Get counts by status
+        Promise.all([
+          ctx.prisma.suspensionAppeal.count({ where: { status: 'PENDING' } }),
+          ctx.prisma.suspensionAppeal.count({ where: { status: 'REVIEWING' } }),
+          ctx.prisma.suspensionAppeal.count({ where: { status: 'APPROVED' } }),
+          ctx.prisma.suspensionAppeal.count({ where: { status: 'REJECTED' } }),
+        ]),
+      ])
+
+      return {
+        appeals,
+        total,
+        statusCounts: {
+          pending: statusCounts[0],
+          reviewing: statusCounts[1],
+          approved: statusCounts[2],
+          rejected: statusCounts[3],
+        },
+      }
+    }),
+
+  // Update appeal status (review, approve, reject)
+  updateAppealStatus: superAdminProcedure
+    .input(
+      z.object({
+        appealId: z.string(),
+        status: z.enum(['REVIEWING', 'APPROVED', 'REJECTED']),
+        adminResponse: z.string().optional(),
+        reactivateStore: z.boolean().default(false), // Only for APPROVED
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const appeal = await ctx.prisma.suspensionAppeal.findUnique({
+        where: { id: input.appealId },
+        include: { store: true },
+      })
+
+      if (!appeal) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Appeal not found' })
+      }
+
+      // Update the appeal
+      const updatedAppeal = await ctx.prisma.suspensionAppeal.update({
+        where: { id: input.appealId },
+        data: {
+          status: input.status,
+          adminResponse: input.adminResponse,
+          reviewedBy: ctx.session.user.id,
+          reviewedAt: new Date(),
+        },
+      })
+
+      // If approved and reactivateStore is true, reactivate the store
+      if (input.status === 'APPROVED' && input.reactivateStore) {
+        await ctx.prisma.store.update({
+          where: { id: appeal.storeId },
+          data: {
+            status: 'ACTIVE',
+            suspendedAt: null,
+            suspendedReason: null,
+          },
+        })
+
+        // Log the reactivation
+        await ctx.prisma.auditLog.create({
+          data: {
+            userId: ctx.session.user.id,
+            storeId: appeal.storeId,
+            action: 'STORE_REACTIVATED',
+            entity: 'Store',
+            entityId: appeal.storeId,
+            metadata: {
+              appealId: appeal.id,
+              previousStatus: 'SUSPENDED',
+              newStatus: 'ACTIVE',
+              reason: 'Appeal approved',
+              performedBy: ctx.session.user.email,
+            },
+          },
+        })
+      }
+
+      // Log the appeal review
+      await ctx.prisma.auditLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          storeId: appeal.storeId,
+          action: 'APPEAL_REVIEWED',
+          entity: 'SuspensionAppeal',
+          entityId: appeal.id,
+          metadata: {
+            newStatus: input.status,
+            adminResponse: input.adminResponse,
+            reactivated: input.status === 'APPROVED' && input.reactivateStore,
+            performedBy: ctx.session.user.email,
+          },
+        },
+      })
+
+      return {
+        success: true,
+        message:
+          input.status === 'APPROVED'
+            ? input.reactivateStore
+              ? 'Appel approuvé et boutique réactivée'
+              : 'Appel approuvé'
+            : input.status === 'REJECTED'
+            ? 'Appel rejeté'
+            : 'Appel en cours d\'examen',
+        appeal: updatedAppeal,
       }
     }),
 })

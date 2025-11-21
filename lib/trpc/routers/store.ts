@@ -16,6 +16,7 @@ export const storeRouter = router({
     .query(async ({ ctx, input }) => {
       const where: any = {
         showOnDirectory: true, // Only show stores that opted in
+        status: 'ACTIVE', // Only show active stores (not suspended, pending, or closed)
       }
 
       // Search by name or description
@@ -418,5 +419,144 @@ export const storeRouter = router({
         where: { id: storeId },
         data,
       })
+    }),
+
+  // Get store status for merchant (includes suspension info)
+  getStoreStatus: protectedProcedure
+    .input(z.object({ storeId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          suspendedAt: true,
+          suspendedReason: true,
+          ownerId: true,
+        },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
+      }
+
+      // Verify user has access to this store
+      const isOwner = store.ownerId === ctx.session.user.id
+      const isStoreUser = await ctx.prisma.storeUser.findUnique({
+        where: {
+          userId_storeId: {
+            userId: ctx.session.user.id,
+            storeId: input.storeId,
+          },
+        },
+      })
+
+      if (!isOwner && !isStoreUser) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' })
+      }
+
+      // Get pending appeals for this store
+      const pendingAppeal = await ctx.prisma.suspensionAppeal.findFirst({
+        where: {
+          storeId: input.storeId,
+          status: { in: ['PENDING', 'REVIEWING'] },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+
+      // Get last appeal (if any)
+      const lastAppeal = await ctx.prisma.suspensionAppeal.findFirst({
+        where: { storeId: input.storeId },
+        orderBy: { createdAt: 'desc' },
+      })
+
+      return {
+        ...store,
+        hasPendingAppeal: !!pendingAppeal,
+        lastAppeal: lastAppeal
+          ? {
+              status: lastAppeal.status,
+              message: lastAppeal.message,
+              adminResponse: lastAppeal.adminResponse,
+              createdAt: lastAppeal.createdAt,
+              reviewedAt: lastAppeal.reviewedAt,
+            }
+          : null,
+      }
+    }),
+
+  // Submit a suspension appeal
+  submitAppeal: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        message: z.string().min(50, 'Le message doit contenir au moins 50 caractères'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify the store exists and is suspended
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+        select: { id: true, status: true, ownerId: true },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
+      }
+
+      // Verify user has access to this store
+      const isOwner = store.ownerId === ctx.session.user.id
+      const isStoreUser = await ctx.prisma.storeUser.findUnique({
+        where: {
+          userId_storeId: {
+            userId: ctx.session.user.id,
+            storeId: input.storeId,
+          },
+        },
+      })
+
+      if (!isOwner && !isStoreUser) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' })
+      }
+
+      // Only allow appeals for suspended stores
+      if (store.status !== 'SUSPENDED') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Vous ne pouvez faire appel que pour une boutique suspendue',
+        })
+      }
+
+      // Check if there's already a pending appeal
+      const existingAppeal = await ctx.prisma.suspensionAppeal.findFirst({
+        where: {
+          storeId: input.storeId,
+          status: { in: ['PENDING', 'REVIEWING'] },
+        },
+      })
+
+      if (existingAppeal) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Un appel est déjà en cours de traitement pour cette boutique',
+        })
+      }
+
+      // Create the appeal
+      const appeal = await ctx.prisma.suspensionAppeal.create({
+        data: {
+          storeId: input.storeId,
+          userId: ctx.session.user.id,
+          message: input.message,
+          status: 'PENDING',
+        },
+      })
+
+      return {
+        success: true,
+        message: 'Votre appel a été soumis avec succès. Un administrateur l\'examinera sous peu.',
+        appeal,
+      }
     }),
 })

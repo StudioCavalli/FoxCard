@@ -44,6 +44,8 @@ export const productRouter = router({
           ...(categoryId && { categoryId }),
           // For public endpoint, only show active products unless status is explicitly provided
           status: status || ProductStatus.ACTIVE,
+          // Only show products from active stores (not suspended, pending, or closed)
+          store: { status: 'ACTIVE' },
           ...(featured !== undefined && { featured }),
           ...(tags && tags.length > 0 && {
             tags: {

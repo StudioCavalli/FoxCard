@@ -8,6 +8,9 @@ interface Store {
   id: string
   name: string
   slug?: string
+  status?: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'CLOSED'
+  suspendedAt?: Date | null
+  suspendedReason?: string | null
 }
 
 interface StoreContextType {
@@ -18,6 +21,19 @@ interface StoreContextType {
   error: string | null
   isSuperAdmin: boolean
   setStoreId: (id: string) => void
+  // Suspension info
+  isSuspended: boolean
+  suspendedAt: Date | null
+  suspendedReason: string | null
+  hasPendingAppeal: boolean
+  lastAppeal: {
+    status: string
+    message: string
+    adminResponse: string | null
+    createdAt: Date
+    reviewedAt: Date | null
+  } | null
+  refetchStoreStatus: () => void
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -40,6 +56,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const { data: allStoresData, error: allStoresError } = trpc.superadmin.getAllStores.useQuery(
     { limit: 1000, offset: 0 },
     { enabled: !!session?.user && isSuperAdmin }
+  )
+
+  // Get store status (for suspension info) - only for non-superadmins
+  const { data: storeStatus, refetch: refetchStoreStatus } = trpc.store.getStoreStatus.useQuery(
+    { storeId: storeId! },
+    { enabled: !!storeId && !isSuperAdmin }
   )
 
   // Combine stores based on role
@@ -106,6 +128,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     slug: 'slug' in s ? s.slug : undefined
   })) || []
 
+  // Suspension info (super admins are never suspended)
+  const isSuspended = !isSuperAdmin && storeStatus?.status === 'SUSPENDED'
+  const suspendedAt = storeStatus?.suspendedAt ?? null
+  const suspendedReason = storeStatus?.suspendedReason ?? null
+  const hasPendingAppeal = storeStatus?.hasPendingAppeal ?? false
+  const lastAppeal = storeStatus?.lastAppeal ?? null
+
   return (
     <StoreContext.Provider
       value={{
@@ -115,7 +144,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         isSuperAdmin,
-        setStoreId: handleSetStoreId
+        setStoreId: handleSetStoreId,
+        isSuspended,
+        suspendedAt,
+        suspendedReason,
+        hasPendingAppeal,
+        lastAppeal,
+        refetchStoreStatus: () => refetchStoreStatus(),
       }}
     >
       {children}
