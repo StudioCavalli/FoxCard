@@ -22,7 +22,8 @@ import {
   Shield,
   UserCog,
   Activity,
-  ShoppingBag
+  ShoppingBag,
+  Receipt
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -40,6 +41,7 @@ const navigation = [
   { name: 'Journal d\'audit', href: '/admin/audit', icon: Activity },
   { name: 'Categories', href: '/admin/categories', icon: FolderTree },
   { name: 'Codes Promo', href: '/admin/discounts', icon: Percent },
+  { name: 'Taxes', href: '/admin/taxes', icon: Receipt },
   { name: 'Livraison', href: '/admin/shipping', icon: Truck },
   { name: 'Boutique', href: '/admin/store', icon: Store },
   { name: 'Thèmes', href: '/admin/themes', icon: Palette },

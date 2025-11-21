@@ -1,13 +1,22 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+import { notFound } from 'next/navigation'
+import { locales } from '@/lib/i18n/config'
 import { TRPCProvider } from '@/lib/trpc/Provider'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { CartDrawerWrapper } from '@/components/cart/CartDrawerWrapper'
+import { CurrencyProvider } from '@/lib/currency/CurrencyContext'
+import '../globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }))
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -64,30 +73,43 @@ export const metadata: Metadata = {
       { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [
-      { url: '/icon-152x152.png', sizes: '152x152', type: 'image/png' },
-    ],
+    apple: [{ url: '/icon-152x152.png', sizes: '152x152', type: 'image/png' }],
   },
 }
 
-export default function RootLayout({
+export default async function LocaleLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
+  // Await params (Next.js 16 requirement)
+  const { locale } = await params
+
+  // Validate locale
+  if (!locales.includes(locale as any)) {
+    notFound()
+  }
+
+  // Get messages for the locale
+  const messages = await getMessages()
+
   return (
-    <html lang="fr">
+    <html lang={locale}>
       <body className={inter.className}>
-        <TRPCProvider>
-          <ThemeProvider>
-            <Header />
-            <main className="min-h-screen bg-theme-background">
-              {children}
-            </main>
-            <Footer />
-            <CartDrawerWrapper />
-          </ThemeProvider>
-        </TRPCProvider>
+        <NextIntlClientProvider messages={messages}>
+          <TRPCProvider>
+            <CurrencyProvider>
+              <ThemeProvider>
+                <Header />
+                <main className="min-h-screen bg-theme-background">{children}</main>
+                <Footer />
+                <CartDrawerWrapper />
+              </ThemeProvider>
+            </CurrencyProvider>
+          </TRPCProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
