@@ -112,21 +112,52 @@ export const productRouter = router({
   getBySlug: publicProcedure
     .input(
       z.object({
-        storeId: z.string(),
+        storeId: z.string().optional(), // Optional for "All Stores" mode
         slug: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.product.findUnique({
-        where: {
-          storeId_slug: {
-            storeId: input.storeId,
-            slug: input.slug,
+      // If storeId provided, use unique constraint (fast)
+      if (input.storeId) {
+        return ctx.prisma.product.findUnique({
+          where: {
+            storeId_slug: {
+              storeId: input.storeId,
+              slug: input.slug,
+            },
           },
+          include: {
+            category: true,
+            variants: true,
+            store: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                logo: true,
+              },
+            },
+          },
+        })
+      }
+
+      // If no storeId, find first matching slug across all stores
+      return ctx.prisma.product.findFirst({
+        where: {
+          slug: input.slug,
+          status: ProductStatus.ACTIVE, // Only active products in "all stores" mode
         },
         include: {
           category: true,
           variants: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+            },
+          },
         },
       })
     }),
