@@ -53,6 +53,14 @@ model Store {
   warehouses  Warehouse[]
   allocationRules AllocationRule[]
 
+  // crsdpay - Custom Payment Gateway
+  crsdpayCustomers     CrsdpayCustomer[]
+  crsdpayTransactions  CrsdpayTransaction[]
+  crsdpayCryptoPayments CrsdpayCryptoPayment[]
+  crsdpayWebhookEvents CrsdpayWebhookEvent[]
+  crsdpayApiKeys       CrsdpayApiKey[]
+  crsdpayConfig        CrsdpayConfig?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -281,6 +289,10 @@ model Order {
 
   // Invoice
   invoice         Invoice?
+
+  // crsdpay payments
+  crsdpayTransactions   CrsdpayTransaction[]
+  crsdpayCryptoPayments CrsdpayCryptoPayment[]
 
   // Notes
   notes           String?
@@ -1738,3 +1750,395 @@ model TaxRate {
 // ====================================
 
 
+// ====================================
+// CRSDPAY - CUSTOM PAYMENT GATEWAY
+// ====================================
+
+// Customer dans le système crsdpay
+model CrsdpayCustomer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String   @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Identifiants
+  email     String
+  firstName String?
+  lastName  String?
+  phone     String?
+  
+  // Métadonnées
+  metadata  Json?    // Custom data
+  
+  // Relations
+  cards         CrsdpayCard[]
+  transactions  CrsdpayTransaction[]
+  cryptoPayments CrsdpayCryptoPayment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storeId, email])
+  @@index([storeId])
+  @@index([email])
+}
+
+// Cartes bancaires tokenisées (PCI DSS compliant)
+model CrsdpayCard {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String   @db.ObjectId
+  customer   CrsdpayCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  // Token (jamais les vraies données de carte !)
+  token      String   @unique  // Token sécurisé unique
+  
+  // Informations safe (peuvent être stockées)
+  brand      String   // visa, mastercard, amex, etc.
+  last4      String   // 4 derniers chiffres
+  expMonth   Int      // Mois d'expiration
+  expYear    Int      // Année d'expiration
+  holderName String?  // Nom du titulaire
+  
+  // Métadonnées
+  fingerprint String?  // Empreinte unique de la carte
+  country     String?  // Pays d'émission
+  funding     String?  // credit, debit, prepaid
+  
+  // Status
+  isDefault  Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  
+  // Relations
+  transactions CrsdpayTransaction[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+// Transaction de paiement
+model CrsdpayTransaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String   @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  customerId String?  @db.ObjectId
+  customer   CrsdpayCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  orderId    String?  @db.ObjectId
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  // Identifiant unique de transaction
+  transactionId String @unique  // crsd_tx_xxxxxxxx
+  
+  // Montant
+  amount        Float   // Montant en centimes
+  currency      String  // EUR, USD, GBP, etc.
+  amountCaptured Float  @default(0) // Montant capturé
+  amountRefunded Float  @default(0) // Montant remboursé
+  
+  // Type de paiement
+  paymentMethod String  // card, crypto, bank_transfer
+  cardId        String? @db.ObjectId
+  card          CrsdpayCard? @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  
+  // Status
+  status        String  // pending, processing, succeeded, failed, canceled
+  captureMethod String  // automatic, manual
+  captured      Boolean @default(false)
+  
+  // 3D Secure
+  require3DS    Boolean @default(false)
+  threeDSStatus String? // authenticated, failed, not_applicable
+  
+  // Informations de paiement
+  description   String?
+  statementDescriptor String? // Apparaît sur le relevé bancaire
+  
+  // Métadonnées
+  metadata      Json?
+  
+  // IP et device fingerprint (anti-fraude)
+  customerIP    String?
+  userAgent     String?
+  deviceFingerprint String?
+  
+  // Fraude
+  fraudScore    Float?  // Score de risque 0-100
+  fraudStatus   String? // safe, review, block
+  
+  // Erreurs
+  failureCode   String?
+  failureMessage String?
+  
+  // Relations
+  refunds       CrsdpayRefund[]
+  webhookEvents CrsdpayWebhookEvent[]
+  fraudChecks   CrsdpayFraudCheck[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  capturedAt DateTime?
+  expiredAt  DateTime? // Pour les paiements qui expirent
+
+  @@index([storeId])
+  @@index([customerId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Paiements cryptocurrency
+model CrsdpayCryptoPayment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String   @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  customerId String?  @db.ObjectId
+  customer   CrsdpayCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  orderId    String?  @db.ObjectId
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  // Identifiant unique
+  paymentId  String   @unique  // crsd_crypto_xxxxxxxx
+  
+  // Crypto
+  cryptocurrency String  // BTC, ETH, USDT, etc.
+  network        String  // bitcoin, ethereum, lightning, etc.
+  address        String  // Adresse de paiement générée
+  amount         Float   // Montant en crypto
+  amountFiat     Float   // Montant équivalent en fiat
+  currency       String  // EUR, USD (pour conversion)
+  
+  // Taux de change au moment du paiement
+  exchangeRate   Float
+  
+  // Status
+  status         String  // pending, confirming, confirmed, failed, expired
+  confirmations  Int     @default(0)
+  requiredConfirmations Int @default(3)
+  
+  // Transaction blockchain
+  txHash         String? // Hash de la transaction blockchain
+  blockHeight    Int?
+  
+  // Expiration
+  expiresAt      DateTime
+  confirmedAt    DateTime?
+  
+  // QR Code
+  qrCodeUrl      String? // URL du QR code
+  
+  // Métadonnées
+  metadata       Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([customerId])
+  @@index([orderId])
+  @@index([status])
+  @@index([address])
+}
+
+// Remboursements
+model CrsdpayRefund {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId String   @db.ObjectId
+  transaction   CrsdpayTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  // Identifiant unique
+  refundId      String   @unique  // crsd_rf_xxxxxxxx
+  
+  // Montant
+  amount        Float    // Montant remboursé en centimes
+  currency      String
+  
+  // Raison
+  reason        String?  // duplicate, fraudulent, requested_by_customer, etc.
+  description   String?
+  
+  // Status
+  status        String   // pending, succeeded, failed, canceled
+  
+  // Métadonnées
+  metadata      Json?
+  
+  // Erreurs
+  failureReason String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  processedAt DateTime?
+
+  @@index([transactionId])
+  @@index([status])
+}
+
+// Vérifications anti-fraude
+model CrsdpayFraudCheck {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId String   @db.ObjectId
+  transaction   CrsdpayTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  // Score et décision
+  riskScore     Float    // 0-100 (0 = safe, 100 = très risqué)
+  decision      String   // approve, review, decline
+  
+  // Facteurs de risque détectés
+  riskFactors   String[] // velocity_abuse, proxy_ip, stolen_card, etc.
+  
+  // Données d'analyse
+  ipAddress     String?
+  ipCountry     String?
+  ipRiskScore   Float?
+  
+  emailRiskScore Float?
+  cardBinCountry String?
+  
+  // Velocity checks
+  transactionCountLast24h Int?
+  amountLast24h Float?
+  
+  // Métadonnées
+  metadata      Json?
+  
+  createdAt DateTime @default(now())
+
+  @@index([transactionId])
+  @@index([decision])
+}
+
+// Événements webhook
+model CrsdpayWebhookEvent {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId       String   @db.ObjectId
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  transactionId String?  @db.ObjectId
+  transaction   CrsdpayTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  
+  // Événement
+  eventId       String   @unique  // crsd_evt_xxxxxxxx
+  eventType     String   // payment.created, payment.succeeded, etc.
+  
+  // Webhook endpoint
+  webhookUrl    String
+  
+  // Status
+  status        String   // pending, delivered, failed
+  attempts      Int      @default(0)
+  maxAttempts   Int      @default(3)
+  
+  // Données
+  payload       Json     // Payload envoyé
+  
+  // Réponse
+  responseStatus Int?
+  responseBody   String?
+  
+  // Erreur
+  lastError      String?
+  
+  // Prochaine tentative
+  nextRetryAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deliveredAt DateTime?
+
+  @@index([storeId])
+  @@index([transactionId])
+  @@index([status])
+  @@index([eventType])
+}
+
+// Clés API pour accès externe à crsdpay
+model CrsdpayApiKey {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String   @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Clés
+  publicKey String   @unique  // pk_live_ ou pk_test_
+  secretKey String   @unique  // sk_live_ ou sk_test_ (hashé)
+  
+  // Type
+  type      String   // live, test
+  
+  // Nom et description
+  name      String
+  description String?
+  
+  // Permissions
+  permissions String[] // all, payments:read, payments:write, etc.
+  
+  // Rate limiting
+  rateLimit     Int      @default(1000) // Requêtes par heure
+  currentUsage  Int      @default(0)
+  lastResetAt   DateTime @default(now())
+  
+  // IP whitelisting
+  allowedIPs    String[] // Liste d'IPs autorisées
+  
+  // Status
+  isActive  Boolean  @default(true)
+  lastUsedAt DateTime?
+  
+  // Métadonnées
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
+
+  @@index([storeId])
+}
+
+// Configuration crsdpay par store
+model CrsdpayConfig {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String   @unique @db.ObjectId
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Activation
+  isEnabled Boolean  @default(false)
+  mode      String   @default("test") // test, live
+  
+  // Méthodes de paiement activées
+  enabledMethods String[] // card, crypto_btc, crypto_eth, etc.
+  
+  // Configuration carte
+  require3DS    Boolean  @default(true)
+  autoCapture   Boolean  @default(true)
+  
+  // Configuration crypto
+  btcEnabled    Boolean  @default(false)
+  ethEnabled    Boolean  @default(false)
+  usdtEnabled   Boolean  @default(false)
+  lightningEnabled Boolean @default(false)
+  
+  // Anti-fraude
+  fraudDetectionEnabled Boolean @default(true)
+  riskScoreThreshold    Float   @default(75.0)
+  
+  // Webhooks
+  webhookUrl    String?
+  webhookSecret String?
+  
+  // Branding
+  brandName     String?
+  brandLogoUrl  String?
+  brandColor    String?
+  
+  // Statement descriptor (relevé bancaire)
+  statementDescriptor String?
+  
+  // Métadonnées
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -23,7 +23,8 @@ import {
   UserCog,
   Activity,
   ShoppingBag,
-  Receipt
+  Receipt,
+  CreditCard
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -35,6 +36,7 @@ const navigation = [
   { name: 'Templates Email', href: '/admin/email-templates', icon: FileText },
   { name: 'Newsletter', href: '/admin/newsletter', icon: Send },
   { name: 'Paiements', href: '/admin/payments', icon: DollarSign },
+  { name: 'crsdpay Gateway', href: '/admin/crsdpay', icon: CreditCard },
   { name: 'Clients', href: '/admin/customers', icon: Users },
   { name: 'Utilisateurs', href: '/admin/users', icon: UserCog },
   { name: 'Rôles & Permissions', href: '/admin/roles', icon: Shield },
