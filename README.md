@@ -622,6 +622,234 @@ Après le seed, utilisez ces credentials :
   - Erreurs : `{ error: { message, status } }`
   - Codes HTTP appropriés (200, 400, 401, 403, 404, 500)
 
+### ✅ M3: Product Management (COMPLETE)
+
+#### 📊 Analytics & Reporting
+- [x] **Dashboard Analytics** (`/admin/analytics`) :
+  - Graphiques de revenus (7 derniers jours)
+  - Graphiques des commandes (30 derniers jours)
+  - Graphiques des produits les plus vendus
+  - Métriques en temps réel : revenus, commandes, clients
+  - Taux de conversion et panier moyen
+- [x] **Rapports Détaillés** (`/admin/reports`) :
+  - Rapport de ventes (par période, par produit, par catégorie)
+  - Rapport de revenus (journalier, hebdomadaire, mensuel)
+  - Rapport de clients (nouveaux clients, clients actifs)
+  - Export CSV/JSON
+- [x] **Prévisions** (`/admin/forecast`) :
+  - Prévision de ventes basée sur l'historique
+  - Prévision de stock (réapprovisionnement)
+  - Alertes de rupture de stock
+
+#### 🧪 A/B Testing
+- [x] **Système A/B Testing** (`/admin/ab-testing`) :
+  - Création de tests A/B pour :
+    - Titres de pages
+    - Images de produits
+    - Prix et réductions
+    - Boutons CTA
+  - Tracking automatique des conversions
+  - Statistiques et résultats en temps réel
+  - Calcul de signification statistique
+- [x] **Router tRPC ABTest** (`lib/trpc/routers/abtest.ts`) :
+  - `getAll` : Liste des tests
+  - `create` : Création de test
+  - `update` : Modification de test
+  - `recordConversion` : Enregistrement d'une conversion
+  - `getResults` : Résultats et statistiques
+
+#### 📦 Inventory & Warehouse Management
+- [x] **Gestion des Entrepôts** (`/admin/warehouses`) :
+  - Création et gestion de plusieurs entrepôts
+  - Adresses et informations de contact
+  - Statut actif/inactif
+- [x] **Inventaire Multi-Entrepôts** (`/admin/inventory`) :
+  - Stock par produit et par entrepôt
+  - Seuils de réapprovisionnement
+  - Historique des mouvements de stock
+  - Alertes de stock bas
+- [x] **Allocation de Stock** (`/admin/allocation`) :
+  - Règles d'allocation par entrepôt
+  - Priorités d'allocation
+  - Transferts entre entrepôts
+- [x] **Rapports d'Inventaire** (`/admin/inventory-reports`) :
+  - Rapport de stock par entrepôt
+  - Rapport de mouvements
+  - Rapport de valeur de stock
+  - Export CSV/JSON
+
+### ✅ M4: Shopping Cart & Checkout (COMPLETE)
+
+#### 🛒 Multi-step Checkout
+- [x] **Checkout 3 Étapes** :
+  - Étape 1 : Informations de contact (email)
+  - Étape 2 : Adresse de livraison
+  - Étape 3 : Mode de paiement
+  - Barre de progression visuelle
+  - Navigation entre les étapes
+  - Validation par étape
+
+#### 💾 Auto-save & Recovery
+- [x] **Sauvegarde Automatique** :
+  - Données de checkout sauvegardées dans localStorage
+  - Restauration automatique au retour
+  - Timestamp de dernière modification
+  - Conservation des données :
+    - Informations de contact
+    - Adresse de livraison
+    - Mode de paiement sélectionné
+    - Étape en cours
+
+#### 🎟️ Promo Codes
+- [x] **Application de Codes Promo** :
+  - Widget dans le récapitulatif de commande
+  - Validation en temps réel
+  - Calcul automatique de la réduction
+  - Support PERCENTAGE et FIXED
+  - Affichage de la réduction appliquée
+  - Possibilité de retirer le code
+  - Incrémentation automatique du compteur d'utilisation
+
+#### 🛒 Abandoned Cart Recovery
+- [x] **Tracking des Paniers Abandonnés** :
+  - Détection automatique après 5 minutes d'inactivité
+  - Capture des informations client (email, nom, téléphone)
+  - Stockage des données du panier
+  - **Page Admin** (`/admin/abandoned-carts`) :
+    - Liste de tous les paniers abandonnés
+    - Affichage des détails (client, montant, items)
+    - Statut : ABANDONED, RECOVERED, EXPIRED
+    - Tableau de bord avec statistiques
+    - Taux de récupération
+- [x] **Router tRPC AbandonedCart** (`lib/trpc/routers/abandoned-cart.ts`) :
+  - `track` : Enregistrement d'un panier abandonné
+  - `getAll` : Liste pour admin
+  - `getStats` : Statistiques de récupération
+  - `markAsRecovered` : Marquer comme récupéré
+  - `markAsExpired` : Marquer comme expiré
+
+### ✅ M5: Payment Gateway (COMPLETE)
+
+#### 💳 Enhanced Stripe Integration
+- [x] **Remboursements Stripe** :
+  - API de remboursement complet
+  - API de remboursement partiel
+  - Gestion des erreurs Stripe
+  - Mise à jour automatique du statut de commande
+
+#### 💰 Enhanced PayPal Integration
+- [x] **PayPal Checkout** :
+  - Création d'ordre PayPal
+  - Capture de paiement
+  - Gestion des webhooks PayPal
+  - Support des événements :
+    - CHECKOUT.ORDER.APPROVED
+    - PAYMENT.CAPTURE.COMPLETED
+    - PAYMENT.CAPTURE.DENIED
+    - PAYMENT.CAPTURE.REFUNDED
+- [x] **Remboursements PayPal** :
+  - API de remboursement complet
+  - API de remboursement partiel
+  - Tracking des remboursements
+
+#### 🏦 Bank Transfer Payment
+- [x] **Virement Bancaire** :
+  - Génération d'instructions de virement
+  - Référence unique par commande
+  - Expiration après 7 jours
+  - **Cron Job** (`/api/cron/bank-transfers`) :
+    - Exécution quotidienne
+    - Annulation automatique des virements expirés
+    - Mise à jour des statuts de commande
+- [x] **Page de Confirmation** :
+  - Affichage des instructions de virement
+  - IBAN, BIC, référence
+  - Montant et délai
+
+#### 💸 Refund Management
+- [x] **Interface Admin de Remboursement** (`/admin/payments`) :
+  - Liste de toutes les commandes avec statut de paiement
+  - Boutons de remboursement (complet/partiel)
+  - Formulaire de remboursement partiel
+  - Historique des remboursements
+  - Affichage des montants remboursés
+- [x] **Router tRPC Payment** (`lib/trpc/routers/payment.ts`) :
+  - `refundOrder` : Remboursement complet
+  - `refundOrderPartial` : Remboursement partiel
+  - `getRefunds` : Liste des remboursements
+  - Support Stripe et PayPal
+
+### ✅ M6: Loyalty Program (Miles) (COMPLETE)
+
+#### 🎁 Points Accumulation
+- [x] **Système de Points** :
+  - 1 point = 1€ dépensé
+  - Bonus d'inscription : 100 points
+  - Expiration après 12 mois
+  - Historique complet des transactions
+  - Types de transactions : EARN, REDEEM, EXPIRE, ADMIN_ADJUST
+
+#### 👑 VIP Tiers
+- [x] **3 Paliers VIP** :
+  - **BRONZE** (0-999€) : Accumulation de base
+  - **SILVER** (1000-4999€) : Livraison gratuite >50€, ventes privées, événements spéciaux
+  - **GOLD** (5000€+) : Tous les avantages + livraison gratuite sans minimum, accès prioritaire, bonus anniversaire 500pts
+- [x] **Calcul Automatique** :
+  - Basé sur le total dépensé à vie (totalPointsEarned)
+  - Mise à jour automatique du palier
+  - Barre de progression vers prochain palier
+
+#### 🛍️ Checkout Points Redemption
+- [x] **Widget de Rachat** :
+  - Intégré dans le récapitulatif de checkout
+  - Affichage du solde de points disponible
+  - Badge avec palier VIP
+  - Conversion 1 point = 1€
+  - Validation automatique (max = total commande)
+  - Application instantanée de la réduction
+  - Déduction automatique lors de la création de commande
+
+#### 📊 Loyalty Dashboard
+- [x] **Page Dashboard** (`/account/loyalty`) :
+  - Carte gradient avec palier actuel (Bronze/Silver/Gold)
+  - Solde de points disponibles
+  - Barre de progression vers prochain palier
+  - Statistiques :
+    - Total points gagnés
+    - Total dépensé
+    - Points expirant bientôt (30 jours)
+  - Liste des avantages par palier
+  - Historique complet des transactions
+  - Indicateurs earn/redeem/expire
+  - Dates d'expiration
+
+#### ⏰ Automatic Points Expiration
+- [x] **Cron Job d'Expiration** (`/api/cron/loyalty-expiration`) :
+  - Exécution quotidienne
+  - Expiration automatique des points >12 mois
+  - Création de transactions EXPIRE
+  - Mise à jour des soldes clients
+  - Support Vercel Cron et cron manuel
+  - Logs détaillés
+
+#### 🔗 Webhook Integration
+- [x] **Attribution Automatique** :
+  - Intégration Stripe : points attribués à la confirmation de paiement
+  - Intégration PayPal : points attribués à la capture de paiement
+  - Prévention des doublons
+  - Création automatique de client si nécessaire
+  - Gestion d'erreurs (ne fait pas échouer le paiement)
+
+#### 🎯 tRPC Router Loyalty
+- [x] **Endpoints Complets** (`lib/trpc/routers/loyalty.ts`) :
+  - `getBalance` : Solde et infos palier
+  - `getHistory` : Historique paginé des transactions
+  - `redeemPoints` : Rachat de points (checkout)
+  - `awardSignupBonus` : Attribution du bonus inscription
+  - `awardPurchasePoints` : Attribution pour achat (webhook)
+  - `getAllCustomersLoyalty` : Vue admin de tous les clients
+  - `adminAdjustPoints` : Ajustements manuels
+
 ### ✅ Version 1.0.0 - Production Ready
 
 #### 📱 Progressive Web App (PWA)
