@@ -16,8 +16,10 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { PERMISSIONS } from '@/lib/rbac/roles'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function UsersPage() {
+  const { storeId } = useStoreContext()
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
@@ -25,14 +27,12 @@ export default function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRoleId, setInviteRoleId] = useState('')
 
-  const storeId = '000000000000000000000001' // TODO: Get from context
-
   // Queries
   const { data: storeUsers, refetch: refetchUsers } = trpc.role.getStoreUsers.useQuery({
-    storeId,
+    storeId: storeId!,
   })
-  const { data: roles } = trpc.role.list.useQuery({ storeId })
-  const { data: myPermissions } = trpc.role.getMyPermissions.useQuery({ storeId })
+  const { data: roles } = trpc.role.list.useQuery({ storeId: storeId! })
+  const { data: myPermissions } = trpc.role.getMyPermissions.useQuery({ storeId: storeId! })
 
   // Mutations
   const assignRoleMutation = trpc.role.assignRole.useMutation()
@@ -50,7 +50,7 @@ export default function UsersPage() {
 
     assignRoleMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         userId: selectedUser.user.id,
         roleId: selectedRoleId,
       },
@@ -72,7 +72,7 @@ export default function UsersPage() {
     if (!confirm('Êtes-vous sûr de vouloir suspendre cet utilisateur ?')) return
 
     suspendUserMutation.mutate(
-      { storeId, userId },
+      { storeId: storeId!, userId },
       {
         onSuccess: () => {
           refetchUsers()
@@ -86,7 +86,7 @@ export default function UsersPage() {
 
   const handleReactivateUser = async (userId: string) => {
     reactivateUserMutation.mutate(
-      { storeId, userId },
+      { storeId: storeId!, userId },
       {
         onSuccess: () => {
           refetchUsers()
@@ -107,7 +107,7 @@ export default function UsersPage() {
       return
 
     removeUserMutation.mutate(
-      { storeId, userId },
+      { storeId: storeId!, userId },
       {
         onSuccess: () => {
           refetchUsers()
@@ -127,7 +127,7 @@ export default function UsersPage() {
 
     inviteUserMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         email: inviteEmail,
         roleId: inviteRoleId,
       },

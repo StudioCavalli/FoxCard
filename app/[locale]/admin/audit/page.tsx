@@ -16,8 +16,10 @@ import {
   TrendingUp,
   AlertTriangle,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AuditLogsPage() {
+  const { storeId } = useStoreContext()
   const [filters, setFilters] = useState({
     action: '',
     userId: '',
@@ -28,11 +30,9 @@ export default function AuditLogsPage() {
   const [page, setPage] = useState(0)
   const limit = 50
 
-  const storeId = '000000000000000000000001' // TODO: Get from context
-
   // Queries
   const { data: logsData, isLoading } = trpc.audit.list.useQuery({
-    storeId,
+    storeId: storeId!,
     limit,
     offset: page * limit,
     action: filters.action || undefined,
@@ -40,16 +40,16 @@ export default function AuditLogsPage() {
     entity: filters.entity || undefined,
     startDate: filters.startDate ? new Date(filters.startDate) : undefined,
     endDate: filters.endDate ? new Date(filters.endDate) : undefined,
-  })
+  }, { enabled: !!storeId })
 
   const { data: stats } = trpc.audit.getStats.useQuery({
-    storeId,
+    storeId: storeId!,
     days: 30,
-  })
+  }, { enabled: !!storeId })
 
-  const { data: actions } = trpc.audit.getActions.useQuery({ storeId })
-  const { data: entities } = trpc.audit.getEntities.useQuery({ storeId })
-  const { data: users } = trpc.role.getStoreUsers.useQuery({ storeId })
+  const { data: actions } = trpc.audit.getActions.useQuery({ storeId: storeId! }, { enabled: !!storeId })
+  const { data: entities } = trpc.audit.getEntities.useQuery({ storeId: storeId! }, { enabled: !!storeId })
+  const { data: users } = trpc.role.getStoreUsers.useQuery({ storeId: storeId! }, { enabled: !!storeId })
 
   const handleResetFilters = () => {
     setFilters({

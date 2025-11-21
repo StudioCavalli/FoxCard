@@ -21,6 +21,7 @@ import {
   Package,
   Filter,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 const categoryIcons: Record<string, any> = {
   shipping: Truck,
@@ -54,7 +55,7 @@ const categories = [
 
 export default function PluginMarketplacePage() {
   const router = useRouter()
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   // State
   const [searchQuery, setSearchQuery] = useState('')
@@ -71,7 +72,7 @@ export default function PluginMarketplacePage() {
   })
 
   // Fetch installed plugins
-  const { data: installedPlugins } = trpc.plugin.getAll.useQuery({ storeId })
+  const { data: installedPlugins } = trpc.plugin.getAll.useQuery({ storeId: storeId! })
 
   // Install mutation
   const installMutation = trpc.plugin.installFromPreset.useMutation()
@@ -97,7 +98,7 @@ export default function PluginMarketplacePage() {
 
     installMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         presetId: preset.id,
       },
       {

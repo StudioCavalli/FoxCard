@@ -17,6 +17,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 // Configuration field types
 type FieldType = 'string' | 'password' | 'number' | 'boolean' | 'select' | 'object'
@@ -113,7 +114,7 @@ export default function PluginSettingsPage() {
   const params = useParams()
   const router = useRouter()
   const pluginId = params.id as string
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const [config, setConfig] = useState<Record<string, any>>({})
   const [originalConfig, setOriginalConfig] = useState<Record<string, any>>({})
@@ -122,7 +123,7 @@ export default function PluginSettingsPage() {
 
   // Fetch plugin data
   const { data: plugin, isLoading, refetch } = trpc.plugin.getById.useQuery(
-    { storeId, id: pluginId },
+    { storeId: storeId!, id: pluginId },
     { enabled: !!pluginId }
   )
 
@@ -161,7 +162,7 @@ export default function PluginSettingsPage() {
   const handleSave = async () => {
     updateConfigMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         id: pluginId,
         config,
       },
@@ -182,7 +183,7 @@ export default function PluginSettingsPage() {
   const handleToggle = () => {
     if (plugin?.isEnabled) {
       disableMutation.mutate(
-        { storeId, id: pluginId },
+        { storeId: storeId!, id: pluginId },
         {
           onSuccess: () => refetch(),
           onError: (error) => alert(error.message),
@@ -190,7 +191,7 @@ export default function PluginSettingsPage() {
       )
     } else {
       enableMutation.mutate(
-        { storeId, id: pluginId },
+        { storeId: storeId!, id: pluginId },
         {
           onSuccess: () => refetch(),
           onError: (error) => alert(error.message),

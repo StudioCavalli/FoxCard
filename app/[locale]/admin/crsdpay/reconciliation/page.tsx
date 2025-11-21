@@ -21,17 +21,16 @@ import {
   Download,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function ReconciliationPage() {
-  const [storeId, setStoreId] = useState<string>('')
+  const { storeId } = useStoreContext()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [reconciliationResult, setReconciliationResult] = useState<any>(null)
   const { toast } = useToast()
 
   useEffect(() => {
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
 
     // Set default dates (last 30 days)
     const end = new Date()
@@ -47,7 +46,7 @@ export default function ReconciliationPage() {
   const handleReconcile = async () => {
     try {
       const result = await reconcileMutation.mutateAsync({
-        storeId,
+        storeId: storeId!,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
       })

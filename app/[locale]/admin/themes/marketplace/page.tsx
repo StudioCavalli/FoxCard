@@ -20,13 +20,14 @@ import {
   Clock,
 } from 'lucide-react'
 import { generateThemeCSS } from '@/lib/themes/presets'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type SortOption = 'popular' | 'rating' | 'newest'
 type FilterOption = 'all' | 'free' | 'premium'
 
 export default function ThemeMarketplacePage() {
   const router = useRouter()
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   // State
   const [searchQuery, setSearchQuery] = useState('')
@@ -43,7 +44,7 @@ export default function ThemeMarketplacePage() {
   })
 
   // Fetch installed themes to check what's already installed
-  const { data: installedThemes } = trpc.theme.getAll.useQuery({ storeId })
+  const { data: installedThemes } = trpc.theme.getAll.useQuery({ storeId: storeId! })
 
   // Install mutation
   const installMutation = trpc.theme.installFromPreset.useMutation()
@@ -89,7 +90,7 @@ export default function ThemeMarketplacePage() {
 
     installMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         presetId: preset.id,
       },
       {

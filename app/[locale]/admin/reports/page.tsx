@@ -16,11 +16,12 @@ import {
   TrendingUp,
   AlertTriangle,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type ReportType = 'sales' | 'customers' | 'products'
 
 export default function ReportsPage() {
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const [reportType, setReportType] = useState<ReportType>('sales')
   const [startDate, setStartDate] = useState(() => {
@@ -35,17 +36,17 @@ export default function ReportsPage() {
 
   // Fetch report data
   const { data: salesReport, isLoading: salesLoading } = trpc.report.getSalesReport.useQuery(
-    { storeId, startDate, endDate },
+    { storeId: storeId!, startDate, endDate },
     { enabled: reportType === 'sales' }
   )
 
   const { data: customerReport, isLoading: customerLoading } = trpc.report.getCustomerReport.useQuery(
-    { storeId, startDate, endDate },
+    { storeId: storeId!, startDate, endDate },
     { enabled: reportType === 'customers' }
   )
 
   const { data: productReport, isLoading: productLoading } = trpc.report.getProductReport.useQuery(
-    { storeId, startDate, endDate },
+    { storeId: storeId!, startDate, endDate },
     { enabled: reportType === 'products' }
   )
 

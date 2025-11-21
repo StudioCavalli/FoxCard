@@ -28,26 +28,27 @@ import {
   ArrowDown,
   RefreshCw,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type ForecastPeriod = 7 | 30 | 90
 
 export default function ForecastPage() {
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const [forecastDays, setForecastDays] = useState<ForecastPeriod>(30)
 
   // Fetch forecast data
   const { data: salesForecast, isLoading: salesLoading, refetch: refetchSales } =
-    trpc.forecast.getSalesForecast.useQuery({ storeId, forecastDays })
+    trpc.forecast.getSalesForecast.useQuery({ storeId: storeId!, forecastDays })
 
   const { data: stockForecast, isLoading: stockLoading } =
-    trpc.forecast.getStockForecast.useQuery({ storeId, forecastDays })
+    trpc.forecast.getStockForecast.useQuery({ storeId: storeId!, forecastDays })
 
   const { data: productTrends, isLoading: trendsLoading } =
-    trpc.forecast.getProductTrends.useQuery({ storeId, limit: 5 })
+    trpc.forecast.getProductTrends.useQuery({ storeId: storeId!, limit: 5 })
 
   const { data: recommendations } =
-    trpc.forecast.getRecommendations.useQuery({ storeId })
+    trpc.forecast.getRecommendations.useQuery({ storeId: storeId! }, { enabled: !!storeId })
 
   const isLoading = salesLoading || stockLoading || trendsLoading
 

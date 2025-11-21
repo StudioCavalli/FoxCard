@@ -5,23 +5,18 @@
  * Gestion des paiements cryptocurrency
  */
 
-import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import Link from 'next/link'
 import { ArrowLeft, Bitcoin, CheckCircle, Clock, XCircle, Loader2, RefreshCw } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function CrsdpayCryptoPage() {
-  const [storeId, setStoreId] = useState<string>('')
-
-  useEffect(() => {
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
-  }, [])
+  const { storeId } = useStoreContext()
 
   const { data: payments, isLoading, refetch } = trpc.crsdpay.listCryptoPayments.useQuery(
-    { storeId },
+    { storeId: storeId! },
     { enabled: !!storeId }
   )
 

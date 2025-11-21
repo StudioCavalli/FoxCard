@@ -5,26 +5,27 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { Mail, Eye, RefreshCw, Send, BarChart3 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type EmailStatus = 'PENDING' | 'SENDING' | 'SENT' | 'FAILED' | 'BOUNCED'
 
 export default function AdminEmailsPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [statusFilter, setStatusFilter] = useState<EmailStatus | undefined>(undefined)
   const [showTestModal, setShowTestModal] = useState(false)
 
   // Get email logs
   const { data: logsData, isLoading: logsLoading, refetch: refetchLogs } = trpc.email.getLogs.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: storeId!,
     limit: 50,
     offset: 0,
     status: statusFilter,
-  })
+  }, { enabled: !!storeId })
 
   // Get email statistics
   const { data: stats, isLoading: statsLoading } = trpc.email.getStats.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+    storeId: storeId!,
+  }, { enabled: !!storeId })
 
   const logs = logsData?.logs || []
 
@@ -266,7 +267,7 @@ export default function AdminEmailsPage() {
       {/* Test Email Modal */}
       {showTestModal && (
         <TestEmailModal
-          storeId={DEMO_STORE_ID}
+          storeId={storeId!}
           onClose={() => setShowTestModal(false)}
           onSuccess={() => {
             setShowTestModal(false)
@@ -320,7 +321,7 @@ function TestEmailModal({
     e.preventDefault()
     try {
       await sendTestMutation.mutateAsync({
-        storeId,
+        storeId: storeId!,
         to: email,
         template,
       })
