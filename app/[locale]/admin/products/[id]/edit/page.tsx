@@ -9,6 +9,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload'
 import { trpc } from '@/lib/trpc/client'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function EditProductPage({
   params,
@@ -17,7 +18,7 @@ export default function EditProductPage({
 }) {
   const { id } = use(params)
   const router = useRouter()
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
 
   const [formData, setFormData] = useState<{
     name: string
@@ -44,9 +45,14 @@ export default function EditProductPage({
   })
 
   const { data: product, isLoading } = trpc.product.getById.useQuery({ id })
-  const { data: categories } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: categories } = trpc.category.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const updateProduct = trpc.product.update.useMutation({
     onSuccess: () => {

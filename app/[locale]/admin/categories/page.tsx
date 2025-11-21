@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { generateSlug } from '@/lib/utils'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminCategoriesPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -19,9 +20,14 @@ export default function AdminCategoriesPage() {
     description: '',
   })
 
-  const { data: categories, refetch } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: categories, refetch } = trpc.category.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const createCategory = trpc.category.create.useMutation({
     onSuccess: () => {
@@ -57,7 +63,7 @@ export default function AdminCategoriesPage() {
       })
     } else {
       createCategory.mutate({
-        storeId: DEMO_STORE_ID,
+        storeId: storeId!,
         name: formData.name,
         slug: formData.slug || generateSlug(formData.name),
         description: formData.description || undefined,

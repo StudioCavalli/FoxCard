@@ -6,19 +6,25 @@ import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { Mail, Plus, Edit, Trash2, Copy, Eye, Power } from 'lucide-react'
 import { EmailTemplateEditor } from '@/components/admin/email/EmailTemplateEditor'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminEmailTemplatesPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [showEditor, setShowEditor] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<any>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [previewTemplate, setPreviewTemplate] = useState<any>(null)
 
   // Get all templates
-  const { data: templates, isLoading, refetch } = trpc.email.getTemplates.useQuery({
-    storeId: DEMO_STORE_ID,
-    includeInactive: true,
-  })
+  const { data: templates, isLoading, refetch } = trpc.email.getTemplates.useQuery(
+    {
+      storeId: storeId!,
+      includeInactive: true,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   // Mutations
   const createMutation = trpc.email.createTemplate.useMutation()

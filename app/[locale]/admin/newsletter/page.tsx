@@ -5,12 +5,13 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { Mail, Users, CheckCircle, XCircle, Clock, Send, Trash2, Search } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type TabType = 'subscribers' | 'campaign'
 type StatusFilter = 'PENDING' | 'CONFIRMED' | 'UNSUBSCRIBED' | undefined
 
 export default function AdminNewsletterPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [activeTab, setActiveTab] = useState<TabType>('subscribers')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(undefined)
   const [searchQuery, setSearchQuery] = useState('')
@@ -20,18 +21,28 @@ export default function AdminNewsletterPage() {
   const [campaignContent, setCampaignContent] = useState('')
 
   // Get stats
-  const { data: stats } = trpc.newsletter.getStats.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: stats } = trpc.newsletter.getStats.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   // Get subscribers
-  const { data: subscribersData, refetch } = trpc.newsletter.getSubscribers.useQuery({
-    storeId: DEMO_STORE_ID,
-    status: statusFilter,
-    search: searchQuery || undefined,
-    limit: 50,
-    offset: 0,
-  })
+  const { data: subscribersData, refetch } = trpc.newsletter.getSubscribers.useQuery(
+    {
+      storeId: storeId!,
+      status: statusFilter,
+      search: searchQuery || undefined,
+      limit: 50,
+      offset: 0,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const subscribers = subscribersData?.subscribers || []
 
@@ -67,7 +78,7 @@ export default function AdminNewsletterPage() {
 
     try {
       const result = await sendCampaignMutation.mutateAsync({
-        storeId: DEMO_STORE_ID,
+        storeId: storeId!,
         subject: campaignSubject,
         htmlContent: campaignContent,
       })

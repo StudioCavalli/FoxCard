@@ -7,15 +7,21 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Mail, Calendar, ShoppingBag, Search, Trash2 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminCustomersPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data, isLoading, refetch } = trpc.customer.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 50,
-  })
+  const { data, isLoading, refetch } = trpc.customer.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 50,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const deleteCustomer = trpc.customer.delete.useMutation({
     onSuccess: () => {

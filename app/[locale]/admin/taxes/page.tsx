@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { Plus, Edit, Trash2, Percent, Globe, MapPin, Star } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 const COMMON_COUNTRIES = [
   { code: 'FR', name: 'France', defaultRate: 20 },
@@ -31,7 +32,7 @@ const US_STATES = [
 ]
 
 export default function AdminTaxesPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [quickAddCountry, setQuickAddCountry] = useState<string>('')
@@ -46,9 +47,14 @@ export default function AdminTaxesPage() {
     isDefault: false,
   })
 
-  const { data: taxRates, refetch } = trpc.tax.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: taxRates, refetch } = trpc.tax.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const createTax = trpc.tax.create.useMutation({
     onSuccess: () => {
@@ -100,7 +106,7 @@ export default function AdminTaxesPage() {
     }
 
     const data = {
-      storeId: DEMO_STORE_ID,
+      storeId: storeId!,
       name: formData.name,
       countryCode: formData.countryCode,
       stateCode: formData.stateCode || undefined,
@@ -151,7 +157,7 @@ export default function AdminTaxesPage() {
     }]
 
     bulkCreateTax.mutate({
-      storeId: DEMO_STORE_ID,
+      storeId: storeId!,
       rates,
     })
   }

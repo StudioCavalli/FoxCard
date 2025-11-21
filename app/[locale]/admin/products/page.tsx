@@ -9,15 +9,21 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminProductsPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data, isLoading, refetch } = trpc.product.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 50,
-  })
+  const { data, isLoading, refetch } = trpc.product.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 50,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const deleteProduct = trpc.product.delete.useMutation({
     onSuccess: () => {
