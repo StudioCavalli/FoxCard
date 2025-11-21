@@ -566,6 +566,7 @@ export const superadminRouter = router({
         offset: z.number().min(0).default(0),
         search: z.string().optional(),
         role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN', 'all']).default('all'),
+        status: z.enum(['ACTIVE', 'SUSPENDED', 'BANNED', 'all']).default('all'),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -582,7 +583,11 @@ export const superadminRouter = router({
         where.role = input.role
       }
 
-      const [users, total] = await Promise.all([
+      if (input.status !== 'all') {
+        where.status = input.status
+      }
+
+      const [users, total, statusCounts] = await Promise.all([
         ctx.prisma.user.findMany({
           where,
           include: {
@@ -610,12 +615,238 @@ export const superadminRouter = router({
           skip: input.offset,
         }),
         ctx.prisma.user.count({ where }),
+        // Get counts by status
+        Promise.all([
+          ctx.prisma.user.count({ where: { status: 'ACTIVE' } }),
+          ctx.prisma.user.count({ where: { status: 'SUSPENDED' } }),
+          ctx.prisma.user.count({ where: { status: 'BANNED' } }),
+        ]),
       ])
 
       return {
         users,
         total,
         hasMore: input.offset + input.limit < total,
+        statusCounts: {
+          active: statusCounts[0],
+          suspended: statusCounts[1],
+          banned: statusCounts[2],
+        },
+      }
+    }),
+
+  // Create a new user
+  createUser: superAdminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        password: z.string().min(6),
+        role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN']).default('USER'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if email already exists
+      const existingUser = await ctx.prisma.user.findUnique({
+        where: { email: input.email },
+      })
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Un utilisateur avec cet email existe deja',
+        })
+      }
+
+      // Hash password
+      const bcrypt = await import('bcryptjs')
+      const hashedPassword = await bcrypt.hash(input.password, 12)
+
+      const user = await ctx.prisma.user.create({
+        data: {
+          name: input.name,
+          email: input.email,
+          password: hashedPassword,
+          role: input.role,
+          status: 'ACTIVE',
+        },
+      })
+
+      // Audit log
+      const firstStore = await ctx.prisma.store.findFirst()
+      if (firstStore) {
+        await ctx.prisma.auditLog.create({
+          data: {
+            userId: ctx.session.user.id,
+            storeId: firstStore.id,
+            action: 'USER_CREATED',
+            entity: 'User',
+            entityId: user.id,
+            metadata: {
+              newUserEmail: user.email,
+              newUserRole: user.role,
+              performedBy: ctx.session.user.email,
+            },
+          },
+        })
+      }
+
+      return {
+        success: true,
+        message: 'Utilisateur cree avec succes',
+        user,
+      }
+    }),
+
+  // Update user status (suspend/ban/activate)
+  updateUserStatus: superAdminProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        status: z.enum(['ACTIVE', 'SUSPENDED', 'BANNED']),
+        reason: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.findUnique({
+        where: { id: input.userId },
+      })
+
+      if (!user) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Utilisateur non trouve' })
+      }
+
+      // Cannot suspend/ban a SUPER_ADMIN
+      if (user.role === 'SUPER_ADMIN' && input.status !== 'ACTIVE') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Impossible de suspendre un Super Admin',
+        })
+      }
+
+      // Cannot modify your own status
+      if (user.id === ctx.session.user.id) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Vous ne pouvez pas modifier votre propre statut',
+        })
+      }
+
+      const updatedUser = await ctx.prisma.user.update({
+        where: { id: input.userId },
+        data: {
+          status: input.status,
+          suspendedAt: input.status !== 'ACTIVE' ? new Date() : null,
+          suspendedReason: input.status !== 'ACTIVE' ? input.reason : null,
+        },
+      })
+
+      // If suspended or banned, invalidate all sessions
+      if (input.status !== 'ACTIVE') {
+        await ctx.prisma.session.deleteMany({
+          where: { userId: input.userId },
+        })
+      }
+
+      // Audit log
+      const firstStore = await ctx.prisma.store.findFirst()
+      if (firstStore) {
+        await ctx.prisma.auditLog.create({
+          data: {
+            userId: ctx.session.user.id,
+            storeId: firstStore.id,
+            action: 'USER_STATUS_UPDATED',
+            entity: 'User',
+            entityId: user.id,
+            metadata: {
+              oldStatus: user.status,
+              newStatus: input.status,
+              reason: input.reason,
+              targetUser: user.email,
+              performedBy: ctx.session.user.email,
+            },
+          },
+        })
+      }
+
+      return {
+        success: true,
+        message:
+          input.status === 'ACTIVE'
+            ? 'Utilisateur reactive'
+            : input.status === 'SUSPENDED'
+            ? 'Utilisateur suspendu'
+            : 'Utilisateur banni',
+        user: updatedUser,
+      }
+    }),
+
+  // Delete a user
+  deleteUser: superAdminProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.findUnique({
+        where: { id: input.userId },
+        include: {
+          stores: true,
+        },
+      })
+
+      if (!user) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Utilisateur non trouve' })
+      }
+
+      // Cannot delete a SUPER_ADMIN
+      if (user.role === 'SUPER_ADMIN') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Impossible de supprimer un Super Admin',
+        })
+      }
+
+      // Cannot delete yourself
+      if (user.id === ctx.session.user.id) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Vous ne pouvez pas vous supprimer vous-meme',
+        })
+      }
+
+      // Warning if user owns stores
+      if (user.stores.length > 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Cet utilisateur possede ${user.stores.length} boutique(s). Transférez ou supprimez les boutiques d'abord.`,
+        })
+      }
+
+      // Delete user (cascades to sessions, accounts, storeUsers)
+      await ctx.prisma.user.delete({
+        where: { id: input.userId },
+      })
+
+      // Audit log
+      const firstStore = await ctx.prisma.store.findFirst()
+      if (firstStore) {
+        await ctx.prisma.auditLog.create({
+          data: {
+            userId: ctx.session.user.id,
+            storeId: firstStore.id,
+            action: 'USER_DELETED',
+            entity: 'User',
+            entityId: input.userId,
+            metadata: {
+              deletedUserEmail: user.email,
+              deletedUserRole: user.role,
+              performedBy: ctx.session.user.email,
+            },
+          },
+        })
+      }
+
+      return {
+        success: true,
+        message: 'Utilisateur supprime avec succes',
       }
     }),
 

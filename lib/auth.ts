@@ -34,6 +34,15 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials')
         }
 
+        // Check if user is suspended or banned
+        if (user.status === 'SUSPENDED') {
+          throw new Error('Votre compte a ete suspendu. Contactez le support pour plus d\'informations.')
+        }
+
+        if (user.status === 'BANNED') {
+          throw new Error('Votre compte a ete definitivement banni.')
+        }
+
         return {
           id: user.id,
           email: user.email,
