@@ -27,7 +27,7 @@ export default function CommerceTypePage() {
 
   const createCategories = trpc.commerceType.createDefaultCategories.useMutation({
     onSuccess: () => {
-      utils.category.list.invalidate()
+      utils.category.getAll.invalidate()
     }
   })
 

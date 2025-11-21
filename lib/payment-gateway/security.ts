@@ -413,7 +413,7 @@ export function shouldRequire3DS(
 // ========================================
 
 // List of high-risk countries (example)
-export const HIGH_RISK_COUNTRIES = [
+export const HIGH_RISK_COUNTRIES: string[] = [
   // Add countries based on fraud patterns
 ]
 

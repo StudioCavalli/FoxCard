@@ -4,7 +4,7 @@ import type { CommerceType } from '@/lib/commerce-types'
 
 interface ProductAttributesProps {
   commerceType: CommerceType
-  attributes: Record<string, unknown>
+  attributes: Record<string, any>
 }
 
 export default function ProductAttributes({
@@ -36,7 +36,7 @@ export default function ProductAttributes({
 }
 
 // Food attributes display
-function FoodAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function FoodAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Nutritional Info */}
@@ -98,7 +98,7 @@ function FoodAttributes({ attributes }: { attributes: Record<string, unknown> })
 }
 
 // Alcohol attributes display
-function AlcoholAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function AlcoholAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Main info */}
@@ -172,7 +172,7 @@ function AlcoholAttributes({ attributes }: { attributes: Record<string, unknown>
 }
 
 // Fashion attributes display
-function FashionAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function FashionAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Materials */}
@@ -234,7 +234,7 @@ function FashionAttributes({ attributes }: { attributes: Record<string, unknown>
 }
 
 // Electronics attributes display
-function ElectronicsAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function ElectronicsAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Specifications table */}
@@ -292,7 +292,7 @@ function ElectronicsAttributes({ attributes }: { attributes: Record<string, unkn
 }
 
 // Beauty attributes display
-function BeautyAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function BeautyAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Certifications badges */}
@@ -356,7 +356,7 @@ function BeautyAttributes({ attributes }: { attributes: Record<string, unknown> 
 }
 
 // Home attributes display
-function HomeAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function HomeAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Dimensions */}
@@ -423,7 +423,7 @@ function HomeAttributes({ attributes }: { attributes: Record<string, unknown> })
 }
 
 // Sports attributes display
-function SportsAttributes({ attributes }: { attributes: Record<string, unknown> }) {
+function SportsAttributes({ attributes }: { attributes: Record<string, any> }) {
   return (
     <div className="space-y-4">
       {/* Sport tags */}

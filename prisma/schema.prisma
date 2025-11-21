@@ -1968,8 +1968,6 @@ model PaymentGatewayConfig {
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
-  @@index([storeId])
 }
 
 // Settlement/Payout records
