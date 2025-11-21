@@ -36,6 +36,80 @@ export const shippingRouter = router({
       })
     }),
 
+  // Calculate shipping for multiple stores (multi-store cart)
+  calculateMultiStoreShipping: publicProcedure
+    .input(
+      z.object({
+        items: z.array(z.object({
+          storeId: z.string(),
+          amount: z.number(),
+        })),
+        country: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const results = await Promise.all(
+        input.items.map(async (item) => {
+          // Find shipping zone that includes the country
+          const shippingZone = await ctx.prisma.shippingZone.findFirst({
+            where: {
+              storeId: item.storeId,
+              countries: {
+                has: input.country,
+              },
+              isActive: true,
+            },
+            include: {
+              rates: true,
+            },
+          })
+
+          if (!shippingZone) {
+            return {
+              storeId: item.storeId,
+              available: false,
+              cost: 0,
+              message: 'Aucune zone de livraison disponible',
+            }
+          }
+
+          // Find applicable rate based on order amount
+          const applicableRate = shippingZone.rates.find((rate) => {
+            if (rate.minOrderAmount) {
+              return item.amount >= rate.minOrderAmount
+            }
+            return true
+          })
+
+          if (!applicableRate) {
+            return {
+              storeId: item.storeId,
+              available: false,
+              cost: 0,
+              message: 'Aucun tarif disponible',
+            }
+          }
+
+          return {
+            storeId: item.storeId,
+            available: true,
+            cost: applicableRate.price,
+            message: null,
+            estimatedDays: applicableRate.estimatedDays,
+            rateName: applicableRate.name,
+            zoneName: shippingZone.name,
+          }
+        })
+      )
+
+      const totalShipping = results.reduce((sum, r) => sum + r.cost, 0)
+
+      return {
+        byStore: results,
+        total: totalShipping,
+      }
+    }),
+
   // Calculate shipping cost for an order (public endpoint)
   calculateShipping: publicProcedure
     .input(
