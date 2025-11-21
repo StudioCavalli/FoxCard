@@ -247,27 +247,15 @@ export default function CustomerDetailPage() {
             </div>
           </div>
 
-          {/* Addresses */}
-          {customer.addresses && customer.addresses.length > 0 && (
+          {/* Address */}
+          {customer.address && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="font-semibold text-gray-900 mb-4">Adresses</h2>
-              <div className="space-y-4">
-                {customer.addresses.map((address: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div className="text-sm text-gray-600">
-                      {address.firstName && address.lastName && (
-                        <p className="font-medium text-gray-900">
-                          {address.firstName} {address.lastName}
-                        </p>
-                      )}
-                      <p>{address.address}</p>
-                      {address.address2 && <p>{address.address2}</p>}
-                      <p>{address.postalCode} {address.city}</p>
-                      <p>{address.country}</p>
-                    </div>
-                  </div>
-                ))}
+              <h2 className="font-semibold text-gray-900 mb-4">Adresse</h2>
+              <div className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                <div className="text-sm text-gray-600">
+                  <p>{customer.address}</p>
+                </div>
               </div>
             </div>
           )}
