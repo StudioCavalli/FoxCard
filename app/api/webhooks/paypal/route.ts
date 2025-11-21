@@ -32,13 +32,63 @@ export async function POST(request: NextRequest) {
         const orderId = resource.custom_id || resource.supplementary_data?.related_ids?.order_id
 
         if (orderId) {
-          await prisma.order.update({
+          const order = await prisma.order.update({
             where: { id: orderId },
             data: {
               paymentStatus: 'PAID',
               status: 'PROCESSING',
             },
           })
+
+          // Award loyalty points if customer exists
+          if (order.customerId && order.total > 0) {
+            try {
+              const pointsToAward = Math.floor(order.total)
+              const expiresAt = new Date()
+              expiresAt.setMonth(expiresAt.getMonth() + 12)
+
+              // Check if points already awarded
+              const existingTransaction = await prisma.loyaltyTransaction.findFirst({
+                where: {
+                  orderId: order.id,
+                  type: 'EARN',
+                },
+              })
+
+              if (!existingTransaction) {
+                await prisma.$transaction([
+                  prisma.customer.update({
+                    where: { id: order.customerId },
+                    data: {
+                      loyaltyPoints: {
+                        increment: pointsToAward,
+                      },
+                      totalPointsEarned: {
+                        increment: pointsToAward,
+                      },
+                    },
+                  }),
+                  prisma.loyaltyTransaction.create({
+                    data: {
+                      customerId: order.customerId,
+                      storeId: order.storeId,
+                      type: 'EARN',
+                      points: pointsToAward,
+                      orderId: order.id,
+                      description: `Achat confirmé`,
+                      expiresAt,
+                    },
+                  }),
+                ])
+
+                console.log(`[Loyalty] Awarded ${pointsToAward} points for order ${orderId}`)
+              }
+            } catch (loyaltyError) {
+              console.error('[Loyalty] Error awarding points:', loyaltyError)
+              // Don't fail the webhook if loyalty fails
+            }
+          }
+
           console.log('[PayPal] Payment captured for order:', orderId)
         }
         break

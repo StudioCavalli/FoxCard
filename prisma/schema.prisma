@@ -222,6 +222,12 @@ model Customer {
   // Address
   address     Json?
 
+  // Loyalty Program
+  loyaltyPoints       Int          @default(0)          // Current available points balance
+  loyaltyTier         LoyaltyTier  @default(BRONZE)     // VIP tier level
+  totalPointsEarned   Int          @default(0)          // Lifetime points earned (for tier calculation)
+  loyaltyTransactions LoyaltyTransaction[]
+
   orders      Order[]
 
   createdAt   DateTime @default(now())
@@ -229,6 +235,7 @@ model Customer {
 
   @@unique([storeId, email])
   @@index([storeId])
+  @@index([loyaltyTier])
 }
 
 model Order {
@@ -1498,4 +1505,44 @@ enum AbandonedCartStatus {
   SECOND_EMAIL_SENT // D+3 email sent
   RECOVERED         // Customer completed purchase
   EXPIRED           // Too old to pursue (30+ days)
+}
+
+// Loyalty Program - VIP Tiers
+enum LoyaltyTier {
+  BRONZE  // 0-999€ lifetime spend
+  SILVER  // 1000-4999€ lifetime spend
+  GOLD    // 5000€+ lifetime spend
+}
+
+enum LoyaltyTransactionType {
+  EARN          // Points earned (purchase, signup bonus, referral)
+  REDEEM        // Points used for discount
+  EXPIRE        // Points expired (12 months)
+  ADMIN_ADJUST  // Manual adjustment by admin
+}
+
+// Loyalty Transactions - History of all points movements
+model LoyaltyTransaction {
+  id         String                  @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String                  @db.ObjectId
+  customer   Customer                @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  storeId    String                  @db.ObjectId
+
+  type       LoyaltyTransactionType
+  points     Int                     // Positive for earn, negative for redeem/expire
+
+  // Context
+  orderId    String?                 @db.ObjectId  // Related order if EARN or REDEEM
+  description String                                // "Purchase #ORD-123", "Signup bonus", "Points expired"
+
+  // Expiration tracking (for EARN transactions)
+  expiresAt  DateTime?                              // Points expire 12 months after earning
+  isExpired  Boolean                 @default(false)
+
+  createdAt  DateTime                @default(now())
+
+  @@index([customerId])
+  @@index([storeId])
+  @@index([type])
+  @@index([expiresAt])
 }
