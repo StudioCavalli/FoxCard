@@ -4,9 +4,15 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
 
+interface Store {
+  id: string
+  name: string
+}
+
 interface StoreContextType {
   storeId: string | null
   storeName: string | null
+  stores: Store[]
   isLoading: boolean
   error: string | null
   setStoreId: (id: string) => void
@@ -76,11 +82,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Map stores to simple format
+  const storesList: Store[] = stores?.map(s => ({ id: s.id, name: s.name })) || []
+
   return (
     <StoreContext.Provider
       value={{
         storeId,
         storeName,
+        stores: storesList,
         isLoading,
         error,
         setStoreId: handleSetStoreId

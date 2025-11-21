@@ -2,6 +2,7 @@
 
 import { Bell, User } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import StoreSelector from './StoreSelector'
 
 export function AdminHeader() {
   return (
@@ -13,6 +14,7 @@ export function AdminHeader() {
         </div>
 
         <div className="flex items-center space-x-4">
+          <StoreSelector />
           <Button variant="ghost" size="sm">
             <Bell className="w-5 h-5" />
           </Button>
