@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 
 export function CartDrawer() {
   const { isCartOpen, closeCart } = useUIStore()
-  const { items, updateQuantity, removeItem, getTotalPrice } = useCartStore()
+  const { items, updateQuantity, removeItem, getTotalPrice, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
 
   // Close cart on escape key
   useEffect(() => {
@@ -63,58 +63,75 @@ export function CartDrawer() {
               <Button onClick={closeCart}>Continuer mes achats</Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
-                  {/* Image */}
-                  <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-                    {item.image && (
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-contain"
-                        sizes="80px"
-                      />
-                    )}
-                  </div>
+            <div className="space-y-6">
+              {Object.entries(getItemsByStore()).map(([storeId, storeItems]) => (
+                <div key={storeId} className="space-y-3">
+                  {/* Store Header (only show if multiple stores) */}
+                  {getUniqueStoresCount() > 1 && (
+                    <div className="flex items-center justify-between px-2 pb-2 border-b border-gray-200">
+                      <h3 className="font-semibold text-sm text-gray-700">
+                        {storeItems[0]?.storeName || 'Boutique'}
+                      </h3>
+                      <span className="text-sm font-medium text-gray-600">
+                        Sous-total: {formatPrice(getStoreSubtotal(storeId))}
+                      </span>
+                    </div>
+                  )}
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                    {item.variantName && (
-                      <p className="text-sm text-gray-600">{item.variantName}</p>
-                    )}
-                    <p className="text-lg font-bold text-gray-900 mt-1">
-                      {formatPrice(item.price)}
-                    </p>
+                  {/* Store Items */}
+                  {storeItems.map((item) => (
+                    <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
+                      {/* Image */}
+                      <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden">
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-contain"
+                            sizes="80px"
+                          />
+                        )}
+                      </div>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-2 mt-2">
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
+                        {item.variantName && (
+                          <p className="text-sm text-gray-600">{item.variantName}</p>
+                        )}
+                        <p className="text-lg font-bold text-gray-900 mt-1">
+                          {formatPrice(item.price)}
+                        </p>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1, item.variantId)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                            disabled={item.maxQuantity ? item.quantity >= item.maxQuantity : false}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Remove */}
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1, item.variantId)}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        onClick={() => removeItem(item.productId, item.variantId)}
+                        className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors h-fit"
                       >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
-                        disabled={item.maxQuantity ? item.quantity >= item.maxQuantity : false}
-                      >
-                        <Plus className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
-                  </div>
-
-                  {/* Remove */}
-                  <button
-                    onClick={() => removeItem(item.productId, item.variantId)}
-                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors h-fit"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  ))}
                 </div>
               ))}
             </div>
