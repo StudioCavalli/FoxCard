@@ -6,24 +6,40 @@ import { Card } from '@/components/ui/Card'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { DollarSign, Package, ShoppingCart, Users } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminDashboard() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
 
-  const { data: products } = trpc.product.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 100,
-  })
+  const { data: products } = trpc.product.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 100,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
-  const { data: ordersData } = trpc.order.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 100,
-  })
+  const { data: ordersData } = trpc.order.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 100,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
-  const { data: customersData } = trpc.customer.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 100,
-  })
+  const { data: customersData } = trpc.customer.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 100,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const totalProducts = products?.products.length || 0
   const totalOrders = ordersData?.orders.length || 0

@@ -12,10 +12,11 @@ import { trpc } from '@/lib/trpc/client'
 import { generateSlug } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function NewProductPage() {
   const router = useRouter()
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,9 +32,14 @@ export default function NewProductPage() {
   })
   const [variants, setVariants] = useState<ProductVariant[]>([])
 
-  const { data: categories } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: categories } = trpc.category.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const createProduct = trpc.product.create.useMutation({
     onSuccess: () => {
@@ -45,7 +51,7 @@ export default function NewProductPage() {
     e.preventDefault()
 
     createProduct.mutate({
-      storeId: DEMO_STORE_ID,
+      storeId: storeId!,
       name: formData.name,
       slug: formData.slug || generateSlug(formData.name),
       description: formData.description || undefined,

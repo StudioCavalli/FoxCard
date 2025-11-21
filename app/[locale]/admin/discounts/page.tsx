@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Plus, Edit, Trash2, Percent, DollarSign, Calendar, Users } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminDiscountsPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -25,9 +26,14 @@ export default function AdminDiscountsPage() {
     isActive: true,
   })
 
-  const { data: discounts, refetch } = trpc.discount.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: discounts, refetch } = trpc.discount.getAll.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const createDiscount = trpc.discount.create.useMutation({
     onSuccess: () => {
@@ -69,7 +75,7 @@ export default function AdminDiscountsPage() {
     e.preventDefault()
 
     const data = {
-      storeId: DEMO_STORE_ID,
+      storeId: storeId!,
       code: formData.code.toUpperCase(),
       description: formData.description || undefined,
       type: formData.type,

@@ -5,19 +5,30 @@ import { Card } from '@/components/ui/Card'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { ShoppingCart, TrendingUp, Mail, DollarSign, BarChart3, Send } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AbandonedCartsPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  const { data: analytics, refetch: refetchAnalytics } = trpc.abandonedCart.getAnalytics.useQuery({
-    storeId: DEMO_STORE_ID,
-  })
+  const { data: analytics, refetch: refetchAnalytics } = trpc.abandonedCart.getAnalytics.useQuery(
+    {
+      storeId: storeId!,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
-  const { data: carts, refetch: refetchCarts } = trpc.abandonedCart.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    status: statusFilter === 'all' ? undefined : statusFilter as any,
-  })
+  const { data: carts, refetch: refetchCarts } = trpc.abandonedCart.getAll.useQuery(
+    {
+      storeId: storeId!,
+      status: statusFilter === 'all' ? undefined : statusFilter as any,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const sendEmail = trpc.abandonedCart.sendRecoveryEmail.useMutation({
     onSuccess: () => {
