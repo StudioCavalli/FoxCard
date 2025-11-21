@@ -5,7 +5,7 @@
  * Vue d'ensemble du système de paiement crsdpay
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import {
   DollarSign,
@@ -24,41 +24,36 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { LineChart } from '@/components/charts/LineChart'
 import { BarChart } from '@/components/charts/BarChart'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function CrsdpayDashboard() {
-  const [storeId, setStoreId] = useState<string>('')
+  const { storeId } = useStoreContext()
   const [period, setPeriod] = useState<7 | 30 | 90>(30)
 
-  useEffect(() => {
-    // En production, récupérer le storeId depuis le contexte utilisateur
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
-  }, [])
-
   const { data: stats, isLoading: statsLoading } = trpc.crsdpay.getStats.useQuery(
-    { storeId },
+    { storeId: storeId! },
     { enabled: !!storeId }
   )
 
   const { data: recentTransactions, isLoading: transactionsLoading } =
     trpc.crsdpay.listTransactions.useQuery(
-      { storeId, limit: 10 },
+      { storeId: storeId!, limit: 10 },
       { enabled: !!storeId }
     )
 
   const { data: config } = trpc.crsdpay.getConfig.useQuery(
-    { storeId },
+    { storeId: storeId! },
     { enabled: !!storeId }
   )
 
   const { data: chartData, isLoading: chartLoading } = trpc.crsdpay.getChartData.useQuery(
-    { storeId, days: period },
+    { storeId: storeId!, days: period },
     { enabled: !!storeId }
   )
 
   const { data: paymentMethodStats, isLoading: methodStatsLoading } =
     trpc.crsdpay.getPaymentMethodStats.useQuery(
-      { storeId, days: period },
+      { storeId: storeId!, days: period },
       { enabled: !!storeId }
     )
 

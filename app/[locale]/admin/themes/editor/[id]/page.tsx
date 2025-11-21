@@ -23,6 +23,7 @@ import {
   History,
   Clock,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type TabType = 'colors' | 'typography' | 'spacing' | 'advanced' | 'history'
 
@@ -84,7 +85,7 @@ export default function ThemeEditorPage() {
   const params = useParams()
   const router = useRouter()
   const themeId = params.id as string
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   // State
   const [activeTab, setActiveTab] = useState<TabType>('colors')
@@ -102,7 +103,7 @@ export default function ThemeEditorPage() {
 
   // Fetch theme data
   const { data: theme, isLoading } = trpc.theme.getById.useQuery(
-    { storeId, id: themeId },
+    { storeId: storeId!, id: themeId },
     { enabled: !!themeId && themeId !== 'new' }
   )
 
@@ -188,7 +189,7 @@ export default function ThemeEditorPage() {
     if (themeId === 'new') {
       createThemeMutation.mutate(
         {
-          storeId,
+          storeId: storeId!,
           name: themeName || 'Nouveau thème',
           description: themeDescription,
           config,
@@ -207,7 +208,7 @@ export default function ThemeEditorPage() {
     } else {
       updateThemeMutation.mutate(
         {
-          storeId,
+          storeId: storeId!,
           id: themeId,
           name: themeName,
           description: themeDescription,
@@ -257,7 +258,7 @@ export default function ThemeEditorPage() {
 
   // Fetch theme history
   const { data: themeHistory } = trpc.theme.getHistory.useQuery(
-    { storeId, themeId, limit: 20 },
+    { storeId: storeId!, themeId, limit: 20 },
     { enabled: !!themeId && themeId !== 'new' }
   )
 
@@ -270,7 +271,7 @@ export default function ThemeEditorPage() {
     }
 
     restoreFromHistoryMutation.mutate(
-      { storeId, themeId, historyId },
+      { storeId: storeId!, themeId, historyId },
       {
         onSuccess: (restoredTheme) => {
           const restoredConfig = {

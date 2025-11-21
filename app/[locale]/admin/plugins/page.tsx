@@ -20,6 +20,7 @@ import {
   Link,
   Wrench,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 const categoryIcons: Record<string, any> = {
   shipping: Truck,
@@ -43,9 +44,9 @@ const typeLabels: Record<string, string> = {
 
 export default function PluginsPage() {
   const router = useRouter()
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
-  const { data: plugins, refetch } = trpc.plugin.getAll.useQuery({ storeId })
+  const { data: plugins, refetch } = trpc.plugin.getAll.useQuery({ storeId: storeId! })
 
   const enableMutation = trpc.plugin.enable.useMutation()
   const disableMutation = trpc.plugin.disable.useMutation()
@@ -62,7 +63,7 @@ export default function PluginsPage() {
   const handleToggle = async (plugin: any) => {
     if (plugin.isEnabled) {
       disableMutation.mutate(
-        { storeId, id: plugin.id },
+        { storeId: storeId!, id: plugin.id },
         {
           onSuccess: () => refetch(),
           onError: (error) => alert(error.message),
@@ -70,7 +71,7 @@ export default function PluginsPage() {
       )
     } else {
       enableMutation.mutate(
-        { storeId, id: plugin.id },
+        { storeId: storeId!, id: plugin.id },
         {
           onSuccess: () => refetch(),
           onError: (error) => alert(error.message),
@@ -83,7 +84,7 @@ export default function PluginsPage() {
     if (!confirm(`Voulez-vous vraiment désinstaller "${plugin.name}" ?`)) return
 
     uninstallMutation.mutate(
-      { storeId, id: plugin.id },
+      { storeId: storeId!, id: plugin.id },
       {
         onSuccess: () => refetch(),
         onError: (error) => alert(error.message),

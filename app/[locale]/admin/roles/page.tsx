@@ -6,8 +6,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Plus, Trash2, Edit, Users, Shield, ShieldCheck } from 'lucide-react'
 import { PERMISSION_GROUPS, PERMISSION_LABELS, PERMISSIONS } from '@/lib/rbac/roles'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function RolesPage() {
+  const { storeId } = useStoreContext()
   const [selectedRole, setSelectedRole] = useState<any>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [formData, setFormData] = useState({
@@ -16,11 +18,9 @@ export default function RolesPage() {
     permissions: [] as string[],
   })
 
-  const storeId = '000000000000000000000001' // TODO: Get from context
-
   // Queries
-  const { data: roles, refetch: refetchRoles } = trpc.role.list.useQuery({ storeId })
-  const { data: myPermissions } = trpc.role.getMyPermissions.useQuery({ storeId })
+  const { data: roles, refetch: refetchRoles } = trpc.role.list.useQuery({ storeId: storeId! })
+  const { data: myPermissions } = trpc.role.getMyPermissions.useQuery({ storeId: storeId! })
 
   // Mutations
   const createRoleMutation = trpc.role.create.useMutation()
@@ -40,7 +40,7 @@ export default function RolesPage() {
 
     createRoleMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         name: formData.name,
         description: formData.description,
         permissions: formData.permissions,
@@ -63,7 +63,7 @@ export default function RolesPage() {
 
     updateRoleMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         roleId: selectedRole.id,
         name: formData.name,
         description: formData.description,
@@ -86,7 +86,7 @@ export default function RolesPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) return
 
     deleteRoleMutation.mutate(
-      { storeId, roleId },
+      { storeId: storeId!, roleId },
       {
         onSuccess: () => {
           refetchRoles()
@@ -100,7 +100,7 @@ export default function RolesPage() {
 
   const handleSeedSystemRoles = async () => {
     seedSystemRolesMutation.mutate(
-      { storeId },
+      { storeId: storeId! },
       {
         onSuccess: () => {
           refetchRoles()

@@ -5,11 +5,12 @@ import { trpc } from '@/lib/trpc/client'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Store, Save, Image as ImageIcon } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function StorePage() {
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
-  const { data: store } = trpc.store.getById.useQuery({ id: storeId })
+  const { data: store } = trpc.store.getById.useQuery({ id: storeId! }, { enabled: !!storeId })
 
   const [formData, setFormData] = useState({
     name: '',
@@ -37,7 +38,7 @@ export default function StorePage() {
 
     updateStoreMutation.mutate(
       {
-        id: storeId,
+        id: storeId!,
         ...formData,
       },
       {

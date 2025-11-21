@@ -13,9 +13,10 @@ import { trpc } from '@/lib/trpc/client'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Download, FileText, Filter } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function ReportsPage() {
-  const [storeId, setStoreId] = useState<string>('')
+  const { storeId } = useStoreContext()
   const { toast } = useToast()
 
   // Filters
@@ -24,8 +25,6 @@ export default function ReportsPage() {
   const [status, setStatus] = useState<string>('')
 
   useEffect(() => {
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
 
     // Set default dates (last 30 days)
     const end = new Date()
@@ -38,7 +37,7 @@ export default function ReportsPage() {
 
   const { data, isLoading, refetch } = trpc.crsdpay.listTransactions.useQuery(
     {
-      storeId,
+      storeId: storeId!,
       status: status as any || undefined,
       limit: 1000, // Get all for export
     },

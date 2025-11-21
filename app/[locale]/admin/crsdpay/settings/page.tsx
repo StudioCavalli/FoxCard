@@ -14,22 +14,18 @@ import { trpc } from '@/lib/trpc/client'
 import { useToast } from '@/hooks/use-toast'
 import { Save, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function CrsdpaySettings() {
-  const [storeId, setStoreId] = useState<string>('')
+  const { storeId } = useStoreContext()
   const { toast } = useToast()
 
   const { data: config, isLoading, refetch } = trpc.crsdpay.getConfig.useQuery(
-    { storeId },
+    { storeId: storeId! },
     { enabled: !!storeId }
   )
 
   const updateConfigMutation = trpc.crsdpay.updateConfig.useMutation()
-
-  useEffect(() => {
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
-  }, [])
 
   const [formData, setFormData] = useState({
     isEnabled: false,
@@ -76,7 +72,7 @@ export default function CrsdpaySettings() {
   const handleSave = async () => {
     try {
       await updateConfigMutation.mutateAsync({
-        storeId,
+        storeId: storeId!,
         ...formData,
       })
 

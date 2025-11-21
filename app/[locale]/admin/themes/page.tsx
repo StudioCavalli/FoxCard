@@ -18,13 +18,14 @@ import {
   Paintbrush,
   Store,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function ThemesPage() {
   const router = useRouter()
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const { data: themes, refetch: refetchThemes } = trpc.theme.getAll.useQuery({
-    storeId,
+    storeId: storeId!,
   })
 
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -62,7 +63,7 @@ export default function ThemesPage() {
   const handleCreateTheme = async () => {
     createThemeMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         name: formData.name,
         description: formData.description,
         config: {
@@ -111,7 +112,7 @@ export default function ThemesPage() {
 
     updateThemeMutation.mutate(
       {
-        storeId,
+        storeId: storeId!,
         id: selectedTheme.id,
         name: formData.name,
         description: formData.description,
@@ -139,7 +140,7 @@ export default function ThemesPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce thème ?')) return
 
     deleteThemeMutation.mutate(
-      { storeId, id: themeId },
+      { storeId: storeId!, id: themeId },
       {
         onSuccess: () => {
           refetchThemes()
@@ -153,7 +154,7 @@ export default function ThemesPage() {
 
   const handleActivateTheme = async (themeId: string) => {
     activateThemeMutation.mutate(
-      { storeId, id: themeId },
+      { storeId: storeId!, id: themeId },
       {
         onSuccess: () => {
           refetchThemes()
@@ -167,7 +168,7 @@ export default function ThemesPage() {
 
   const handleDuplicateTheme = async (themeId: string) => {
     duplicateThemeMutation.mutate(
-      { storeId, id: themeId },
+      { storeId: storeId!, id: themeId },
       {
         onSuccess: () => {
           refetchThemes()
@@ -196,7 +197,7 @@ export default function ThemesPage() {
     if (!confirm('Voulez-vous installer les 3 thèmes système (Minimal, Elegant, Bold) ?')) return
 
     seedSystemThemesMutation.mutate(
-      { storeId },
+      { storeId: storeId! },
       {
         onSuccess: (data) => {
           alert(data.message)

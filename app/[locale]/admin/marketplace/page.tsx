@@ -12,9 +12,10 @@ import {
   Search,
   RefreshCw,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function MarketplacePage() {
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -24,7 +25,7 @@ export default function MarketplacePage() {
     tags: selectedTags.length > 0 ? selectedTags : undefined,
   })
 
-  const { data: installedThemes, refetch: refetchInstalledThemes } = trpc.theme.getAll.useQuery({ storeId })
+  const { data: installedThemes, refetch: refetchInstalledThemes } = trpc.theme.getAll.useQuery({ storeId: storeId! })
 
   const seedPresetsMutation = trpc.theme.seedPresets.useMutation()
   const installFromPresetMutation = trpc.theme.installFromPreset.useMutation()
@@ -45,7 +46,7 @@ export default function MarketplacePage() {
     if (!confirm(`Installer le thème "${presetName}" ?`)) return
 
     installFromPresetMutation.mutate(
-      { storeId, presetId },
+      { storeId: storeId!, presetId },
       {
         onSuccess: () => {
           alert('Thème installé avec succès!')

@@ -4,28 +4,24 @@
  * Customers Management Page - Gestion des clients crsdpay
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { ArrowLeft, Search, User, CreditCard, DollarSign } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function CustomersPage() {
-  const [storeId, setStoreId] = useState<string>('')
+  const { storeId } = useStoreContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [offset, setOffset] = useState(0)
   const limit = 20
 
-  useEffect(() => {
-    const mockStoreId = '507f1f77bcf86cd799439011'
-    setStoreId(mockStoreId)
-  }, [])
-
   const { data, isLoading, refetch } = trpc.crsdpay.listCustomers.useQuery(
     {
-      storeId,
+      storeId: storeId!,
       limit,
       offset,
     },

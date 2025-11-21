@@ -19,42 +19,46 @@ import {
   BarChart3,
   Package,
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type Period = 'day' | 'week' | 'month' | 'year'
 type ProductSortBy = 'revenue' | 'quantity' | 'views'
 
 export default function AnalyticsPage() {
-  const storeId = '000000000000000000000001' // TODO: Get from context
+  const { storeId } = useStoreContext()
 
   const [period, setPeriod] = useState<Period>('month')
   const [productSortBy, setProductSortBy] = useState<ProductSortBy>('revenue')
 
   // Fetch analytics data
   const { data: salesData, isLoading: salesLoading, refetch: refetchSales } =
-    trpc.analytics.getSalesOverview.useQuery({ storeId, period })
+    trpc.analytics.getSalesOverview.useQuery(
+      { storeId: storeId!, period },
+      { enabled: !!storeId }
+    )
 
   const { data: topProducts, isLoading: productsLoading } =
     trpc.analytics.getTopProducts.useQuery({
-      storeId,
+      storeId: storeId!,
       limit: 10,
       sortBy: productSortBy,
       period: period === 'day' ? 'week' : period,
-    })
+    }, { enabled: !!storeId })
 
   const { data: funnel, isLoading: funnelLoading } =
     trpc.analytics.getConversionFunnel.useQuery({
-      storeId,
+      storeId: storeId!,
       period: period === 'day' ? 'week' : period === 'year' ? 'year' : period,
-    })
+    }, { enabled: !!storeId })
 
   const { data: realTimeStats, refetch: refetchRealTime } =
-    trpc.analytics.getRealTimeStats.useQuery({ storeId })
+    trpc.analytics.getRealTimeStats.useQuery({ storeId: storeId! }, { enabled: !!storeId })
 
   const { data: customerStats } =
     trpc.analytics.getCustomerStats.useQuery({
-      storeId,
+      storeId: storeId!,
       period: period === 'day' ? 'week' : period === 'year' ? 'year' : period,
-    })
+    }, { enabled: !!storeId })
 
   const handleRefresh = () => {
     refetchSales()
