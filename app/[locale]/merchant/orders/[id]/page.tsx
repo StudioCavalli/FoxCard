@@ -211,24 +211,24 @@ export default function OrderDetailPage() {
             <div className="bg-gray-50 p-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Sous-total</span>
-                <span className="text-gray-900">{formatPrice(order.subtotal)}</span>
+                <span className="text-gray-900">{formatPrice((order as any).subtotal || order.total)}</span>
               </div>
-              {order.shippingAmount > 0 && (
+              {(order as any).shippingAmount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Livraison</span>
-                  <span className="text-gray-900">{formatPrice(order.shippingAmount)}</span>
+                  <span className="text-gray-900">{formatPrice((order as any).shippingAmount)}</span>
                 </div>
               )}
-              {order.taxAmount > 0 && (
+              {(order as any).taxAmount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Taxes</span>
-                  <span className="text-gray-900">{formatPrice(order.taxAmount)}</span>
+                  <span className="text-gray-900">{formatPrice((order as any).taxAmount)}</span>
                 </div>
               )}
-              {order.discountAmount > 0 && (
+              {(order as any).discountAmount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Réduction</span>
-                  <span className="text-green-600">-{formatPrice(order.discountAmount)}</span>
+                  <span className="text-green-600">-{formatPrice((order as any).discountAmount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
