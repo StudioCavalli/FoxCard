@@ -1,13 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { trpc } from '@/lib/trpc/client'
+import {
+  AdminCard,
+  AdminStatCard,
+  AdminButton,
+  AdminInput,
+  AdminSelect,
+  AdminSearchInput,
+  AdminBadge,
+  AdminTabs,
+  AdminEmptyState,
+} from '@/components/admin/ui'
 import {
   MessageSquare,
-  Search,
-  Filter,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -17,204 +24,97 @@ import {
   Send,
   ChevronRight,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  RefreshCw,
+  AlertTriangle,
+  Hourglass,
+  Hash,
+  Calendar,
+  Tag,
 } from 'lucide-react'
 
-type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'WAITING_CUSTOMER' | 'RESOLVED' | 'CLOSED'
 type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
 
-type Ticket = {
-  id: string
-  subject: string
-  description: string
-  status: TicketStatus
-  priority: TicketPriority
-  category: string
-  createdAt: string
-  updatedAt: string
-  user: {
-    name: string
-    email: string
-  }
-  store?: {
-    name: string
-  }
-  messages: {
-    id: string
-    content: string
-    isAdmin: boolean
-    createdAt: string
-    authorName: string
-  }[]
+const statusConfig: Record<TicketStatus, { label: string; variant: 'warning' | 'info' | 'default' | 'success' | 'danger'; icon: any }> = {
+  OPEN: { label: 'Ouvert', variant: 'warning', icon: AlertCircle },
+  IN_PROGRESS: { label: 'En cours', variant: 'info', icon: Clock },
+  WAITING_CUSTOMER: { label: 'En attente client', variant: 'default', icon: Hourglass },
+  RESOLVED: { label: 'Résolu', variant: 'success', icon: CheckCircle },
+  CLOSED: { label: 'Fermé', variant: 'danger', icon: XCircle },
 }
 
-const statusLabels: Record<TicketStatus, string> = {
-  OPEN: 'Ouvert',
-  IN_PROGRESS: 'En cours',
-  RESOLVED: 'Résolu',
-  CLOSED: 'Fermé',
+const priorityConfig: Record<TicketPriority, { label: string; variant: 'default' | 'info' | 'warning' | 'danger' }> = {
+  LOW: { label: 'Basse', variant: 'default' },
+  MEDIUM: { label: 'Moyenne', variant: 'info' },
+  HIGH: { label: 'Haute', variant: 'warning' },
+  URGENT: { label: 'Urgente', variant: 'danger' },
 }
-
-const statusColors: Record<TicketStatus, string> = {
-  OPEN: 'bg-yellow-100 text-yellow-700',
-  IN_PROGRESS: 'bg-blue-100 text-blue-700',
-  RESOLVED: 'bg-green-100 text-green-700',
-  CLOSED: 'bg-gray-100 text-gray-700',
-}
-
-const statusIcons: Record<TicketStatus, typeof Clock> = {
-  OPEN: AlertCircle,
-  IN_PROGRESS: Clock,
-  RESOLVED: CheckCircle,
-  CLOSED: XCircle,
-}
-
-const priorityLabels: Record<TicketPriority, string> = {
-  LOW: 'Basse',
-  MEDIUM: 'Moyenne',
-  HIGH: 'Haute',
-  URGENT: 'Urgente',
-}
-
-const priorityColors: Record<TicketPriority, string> = {
-  LOW: 'bg-gray-100 text-gray-600',
-  MEDIUM: 'bg-blue-100 text-blue-600',
-  HIGH: 'bg-orange-100 text-orange-600',
-  URGENT: 'bg-red-100 text-red-600',
-}
-
-// Données simulées
-const mockTickets: Ticket[] = [
-  {
-    id: '1',
-    subject: 'Problème de paiement Stripe',
-    description: 'Je n\'arrive pas à configurer Stripe sur ma boutique, le webhook ne fonctionne pas.',
-    status: 'OPEN',
-    priority: 'HIGH',
-    category: 'Paiement',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
-    user: { name: 'Jean Dupont', email: 'jean@example.com' },
-    store: { name: 'Boutique Mode' },
-    messages: [
-      { id: '1', content: 'Bonjour, j\'ai configuré mon compte Stripe mais les webhooks ne fonctionnent pas. J\'ai vérifié les clés API mais le problème persiste.', isAdmin: false, createdAt: '2024-01-15T10:30:00Z', authorName: 'Jean Dupont' },
-    ],
-  },
-  {
-    id: '2',
-    subject: 'Comment ajouter un nouveau thème ?',
-    description: 'Je souhaite personnaliser ma boutique avec un nouveau thème.',
-    status: 'IN_PROGRESS',
-    priority: 'MEDIUM',
-    category: 'Personnalisation',
-    createdAt: '2024-01-14T14:00:00Z',
-    updatedAt: '2024-01-15T09:00:00Z',
-    user: { name: 'Marie Martin', email: 'marie@example.com' },
-    store: { name: 'Bijoux Artisanaux' },
-    messages: [
-      { id: '1', content: 'Comment puis-je changer le thème de ma boutique ?', isAdmin: false, createdAt: '2024-01-14T14:00:00Z', authorName: 'Marie Martin' },
-      { id: '2', content: 'Bonjour Marie ! Pour changer votre thème, rendez-vous dans Paramètres > Apparence. Vous y trouverez tous les thèmes disponibles.', isAdmin: true, createdAt: '2024-01-15T09:00:00Z', authorName: 'Support FoxCard' },
-    ],
-  },
-  {
-    id: '3',
-    subject: 'Demande de remboursement client',
-    description: 'Un client demande un remboursement mais je ne trouve pas l\'option.',
-    status: 'RESOLVED',
-    priority: 'MEDIUM',
-    category: 'Commandes',
-    createdAt: '2024-01-13T16:45:00Z',
-    updatedAt: '2024-01-14T11:30:00Z',
-    user: { name: 'Pierre Durand', email: 'pierre@example.com' },
-    store: { name: 'Tech Store' },
-    messages: [
-      { id: '1', content: 'Comment effectuer un remboursement pour une commande ?', isAdmin: false, createdAt: '2024-01-13T16:45:00Z', authorName: 'Pierre Durand' },
-      { id: '2', content: 'Dans la page Commandes, cliquez sur la commande concernée puis sur le bouton "Rembourser".', isAdmin: true, createdAt: '2024-01-14T10:00:00Z', authorName: 'Support FoxCard' },
-      { id: '3', content: 'Parfait, j\'ai trouvé ! Merci beaucoup !', isAdmin: false, createdAt: '2024-01-14T11:30:00Z', authorName: 'Pierre Durand' },
-    ],
-  },
-  {
-    id: '4',
-    subject: 'Bug affichage sur mobile',
-    description: 'Le menu ne s\'affiche pas correctement sur iPhone.',
-    status: 'CLOSED',
-    priority: 'LOW',
-    category: 'Bug',
-    createdAt: '2024-01-10T09:00:00Z',
-    updatedAt: '2024-01-12T15:00:00Z',
-    user: { name: 'Sophie Lefebvre', email: 'sophie@example.com' },
-    store: { name: 'Déco Maison' },
-    messages: [
-      { id: '1', content: 'Le menu hamburger ne fonctionne pas sur Safari mobile.', isAdmin: false, createdAt: '2024-01-10T09:00:00Z', authorName: 'Sophie Lefebvre' },
-      { id: '2', content: 'Nous avons identifié le problème et déployé un correctif. Pouvez-vous vérifier de votre côté ?', isAdmin: true, createdAt: '2024-01-11T14:00:00Z', authorName: 'Support FoxCard' },
-      { id: '3', content: 'C\'est résolu, merci !', isAdmin: false, createdAt: '2024-01-12T15:00:00Z', authorName: 'Sophie Lefebvre' },
-    ],
-  },
-]
 
 export default function SuperAdminSupportPage() {
-  const [tickets, setTickets] = useState<Ticket[]>(mockTickets)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
+  const [priorityFilter, setPriorityFilter] = useState<string>('all')
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState('')
-  const [isSending, setIsSending] = useState(false)
+  const [page, setPage] = useState(0)
+  const limit = 20
 
-  // Stats
-  const stats = {
-    open: tickets.filter(t => t.status === 'OPEN').length,
-    inProgress: tickets.filter(t => t.status === 'IN_PROGRESS').length,
-    resolved: tickets.filter(t => t.status === 'RESOLVED').length,
-    closed: tickets.filter(t => t.status === 'CLOSED').length,
-  }
+  // Fetch tickets list
+  const {
+    data: ticketsData,
+    isLoading: isLoadingTickets,
+    refetch: refetchTickets,
+  } = trpc.superadmin.getAllTickets.useQuery({
+    limit,
+    offset: page * limit,
+    search: search || undefined,
+    status: statusFilter as TicketStatus | 'all',
+    priority: priorityFilter as TicketPriority | 'all',
+  })
 
-  // Filter tickets
-  const filteredTickets = tickets.filter(ticket => {
-    const matchesSearch = search === '' ||
-      ticket.subject.toLowerCase().includes(search.toLowerCase()) ||
-      ticket.user.email.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter
-    return matchesSearch && matchesStatus
+  // Fetch single ticket with messages
+  const {
+    data: selectedTicket,
+    isLoading: isLoadingTicket,
+    refetch: refetchTicket,
+  } = trpc.superadmin.getTicket.useQuery(
+    { ticketId: selectedTicketId! },
+    { enabled: !!selectedTicketId }
+  )
+
+  // Fetch stats
+  const { data: stats } = trpc.superadmin.getSupportStats.useQuery()
+
+  // Update status mutation
+  const updateStatus = trpc.superadmin.updateTicketStatus.useMutation({
+    onSuccess: () => {
+      refetchTicket()
+      refetchTickets()
+    },
+  })
+
+  // Add message mutation
+  const addMessage = trpc.superadmin.addTicketMessage.useMutation({
+    onSuccess: () => {
+      setNewMessage('')
+      refetchTicket()
+      refetchTickets()
+    },
   })
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedTicket) return
-
-    setIsSending(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    const message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      isAdmin: true,
-      createdAt: new Date().toISOString(),
-      authorName: 'Support FoxCard',
-    }
-
-    setTickets(prev => prev.map(t =>
-      t.id === selectedTicket.id
-        ? { ...t, messages: [...t.messages, message], updatedAt: new Date().toISOString() }
-        : t
-    ))
-
-    setSelectedTicket(prev => prev ? { ...prev, messages: [...prev.messages, message] } : null)
-    setNewMessage('')
-    setIsSending(false)
+    if (!newMessage.trim() || !selectedTicketId) return
+    addMessage.mutate({ ticketId: selectedTicketId, content: newMessage })
   }
 
-  const handleUpdateStatus = async (ticketId: string, newStatus: TicketStatus) => {
-    setTickets(prev => prev.map(t =>
-      t.id === ticketId
-        ? { ...t, status: newStatus, updatedAt: new Date().toISOString() }
-        : t
-    ))
-    if (selectedTicket?.id === ticketId) {
-      setSelectedTicket(prev => prev ? { ...prev, status: newStatus } : null)
-    }
+  const handleUpdateStatus = async (newStatus: string) => {
+    if (!selectedTicketId) return
+    updateStatus.mutate({ ticketId: selectedTicketId, status: newStatus as TicketStatus })
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -223,140 +123,241 @@ export default function SuperAdminSupportPage() {
     })
   }
 
+  const statusTabs = [
+    { value: 'all', label: 'Tous', count: ticketsData?.total || 0 },
+    { value: 'OPEN', label: 'Ouverts', count: ticketsData?.statusCounts?.open || 0, icon: <AlertCircle className="w-4 h-4" /> },
+    { value: 'IN_PROGRESS', label: 'En cours', count: ticketsData?.statusCounts?.inProgress || 0, icon: <Clock className="w-4 h-4" /> },
+    { value: 'WAITING_CUSTOMER', label: 'En attente', count: ticketsData?.statusCounts?.waitingCustomer || 0, icon: <Hourglass className="w-4 h-4" /> },
+    { value: 'RESOLVED', label: 'Résolus', count: ticketsData?.statusCounts?.resolved || 0, icon: <CheckCircle className="w-4 h-4" /> },
+  ]
+
+  const priorityOptions = [
+    { value: 'all', label: 'Toutes priorités' },
+    { value: 'LOW', label: 'Basse' },
+    { value: 'MEDIUM', label: 'Moyenne' },
+    { value: 'HIGH', label: 'Haute' },
+    { value: 'URGENT', label: 'Urgente' },
+  ]
+
+  const statusOptions = [
+    { value: 'OPEN', label: 'Ouvert' },
+    { value: 'IN_PROGRESS', label: 'En cours' },
+    { value: 'WAITING_CUSTOMER', label: 'En attente client' },
+    { value: 'RESOLVED', label: 'Résolu' },
+    { value: 'CLOSED', label: 'Fermé' },
+  ]
+
   // Detail view
-  if (selectedTicket) {
-    const StatusIcon = statusIcons[selectedTicket.status]
+  if (selectedTicketId) {
+    if (isLoadingTicket || !selectedTicket) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement du ticket...</p>
+          </div>
+        </div>
+      )
+    }
+
+    const ticketStatus = statusConfig[selectedTicket.status as TicketStatus]
+    const ticketPriority = priorityConfig[selectedTicket.priority as TicketPriority]
+    const StatusIcon = ticketStatus?.icon || AlertCircle
 
     return (
       <div className="space-y-6">
         {/* Back button */}
         <button
-          onClick={() => setSelectedTicket(null)}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          onClick={() => setSelectedTicketId(null)}
+          className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Retour aux tickets</span>
+          <span className="font-medium">Retour aux tickets</span>
         </button>
 
         {/* Ticket Header */}
-        <Card className="p-6">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-gray-900">{selectedTicket.subject}</h1>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[selectedTicket.status]}`}>
-                  <StatusIcon className="w-3.5 h-3.5 mr-1" />
-                  {statusLabels[selectedTicket.status]}
-                </span>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${priorityColors[selectedTicket.priority]}`}>
-                  {priorityLabels[selectedTicket.priority]}
-                </span>
-                <span className="text-sm text-gray-500">
-                  #{selectedTicket.id} • Créé le {formatDate(selectedTicket.createdAt)}
-                </span>
+        <AdminCard>
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div className="space-y-3">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {selectedTicket.subject}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <AdminBadge variant={ticketStatus?.variant || 'default'}>
+                    <StatusIcon className="w-3.5 h-3.5 mr-1" />
+                    {ticketStatus?.label || selectedTicket.status}
+                  </AdminBadge>
+                  <AdminBadge variant={ticketPriority?.variant || 'default'}>
+                    {ticketPriority?.label || selectedTicket.priority}
+                  </AdminBadge>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <Hash className="w-4 h-4" />
+                    {selectedTicket.ticketNumber}
+                  </span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {formatDate(selectedTicket.createdAt)}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedTicket.status}
-                onChange={(e) => handleUpdateStatus(selectedTicket.id, e.target.value as TicketStatus)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="OPEN">Ouvert</option>
-                <option value="IN_PROGRESS">En cours</option>
-                <option value="RESOLVED">Résolu</option>
-                <option value="CLOSED">Fermé</option>
-              </select>
+              <div className="flex items-center gap-3">
+                <AdminSelect
+                  value={selectedTicket.status}
+                  onChange={handleUpdateStatus}
+                  options={statusOptions}
+                  disabled={updateStatus.isPending}
+                />
+                {updateStatus.isPending && <Loader2 className="w-4 h-4 animate-spin text-violet-500" />}
+              </div>
             </div>
           </div>
 
           {/* User info */}
-          <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-400" />
+          <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{selectedTicket.user.name}</p>
-                <p className="text-xs text-gray-500">{selectedTicket.user.email}</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                  {selectedTicket.user.name || 'Sans nom'}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {selectedTicket.user.email}
+                </p>
               </div>
             </div>
             {selectedTicket.store && (
-              <div className="flex items-center gap-3">
-                <Store className="w-5 h-5 text-gray-400" />
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{selectedTicket.store.name}</p>
-                  <p className="text-xs text-gray-500">Boutique</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">
+                    {selectedTicket.store.name}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Boutique</p>
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-3">
-              <MessageSquare className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                <Tag className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{selectedTicket.category}</p>
-                <p className="text-xs text-gray-500">Catégorie</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                  {selectedTicket.category}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Catégorie</p>
               </div>
             </div>
           </div>
-        </Card>
+
+          {/* Description */}
+          {selectedTicket.description && (
+            <div className="px-5 pb-5">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                  {selectedTicket.description}
+                </p>
+              </div>
+            </div>
+          )}
+        </AdminCard>
 
         {/* Messages */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Conversation</h2>
-
-          <div className="space-y-4 mb-6">
-            {selectedTicket.messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[80%] rounded-xl px-4 py-3 ${
-                  message.isAdmin
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-medium ${message.isAdmin ? 'text-purple-200' : 'text-gray-500'}`}>
-                      {message.authorName}
-                    </span>
-                    <span className={`text-xs ${message.isAdmin ? 'text-purple-200' : 'text-gray-400'}`}>
-                      {formatDate(message.createdAt)}
-                    </span>
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
+        <AdminCard>
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <MessageSquare className="w-5 h-5 text-white" />
               </div>
-            ))}
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Conversation</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {selectedTicket.messages.length} message{selectedTicket.messages.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 space-y-4 max-h-[500px] overflow-y-auto">
+            {selectedTicket.messages.length === 0 ? (
+              <div className="text-center py-12">
+                <MessageSquare className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-slate-400">Aucun message dans ce ticket</p>
+              </div>
+            ) : (
+              selectedTicket.messages.map((message: any) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      message.isAdmin
+                        ? 'bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`text-xs font-medium ${
+                          message.isAdmin ? 'text-violet-200' : 'text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {message.authorName}
+                      </span>
+                      <span
+                        className={`text-xs ${
+                          message.isAdmin ? 'text-violet-200' : 'text-slate-400 dark:text-slate-500'
+                        }`}
+                      >
+                        {formatDate(message.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Reply form */}
           {selectedTicket.status !== 'CLOSED' && (
-            <div className="flex gap-3">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Votre réponse..."
-                className="flex-1"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSendMessage()
-                  }
-                }}
-              />
-              <Button
-                variant="primary"
-                onClick={handleSendMessage}
-                disabled={!newMessage.trim() || isSending}
-              >
-                {isSending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
+            <div className="p-5 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex gap-3">
+                <AdminInput
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Votre réponse..."
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }
+                  }}
+                  disabled={addMessage.isPending}
+                />
+                <AdminButton
+                  variant="primary"
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || addMessage.isPending}
+                  loading={addMessage.isPending}
+                  icon={<Send className="w-4 h-4" />}
+                >
+                  Envoyer
+                </AdminButton>
+              </div>
+              {addMessage.error && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{addMessage.error.message}</p>
+              )}
             </div>
           )}
-        </Card>
+        </AdminCard>
       </div>
     )
   }
@@ -365,147 +366,231 @@ export default function SuperAdminSupportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Support & Tickets</h1>
-        <p className="text-gray-600">Gérez les demandes de support des marchands</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Support & Tickets
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">
+            Gérez les demandes de support des marchands
+          </p>
+        </div>
+        <AdminButton
+          variant="secondary"
+          icon={<RefreshCw className="w-4 h-4" />}
+          onClick={() => refetchTickets()}
+        >
+          Actualiser
+        </AdminButton>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Ouverts</p>
-              <p className="text-xl font-bold text-gray-900">{stats.open}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">En cours</p>
-              <p className="text-xl font-bold text-gray-900">{stats.inProgress}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Résolus</p>
-              <p className="text-xl font-bold text-gray-900">{stats.resolved}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-gray-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Fermés</p>
-              <p className="text-xl font-bold text-gray-900">{stats.closed}</p>
-            </div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <AdminStatCard
+          title="Ouverts"
+          value={ticketsData?.statusCounts?.open || 0}
+          icon={AlertCircle}
+          variant="amber"
+          onClick={() => setStatusFilter('OPEN')}
+        />
+        <AdminStatCard
+          title="En cours"
+          value={ticketsData?.statusCounts?.inProgress || 0}
+          icon={Clock}
+          variant="blue"
+          onClick={() => setStatusFilter('IN_PROGRESS')}
+        />
+        <AdminStatCard
+          title="En attente"
+          value={ticketsData?.statusCounts?.waitingCustomer || 0}
+          icon={Hourglass}
+          variant="slate"
+          onClick={() => setStatusFilter('WAITING_CUSTOMER')}
+        />
+        <AdminStatCard
+          title="Résolus"
+          value={ticketsData?.statusCounts?.resolved || 0}
+          icon={CheckCircle}
+          variant="emerald"
+          onClick={() => setStatusFilter('RESOLVED')}
+        />
+        <AdminStatCard
+          title="Urgents"
+          value={stats?.urgent || 0}
+          icon={AlertTriangle}
+          variant="rose"
+          onClick={() => setPriorityFilter('URGENT')}
+        />
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Rechercher par sujet ou email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="OPEN">Ouverts</option>
-              <option value="IN_PROGRESS">En cours</option>
-              <option value="RESOLVED">Résolus</option>
-              <option value="CLOSED">Fermés</option>
-            </select>
+      <AdminCard>
+        <div className="p-4 space-y-4">
+          {/* Status Tabs */}
+          <AdminTabs
+            items={statusTabs}
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v)
+              setPage(0)
+            }}
+            variant="pills"
+            size="sm"
+          />
+
+          {/* Search and Priority Filter */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <AdminSearchInput
+                value={search}
+                onChange={(v) => {
+                  setSearch(v)
+                  setPage(0)
+                }}
+                placeholder="Rechercher par sujet, numéro ou email..."
+              />
+            </div>
+            <div className="sm:w-48">
+              <AdminSelect
+                value={priorityFilter}
+                onChange={(v) => {
+                  setPriorityFilter(v)
+                  setPage(0)
+                }}
+                options={priorityOptions}
+              />
+            </div>
           </div>
         </div>
-      </Card>
+      </AdminCard>
+
+      {/* Loading */}
+      {isLoadingTickets && (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des tickets...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoadingTickets && (!ticketsData?.tickets || ticketsData.tickets.length === 0) && (
+        <AdminEmptyState
+          icon={MessageSquare}
+          title="Aucun ticket trouvé"
+          description={search || statusFilter !== 'all' || priorityFilter !== 'all'
+            ? "Aucun ticket ne correspond à vos critères de recherche"
+            : "Les tickets de support apparaîtront ici"
+          }
+          action={
+            (search || statusFilter !== 'all' || priorityFilter !== 'all') ? (
+              <AdminButton
+                variant="secondary"
+                onClick={() => {
+                  setSearch('')
+                  setStatusFilter('all')
+                  setPriorityFilter('all')
+                }}
+              >
+                Réinitialiser les filtres
+              </AdminButton>
+            ) : undefined
+          }
+        />
+      )}
 
       {/* Tickets List */}
-      {filteredTickets.length === 0 ? (
-        <Card className="p-12 text-center">
-          <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Aucun ticket trouvé</p>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {filteredTickets.map((ticket) => {
-            const StatusIcon = statusIcons[ticket.status]
+      {!isLoadingTickets && ticketsData?.tickets && ticketsData.tickets.length > 0 && (
+        <AdminCard>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {ticketsData.tickets.map((ticket: any) => {
+              const status = statusConfig[ticket.status as TicketStatus]
+              const priority = priorityConfig[ticket.priority as TicketPriority]
+              const StatusIcon = status?.icon || AlertCircle
 
-            return (
-              <Card
-                key={ticket.id}
-                className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => setSelectedTicket(ticket)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[ticket.status]}`}>
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {statusLabels[ticket.status]}
-                      </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[ticket.priority]}`}>
-                        {priorityLabels[ticket.priority]}
-                      </span>
-                      <span className="text-xs text-gray-400">#{ticket.id}</span>
-                    </div>
-                    <h3 className="font-medium text-gray-900 truncate">{ticket.subject}</h3>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5" />
-                        {ticket.user.name}
-                      </span>
-                      {ticket.store && (
-                        <span className="flex items-center gap-1">
-                          <Store className="w-3.5 h-3.5" />
-                          {ticket.store.name}
+              return (
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicketId(ticket.id)}
+                  className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      {/* Badges */}
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <AdminBadge variant={status?.variant || 'default'} size="sm">
+                          <StatusIcon className="w-3 h-3 mr-1" />
+                          {status?.label || ticket.status}
+                        </AdminBadge>
+                        <AdminBadge variant={priority?.variant || 'default'} size="sm">
+                          {priority?.label || ticket.priority}
+                        </AdminBadge>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                          #{ticket.ticketNumber}
                         </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        {ticket.messages.length} message{ticket.messages.length > 1 ? 's' : ''}
-                      </span>
+                      </div>
+
+                      {/* Subject */}
+                      <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                        {ticket.subject}
+                      </h3>
+
+                      {/* Meta */}
+                      <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5" />
+                          {ticket.user?.name || ticket.user?.email}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          {ticket.messagesCount} message{ticket.messagesCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs text-gray-500">Mis à jour</p>
-                      <p className="text-sm text-gray-700">{formatDate(ticket.updatedAt)}</p>
+
+                    <div className="flex items-center gap-4 flex-shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Mis à jour</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {formatDate(ticket.updatedAt)}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
                   </div>
                 </div>
-              </Card>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+
+          {/* Pagination Footer */}
+          {ticketsData.total > limit && (
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Affichage {page * limit + 1} - {Math.min((page + 1) * limit, ticketsData.total)} sur {ticketsData.total}
+              </p>
+              <div className="flex gap-2">
+                <AdminButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                >
+                  Précédent
+                </AdminButton>
+                <AdminButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={(page + 1) * limit >= ticketsData.total}
+                >
+                  Suivant
+                </AdminButton>
+              </div>
+            </div>
+          )}
+        </AdminCard>
       )}
     </div>
   )

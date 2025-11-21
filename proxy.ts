@@ -10,12 +10,45 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'always',
 })
 
-export default withAuth(
-  function middleware(req) {
-    // First, handle i18n routing
-    const response = intlMiddleware(req)
+// Simple in-memory cache for maintenance mode
+let maintenanceCache: { active: boolean; message: string | null; timestamp: number } | null = null
+const MAINTENANCE_CACHE_TTL = 30 * 1000 // 30 seconds
 
-    // Then handle authentication/authorization
+async function checkMaintenanceMode(baseUrl: string): Promise<{ active: boolean; message: string | null }> {
+  const now = Date.now()
+
+  // Use cache if still valid
+  if (maintenanceCache && now - maintenanceCache.timestamp < MAINTENANCE_CACHE_TTL) {
+    return { active: maintenanceCache.active, message: maintenanceCache.message }
+  }
+
+  try {
+    // Fetch settings from internal API
+    const settingsUrl = new URL('/api/platform/settings', baseUrl)
+    const response = await fetch(settingsUrl, {
+      headers: { 'x-internal-request': 'true' },
+      cache: 'no-store',
+    })
+
+    if (response.ok) {
+      const settings = await response.json()
+      maintenanceCache = {
+        active: settings.maintenanceMode || false,
+        message: settings.maintenanceMessage || null,
+        timestamp: now,
+      }
+      return { active: maintenanceCache.active, message: maintenanceCache.message }
+    }
+  } catch (error) {
+    // Silent fail - don't block on maintenance check errors
+  }
+
+  // Default to no maintenance mode on error
+  return { active: false, message: null }
+}
+
+export default withAuth(
+  async function middleware(req) {
     const token = req.nextauth.token
     const isAuth = !!token
     const pathname = req.nextUrl.pathname
@@ -32,23 +65,46 @@ export default withAuth(
     const isAdminPage = pathWithoutLocale.startsWith('/admin') && !isSuperAdminPage
     const isMerchantPage = pathWithoutLocale.startsWith('/merchant')
     const isAccountPage = pathWithoutLocale.startsWith('/account')
+    const isMaintenancePage = pathWithoutLocale.startsWith('/maintenance')
+    const isSuspendedPage = pathWithoutLocale === '/account/suspended'
+
+    const locale = pathname.split('/')[1] || defaultLocale
+
+    // Check maintenance mode (except for super admins and certain pages)
+    const isSuperAdmin = token?.role === 'SUPER_ADMIN'
+    if (!isSuperAdmin && !isMaintenancePage && !isAuthPage && !isSuspendedPage) {
+      const maintenanceStatus = await checkMaintenanceMode(req.nextUrl.origin)
+
+      if (maintenanceStatus.active) {
+        const maintenanceUrl = new URL(`/${locale}/maintenance`, req.url)
+        if (maintenanceStatus.message) {
+          maintenanceUrl.searchParams.set('message', maintenanceStatus.message)
+        }
+        return NextResponse.redirect(maintenanceUrl)
+      }
+    }
+
+    // Check if user is suspended or banned
+    if (isAuth && !isSuspendedPage && !isAuthPage) {
+      const userStatus = token?.status as string | undefined
+      if (userStatus === 'SUSPENDED' || userStatus === 'BANNED') {
+        return NextResponse.redirect(new URL(`/${locale}/account/suspended`, req.url))
+      }
+    }
 
     // Redirect /admin to /merchant (route migration)
     if (isAdminPage) {
-      const locale = pathname.split('/')[1]
       const restPath = pathWithoutLocale.replace('/admin', '')
       return NextResponse.redirect(new URL(`/${locale}/merchant${restPath}`, req.url))
     }
 
     // Redirect authenticated users away from auth pages
     if (isAuthPage && isAuth) {
-      const locale = pathname.split('/')[1]
       return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
     }
 
     // Redirect non-authenticated users from protected pages
     if ((isSuperAdminPage || isMerchantPage || isAccountPage) && !isAuth) {
-      const locale = pathname.split('/')[1]
       let from = pathname
       if (req.nextUrl.search) {
         from += req.nextUrl.search
@@ -63,12 +119,11 @@ export default withAuth(
     if (isSuperAdminPage && isAuth) {
       const userRole = token?.role as string | undefined
       if (userRole !== 'SUPER_ADMIN') {
-        const locale = pathname.split('/')[1]
         // Redirect to merchant if they are an admin, otherwise to account
         if (userRole === 'ADMIN') {
           return NextResponse.redirect(new URL(`/${locale}/merchant`, req.url))
         }
-        return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
+        return NextResponse.redirect(new URL(`/${locale}/unauthorized`, req.url))
       }
     }
 
@@ -76,12 +131,12 @@ export default withAuth(
     if (isMerchantPage && isAuth) {
       const userRole = token?.role as string | undefined
       if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
-        const locale = pathname.split('/')[1]
         return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
       }
     }
 
-    return response
+    // Handle i18n routing
+    return intlMiddleware(req)
   },
   {
     callbacks: {

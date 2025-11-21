@@ -8,6 +8,7 @@ import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
 import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift } from 'lucide-react'
 import Link from 'next/link'
+import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 
 const STEPS = [
   { id: 1, name: 'Contact', icon: Mail },
@@ -22,6 +23,41 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank_transfer'>('card')
+
+  // Platform payment settings
+  const [paymentSettings, setPaymentSettings] = useState({
+    stripeEnabled: true,
+    paypalEnabled: true,
+    bankTransferEnabled: true,
+  })
+
+  // Fetch payment settings
+  useEffect(() => {
+    async function fetchPaymentSettings() {
+      try {
+        const response = await fetch('/api/platform/settings')
+        if (response.ok) {
+          const settings = await response.json()
+          setPaymentSettings({
+            stripeEnabled: settings.stripeEnabled ?? true,
+            paypalEnabled: settings.paypalEnabled ?? true,
+            bankTransferEnabled: settings.bankTransferEnabled ?? true,
+          })
+          // Set default payment method to first available
+          if (settings.stripeEnabled) {
+            setPaymentMethod('card')
+          } else if (settings.paypalEnabled) {
+            setPaymentMethod('paypal')
+          } else if (settings.bankTransferEnabled) {
+            setPaymentMethod('bank_transfer')
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch payment settings:', error)
+      }
+    }
+    fetchPaymentSettings()
+  }, [])
   const [discountCode, setDiscountCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState<{
     id: string
@@ -662,69 +698,86 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <div
-                    onClick={() => setPaymentMethod('card')}
-                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                      paymentMethod === 'card'
-                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-theme-text-secondary" />
-                        <span className="font-semibold text-theme-text">Carte bancaire</span>
-                      </div>
-                      {paymentMethod === 'card' && (
-                        <CheckCircle className="w-5 h-5 text-theme-primary" />
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setPaymentMethod('paypal')}
-                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                      paymentMethod === 'paypal'
-                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#003087">
-                          <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
-                        </svg>
-                        <span className="font-semibold text-theme-text">PayPal</span>
-                      </div>
-                      {paymentMethod === 'paypal' && (
-                        <CheckCircle className="w-5 h-5 text-theme-primary" />
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setPaymentMethod('bank_transfer')}
-                    className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                      paymentMethod === 'bank_transfer'
-                        ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
-                        : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-theme-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <div>
-                          <span className="font-semibold text-theme-text block">Virement bancaire</span>
-                          <span className="text-xs text-theme-text-muted">Paiement sous 2-3 jours</span>
+                  {paymentSettings.stripeEnabled && (
+                    <div
+                      onClick={() => setPaymentMethod('card')}
+                      className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        paymentMethod === 'card'
+                          ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                          : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="w-5 h-5 text-theme-text-secondary" />
+                          <span className="font-semibold text-theme-text">Carte bancaire</span>
                         </div>
+                        {paymentMethod === 'card' && (
+                          <CheckCircle className="w-5 h-5 text-theme-primary" />
+                        )}
                       </div>
-                      {paymentMethod === 'bank_transfer' && (
-                        <CheckCircle className="w-5 h-5 text-theme-primary" />
-                      )}
                     </div>
-                  </div>
+                  )}
+
+                  {paymentSettings.paypalEnabled && (
+                    <div
+                      onClick={() => setPaymentMethod('paypal')}
+                      className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        paymentMethod === 'paypal'
+                          ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                          : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#003087">
+                            <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
+                          </svg>
+                          <span className="font-semibold text-theme-text">PayPal</span>
+                        </div>
+                        {paymentMethod === 'paypal' && (
+                          <CheckCircle className="w-5 h-5 text-theme-primary" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentSettings.bankTransferEnabled && (
+                    <div
+                      onClick={() => setPaymentMethod('bank_transfer')}
+                      className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        paymentMethod === 'bank_transfer'
+                          ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                          : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-theme-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <div>
+                            <span className="font-semibold text-theme-text block">Virement bancaire</span>
+                            <span className="text-xs text-theme-text-muted">Paiement sous 2-3 jours</span>
+                          </div>
+                        </div>
+                        {paymentMethod === 'bank_transfer' && (
+                          <CheckCircle className="w-5 h-5 text-theme-primary" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No payment methods available warning */}
+                  {!paymentSettings.stripeEnabled && !paymentSettings.paypalEnabled && !paymentSettings.bankTransferEnabled && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-red-600">
+                        <p className="font-semibold">Aucune methode de paiement disponible</p>
+                        <p>Veuillez contacter le support pour plus d'informations.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">

@@ -6,6 +6,7 @@ import superjson from 'superjson'
 import type { Session } from 'next-auth'
 import type { PrismaClient } from '@prisma/client'
 import { getUserPermissions } from '@/lib/rbac/seed'
+import { getPlatformPermissions, type PlatformPermission } from '@/lib/platform/permissions'
 
 export type TRPCContext = {
   session: Session | null
@@ -69,6 +70,74 @@ export const superAdminProcedure = t.procedure.use(({ ctx, next }) => {
     },
   })
 })
+
+/**
+ * Platform permission-based procedure for superadmin
+ * Checks both super admin role AND specific platform permissions
+ * Usage:
+ * - requirePlatformPermission('stores.view')
+ * - requirePlatformPermissions(['stores.view', 'stores.edit'])
+ */
+export const requirePlatformPermission = (permission: PlatformPermission) =>
+  superAdminProcedure.use(async ({ ctx, next }) => {
+    const permissions = await getPlatformPermissions(ctx.session.user.id)
+
+    if (!permissions.includes(permission)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Permission requise: ${permission}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        platformPermissions: permissions,
+      },
+    })
+  })
+
+export const requirePlatformPermissions = (requiredPermissions: PlatformPermission[]) =>
+  superAdminProcedure.use(async ({ ctx, next }) => {
+    const permissions = await getPlatformPermissions(ctx.session.user.id)
+
+    const missingPermissions = requiredPermissions.filter((p) => !permissions.includes(p))
+
+    if (missingPermissions.length > 0) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Permissions requises: ${missingPermissions.join(', ')}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        platformPermissions: permissions,
+      },
+    })
+  })
+
+export const requireAnyPlatformPermission = (requiredPermissions: PlatformPermission[]) =>
+  superAdminProcedure.use(async ({ ctx, next }) => {
+    const permissions = await getPlatformPermissions(ctx.session.user.id)
+
+    const hasPermission = requiredPermissions.some((p) => permissions.includes(p))
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Une de ces permissions est requise: ${requiredPermissions.join(', ')}`,
+      })
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        platformPermissions: permissions,
+      },
+    })
+  })
 
 /**
  * Permission-based middleware

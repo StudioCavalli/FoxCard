@@ -1,9 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { trpc } from '@/lib/trpc/client'
+import {
+  AdminCard,
+  AdminButton,
+  AdminInput,
+  AdminBadge,
+  AdminModal,
+  AdminEmptyState,
+} from '@/components/admin/ui'
 import {
   Shield,
   Plus,
@@ -11,96 +17,96 @@ import {
   Trash2,
   Users,
   Check,
-  X,
   Loader2,
-  Info
+  Info,
+  Store,
+  ShoppingCart,
+  BarChart3,
+  Settings,
+  Headphones,
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  Lock,
+  Key,
 } from 'lucide-react'
 
-// Types pour les rôles
-type Permission = {
-  id: string
-  name: string
-  description: string
-  category: string
-}
-
-type Role = {
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  isSystem: boolean
-  usersCount: number
-}
-
-// Permissions disponibles
-const allPermissions: Permission[] = [
+// Permissions disponibles (platform-level)
+const allPermissions = [
   // Stores
-  { id: 'stores.view', name: 'Voir les boutiques', description: 'Voir la liste des boutiques', category: 'Boutiques' },
-  { id: 'stores.create', name: 'Créer des boutiques', description: 'Créer de nouvelles boutiques', category: 'Boutiques' },
-  { id: 'stores.edit', name: 'Modifier les boutiques', description: 'Modifier les informations des boutiques', category: 'Boutiques' },
-  { id: 'stores.delete', name: 'Supprimer des boutiques', description: 'Supprimer des boutiques existantes', category: 'Boutiques' },
+  { id: 'stores.view', name: 'Voir les boutiques', description: 'Voir la liste des boutiques', category: 'Boutiques', icon: Store },
+  { id: 'stores.create', name: 'Créer des boutiques', description: 'Créer de nouvelles boutiques', category: 'Boutiques', icon: Store },
+  { id: 'stores.edit', name: 'Modifier les boutiques', description: 'Modifier les informations des boutiques', category: 'Boutiques', icon: Store },
+  { id: 'stores.delete', name: 'Supprimer des boutiques', description: 'Supprimer des boutiques existantes', category: 'Boutiques', icon: Store },
+  { id: 'stores.suspend', name: 'Suspendre des boutiques', description: 'Suspendre ou réactiver des boutiques', category: 'Boutiques', icon: Store },
   // Users
-  { id: 'users.view', name: 'Voir les utilisateurs', description: 'Voir la liste des utilisateurs', category: 'Utilisateurs' },
-  { id: 'users.create', name: 'Créer des utilisateurs', description: 'Créer de nouveaux utilisateurs', category: 'Utilisateurs' },
-  { id: 'users.edit', name: 'Modifier les utilisateurs', description: 'Modifier les informations des utilisateurs', category: 'Utilisateurs' },
-  { id: 'users.delete', name: 'Supprimer des utilisateurs', description: 'Supprimer des utilisateurs', category: 'Utilisateurs' },
+  { id: 'users.view', name: 'Voir les utilisateurs', description: 'Voir la liste des utilisateurs', category: 'Utilisateurs', icon: Users },
+  { id: 'users.create', name: 'Créer des utilisateurs', description: 'Créer de nouveaux utilisateurs', category: 'Utilisateurs', icon: Users },
+  { id: 'users.edit', name: 'Modifier les utilisateurs', description: 'Modifier les informations des utilisateurs', category: 'Utilisateurs', icon: Users },
+  { id: 'users.delete', name: 'Supprimer des utilisateurs', description: 'Supprimer des utilisateurs', category: 'Utilisateurs', icon: Users },
+  { id: 'users.suspend', name: 'Suspendre des utilisateurs', description: 'Suspendre ou bannir des utilisateurs', category: 'Utilisateurs', icon: Users },
   // Orders
-  { id: 'orders.view', name: 'Voir les commandes', description: 'Voir toutes les commandes de la plateforme', category: 'Commandes' },
-  { id: 'orders.manage', name: 'Gérer les commandes', description: 'Modifier le statut des commandes', category: 'Commandes' },
-  { id: 'orders.refund', name: 'Rembourser', description: 'Effectuer des remboursements', category: 'Commandes' },
+  { id: 'orders.view', name: 'Voir les commandes', description: 'Voir toutes les commandes de la plateforme', category: 'Commandes', icon: ShoppingCart },
+  { id: 'orders.manage', name: 'Gérer les commandes', description: 'Modifier le statut des commandes', category: 'Commandes', icon: ShoppingCart },
+  { id: 'orders.refund', name: 'Rembourser', description: 'Effectuer des remboursements', category: 'Commandes', icon: ShoppingCart },
   // Analytics
-  { id: 'analytics.view', name: 'Voir les analytics', description: 'Accéder aux statistiques de la plateforme', category: 'Analytics' },
-  { id: 'analytics.export', name: 'Exporter les données', description: 'Exporter les rapports et données', category: 'Analytics' },
+  { id: 'analytics.view', name: 'Voir les analytics', description: 'Accéder aux statistiques de la plateforme', category: 'Analytics', icon: BarChart3 },
+  { id: 'analytics.export', name: 'Exporter les données', description: 'Exporter les rapports et données', category: 'Analytics', icon: BarChart3 },
   // Settings
-  { id: 'settings.view', name: 'Voir les paramètres', description: 'Voir les paramètres de la plateforme', category: 'Paramètres' },
-  { id: 'settings.edit', name: 'Modifier les paramètres', description: 'Modifier les paramètres de la plateforme', category: 'Paramètres' },
+  { id: 'settings.view', name: 'Voir les paramètres', description: 'Voir les paramètres de la plateforme', category: 'Paramètres', icon: Settings },
+  { id: 'settings.edit', name: 'Modifier les paramètres', description: 'Modifier les paramètres de la plateforme', category: 'Paramètres', icon: Settings },
   // Support
-  { id: 'support.view', name: 'Voir le support', description: 'Voir les tickets de support', category: 'Support' },
-  { id: 'support.manage', name: 'Gérer le support', description: 'Répondre et gérer les tickets', category: 'Support' },
+  { id: 'support.view', name: 'Voir le support', description: 'Voir les tickets de support', category: 'Support', icon: Headphones },
+  { id: 'support.manage', name: 'Gérer le support', description: 'Répondre et gérer les tickets', category: 'Support', icon: Headphones },
+  // Appeals
+  { id: 'appeals.view', name: 'Voir les appels', description: 'Voir les appels de suspension', category: 'Appels', icon: AlertTriangle },
+  { id: 'appeals.manage', name: 'Gérer les appels', description: 'Approuver ou rejeter les appels', category: 'Appels', icon: AlertTriangle },
 ]
 
-// Rôles par défaut (simulés)
-const defaultRoles: Role[] = [
-  {
-    id: '1',
-    name: 'Super Admin',
-    description: 'Accès complet à toutes les fonctionnalités',
-    permissions: allPermissions.map(p => p.id),
-    isSystem: true,
-    usersCount: 1,
-  },
-  {
-    id: '2',
-    name: 'Admin',
-    description: 'Gestion des boutiques et utilisateurs',
-    permissions: ['stores.view', 'stores.edit', 'users.view', 'users.edit', 'orders.view', 'analytics.view', 'support.view', 'support.manage'],
-    isSystem: true,
-    usersCount: 3,
-  },
-  {
-    id: '3',
-    name: 'Support',
-    description: 'Gestion du support client uniquement',
-    permissions: ['stores.view', 'users.view', 'orders.view', 'support.view', 'support.manage'],
-    isSystem: false,
-    usersCount: 5,
-  },
-  {
-    id: '4',
-    name: 'Analyste',
-    description: 'Accès aux analytics et rapports',
-    permissions: ['stores.view', 'orders.view', 'analytics.view', 'analytics.export'],
-    isSystem: false,
-    usersCount: 2,
-  },
-]
+const categoryIcons: Record<string, any> = {
+  Boutiques: Store,
+  Utilisateurs: Users,
+  Commandes: ShoppingCart,
+  Analytics: BarChart3,
+  Paramètres: Settings,
+  Support: Headphones,
+  Appels: AlertTriangle,
+}
+
+const categoryColors: Record<string, string> = {
+  Boutiques: 'from-violet-500 to-indigo-600',
+  Utilisateurs: 'from-blue-500 to-cyan-600',
+  Commandes: 'from-amber-500 to-orange-600',
+  Analytics: 'from-emerald-500 to-green-600',
+  Paramètres: 'from-slate-500 to-gray-600',
+  Support: 'from-rose-500 to-pink-600',
+  Appels: 'from-red-500 to-rose-600',
+}
 
 export default function SuperAdminRolesPage() {
-  const [roles, setRoles] = useState<Role[]>(defaultRoles)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRole, setEditingRole] = useState<Role | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  const [editingRole, setEditingRole] = useState<any>(null)
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
+
+  const { data: roles, isLoading, refetch } = trpc.superadmin.getPlatformRoles.useQuery()
+
+  const createRole = trpc.superadmin.createPlatformRole.useMutation({
+    onSuccess: () => {
+      handleCloseModal()
+      refetch()
+    },
+  })
+
+  const updateRole = trpc.superadmin.updatePlatformRole.useMutation({
+    onSuccess: () => {
+      handleCloseModal()
+      refetch()
+    },
+  })
+
+  const deleteRole = trpc.superadmin.deletePlatformRole.useMutation({
+    onSuccess: () => refetch(),
+  })
 
   // Form state
   const [formData, setFormData] = useState({
@@ -109,12 +115,12 @@ export default function SuperAdminRolesPage() {
     permissions: [] as string[],
   })
 
-  const handleOpenModal = (role?: Role) => {
+  const handleOpenModal = (role?: any) => {
     if (role) {
       setEditingRole(role)
       setFormData({
         name: role.name,
-        description: role.description,
+        description: role.description || '',
         permissions: [...role.permissions],
       })
     } else {
@@ -125,6 +131,7 @@ export default function SuperAdminRolesPage() {
         permissions: [],
       })
     }
+    setExpandedCategories(Object.keys(permissionsByCategory))
     setIsModalOpen(true)
   }
 
@@ -132,56 +139,50 @@ export default function SuperAdminRolesPage() {
     setIsModalOpen(false)
     setEditingRole(null)
     setFormData({ name: '', description: '', permissions: [] })
+    setExpandedCategories([])
   }
 
   const handleTogglePermission = (permissionId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: prev.permissions.includes(permissionId)
-        ? prev.permissions.filter(p => p !== permissionId)
+        ? prev.permissions.filter((p) => p !== permissionId)
         : [...prev.permissions, permissionId],
     }))
   }
 
   const handleToggleCategory = (category: string) => {
-    const categoryPermissions = allPermissions.filter(p => p.category === category).map(p => p.id)
-    const allSelected = categoryPermissions.every(p => formData.permissions.includes(p))
+    const categoryPermissions = allPermissions.filter((p) => p.category === category).map((p) => p.id)
+    const allSelected = categoryPermissions.every((p) => formData.permissions.includes(p))
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: allSelected
-        ? prev.permissions.filter(p => !categoryPermissions.includes(p))
+        ? prev.permissions.filter((p) => !categoryPermissions.includes(p))
         : [...new Set([...prev.permissions, ...categoryPermissions])],
     }))
   }
 
+  const toggleCategoryExpand = (category: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    )
+  }
+
   const handleSave = async () => {
-    setIsSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
-
     if (editingRole) {
-      setRoles(prev => prev.map(r =>
-        r.id === editingRole.id
-          ? { ...r, ...formData }
-          : r
-      ))
-    } else {
-      const newRole: Role = {
-        id: Date.now().toString(),
+      updateRole.mutate({
+        roleId: editingRole.id,
         ...formData,
-        isSystem: false,
-        usersCount: 0,
-      }
-      setRoles(prev => [...prev, newRole])
+      })
+    } else {
+      createRole.mutate(formData)
     }
-
-    setIsSaving(false)
-    handleCloseModal()
   }
 
   const handleDelete = async (roleId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) return
-    setRoles(prev => prev.filter(r => r.id !== roleId))
+    deleteRole.mutate({ roleId })
   }
 
   // Group permissions by category
@@ -191,217 +192,351 @@ export default function SuperAdminRolesPage() {
     }
     acc[permission.category].push(permission)
     return acc
-  }, {} as Record<string, Permission[]>)
+  }, {} as Record<string, typeof allPermissions>)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des rôles...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Rôles & Permissions</h1>
-          <p className="text-gray-600">Gérez les rôles et leurs permissions</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Rôles & Permissions
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">
+            Gérez les rôles de la plateforme et leurs permissions
+          </p>
         </div>
-        <Button variant="primary" onClick={() => handleOpenModal()}>
-          <Plus className="w-4 h-4 mr-2" />
+        <AdminButton
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => handleOpenModal()}
+        >
           Nouveau rôle
-        </Button>
+        </AdminButton>
       </div>
 
       {/* Info Card */}
-      <Card className="p-4 bg-blue-50 border-blue-200">
+      <AdminCard className="p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 border-blue-200 dark:border-blue-500/30">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
+            <Info className="w-5 h-5 text-white" />
+          </div>
           <div>
-            <p className="text-sm font-medium text-blue-900">À propos des rôles système</p>
-            <p className="text-sm text-blue-700">
-              Les rôles "Super Admin" et "Admin" sont des rôles système et ne peuvent pas être supprimés.
+            <p className="font-semibold text-slate-900 dark:text-white">À propos des rôles système</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Les rôles marqués comme "Système" ne peuvent pas être supprimés.
               Vous pouvez créer des rôles personnalisés pour des besoins spécifiques.
             </p>
           </div>
         </div>
-      </Card>
+      </AdminCard>
 
       {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {roles.map((role) => (
-          <Card key={role.id} className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  role.isSystem ? 'bg-purple-100' : 'bg-gray-100'
-                }`}>
-                  <Shield className={`w-5 h-5 ${role.isSystem ? 'text-purple-600' : 'text-gray-600'}`} />
+      {!roles || roles.length === 0 ? (
+        <AdminEmptyState
+          icon={Shield}
+          title="Aucun rôle défini"
+          description="Créez votre premier rôle pour gérer les permissions des utilisateurs"
+          action={
+            <AdminButton
+              variant="primary"
+              icon={<Plus className="w-4 h-4" />}
+              onClick={() => handleOpenModal()}
+            >
+              Créer le premier rôle
+            </AdminButton>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {roles.map((role) => {
+            const permCount = role.permissions.length
+            const displayPerms = role.permissions.slice(0, 5)
+
+            return (
+              <AdminCard key={role.id} className="overflow-hidden">
+                {/* Card Header */}
+                <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        role.isSystem
+                          ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30'
+                          : 'bg-slate-100 dark:bg-slate-700'
+                      }`}>
+                        {role.isSystem ? (
+                          <Lock className="w-6 h-6 text-white" />
+                        ) : (
+                          <Shield className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-900 dark:text-white text-lg">
+                            {role.name}
+                          </h3>
+                          {role.isSystem && (
+                            <AdminBadge variant="default" size="sm">
+                              Système
+                            </AdminBadge>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                          {role.description || 'Aucune description'}
+                        </p>
+                      </div>
+                    </div>
+                    {!role.isSystem && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleOpenModal(role)}
+                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-violet-600 dark:hover:text-violet-400"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(role.id)}
+                          disabled={deleteRole.isPending}
+                          className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors text-slate-400 hover:text-red-500"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">{role.name}</h3>
-                    {role.isSystem && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded">
-                        Système
+
+                {/* Card Body */}
+                <div className="p-5">
+                  {/* Stats */}
+                  <div className="flex items-center gap-6 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                        <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">
+                          {role.usersCount}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          utilisateur{role.usersCount !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+                        <Key className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">
+                          {permCount}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          permission{permCount !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Permissions Preview */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {displayPerms.map((permId: string) => {
+                      const perm = allPermissions.find((p) => p.id === permId)
+                      return perm ? (
+                        <span
+                          key={permId}
+                          className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg"
+                        >
+                          {perm.name}
+                        </span>
+                      ) : null
+                    })}
+                    {permCount > 5 && (
+                      <span className="px-2.5 py-1 text-xs font-medium bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-lg">
+                        +{permCount - 5} autres
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">{role.description}</p>
                 </div>
-              </div>
-              {!role.isSystem && (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleOpenModal(role)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4 text-gray-500" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(role.id)}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="w-4 h-4" />
-                <span>{role.usersCount} utilisateur{role.usersCount > 1 ? 's' : ''}</span>
-              </div>
-              <div className="text-sm text-gray-600">
-                {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-1">
-              {role.permissions.slice(0, 6).map((permId) => {
-                const perm = allPermissions.find(p => p.id === permId)
-                return perm ? (
-                  <span
-                    key={permId}
-                    className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded"
-                  >
-                    {perm.name}
-                  </span>
-                ) : null
-              })}
-              {role.permissions.length > 6 && (
-                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                  +{role.permissions.length - 6} autres
-                </span>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {editingRole ? 'Modifier le rôle' : 'Nouveau rôle'}
-              </h2>
-            </div>
-
-            <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
-              {/* Name & Description */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom du rôle
-                  </label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ex: Modérateur"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
-                  </label>
-                  <Input
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Ex: Gestion de la modération du contenu"
-                  />
-                </div>
-              </div>
-
-              {/* Permissions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  Permissions
-                </label>
-                <div className="space-y-4">
-                  {Object.entries(permissionsByCategory).map(([category, permissions]) => {
-                    const allSelected = permissions.every(p => formData.permissions.includes(p.id))
-                    const someSelected = permissions.some(p => formData.permissions.includes(p.id))
-
-                    return (
-                      <div key={category} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleCategory(category)}
-                          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                        >
-                          <span className="font-medium text-gray-900">{category}</span>
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                            allSelected
-                              ? 'bg-purple-600 border-purple-600'
-                              : someSelected
-                              ? 'bg-purple-100 border-purple-300'
-                              : 'border-gray-300'
-                          }`}>
-                            {allSelected && <Check className="w-3 h-3 text-white" />}
-                            {!allSelected && someSelected && <div className="w-2 h-2 bg-purple-600 rounded-sm" />}
-                          </div>
-                        </button>
-                        <div className="p-3 space-y-2">
-                          {permissions.map((permission) => (
-                            <label
-                              key={permission.id}
-                              className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={formData.permissions.includes(permission.id)}
-                                onChange={() => handleTogglePermission(permission.id)}
-                                className="w-4 h-4 rounded text-purple-600 border-gray-300"
-                              />
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-900">{permission.name}</p>
-                                <p className="text-xs text-gray-500">{permission.description}</p>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-              <Button variant="outline" onClick={handleCloseModal}>
-                Annuler
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                disabled={!formData.name || isSaving}
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : null}
-                {editingRole ? 'Enregistrer' : 'Créer'}
-              </Button>
-            </div>
-          </div>
+              </AdminCard>
+            )
+          })}
         </div>
       )}
+
+      {/* Modal */}
+      <AdminModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingRole ? 'Modifier le rôle' : 'Nouveau rôle'}
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Name & Description */}
+          <div className="space-y-4">
+            <AdminInput
+              label="Nom du rôle"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Ex: Modérateur"
+              disabled={editingRole?.isSystem}
+            />
+            <AdminInput
+              label="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Ex: Gestion de la modération du contenu"
+            />
+          </div>
+
+          {/* Permissions */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              Permissions ({formData.permissions.length} sélectionnées)
+            </label>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+              {Object.entries(permissionsByCategory).map(([category, permissions]) => {
+                const CategoryIcon = categoryIcons[category] || Shield
+                const allSelected = permissions.every((p) => formData.permissions.includes(p.id))
+                const someSelected = permissions.some((p) => formData.permissions.includes(p.id))
+                const isExpanded = expandedCategories.includes(category)
+                const selectedCount = permissions.filter((p) => formData.permissions.includes(p.id)).length
+
+                return (
+                  <div
+                    key={category}
+                    className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden"
+                  >
+                    {/* Category Header */}
+                    <div className="flex items-center bg-slate-50 dark:bg-slate-800/50">
+                      <button
+                        type="button"
+                        onClick={() => toggleCategoryExpand(category)}
+                        className="flex-1 flex items-center gap-3 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
+                        )}
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${categoryColors[category] || 'from-slate-500 to-gray-600'} flex items-center justify-center shadow-sm`}>
+                          <CategoryIcon className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-white">
+                          {category}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          ({selectedCount}/{permissions.length})
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleCategory(category)}
+                        className="px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                      >
+                        <div
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            allSelected
+                              ? 'bg-violet-600 border-violet-600'
+                              : someSelected
+                              ? 'bg-violet-100 dark:bg-violet-500/20 border-violet-400 dark:border-violet-500'
+                              : 'border-slate-300 dark:border-slate-600'
+                          }`}
+                        >
+                          {allSelected && <Check className="w-3 h-3 text-white" />}
+                          {!allSelected && someSelected && (
+                            <div className="w-2 h-2 bg-violet-600 rounded-sm" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Permissions List */}
+                    {isExpanded && (
+                      <div className="p-3 space-y-1 bg-white dark:bg-slate-900">
+                        {permissions.map((permission) => {
+                          const isSelected = formData.permissions.includes(permission.id)
+                          return (
+                            <label
+                              key={permission.id}
+                              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                                isSelected
+                                  ? 'bg-violet-50 dark:bg-violet-500/10'
+                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+                              }`}
+                            >
+                              <div
+                                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                  isSelected
+                                    ? 'bg-violet-600 border-violet-600'
+                                    : 'border-slate-300 dark:border-slate-600'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleTogglePermission(permission.id)}
+                                className="sr-only"
+                              />
+                              <div className="flex-1">
+                                <p className={`text-sm font-medium ${
+                                  isSelected
+                                    ? 'text-violet-700 dark:text-violet-300'
+                                    : 'text-slate-700 dark:text-slate-300'
+                                }`}>
+                                  {permission.name}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  {permission.description}
+                                </p>
+                              </div>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {(createRole.error || updateRole.error) && (
+            <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl text-red-700 dark:text-red-400 text-sm">
+              {createRole.error?.message || updateRole.error?.message}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <AdminButton variant="secondary" onClick={handleCloseModal}>
+              Annuler
+            </AdminButton>
+            <AdminButton
+              variant="primary"
+              onClick={handleSave}
+              disabled={!formData.name || createRole.isPending || updateRole.isPending}
+              loading={createRole.isPending || updateRole.isPending}
+            >
+              {editingRole ? 'Enregistrer' : 'Créer le rôle'}
+            </AdminButton>
+          </div>
+        </div>
+      </AdminModal>
     </div>
   )
 }

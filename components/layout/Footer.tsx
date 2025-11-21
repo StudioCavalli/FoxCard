@@ -1,8 +1,12 @@
+'use client'
+
 import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Github, Mail, Phone, MapPin, ArrowUpRight, Heart } from 'lucide-react'
+import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
+  const platformName = usePlatformName()
 
   return (
     <footer className="relative bg-gradient-to-b from-theme-background to-theme-surface border-t border-theme-border mt-32" style={{ fontFamily: 'var(--theme-font-body)' }}>
@@ -25,7 +29,7 @@ export function Footer() {
                 </div>
               </div>
               <span className="text-xl font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}>
-                FoxCard
+                {platformName}
               </span>
             </Link>
             <p className="text-theme-text-secondary leading-relaxed mb-6 max-w-sm">
@@ -136,7 +140,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             {/* Copyright */}
             <div className="flex items-center gap-2 text-sm text-theme-text-muted">
-              <span>© {currentYear} FoxCard.</span>
+              <span>© {currentYear} {platformName}.</span>
               <span className="hidden sm:inline">Tous droits réservés.</span>
               <span className="inline-flex items-center gap-1">
                 Fait avec <Heart className="w-3 h-3 text-red-500 fill-red-500" /> par Studio Cavalli

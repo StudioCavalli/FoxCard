@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, requireStoreAccess } from '../trpc'
 import { TRPCError } from '@trpc/server'
+import { getMaxStoresPerUser } from '@/lib/platform/settings'
 
 export const storeRouter = router({
   // Get store directory with pagination and filters
@@ -209,6 +210,19 @@ export const storeRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Check max stores per user limit from platform settings
+      const maxStores = await getMaxStoresPerUser()
+      const userStoreCount = await ctx.prisma.store.count({
+        where: { ownerId: ctx.session.user.id },
+      })
+
+      if (userStoreCount >= maxStores) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `Vous avez atteint la limite de ${maxStores} boutique(s) par utilisateur.`,
+        })
+      }
+
       return ctx.prisma.store.create({
         data: {
           ...input,

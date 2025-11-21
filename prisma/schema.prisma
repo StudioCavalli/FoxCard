@@ -123,6 +123,7 @@ model User {
   storeUsers    StoreUser[]
   auditLogs     AuditLog[]
   suspensionAppeals SuspensionAppeal[]
+  supportTickets SupportTicket[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -2638,4 +2639,161 @@ model SuspensionAppeal {
 
   @@index([storeId])
   @@index([status])
+}
+
+// ==========================================
+// PLATFORM SETTINGS (SuperAdmin)
+// ==========================================
+
+model PlatformSettings {
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // General
+  platformName           String   @default("FoxCard")
+  platformUrl            String   @default("https://foxcard.io")
+  supportEmail           String   @default("support@foxcard.io")
+  maxStoresPerUser       Int      @default(5)
+  maintenanceMode        Boolean  @default(false)
+  maintenanceMessage     String?
+
+  // Localization
+  defaultCurrency        String   @default("EUR")
+  defaultLanguage        String   @default("fr")
+  supportedCurrencies    String[] @default(["EUR", "USD", "GBP", "CHF"])
+  supportedLanguages     String[] @default(["fr", "en", "de"])
+
+  // Security
+  allowRegistration      Boolean  @default(true)
+  requireEmailVerification Boolean @default(true)
+  sessionTimeout         Int      @default(30) // minutes
+
+  // Payments
+  stripeEnabled          Boolean  @default(false)
+  paypalEnabled          Boolean  @default(false)
+  bankTransferEnabled    Boolean  @default(true)
+
+  // SMTP Configuration
+  smtpHost               String?
+  smtpPort               Int?     @default(587)
+  smtpUser               String?
+  smtpPassword           String?  // Encrypted
+  smtpFromEmail          String?
+  smtpFromName           String?
+
+  // Metadata
+  updatedBy              String?  @db.ObjectId
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+// ==========================================
+// SUPPORT TICKET SYSTEM
+// ==========================================
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SupportTicket {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  ticketNumber String        @unique // Auto-generated readable number like "TKT-2024-0001"
+
+  // Requester
+  userId      String         @db.ObjectId
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeId     String?        @db.ObjectId // Optional store context
+
+  // Ticket content
+  subject     String
+  description String
+  category    String         // e.g., "Payment", "Technical", "Account", "Other"
+
+  // Status
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+
+  // Assignment
+  assignedTo  String?        @db.ObjectId // Admin user assigned to ticket
+
+  // Messages
+  messages    TicketMessage[]
+
+  // Resolution
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([status])
+  @@index([priority])
+  @@index([assignedTo])
+}
+
+model TicketMessage {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  ticketId    String        @db.ObjectId
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Author
+  authorId    String        @db.ObjectId
+  authorName  String
+  isAdmin     Boolean       @default(false)
+
+  // Content
+  content     String
+  attachments String[]      @default([])
+
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+}
+
+// ==========================================
+// PLATFORM ROLES (SuperAdmin level)
+// ==========================================
+
+model PlatformRole {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+
+  // Permissions for platform-wide actions
+  permissions String[] // e.g., ["stores.view", "stores.edit", "users.manage", "settings.edit"]
+
+  // System role flag (cannot be deleted)
+  isSystem    Boolean  @default(false)
+
+  // Users with this role
+  users       PlatformRoleAssignment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlatformRoleAssignment {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  roleId      String       @db.ObjectId
+  role        PlatformRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  assignedBy  String?      @db.ObjectId
+  assignedAt  DateTime     @default(now())
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
 }

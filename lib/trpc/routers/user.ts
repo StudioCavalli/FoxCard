@@ -2,6 +2,7 @@ import { router, publicProcedure } from '../trpc'
 import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
 import { TRPCError } from '@trpc/server'
+import { isRegistrationAllowed, getMaxStoresPerUser } from '@/lib/platform/settings'
 
 export const userRouter = router({
   register: publicProcedure
@@ -14,6 +15,15 @@ export const userRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { name, email, password } = input
+
+      // Check if registration is allowed by platform settings
+      const registrationAllowed = await isRegistrationAllowed()
+      if (!registrationAllowed) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Les inscriptions sont temporairement desactivees. Veuillez reessayer plus tard.',
+        })
+      }
 
       // Check if user already exists
       const existingUser = await ctx.prisma.user.findUnique({
