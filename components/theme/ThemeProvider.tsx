@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { trpc } from '@/lib/trpc/client'
 import { generateThemeCSS, type ThemeConfig } from '@/lib/themes/presets'
+import { getDefaultMarketplaceTheme } from '@/lib/themes/marketplace-theme'
+import { usePublicStore } from '@/lib/context/public-store-context'
 
 interface ThemeContextValue {
   theme: any | null
@@ -22,29 +24,56 @@ export function useTheme() {
  * ThemeProvider - Loads active theme and injects CSS variables
  *
  * This provider:
- * 1. Fetches the active theme from the database
- * 2. Generates CSS variables from theme config
- * 3. Injects them into :root for global access
- * 4. Loads custom fonts from Google Fonts if needed
+ * 1. Listens to store selection changes via PublicStoreContext
+ * 2. Fetches the active theme for the selected store (or uses marketplace theme for "all")
+ * 3. Generates CSS variables from theme config
+ * 4. Injects them into :root for global access with smooth transitions
+ * 5. Loads custom fonts from Google Fonts if needed
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [storeId] = useState(() => {
-    if (typeof window === 'undefined') return '000000000000000000000001'
-    return localStorage.getItem('storeId') || '000000000000000000000001'
-  })
+  const { selectedStore } = usePublicStore()
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
+  // Only fetch theme if a specific store is selected (not "all")
   const { data: theme, isLoading } = trpc.theme.getActive.useQuery(
-    { storeId },
+    { storeId: selectedStore === 'all' ? '' : selectedStore },
     {
+      enabled: selectedStore !== 'all' && !!selectedStore,
       retry: false,
       refetchOnWindowFocus: false,
     }
   )
 
   useEffect(() => {
-    if (!theme?.config) return
+    let config: ThemeConfig
 
-    const config = theme.config as unknown as ThemeConfig
+    // Start transition
+    setIsTransitioning(true)
+
+    if (selectedStore === 'all') {
+      // Load default marketplace theme for "All Stores" view
+      config = getDefaultMarketplaceTheme()
+    } else if (theme?.config) {
+      // Load store-specific theme
+      config = theme.config as unknown as ThemeConfig
+    } else {
+      // Fallback to marketplace theme if store theme not loaded yet
+      config = getDefaultMarketplaceTheme()
+    }
+
+    // Apply theme with transition
+    applyTheme(config)
+
+    // End transition after CSS variables are applied
+    const timer = setTimeout(() => {
+      setIsTransitioning(false)
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [selectedStore, theme])
+
+  // Apply theme configuration
+  const applyTheme = (config: ThemeConfig) => {
 
     // Generate and inject CSS variables
     const css = generateThemeCSS(config)
@@ -55,10 +84,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       existingStyle.remove()
     }
 
-    // Create and inject new style tag
+    // Create and inject new style tag with transitions
     const styleTag = document.createElement('style')
     styleTag.id = 'theme-variables'
-    styleTag.textContent = `:root {\n${css}\n}`
+    styleTag.textContent = `
+      :root {
+        ${css}
+      }
+
+      /* Smooth theme transitions */
+      * {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+    `
     document.head.appendChild(styleTag)
 
     // Load custom fonts from Google Fonts if not system fonts
@@ -73,22 +111,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (fontsToLoad.size > 0) {
       loadGoogleFonts(Array.from(fontsToLoad))
     }
-
-    // Cleanup function
-    return () => {
-      const style = document.getElementById('theme-variables')
-      if (style) {
-        style.remove()
-      }
-    }
-  }, [theme])
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, isLoading }}>
+    <ThemeContext.Provider value={{ theme, isLoading: isLoading || isTransitioning }}>
       {children}
     </ThemeContext.Provider>
   )
 }
+
 
 /**
  * Check if font is a system font
