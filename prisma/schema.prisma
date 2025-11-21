@@ -1998,6 +1998,7 @@ model CrsdpayRefund {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   processedAt DateTime?
+}
 
 // PAYMENT GATEWAY SYSTEM
 // ====================================
@@ -2324,6 +2325,8 @@ model CrsdpayConfig {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
 // Payment Gateway configuration per store
 model PaymentGatewayConfig {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
