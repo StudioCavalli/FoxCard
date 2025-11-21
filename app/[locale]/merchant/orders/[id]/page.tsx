@@ -346,7 +346,7 @@ export default function OrderDetailPage() {
                   Statut d'expédition
                 </label>
                 <select
-                  value={order.fulfillmentStatus}
+                  value={(order as any).fulfillmentStatus || 'UNFULFILLED'}
                   onChange={(e) => handleFulfillmentChange(e.target.value as FulfillmentStatus)}
                   disabled={isUpdating}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -370,28 +370,28 @@ export default function OrderDetailPage() {
               <div className="flex justify-between">
                 <span className="text-gray-500">Méthode</span>
                 <span className="font-medium text-gray-900 capitalize">
-                  {order.paymentMethod === 'card' ? 'Carte bancaire' :
-                   order.paymentMethod === 'paypal' ? 'PayPal' :
-                   order.paymentMethod === 'bank_transfer' ? 'Virement' :
-                   order.paymentMethod}
+                  {(order as any).paymentMethod === 'card' ? 'Carte bancaire' :
+                   (order as any).paymentMethod === 'paypal' ? 'PayPal' :
+                   (order as any).paymentMethod === 'bank_transfer' ? 'Virement' :
+                   (order as any).paymentMethod || 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Statut</span>
                 <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                  order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
-                  order.paymentStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                  order.paymentStatus === 'REFUNDED' ? 'bg-purple-100 text-purple-700' :
+                  (order as any).paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
+                  (order as any).paymentStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                  (order as any).paymentStatus === 'REFUNDED' ? 'bg-purple-100 text-purple-700' :
                   'bg-red-100 text-red-700'
                 }`}>
-                  {paymentStatusLabels[order.paymentStatus]}
+                  {paymentStatusLabels[(order as any).paymentStatus] || 'Inconnu'}
                 </span>
               </div>
-              {order.paymentIntentId && (
+              {(order as any).paymentIntentId && (
                 <div className="pt-2 border-t border-gray-200">
                   <p className="text-xs text-gray-500">ID Transaction</p>
                   <p className="text-sm font-mono text-gray-700 truncate">
-                    {order.paymentIntentId}
+                    {(order as any).paymentIntentId}
                   </p>
                 </div>
               )}
@@ -408,19 +408,19 @@ export default function OrderDetailPage() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Statut</span>
                 <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                  order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-700' :
-                  order.fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'bg-blue-100 text-blue-700' :
-                  order.fulfillmentStatus === 'RETURNED' ? 'bg-red-100 text-red-700' :
+                  (order as any).fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-700' :
+                  (order as any).fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'bg-blue-100 text-blue-700' :
+                  (order as any).fulfillmentStatus === 'RETURNED' ? 'bg-red-100 text-red-700' :
                   'bg-gray-100 text-gray-700'
                 }`}>
-                  {fulfillmentStatusLabels[order.fulfillmentStatus]}
+                  {fulfillmentStatusLabels[(order as any).fulfillmentStatus] || 'Non expédié'}
                 </span>
               </div>
-              {order.trackingNumber && (
+              {(order as any).trackingNumber && (
                 <div className="pt-2 border-t border-gray-200">
                   <p className="text-xs text-gray-500">N° de suivi</p>
                   <p className="text-sm font-mono text-gray-700">
-                    {order.trackingNumber}
+                    {(order as any).trackingNumber}
                   </p>
                 </div>
               )}
@@ -448,7 +448,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
               </div>
-              {order.paymentStatus === 'PAID' && (
+              {(order as any).paymentStatus === 'PAID' && (
                 <div className="flex gap-3">
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
@@ -464,7 +464,7 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
               )}
-              {order.fulfillmentStatus === 'FULFILLED' && (
+              {(order as any).fulfillmentStatus === 'FULFILLED' && (
                 <div className="flex gap-3">
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
