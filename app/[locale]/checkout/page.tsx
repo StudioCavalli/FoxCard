@@ -310,9 +310,24 @@ export default function CheckoutPage() {
 
   const subtotal = getTotalPrice()
 
-  // Multi-store: shipping and tax calculated per store in backend (createFromCart)
-  // Display estimated total only
-  const shipping = subtotal > 50 ? 0 : 5.99 // Estimated shipping
+  // Calculate shipping per store
+  const itemsByStore = getItemsByStore()
+  const shippingItems = Object.entries(itemsByStore).map(([storeId, items]) => ({
+    storeId,
+    amount: getStoreSubtotal(storeId),
+  }))
+
+  const { data: multiStoreShipping } = trpc.shipping.calculateMultiStoreShipping.useQuery(
+    {
+      items: shippingItems,
+      country: formData.country || 'France',
+    },
+    {
+      enabled: !!formData.country && subtotal > 0,
+    }
+  )
+
+  const shipping = multiStoreShipping?.total || 0
   const discount = appliedDiscount?.discountAmount || 0
   const loyaltyDiscount = loyaltyPointsUsed // 1 point = 1€
 
@@ -989,21 +1004,59 @@ export default function CheckoutPage() {
                     <span>Sous-total</span>
                     <span className="font-semibold text-theme-text">{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-theme-text-secondary">
-                    <div className="flex flex-col">
-                      <span>Livraison</span>
-                      <span className="text-xs text-theme-text-muted">
-                        Calculée par boutique
+                  {/* Shipping breakdown by store */}
+                  {multiStoreShipping && getUniqueStoresCount() > 1 ? (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-theme-text-secondary">
+                        <span className="font-medium">Livraison</span>
+                        <span className="font-semibold text-theme-text">
+                          {shipping === 0 ? (
+                            <span className="text-green-600 font-bold">Gratuite</span>
+                          ) : (
+                            formatPrice(shipping)
+                          )}
+                        </span>
+                      </div>
+                      {/* Breakdown by store */}
+                      {multiStoreShipping.byStore.map((storeShipping) => {
+                        const storeItems = itemsByStore[storeShipping.storeId]
+                        const storeName = storeItems?.[0]?.storeName || 'Boutique'
+                        return (
+                          <div key={storeShipping.storeId} className="pl-3 flex justify-between text-xs text-theme-text-muted">
+                            <span>
+                              {storeName}
+                              {storeShipping.estimatedDays && ` (${storeShipping.estimatedDays}j)`}
+                            </span>
+                            <span>
+                              {storeShipping.cost === 0 ? (
+                                <span className="text-green-600">Gratuite</span>
+                              ) : (
+                                formatPrice(storeShipping.cost)
+                              )}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex justify-between text-theme-text-secondary">
+                      <div className="flex flex-col">
+                        <span>Livraison</span>
+                        {multiStoreShipping?.byStore[0]?.estimatedDays && (
+                          <span className="text-xs text-theme-text-muted">
+                            Délai: {multiStoreShipping.byStore[0].estimatedDays} jours
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-semibold">
+                        {shipping === 0 ? (
+                          <span className="text-green-600 font-bold">Gratuite</span>
+                        ) : (
+                          <span className="text-theme-text">{formatPrice(shipping)}</span>
+                        )}
                       </span>
                     </div>
-                    <span className="font-semibold">
-                      {shipping === 0 ? (
-                        <span className="text-green-600 font-bold">Gratuite</span>
-                      ) : (
-                        <span className="text-theme-text">{formatPrice(shipping)} <span className="text-xs text-theme-text-muted">est.</span></span>
-                      )}
-                    </span>
-                  </div>
+                  )}
                   {appliedDiscount && (
                     <div className="flex justify-between text-green-600">
                       <span className="font-medium">Réduction</span>
