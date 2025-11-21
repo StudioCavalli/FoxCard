@@ -7,7 +7,7 @@ export const productRouter = router({
   getAll: publicProcedure
     .input(
       z.object({
-        storeId: z.string(),
+        storeId: z.string().optional(), // Make optional for "All Stores" mode
         categoryId: z.string().optional(),
         status: z.nativeEnum(ProductStatus).optional(),
         featured: z.boolean().optional(),
@@ -40,9 +40,10 @@ export const productRouter = router({
       const products = await ctx.prisma.product.findMany({
         take: limit + 1,
         where: {
-          storeId,
+          ...(storeId && { storeId }), // Only filter by storeId if provided
           ...(categoryId && { categoryId }),
-          ...(status && { status }),
+          // For public endpoint, only show active products unless status is explicitly provided
+          status: status || ProductStatus.ACTIVE,
           ...(featured !== undefined && { featured }),
           ...(tags && tags.length > 0 && {
             tags: {
@@ -73,6 +74,14 @@ export const productRouter = router({
         include: {
           category: true,
           variants: true,
+          store: { // Include store info for "All Stores" mode
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+            },
+          },
         },
       })
 

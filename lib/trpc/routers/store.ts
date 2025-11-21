@@ -59,6 +59,23 @@ export const storeRouter = router({
     )
   }),
 
+  getPublicStores: publicProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.store.findMany({
+      where: {
+        // Add conditions for public visibility if needed
+        // For now, return all stores for "All Stores" mode
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        logo: true,
+        description: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+  }),
+
   create: protectedProcedure
     .input(
       z.object({
