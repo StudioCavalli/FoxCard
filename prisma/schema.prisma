@@ -40,6 +40,8 @@ model Store {
   emailTemplates EmailTemplate[]
   emailLogs   EmailLog[]
   newsletterSubscribers NewsletterSubscriber[]
+  emailCampaigns EmailCampaign[]
+  emailAutomations EmailAutomation[]
   invoices    Invoice[]
   roles       Role[]
   storeUsers  StoreUser[]
@@ -1545,4 +1547,158 @@ model LoyaltyTransaction {
   @@index([storeId])
   @@index([type])
   @@index([expiresAt])
+}
+
+// Email Campaign - Marketing campaigns sent to subscribers
+model EmailCampaign {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Campaign details
+  name        String
+  subject     String
+  htmlBody    String
+  textBody    String?
+
+  // Sender info
+  fromName    String
+  fromEmail   String
+  replyTo     String?
+
+  // Targeting
+  segmentTags String[] // Filter subscribers by tags
+
+  // Scheduling
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  // Statistics
+  totalRecipients Int @default(0)
+  sent            Int @default(0)
+  opened          Int @default(0)
+  clicked         Int @default(0)
+  bounced         Int @default(0)
+  unsubscribed    Int @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  CANCELLED
+}
+
+// Email Automation - Automated email sequences
+model EmailAutomation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Automation details
+  name        String
+  description String?
+  trigger     AutomationTrigger
+
+  // Status
+  isActive    Boolean  @default(true)
+
+  // Configuration (JSON structure for each trigger type)
+  config      Json // Trigger-specific config (delays, conditions, etc.)
+
+  // Email sequence
+  emails      EmailAutomationStep[]
+
+  // Statistics
+  triggered   Int @default(0)
+  completed   Int @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([trigger])
+  @@index([isActive])
+}
+
+enum AutomationTrigger {
+  WELCOME_SERIES        // New customer/subscriber signup
+  ABANDONED_CART        // Cart abandoned
+  POST_PURCHASE         // After order completion
+  RE_ENGAGEMENT         // Customer inactive for X days
+  BIRTHDAY              // Customer birthday
+  PRODUCT_BACK_IN_STOCK // Product back in stock notification
+}
+
+// Individual steps in an automation sequence
+model EmailAutomationStep {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  automationId  String   @db.ObjectId
+  automation    EmailAutomation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  // Step details
+  stepOrder     Int      // Order in sequence (1, 2, 3...)
+  name          String
+  subject       String
+  htmlBody      String
+  textBody      String?
+
+  // Timing
+  delayMinutes  Int      // Delay after trigger or previous step
+
+  // Conditions (optional)
+  conditions    Json?    // Advanced conditions to send this step
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([automationId])
+  @@index([stepOrder])
+}
+
+// Track automation execution for each customer
+model AutomationExecution {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  automationId  String   @db.ObjectId
+  storeId       String   @db.ObjectId
+
+  // Target
+  customerId    String?  @db.ObjectId  // If triggered by customer action
+  email         String   // Email to send to
+
+  // Tracking
+  currentStep   Int      @default(0)  // 0 = not started, 1+ = step number
+  status        AutomationExecutionStatus @default(PENDING)
+
+  // Context data (for variable replacement)
+  contextData   Json     // Trigger-specific data (cart, order, product, etc.)
+
+  // Next execution time
+  nextStepAt    DateTime?
+  completedAt   DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([automationId])
+  @@index([status])
+  @@index([nextStepAt])
+  @@index([storeId])
+}
+
+enum AutomationExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  CANCELLED
+  FAILED
 }

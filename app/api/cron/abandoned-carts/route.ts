@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { emailService } from '@/lib/email/service'
+import { triggerAbandonedCartAutomation } from '@/lib/email/automation'
 
 /**
  * Cron job to process abandoned carts and send recovery emails
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       errors: [] as string[],
     }
 
-    // Send first recovery emails
+    // Trigger abandoned cart automation for carts that haven't received any emails yet
     for (const cart of cartsForFirstEmail) {
       try {
         // Create incentive discount code (10% off, valid for 7 days)
@@ -84,21 +84,22 @@ export async function GET(request: NextRequest) {
           },
         })
 
-        // Send first recovery email
-        // TODO: Create abandoned-cart email templates
-        // await emailService.sendEmail({
-        //   to: cart.email,
-        //   subject: 'Vous avez oublié quelque chose dans votre panier 🛒',
-        //   template: 'abandoned-cart-first',
-        //   data: {
-        //     customerName: cart.customerName || 'Cher client',
-        //     cartData: cart.cartData,
-        //     discountCode: discountCode.code,
-        //     discountValue: 10,
-        //     expiresInDays: 7,
-        //   },
-        // })
-        console.log(`[Abandoned Cart] Would send first email to ${cart.email} with code ${discountCode.code}`)
+        // Parse cart data to get items and total
+        const cartData = cart.cartData as any
+        const cartItems = cartData?.items || []
+        const cartTotal = cartData?.total || 0
+
+        // Trigger abandoned cart automation
+        await triggerAbandonedCartAutomation({
+          storeId: cart.storeId,
+          email: cart.email,
+          cartId: cart.id,
+          cartItems,
+          cartTotal,
+          checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?cart=${cart.id}&code=${discountCode.code}`,
+        })
+
+        console.log(`[Abandoned Cart] Triggered automation for ${cart.email} with code ${discountCode.code}`)
 
         // Update cart
         await prisma.abandonedCart.update({
@@ -112,36 +113,18 @@ export async function GET(request: NextRequest) {
 
         results.firstEmailsSent++
       } catch (error: any) {
-        console.error(`Failed to send first email to ${cart.email}:`, error)
-        results.errors.push(`First email to ${cart.email}: ${error.message}`)
+        console.error(`Failed to trigger automation for ${cart.email}:`, error)
+        results.errors.push(`Automation for ${cart.email}: ${error.message}`)
       }
     }
 
-    // Send second recovery emails
+    // Note: Second and subsequent emails are now handled by the automation system
+    // The automation steps (configured in the database) will handle J+3, J+7, etc.
+    // This cron only triggers the first automation, which then manages its own schedule
+
+    // We still mark these as processed to avoid re-triggering
     for (const cart of cartsForSecondEmail) {
       try {
-        // Get the discount code if exists
-        const discountCode = cart.discountCodeId
-          ? await prisma.discountCode.findUnique({ where: { id: cart.discountCodeId } })
-          : null
-
-        // Send second recovery email (more urgent)
-        // TODO: Create abandoned-cart email templates
-        // await emailService.sendEmail({
-        //   to: cart.email,
-        //   subject: 'Dernière chance ! Votre panier expire bientôt 🎁',
-        //   template: 'abandoned-cart-second',
-        //   data: {
-        //     customerName: cart.customerName || 'Cher client',
-        //     cartData: cart.cartData,
-        //     discountCode: discountCode?.code,
-        //     discountValue: discountCode?.value || 10,
-        //     expiresInDays: discountCode ? Math.ceil((new Date(discountCode.expiresAt!).getTime() - now.getTime()) / (24 * 60 * 60 * 1000)) : 0,
-        //   },
-        // })
-        console.log(`[Abandoned Cart] Would send second email to ${cart.email} with code ${discountCode?.code}`)
-
-        // Update cart
         await prisma.abandonedCart.update({
           where: { id: cart.id },
           data: {
@@ -149,11 +132,10 @@ export async function GET(request: NextRequest) {
             secondEmailSentAt: now,
           },
         })
-
         results.secondEmailsSent++
       } catch (error: any) {
-        console.error(`Failed to send second email to ${cart.email}:`, error)
-        results.errors.push(`Second email to ${cart.email}: ${error.message}`)
+        console.error(`Failed to update cart status for ${cart.email}:`, error)
+        results.errors.push(`Status update for ${cart.email}: ${error.message}`)
       }
     }
 
