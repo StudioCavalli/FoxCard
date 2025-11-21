@@ -98,7 +98,7 @@ export default function EditProductPage() {
         price: product.price.toString(),
         compareAtPrice: product.compareAtPrice?.toString() || '',
         cost: product.cost?.toString() || '',
-        type: product.type,
+        type: product.type as ProductType,
         sku: product.sku || '',
         barcode: product.barcode || '',
         trackInventory: product.trackInventory,
@@ -109,7 +109,7 @@ export default function EditProductPage() {
         metaTitle: product.metaTitle || '',
         metaDescription: product.metaDescription || '',
         tags: product.tags || [],
-        status: product.status,
+        status: product.status as ProductStatus,
         featured: product.featured,
         categoryId: product.categoryId || '',
       })
