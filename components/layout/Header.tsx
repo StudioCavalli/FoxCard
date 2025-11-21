@@ -70,6 +70,7 @@ export function Header() {
             <nav className="hidden lg:flex items-center gap-1">
               {[
                 { href: '/products', label: 'Produits' },
+                { href: '/stores', label: 'Boutiques' },
                 { href: '/categories', label: 'Catégories' },
                 { href: '/about', label: 'À propos' },
               ].map((item) => (
@@ -173,6 +174,7 @@ export function Header() {
               <nav className="flex-1 space-y-1">
                 {[
                   { href: '/products', label: 'Produits' },
+                  { href: '/stores', label: 'Boutiques' },
                   { href: '/categories', label: 'Catégories' },
                   { href: '/about', label: 'À propos' },
                   session ? { href: '/account', label: 'Mon compte' } : { href: '/auth/login', label: 'Connexion' },
