@@ -198,6 +198,9 @@ export const requireAnyPermission = (permissions: string[]) =>
  * 1. The store owner (ownerId)
  * 2. A store member with ACTIVE status (via StoreUser)
  *
+ * Also checks that the store is ACTIVE (not SUSPENDED/CLOSED)
+ * Super admins bypass the store status check
+ *
  * The input must contain a storeId field for verification
  */
 export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, input }) => {
@@ -210,10 +213,10 @@ export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, inp
     })
   }
 
-  // Check if store exists
+  // Check if store exists and get its status
   const store = await ctx.prisma.store.findUnique({
     where: { id: storeId },
-    select: { id: true, ownerId: true },
+    select: { id: true, ownerId: true, status: true, suspendedReason: true },
   })
 
   if (!store) {
@@ -223,6 +226,33 @@ export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, inp
     })
   }
 
+  // Super admins can always access stores (for management purposes)
+  const isSuperAdmin = ctx.session.user.role === 'SUPER_ADMIN'
+
+  // Check store status (super admins bypass this check)
+  if (!isSuperAdmin) {
+    if (store.status === 'SUSPENDED') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Cette boutique a été suspendue${store.suspendedReason ? `: ${store.suspendedReason}` : ''}. Contactez le support pour plus d'informations.`,
+      })
+    }
+
+    if (store.status === 'CLOSED') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Cette boutique a été définitivement fermée.',
+      })
+    }
+
+    if (store.status === 'PENDING') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Cette boutique est en attente d\'approbation.',
+      })
+    }
+  }
+
   // Check if user is the store owner
   if (store.ownerId === ctx.session.user.id) {
     return next({
@@ -230,6 +260,7 @@ export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, inp
         ...ctx,
         storeId,
         isStoreOwner: true,
+        storeStatus: store.status,
       },
     })
   }
@@ -257,6 +288,7 @@ export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, inp
       ...ctx,
       storeId,
       isStoreOwner: false,
+      storeStatus: store.status,
     },
   })
 })
