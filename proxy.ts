@@ -30,7 +30,15 @@ export default withAuth(
     const isAuthPage = pathWithoutLocale.startsWith('/auth')
     const isSuperAdminPage = pathWithoutLocale.startsWith('/superadmin')
     const isAdminPage = pathWithoutLocale.startsWith('/admin') && !isSuperAdminPage
+    const isMerchantPage = pathWithoutLocale.startsWith('/merchant')
     const isAccountPage = pathWithoutLocale.startsWith('/account')
+
+    // Redirect /admin to /merchant (route migration)
+    if (isAdminPage) {
+      const locale = pathname.split('/')[1]
+      const restPath = pathWithoutLocale.replace('/admin', '')
+      return NextResponse.redirect(new URL(`/${locale}/merchant${restPath}`, req.url))
+    }
 
     // Redirect authenticated users away from auth pages
     if (isAuthPage && isAuth) {
@@ -39,7 +47,7 @@ export default withAuth(
     }
 
     // Redirect non-authenticated users from protected pages
-    if ((isSuperAdminPage || isAdminPage || isAccountPage) && !isAuth) {
+    if ((isSuperAdminPage || isMerchantPage || isAccountPage) && !isAuth) {
       const locale = pathname.split('/')[1]
       let from = pathname
       if (req.nextUrl.search) {
@@ -56,16 +64,16 @@ export default withAuth(
       const userRole = token?.role as string | undefined
       if (userRole !== 'SUPER_ADMIN') {
         const locale = pathname.split('/')[1]
-        // Redirect to admin if they are an admin, otherwise to account
+        // Redirect to merchant if they are an admin, otherwise to account
         if (userRole === 'ADMIN') {
-          return NextResponse.redirect(new URL(`/${locale}/admin`, req.url))
+          return NextResponse.redirect(new URL(`/${locale}/merchant`, req.url))
         }
         return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
       }
     }
 
-    // Check admin role for admin pages
-    if (isAdminPage && isAuth) {
+    // Check admin role for merchant pages
+    if (isMerchantPage && isAuth) {
       const userRole = token?.role as string | undefined
       if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
         const locale = pathname.split('/')[1]
