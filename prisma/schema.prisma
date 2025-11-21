@@ -23,6 +23,10 @@ model Store {
   ownerId     String   @db.ObjectId
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
+  // Commerce type configuration
+  commerceType    CommerceType @default(GENERAL)
+  commerceConfig  Json?        // Type-specific configuration
+
   // Store settings
   settings    Json?    // Flexible settings object
   theme       Json?    // Theme customization
@@ -146,6 +150,16 @@ model Product {
 
   // Tags
   tags        String[] // Product tags for filtering and search
+
+  // Commerce type specific attributes
+  attributes  Json?    // Dynamic attributes based on store's commerce type
+  // Food: { ingredients, allergens, nutritionalInfo, expiryDate, storageInstructions }
+  // Alcohol: { alcoholPercentage, volume, region, vintage, grapeVariety, servingTemp }
+  // Fashion: { material, careInstructions, fit, season, gender }
+  // Electronics: { specifications, warranty, compatibility, powerConsumption }
+  // Beauty: { ingredients, skinType, usage, volume, certifications }
+  // Home: { dimensions, weight, material, assembly, roomType }
+  // Sports: { sport, level, material, size, gender }
 
   // Status
   status      ProductStatus @default(DRAFT)
@@ -516,6 +530,18 @@ model EnvVariable {
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+// E-commerce type enum
+enum CommerceType {
+  GENERAL     // Standard e-commerce
+  FOOD        // Food & Restaurant
+  ALCOHOL     // Wine & Spirits
+  FASHION     // Clothing & Accessories
+  ELECTRONICS // Electronics & Tech
+  BEAUTY      // Beauty & Cosmetics
+  HOME        // Home & Furniture
+  SPORTS      // Sports & Outdoor
 }
 
 enum WebhookDeliveryStatus {
@@ -1738,3 +1764,397 @@ model TaxRate {
 // ====================================
 
 
+// ====================================
+// PAYMENT GATEWAY SYSTEM
+// ====================================
+
+// Card token vault for secure storage
+model CardToken {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  customerId  String   @db.ObjectId
+
+  // Tokenized card info (never store full card number)
+  token       String   @unique // Random token for reference
+  last4       String   // Last 4 digits for display
+  brand       CardBrand
+  expiryMonth Int
+  expiryYear  Int
+
+  // Cardholder info
+  cardholderName String?
+
+  // Fingerprint for deduplication
+  fingerprint String   // Hash of card number for deduplication
+
+  // Status
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+
+  // 3DS enrollment
+  threeDSEnrolled Boolean @default(false)
+
+  // Usage
+  lastUsedAt  DateTime?
+  usageCount  Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([customerId])
+  @@index([fingerprint])
+}
+
+// Payment transaction record
+model PaymentTransaction {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+  orderId         String?  @db.ObjectId
+
+  // Transaction reference
+  transactionId   String   @unique // External reference (TRX-XXXXX)
+
+  // Amount
+  amount          Float    // In smallest currency unit (cents)
+  currency        String   @default("EUR")
+
+  // Payment method
+  paymentMethod   PaymentMethodType
+  cardTokenId     String?  @db.ObjectId // If card payment
+
+  // Status
+  status          TransactionStatus @default(PENDING)
+
+  // 3D Secure
+  threeDSRequired Boolean  @default(false)
+  threeDSStatus   ThreeDSStatus?
+  threeDSVersion  String?  // "1.0" or "2.0"
+
+  // Authorization
+  authCode        String?  // Bank authorization code
+  responseCode    String?  // ISO response code
+  responseMessage String?
+
+  // Risk assessment
+  riskScore       Float?   // 0-100
+  riskLevel       RiskLevel @default(LOW)
+  fraudFlags      String[] // Detected fraud indicators
+
+  // Fees
+  processingFee   Float    @default(0)
+  netAmount       Float?   // amount - processingFee
+
+  // Refunds
+  refundedAmount  Float    @default(0)
+  refunds         Refund[]
+
+  // Metadata
+  ipAddress       String?
+  userAgent       String?
+  deviceFingerprint String?
+
+  // Timestamps
+  authorizedAt    DateTime?
+  capturedAt      DateTime?
+  failedAt        DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([cardTokenId])
+}
+
+// Refund records
+model Refund {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId   String   @db.ObjectId
+  transaction     PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  // Refund details
+  refundId        String   @unique // REF-XXXXX
+  amount          Float
+  reason          RefundReason
+  notes           String?
+
+  // Status
+  status          RefundStatus @default(PENDING)
+
+  // Processing
+  processedAt     DateTime?
+  processedBy     String?  @db.ObjectId // Admin user
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([transactionId])
+  @@index([status])
+}
+
+// Dispute/Chargeback records
+model Dispute {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId   String   @db.ObjectId
+  storeId         String   @db.ObjectId
+
+  // Dispute details
+  disputeId       String   @unique // DSP-XXXXX
+  reason          DisputeReason
+  amount          Float
+  currency        String   @default("EUR")
+
+  // Status
+  status          DisputeStatus @default(OPEN)
+
+  // Evidence
+  evidence        Json?    // Submitted evidence documents
+  evidenceDeadline DateTime?
+
+  // Resolution
+  outcome         DisputeOutcome?
+  resolvedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([transactionId])
+  @@index([status])
+}
+
+// Payment Gateway configuration per store
+model PaymentGatewayConfig {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @unique @db.ObjectId
+
+  // Gateway settings
+  isEnabled       Boolean  @default(false)
+  testMode        Boolean  @default(true)
+
+  // 3D Secure settings
+  threeDSEnabled  Boolean  @default(true)
+  threeDSThreshold Float?  // Amount threshold for 3DS
+
+  // Risk settings
+  maxRiskScore    Float    @default(70) // Block transactions above this
+  velocityCheck   Boolean  @default(true) // Check for rapid transactions
+
+  // Fraud prevention
+  fraudRules      Json?    // Custom fraud rules
+  blockedCountries String[] // ISO country codes
+  blockedBins     String[] // Blocked card BIN ranges
+
+  // Fees
+  transactionFeePercent Float @default(2.9)
+  transactionFeeFixed   Float @default(0.30)
+
+  // Payout settings
+  payoutSchedule  PayoutSchedule @default(WEEKLY)
+  minimumPayout   Float    @default(100)
+
+  // Webhook URL for notifications
+  webhookUrl      String?
+  webhookSecret   String?
+
+  // API Keys (encrypted)
+  livePublicKey   String?
+  liveSecretKey   String?
+  testPublicKey   String?
+  testSecretKey   String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+// Settlement/Payout records
+model Payout {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+
+  // Payout details
+  payoutId        String   @unique // PAY-XXXXX
+  amount          Float
+  currency        String   @default("EUR")
+
+  // Period
+  periodStart     DateTime
+  periodEnd       DateTime
+
+  // Transactions included
+  transactionCount Int
+  grossAmount     Float
+  feesAmount      Float
+  refundsAmount   Float
+
+  // Bank details
+  bankAccountLast4 String?
+
+  // Status
+  status          PayoutStatus @default(PENDING)
+
+  // Processing
+  initiatedAt     DateTime?
+  completedAt     DateTime?
+  failedAt        DateTime?
+  failureReason   String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([status])
+  @@index([periodStart])
+}
+
+// Audit log for payment operations
+model PaymentAuditLog {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId         String   @db.ObjectId
+  transactionId   String?  @db.ObjectId
+
+  // Action
+  action          PaymentAuditAction
+
+  // Details
+  details         Json
+
+  // Actor
+  actorType       String   // "system", "customer", "admin"
+  actorId         String?  @db.ObjectId
+
+  // Context
+  ipAddress       String?
+  userAgent       String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([storeId])
+  @@index([transactionId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// Enums for Payment Gateway
+enum CardBrand {
+  VISA
+  MASTERCARD
+  AMEX
+  DISCOVER
+  DINERS
+  JCB
+  UNIONPAY
+  UNKNOWN
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_TRANSFER
+  CRYPTO
+  WALLET // Apple Pay, Google Pay
+}
+
+enum TransactionStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  DISPUTED
+}
+
+enum ThreeDSStatus {
+  ENROLLED
+  NOT_ENROLLED
+  CHALLENGED
+  AUTHENTICATED
+  FAILED
+  REJECTED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RefundReason {
+  CUSTOMER_REQUEST
+  DUPLICATE
+  FRAUDULENT
+  ORDER_CANCELLED
+  PRODUCT_ISSUE
+  OTHER
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum DisputeReason {
+  FRAUDULENT
+  NOT_RECEIVED
+  NOT_AS_DESCRIBED
+  DUPLICATE
+  SUBSCRIPTION_CANCELLED
+  CREDIT_NOT_PROCESSED
+  OTHER
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  EVIDENCE_REQUIRED
+  WON
+  LOST
+  CLOSED
+}
+
+enum DisputeOutcome {
+  WON
+  LOST
+  WITHDRAWN
+}
+
+enum PayoutSchedule {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum PayoutStatus {
+  PENDING
+  INITIATED
+  IN_TRANSIT
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentAuditAction {
+  TRANSACTION_CREATED
+  TRANSACTION_AUTHORIZED
+  TRANSACTION_CAPTURED
+  TRANSACTION_FAILED
+  REFUND_INITIATED
+  REFUND_COMPLETED
+  DISPUTE_OPENED
+  DISPUTE_RESOLVED
+  CONFIG_UPDATED
+  CARD_TOKENIZED
+  CARD_DELETED
+  PAYOUT_INITIATED
+  PAYOUT_COMPLETED
+}
