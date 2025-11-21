@@ -1,5 +1,8 @@
 export { OrderConfirmation } from './OrderConfirmation'
 export { OrderStatusUpdate } from './OrderStatusUpdate'
+export { OrderShipped } from './OrderShipped'
+export { OrderDelivered } from './OrderDelivered'
+export { OrderInvoice } from './OrderInvoice'
 export { WelcomeEmail } from './Welcome'
 export { ResetPassword } from './ResetPassword'
 export { NewsletterConfirmation } from './NewsletterConfirmation'

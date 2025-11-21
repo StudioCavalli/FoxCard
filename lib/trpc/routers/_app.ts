@@ -30,6 +30,8 @@ import { inventoryRouter } from './inventory'
 import { inventoryReportRouter } from './inventory-report'
 import { abandonedCartRouter } from './abandoned-cart'
 import { loyaltyRouter } from './loyalty'
+import { campaignRouter } from './campaign'
+import { automationRouter } from './automation'
 
 export const appRouter = router({
   product: productRouter,
@@ -63,6 +65,8 @@ export const appRouter = router({
   inventoryReport: inventoryReportRouter,
   abandonedCart: abandonedCartRouter,
   loyalty: loyaltyRouter,
+  campaign: campaignRouter,
+  automation: automationRouter,
 })
 
 export type AppRouter = typeof appRouter
