@@ -83,7 +83,7 @@ export const commerceTypeRouter = router({
     .input(z.object({
       storeId: z.string(),
       commerceType: CommerceTypeEnum,
-      commerceConfig: z.record(z.unknown()).optional()
+      commerceConfig: z.record(z.string(), z.unknown()).optional()
     }))
     .mutation(async ({ input, ctx }) => {
       // Verify ownership
@@ -106,7 +106,7 @@ export const commerceTypeRouter = router({
         where: { id: input.storeId },
         data: {
           commerceType: input.commerceType,
-          commerceConfig: input.commerceConfig || null
+          commerceConfig: input.commerceConfig as any || null
         }
       })
 
@@ -120,7 +120,7 @@ export const commerceTypeRouter = router({
   validateAttributes: protectedProcedure
     .input(z.object({
       storeId: z.string(),
-      attributes: z.record(z.unknown())
+      attributes: z.record(z.string(), z.unknown())
     }))
     .mutation(async ({ input }) => {
       const store = await prisma.store.findUnique({
