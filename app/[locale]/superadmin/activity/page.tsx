@@ -234,8 +234,8 @@ export default function SuperAdminActivityPage() {
             <div className="flex-1">
               <AdminSearchInput
                 value={search}
-                onChange={(v) => {
-                  setSearch(v)
+                onChange={(e) => {
+                  setSearch(e.target.value)
                   setPage(0)
                 }}
                 placeholder="Rechercher par action ou entité..."
@@ -244,8 +244,8 @@ export default function SuperAdminActivityPage() {
             <div className="sm:w-64">
               <AdminSelect
                 value={actionFilter}
-                onChange={(v) => {
-                  setActionFilter(v)
+                onChange={(e) => {
+                  setActionFilter(e.target.value)
                   setPage(0)
                 }}
                 options={actionOptions}
