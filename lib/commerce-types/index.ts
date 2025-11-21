@@ -275,20 +275,143 @@ export function getCommerceTypeConfig(type: CommerceType): CommerceTypeConfig {
 export function validateProductAttributes(
   type: CommerceType,
   attributes: Record<string, unknown>
-): { valid: boolean; errors: string[] } {
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const config = getCommerceTypeConfig(type)
   const errors: string[] = []
+  const warnings: string[] = []
 
+  // Check required attributes
   for (const required of config.requiredAttributes) {
     if (!attributes[required]) {
       errors.push(`Le champ "${required}" est requis pour ce type de commerce`)
     }
   }
 
+  // Validate attribute types
+  for (const attrDef of config.optionalAttributes) {
+    const value = attributes[attrDef.key]
+    if (value !== undefined && value !== null) {
+      const typeError = validateAttributeType(attrDef.key, value, attrDef.type)
+      if (typeError) {
+        errors.push(typeError)
+      }
+    }
+  }
+
+  // Commerce-specific validations
+  if (type === 'ALCOHOL') {
+    const alcoholPercent = attributes.alcoholPercentage as number | undefined
+    if (alcoholPercent !== undefined) {
+      if (alcoholPercent < 0 || alcoholPercent > 100) {
+        errors.push('Le degré d\'alcool doit être entre 0 et 100%')
+      }
+    }
+    const volume = attributes.volume as number | undefined
+    if (volume !== undefined && volume <= 0) {
+      errors.push('Le volume doit être positif')
+    }
+  }
+
+  if (type === 'ELECTRONICS') {
+    const warranty = attributes.warranty as number | undefined
+    if (warranty !== undefined && warranty < 0) {
+      errors.push('La garantie ne peut pas être négative')
+    }
+    const power = attributes.powerConsumption as number | undefined
+    if (power !== undefined && power < 0) {
+      errors.push('La consommation ne peut pas être négative')
+    }
+  }
+
+  if (type === 'HOME') {
+    const dimensions = attributes.dimensions as { width?: number; height?: number; depth?: number } | undefined
+    if (dimensions) {
+      if (dimensions.width !== undefined && dimensions.width <= 0) {
+        errors.push('La largeur doit être positive')
+      }
+      if (dimensions.height !== undefined && dimensions.height <= 0) {
+        errors.push('La hauteur doit être positive')
+      }
+      if (dimensions.depth !== undefined && dimensions.depth <= 0) {
+        errors.push('La profondeur doit être positive')
+      }
+    }
+  }
+
+  if (type === 'FOOD') {
+    const nutritionalInfo = attributes.nutritionalInfo as {
+      calories?: number
+      protein?: number
+      carbs?: number
+      fat?: number
+    } | undefined
+    if (nutritionalInfo) {
+      if (nutritionalInfo.calories !== undefined && nutritionalInfo.calories < 0) {
+        errors.push('Les calories ne peuvent pas être négatives')
+      }
+      if (nutritionalInfo.protein !== undefined && nutritionalInfo.protein < 0) {
+        errors.push('Les protéines ne peuvent pas être négatives')
+      }
+      if (nutritionalInfo.carbs !== undefined && nutritionalInfo.carbs < 0) {
+        errors.push('Les glucides ne peuvent pas être négatifs')
+      }
+      if (nutritionalInfo.fat !== undefined && nutritionalInfo.fat < 0) {
+        errors.push('Les lipides ne peuvent pas être négatifs')
+      }
+    }
+  }
+
   return {
     valid: errors.length === 0,
-    errors
+    errors,
+    warnings
   }
+}
+
+// Helper to validate attribute type
+function validateAttributeType(key: string, value: unknown, expectedType: string): string | null {
+  switch (expectedType) {
+    case 'string':
+      if (typeof value !== 'string') {
+        return `Le champ "${key}" doit être une chaîne de caractères`
+      }
+      break
+    case 'number':
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return `Le champ "${key}" doit être un nombre`
+      }
+      break
+    case 'boolean':
+      if (typeof value !== 'boolean') {
+        return `Le champ "${key}" doit être un booléen`
+      }
+      break
+    case 'array':
+    case 'multiselect':
+      if (!Array.isArray(value)) {
+        return `Le champ "${key}" doit être un tableau`
+      }
+      break
+    case 'object':
+      if (typeof value !== 'object' || Array.isArray(value)) {
+        return `Le champ "${key}" doit être un objet`
+      }
+      break
+    case 'date':
+      if (typeof value === 'string') {
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) {
+          return `Le champ "${key}" doit être une date valide`
+        }
+      }
+      break
+    case 'select':
+      if (typeof value !== 'string') {
+        return `Le champ "${key}" doit être une chaîne de caractères`
+      }
+      break
+  }
+  return null
 }
 
 // Commerce type display labels

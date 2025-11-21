@@ -5,7 +5,7 @@ import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 
 export default function PaymentDashboardPage() {
-  const { storeId } = useStoreContext()
+  const { storeId, isLoading: storeLoading, error: storeError } = useStoreContext()
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week')
 
   const { data: dashboard, isLoading } = trpc.paymentGateway.getDashboard.useQuery(
@@ -18,7 +18,7 @@ export default function PaymentDashboardPage() {
     { enabled: !!storeId }
   )
 
-  if (isLoading) {
+  if (storeLoading || isLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
@@ -28,6 +28,22 @@ export default function PaymentDashboardPage() {
               <div key={i} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (storeError) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600 font-medium">{storeError}</p>
+          <a
+            href="/admin/stores/new"
+            className="mt-4 inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Créer une boutique
+          </a>
         </div>
       </div>
     )
