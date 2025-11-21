@@ -9,6 +9,7 @@ import { CartButton } from './CartButton'
 import { SearchBar } from './SearchBar'
 import { LanguageSelector } from '../i18n/LanguageSelector'
 import { CurrencySelector } from '../currency/CurrencySelector'
+import { PublicStoreSelector } from './PublicStoreSelector'
 import { useEffect, useState } from 'react'
 
 export function Header() {
@@ -98,6 +99,11 @@ export function Header() {
                   <span className="text-[10px]">⌘</span>K
                 </kbd>
               </button>
+
+              {/* Store Selector */}
+              <div className="hidden md:block">
+                <PublicStoreSelector />
+              </div>
 
               {/* Language Selector */}
               <div className="hidden md:block">
@@ -190,8 +196,9 @@ export function Header() {
                 ))}
               </nav>
 
-              {/* Language & Currency Selectors - Mobile */}
+              {/* Store, Language & Currency Selectors - Mobile */}
               <div className="pb-6 space-y-3">
+                <PublicStoreSelector />
                 <LanguageSelector />
                 <CurrencySelector />
               </div>
