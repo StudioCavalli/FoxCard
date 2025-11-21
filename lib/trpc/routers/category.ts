@@ -5,18 +5,25 @@ export const categoryRouter = router({
   getAll: publicProcedure
     .input(
       z.object({
-        storeId: z.string(),
+        storeId: z.string().optional(), // Make optional for "All Stores" mode
         parentId: z.string().optional().nullable(),
       })
     )
     .query(async ({ ctx, input }) => {
       return ctx.prisma.category.findMany({
         where: {
-          storeId: input.storeId,
+          ...(input.storeId && { storeId: input.storeId }), // Only filter by storeId if provided
           ...(input.parentId !== undefined && { parentId: input.parentId }),
         },
         include: {
           children: true,
+          store: { // Include store info for "All Stores" mode
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
           _count: {
             select: { products: true },
           },
