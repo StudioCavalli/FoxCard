@@ -254,8 +254,8 @@ export default function OrderDetailPage() {
                   <p className="text-sm text-gray-500">{order.customerEmail}</p>
                 </div>
               </div>
-              {order.customerPhone && (
-                <p className="text-sm text-gray-600">Tél: {order.customerPhone}</p>
+              {(order as any).customerPhone && (
+                <p className="text-sm text-gray-600">Tél: {(order as any).customerPhone}</p>
               )}
             </div>
           </div>
