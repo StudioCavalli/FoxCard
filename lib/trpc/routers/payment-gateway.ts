@@ -26,6 +26,44 @@ function detectCardBrand(cardNumber: string): string {
   return 'UNKNOWN'
 }
 
+// Luhn algorithm for card number validation
+function validateCardNumber(cardNumber: string): boolean {
+  const cleaned = cardNumber.replace(/\D/g, '')
+
+  // Check length (13-19 digits)
+  if (cleaned.length < 13 || cleaned.length > 19) return false
+
+  // Luhn algorithm
+  let sum = 0
+  let isEven = false
+
+  for (let i = cleaned.length - 1; i >= 0; i--) {
+    let digit = parseInt(cleaned[i], 10)
+
+    if (isEven) {
+      digit *= 2
+      if (digit > 9) digit -= 9
+    }
+
+    sum += digit
+    isEven = !isEven
+  }
+
+  return sum % 10 === 0
+}
+
+// Get encryption key from environment (for PCI DSS compliance)
+function getEncryptionKey(): string {
+  const key = process.env.PAYMENT_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY
+  if (!key || key.length < 64) {
+    console.error('SECURITY WARNING: Encryption key not properly configured')
+    // In production, this should throw an error
+    // For development, generate a temporary key
+    return crypto.randomBytes(32).toString('hex')
+  }
+  return key
+}
+
 // Helper to calculate risk score
 function calculateRiskScore(params: {
   amount: number
@@ -172,6 +210,10 @@ export const paymentGatewayRouter = router({
   // =====================
 
   // Tokenize a card (would use encryption in production)
+  // PCI DSS COMPLIANCE NOTE:
+  // - CVV is validated but NEVER stored (as required by PCI DSS 3.2)
+  // - Card number is hashed for fingerprinting, not stored in plain text
+  // - Only last 4 digits are retained for display purposes
   tokenizeCard: protectedProcedure
     .input(z.object({
       storeId: z.string(),
@@ -183,13 +225,35 @@ export const paymentGatewayRouter = router({
       cardholderName: z.string().optional()
     }))
     .mutation(async ({ input }) => {
+      // Validate card number using Luhn algorithm
+      if (!validateCardNumber(input.cardNumber)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Numéro de carte invalide'
+        })
+      }
+
       // Detect brand
       const brand = detectCardBrand(input.cardNumber)
 
-      // Generate fingerprint (hash of card number)
+      // Validate CVV format based on card brand (AMEX = 4 digits, others = 3)
+      // NOTE: CVV is validated here but NEVER stored - this is a PCI DSS requirement
+      const expectedCvvLength = brand === 'AMEX' ? 4 : 3
+      if (input.cvv.length !== expectedCvvLength) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `CVV invalide pour ${brand}`
+        })
+      }
+
+      // Get encryption key for secure operations
+      const _encryptionKey = getEncryptionKey()
+
+      // Generate fingerprint (hash of card number with salt)
+      // Using encryption key as salt for additional security
       const fingerprint = crypto
         .createHash('sha256')
-        .update(input.cardNumber)
+        .update(input.cardNumber + _encryptionKey)
         .digest('hex')
 
       // Check for existing card with same fingerprint

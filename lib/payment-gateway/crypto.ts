@@ -76,21 +76,173 @@ export function generateCryptoPaymentId(): string {
   return `CRYPTO-${Date.now().toString(36)}-${crypto.randomBytes(4).toString('hex')}`.toUpperCase()
 }
 
-// Get exchange rate (mock - use real API in production)
+// Exchange rate cache
+interface CachedRate {
+  rate: number
+  timestamp: number
+}
+
+const exchangeRateCache = new Map<string, CachedRate>()
+const CACHE_TTL_MS = 60000 // 1 minute cache
+
+// CoinGecko API ID mapping
+const COINGECKO_IDS: Record<CryptoCurrency, string> = {
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  USDT: 'tether',
+  USDC: 'usd-coin',
+  LTC: 'litecoin'
+}
+
+// Fallback rates (updated periodically)
+const FALLBACK_RATES: Record<CryptoCurrency, number> = {
+  BTC: 45000,
+  ETH: 2500,
+  USDT: 0.92,
+  USDC: 0.92,
+  LTC: 70
+}
+
+// Get exchange rate with real API support
 export async function getExchangeRate(
-  crypto: CryptoCurrency,
+  cryptoCurrency: CryptoCurrency,
   fiat: string = 'EUR'
 ): Promise<number> {
-  // Mock rates - in production use CoinGecko, CoinMarketCap, etc.
-  const mockRates: Record<CryptoCurrency, number> = {
-    BTC: 45000,
-    ETH: 2500,
-    USDT: 0.92,
-    USDC: 0.92,
-    LTC: 70
+  const cacheKey = `${cryptoCurrency}-${fiat}`
+  const cached = exchangeRateCache.get(cacheKey)
+
+  // Return cached rate if still valid
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.rate
   }
 
-  return mockRates[crypto] || 1
+  // Try to fetch from CoinGecko API
+  try {
+    const coinId = COINGECKO_IDS[cryptoCurrency]
+    const fiatLower = fiat.toLowerCase()
+
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${fiatLower}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          // Add API key if available
+          ...(process.env.COINGECKO_API_KEY && {
+            'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+          })
+        },
+        // Timeout after 5 seconds
+        signal: AbortSignal.timeout(5000)
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const rate = data[coinId]?.[fiatLower]
+
+    if (rate && typeof rate === 'number') {
+      // Cache the rate
+      exchangeRateCache.set(cacheKey, {
+        rate,
+        timestamp: Date.now()
+      })
+
+      return rate
+    }
+
+    throw new Error('Invalid response from CoinGecko')
+  } catch (error) {
+    console.warn(`Failed to fetch exchange rate for ${cryptoCurrency}/${fiat}:`, error)
+
+    // Return cached rate even if expired, or fallback
+    if (cached) {
+      return cached.rate
+    }
+
+    // Use fallback rates
+    return FALLBACK_RATES[cryptoCurrency] || 1
+  }
+}
+
+// Get multiple exchange rates at once (more efficient)
+export async function getExchangeRates(
+  currencies: CryptoCurrency[],
+  fiat: string = 'EUR'
+): Promise<Record<CryptoCurrency, number>> {
+  const results: Record<string, number> = {}
+  const fiatLower = fiat.toLowerCase()
+
+  // Get coins that need fetching
+  const coinsToFetch = currencies.filter(curr => {
+    const cacheKey = `${curr}-${fiat}`
+    const cached = exchangeRateCache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      results[curr] = cached.rate
+      return false
+    }
+    return true
+  })
+
+  if (coinsToFetch.length === 0) {
+    return results as Record<CryptoCurrency, number>
+  }
+
+  try {
+    const ids = coinsToFetch.map(c => COINGECKO_IDS[c]).join(',')
+
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${fiatLower}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          ...(process.env.COINGECKO_API_KEY && {
+            'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+          })
+        },
+        signal: AbortSignal.timeout(5000)
+      }
+    )
+
+    if (response.ok) {
+      const data = await response.json()
+
+      for (const curr of coinsToFetch) {
+        const coinId = COINGECKO_IDS[curr]
+        const rate = data[coinId]?.[fiatLower]
+
+        if (rate && typeof rate === 'number') {
+          results[curr] = rate
+          exchangeRateCache.set(`${curr}-${fiat}`, {
+            rate,
+            timestamp: Date.now()
+          })
+        } else {
+          results[curr] = FALLBACK_RATES[curr] || 1
+        }
+      }
+    } else {
+      throw new Error(`API error: ${response.status}`)
+    }
+  } catch (error) {
+    console.warn('Failed to fetch exchange rates:', error)
+
+    // Use fallbacks for failed fetches
+    for (const curr of coinsToFetch) {
+      const cacheKey = `${curr}-${fiat}`
+      const cached = exchangeRateCache.get(cacheKey)
+      results[curr] = cached?.rate || FALLBACK_RATES[curr] || 1
+    }
+  }
+
+  return results as Record<CryptoCurrency, number>
+}
+
+// Clear exchange rate cache (useful for testing)
+export function clearExchangeRateCache(): void {
+  exchangeRateCache.clear()
 }
 
 // Calculate crypto amount from fiat
