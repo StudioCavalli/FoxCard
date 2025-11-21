@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Bell, User, LogOut, Shield, Search, ChevronDown, Eye, Settings, HelpCircle, ExternalLink } from 'lucide-react'
+import { Bell, User, LogOut, Shield, Search, ChevronDown, Eye, Settings, HelpCircle, ExternalLink, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import StoreSelector from './StoreSelector'
 import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
+import { useSidebar } from '@/lib/context/sidebar-context'
 
 export function AdminHeader() {
+  const { toggle } = useSidebar()
   const { data: session } = useSession()
   const { isSuperAdmin, storeId, storeName } = useStoreContext()
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -27,6 +29,13 @@ export function AdminHeader() {
         <div className="flex items-center justify-between">
           {/* Left side - Store info */}
           <div className="flex items-center gap-4">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={toggle}
+              className="lg:hidden p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
             <div>
               <h2 className="text-xl font-bold text-gray-900">{storeName || 'Tableau de bord'}</h2>
               <p className="text-sm text-gray-500">Administration</p>
