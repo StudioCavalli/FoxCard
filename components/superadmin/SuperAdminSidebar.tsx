@@ -21,11 +21,13 @@ import {
   ChevronLeft,
   LogOut,
   ChevronRight,
+  ShoppingBag,
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/superadmin', icon: LayoutDashboard },
   { name: 'Boutiques', href: '/superadmin/stores', icon: Store },
+  { name: 'Types Commerce', href: '/superadmin/commerce-types', icon: ShoppingBag },
   { name: 'Appels', href: '/superadmin/appeals', icon: Gavel },
   { name: 'Utilisateurs', href: '/superadmin/users', icon: Users },
   { name: 'Commandes', href: '/superadmin/orders', icon: ShoppingCart },

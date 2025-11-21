@@ -1,15 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
-import { Store, Save, Globe, Mail, Phone, MapPin, Image as ImageIcon } from 'lucide-react'
+import {
+  Store, Save, Globe, Mail, Phone, ChevronRight, Check, AlertTriangle,
+  ShoppingBag, Utensils, Wine, Shirt, Smartphone, Sparkles, Home as HomeIcon, Dumbbell,
+  Gamepad2, Car, BookOpen, PawPrint, Download, CalendarCheck, Snowflake, ChefHat,
+  Building2, Plane, Ticket,
+} from 'lucide-react'
+import {
+  commerceTypeConfigs,
+  type CommerceType,
+} from '@/lib/commerce-types'
+
+const iconMap: Record<CommerceType, React.ElementType> = {
+  GENERAL: ShoppingBag,
+  FOOD: Utensils,
+  ALCOHOL: Wine,
+  FASHION: Shirt,
+  ELECTRONICS: Smartphone,
+  BEAUTY: Sparkles,
+  HOME: HomeIcon,
+  SPORTS: Dumbbell,
+  TOYS: Gamepad2,
+  AUTOMOTIVE: Car,
+  BOOKS: BookOpen,
+  PETS: PawPrint,
+  DIGITAL: Download,
+  SERVICES: CalendarCheck,
+  SEASONAL: Snowflake,
+  RESTAURANT: ChefHat,
+  HOTEL: Building2,
+  TRAVEL: Plane,
+  RECREATION: Ticket,
+}
 
 export default function MerchantStorePage() {
   const { storeId } = useStoreContext()
   const [isEditing, setIsEditing] = useState(false)
+  const [showTypeSelector, setShowTypeSelector] = useState(false)
+  const [selectedType, setSelectedType] = useState<CommerceType | null>(null)
 
   const { data: store, isLoading, refetch } = trpc.store.getById.useQuery(
     { id: storeId! },
@@ -24,10 +57,29 @@ export default function MerchantStorePage() {
     publicPhone: '',
   })
 
+  useEffect(() => {
+    if (store?.commerceType) {
+      setSelectedType(store.commerceType as CommerceType)
+    }
+  }, [store?.commerceType])
+
   const updateStore = trpc.store.update.useMutation({
     onSuccess: () => {
       refetch()
       setIsEditing(false)
+    },
+  })
+
+  const updateCommerceType = trpc.commerceType.updateStoreType.useMutation({
+    onSuccess: () => {
+      refetch()
+      setShowTypeSelector(false)
+    },
+  })
+
+  const createDefaultCategories = trpc.commerceType.createDefaultCategories.useMutation({
+    onSuccess: () => {
+      refetch()
     },
   })
 
@@ -51,6 +103,20 @@ export default function MerchantStorePage() {
     })
   }
 
+  const handleTypeChange = async (type: CommerceType) => {
+    setSelectedType(type)
+    await updateCommerceType.mutateAsync({
+      storeId: storeId!,
+      commerceType: type,
+    })
+  }
+
+  const handleCreateCategories = () => {
+    createDefaultCategories.mutate({ storeId: storeId! })
+  }
+
+  const currentConfig = selectedType ? commerceTypeConfigs[selectedType] : null
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -72,11 +138,11 @@ export default function MerchantStorePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ma boutique</h1>
-          <p className="text-gray-500 mt-1">Gérez les informations de votre boutique</p>
+          <p className="text-gray-500 mt-1">Gérez les informations et le type de votre boutique</p>
         </div>
         {!isEditing ? (
           <Button variant="primary" onClick={handleEdit}>
-            Modifier
+            Modifier les infos
           </Button>
         ) : (
           <div className="flex items-center gap-2">
@@ -87,6 +153,184 @@ export default function MerchantStorePage() {
               <Save className="w-4 h-4 mr-2" />
               Enregistrer
             </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Commerce Type Card */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Type de commerce</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Définit les fonctionnalités et champs disponibles pour vos produits
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTypeSelector(!showTypeSelector)}
+            >
+              {showTypeSelector ? 'Fermer' : 'Changer le type'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Current Type Display */}
+        {currentConfig && !showTypeSelector && (
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                {(() => {
+                  const Icon = iconMap[selectedType!]
+                  return <Icon className="w-6 h-6 text-indigo-600" />
+                })()}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-900">{currentConfig.name}</h3>
+                  <span className="text-xl">{currentConfig.emoji}</span>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">{currentConfig.description}</p>
+
+                {/* Features */}
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {currentConfig.features.hasPhysicalProducts && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Produits physiques</span>
+                    </div>
+                  )}
+                  {currentConfig.features.hasDigitalProducts && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Produits digitaux</span>
+                    </div>
+                  )}
+                  {currentConfig.features.hasBookings && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Réservations</span>
+                    </div>
+                  )}
+                  {currentConfig.features.hasSubscriptions && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Abonnements</span>
+                    </div>
+                  )}
+                  {currentConfig.features.requiresShipping && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Livraison</span>
+                    </div>
+                  )}
+                  {currentConfig.features.hasVariants && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Variantes produit</span>
+                    </div>
+                  )}
+                  {currentConfig.features.hasTimeslots && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Créneaux horaires</span>
+                    </div>
+                  )}
+                  {currentConfig.features.requiresAgeVerification && (
+                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Vérification âge ({currentConfig.minAge}+)</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Default Categories */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Catégories par défaut</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCreateCategories}
+                      isLoading={createDefaultCategories.isPending}
+                    >
+                      Créer les catégories
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentConfig.defaultCategories.map((cat) => (
+                      <span
+                        key={cat}
+                        className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                      >
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Regulations */}
+                {currentConfig.regulations && currentConfig.regulations.length > 0 && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-800">Réglementations obligatoires</p>
+                        <ul className="mt-1 text-sm text-amber-700 space-y-1">
+                          {currentConfig.regulations.map((reg, i) => (
+                            <li key={i}>&bull; {reg}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Type Selector */}
+        {showTypeSelector && (
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.entries(commerceTypeConfigs).map(([type, config]) => {
+                const Icon = iconMap[type as CommerceType]
+                const isSelected = selectedType === type
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleTypeChange(type as CommerceType)}
+                    disabled={updateCommerceType.isPending}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                      isSelected
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        isSelected ? 'bg-indigo-100' : 'bg-gray-100'
+                      }`}>
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-indigo-600' : 'text-gray-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>
+                            {config.name}
+                          </span>
+                          <span>{config.emoji}</span>
+                          {isSelected && <Check className="w-4 h-4 text-indigo-500" />}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">{config.description}</p>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -187,6 +431,28 @@ export default function MerchantStorePage() {
           )}
         </div>
       </div>
+
+      {/* Checkout Steps Preview */}
+      {currentConfig && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Étapes du checkout</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Les étapes de paiement sont automatiquement adaptées selon votre type de commerce
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            {currentConfig.checkoutSteps.map((step, i) => (
+              <div key={step} className="flex items-center gap-2">
+                <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg capitalize">
+                  {step.replace(/-/g, ' ')}
+                </span>
+                {i < currentConfig.checkoutSteps.length - 1 && (
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

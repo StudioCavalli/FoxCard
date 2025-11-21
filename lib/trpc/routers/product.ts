@@ -188,11 +188,16 @@ export const productRouter = router({
         status: z.nativeEnum(ProductStatus),
         featured: z.boolean().default(false),
         categoryId: z.string().optional(),
+        attributes: z.record(z.string(), z.unknown()).optional(), // Commerce type specific attributes
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { attributes, ...productData } = input
       const product = await ctx.prisma.product.create({
-        data: input,
+        data: {
+          ...productData,
+          attributes: attributes ? JSON.parse(JSON.stringify(attributes)) : undefined,
+        },
       })
 
       // Execute plugin hooks (async, don't block response)

@@ -1,224 +1,564 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, CommerceType } from '@prisma/client'
 import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-async function main() {
-  console.log('🏪 Creating test stores...')
+// Category data for each commerce type
+const categoryData: Record<CommerceType, { name: string; slug: string; children: { name: string; slug: string }[] }[]> = {
+  ELECTRONICS: [
+    { name: 'Computers & Accessories', slug: 'computers-accessories', children: [
+      { name: 'Laptops', slug: 'laptops' },
+      { name: 'Desktops', slug: 'desktops' },
+      { name: 'Monitors', slug: 'monitors' },
+      { name: 'Keyboards & Mice', slug: 'keyboards-mice' },
+      { name: 'External Drives', slug: 'external-drives' },
+      { name: 'Networking Equipment', slug: 'networking-equipment' },
+    ]},
+    { name: 'Mobile Devices', slug: 'mobile-devices', children: [
+      { name: 'Smartphones', slug: 'smartphones' },
+      { name: 'Tablets', slug: 'tablets' },
+      { name: 'Smartwatches', slug: 'smartwatches' },
+    ]},
+    { name: 'Home Appliances', slug: 'home-appliances', children: [
+      { name: 'Refrigerators', slug: 'refrigerators' },
+      { name: 'Washing Machines', slug: 'washing-machines' },
+      { name: 'Microwave Ovens', slug: 'microwave-ovens' },
+      { name: 'Coffee Makers', slug: 'coffee-makers' },
+    ]},
+    { name: 'Audio & Headphones', slug: 'audio-headphones', children: [
+      { name: 'Speakers', slug: 'speakers' },
+      { name: 'Headphones', slug: 'headphones' },
+      { name: 'Earbuds', slug: 'earbuds' },
+      { name: 'Home Theater Systems', slug: 'home-theater-systems' },
+    ]},
+    { name: 'Cameras & Photography', slug: 'cameras-photography', children: [
+      { name: 'Digital Cameras', slug: 'digital-cameras' },
+      { name: 'Camcorders', slug: 'camcorders' },
+      { name: 'Lenses', slug: 'lenses' },
+      { name: 'Tripods & Accessories', slug: 'tripods-accessories' },
+    ]},
+  ],
+  FASHION: [
+    { name: "Men's Clothing", slug: 'mens-clothing', children: [
+      { name: 'T-Shirts', slug: 'mens-tshirts' },
+      { name: 'Pants', slug: 'mens-pants' },
+      { name: 'Suits', slug: 'mens-suits' },
+      { name: 'Jackets', slug: 'mens-jackets' },
+    ]},
+    { name: "Women's Clothing", slug: 'womens-clothing', children: [
+      { name: 'Dresses', slug: 'womens-dresses' },
+      { name: 'Tops', slug: 'womens-tops' },
+      { name: 'Skirts', slug: 'womens-skirts' },
+      { name: 'Outerwear', slug: 'womens-outerwear' },
+    ]},
+    { name: 'Footwear', slug: 'footwear', children: [
+      { name: 'Sneakers', slug: 'sneakers' },
+      { name: 'Boots', slug: 'boots' },
+      { name: 'Sandals', slug: 'sandals' },
+    ]},
+    { name: 'Accessories', slug: 'accessories', children: [
+      { name: 'Bags & Purses', slug: 'bags-purses' },
+      { name: 'Belts', slug: 'belts' },
+      { name: 'Jewelry', slug: 'jewelry' },
+    ]},
+    { name: 'Watches', slug: 'watches', children: [] },
+  ],
+  HOME: [
+    { name: 'Furniture', slug: 'furniture', children: [
+      { name: 'Living Room Furniture', slug: 'living-room-furniture' },
+      { name: 'Bedroom Furniture', slug: 'bedroom-furniture' },
+      { name: 'Office Furniture', slug: 'office-furniture' },
+    ]},
+    { name: 'Home Decor', slug: 'home-decor', children: [
+      { name: 'Lighting', slug: 'lighting' },
+      { name: 'Rugs & Carpets', slug: 'rugs-carpets' },
+      { name: 'Wall Art & Mirrors', slug: 'wall-art-mirrors' },
+    ]},
+    { name: 'Garden Supplies', slug: 'garden-supplies', children: [
+      { name: 'Plants & Seeds', slug: 'plants-seeds' },
+      { name: 'Garden Tools', slug: 'garden-tools' },
+      { name: 'Outdoor Furniture', slug: 'outdoor-furniture' },
+    ]},
+  ],
+  BEAUTY: [
+    { name: 'Personal Care', slug: 'personal-care', children: [
+      { name: 'Skincare Products', slug: 'skincare-products' },
+      { name: 'Hair Care Products', slug: 'hair-care-products' },
+      { name: 'Oral Care Products', slug: 'oral-care-products' },
+    ]},
+    { name: 'Makeup', slug: 'makeup', children: [
+      { name: 'Face Makeup', slug: 'face-makeup' },
+      { name: 'Eye Makeup', slug: 'eye-makeup' },
+      { name: 'Lip Products', slug: 'lip-products' },
+    ]},
+    { name: 'Health Supplements', slug: 'health-supplements', children: [
+      { name: 'Vitamins & Minerals', slug: 'vitamins-minerals' },
+      { name: 'Protein Powders', slug: 'protein-powders' },
+    ]},
+  ],
+  SPORTS: [
+    { name: 'Fitness Equipment', slug: 'fitness-equipment', children: [
+      { name: 'Weights & Resistance Bands', slug: 'weights-resistance-bands' },
+      { name: 'Cardio Machines', slug: 'cardio-machines' },
+    ]},
+    { name: 'Outdoor Gear', slug: 'outdoor-gear', children: [
+      { name: 'Camping Equipment', slug: 'camping-equipment' },
+      { name: 'Hiking Gear', slug: 'hiking-gear' },
+    ]},
+    { name: 'Team Sports Equipment', slug: 'team-sports-equipment', children: [
+      { name: 'Balls', slug: 'balls' },
+      { name: 'Protective Gear', slug: 'protective-gear' },
+    ]},
+  ],
+  TOYS: [
+    { name: "Kids' Toys", slug: 'kids-toys', children: [
+      { name: 'Action Figures', slug: 'action-figures' },
+      { name: 'Dolls & Plush Toys', slug: 'dolls-plush-toys' },
+    ]},
+    { name: 'Board Games & Puzzles', slug: 'board-games-puzzles', children: [] },
+    { name: 'Video Games & Consoles', slug: 'video-games-consoles', children: [] },
+  ],
+  AUTOMOTIVE: [
+    { name: 'Automotive Parts & Accessories', slug: 'automotive-parts-accessories', children: [
+      { name: 'Tires & Wheels', slug: 'tires-wheels' },
+      { name: 'Car Electronics', slug: 'car-electronics' },
+    ]},
+    { name: 'Tools & Home Improvement', slug: 'tools-home-improvement', children: [
+      { name: 'Power Tools', slug: 'power-tools' },
+      { name: 'Hand Tools', slug: 'hand-tools' },
+    ]},
+  ],
+  BOOKS: [
+    { name: 'Books', slug: 'books', children: [
+      { name: 'Fiction & Non-Fiction', slug: 'fiction-non-fiction' },
+      { name: 'Textbooks', slug: 'textbooks' },
+    ]},
+    { name: 'Stationery Supplies', slug: 'stationery-supplies', children: [
+      { name: 'Notebooks', slug: 'notebooks' },
+      { name: 'Writing Instruments', slug: 'writing-instruments' },
+    ]},
+  ],
+  PETS: [
+    { name: 'Pet Food', slug: 'pet-food', children: [] },
+    { name: 'Pet Accessories', slug: 'pet-accessories', children: [] },
+    { name: 'Pet Health Products', slug: 'pet-health-products', children: [] },
+  ],
+  FOOD: [
+    { name: 'Snacks', slug: 'snacks', children: [] },
+    { name: 'Beverages', slug: 'beverages', children: [] },
+    { name: 'Cooking Ingredients', slug: 'cooking-ingredients', children: [] },
+  ],
+  ALCOHOL: [
+    { name: 'Wines', slug: 'wines', children: [
+      { name: 'Red Wine', slug: 'red-wine' },
+      { name: 'White Wine', slug: 'white-wine' },
+      { name: 'Rose Wine', slug: 'rose-wine' },
+    ]},
+    { name: 'Spirits', slug: 'spirits', children: [
+      { name: 'Whisky', slug: 'whisky' },
+      { name: 'Vodka', slug: 'vodka' },
+      { name: 'Gin', slug: 'gin' },
+    ]},
+    { name: 'Beers', slug: 'beers', children: [] },
+  ],
+  DIGITAL: [
+    { name: 'E-books', slug: 'ebooks', children: [] },
+    { name: 'Software & Applications', slug: 'software-applications', children: [] },
+    { name: 'Online Courses', slug: 'online-courses', children: [] },
+  ],
+  SERVICES: [
+    { name: 'Subscription Services', slug: 'subscription-services', children: [] },
+    { name: 'Gift Cards', slug: 'gift-cards', children: [] },
+  ],
+  SEASONAL: [
+    { name: 'Holiday Decorations', slug: 'holiday-decorations', children: [] },
+    { name: 'Seasonal Clothing', slug: 'seasonal-clothing', children: [] },
+  ],
+  RESTAURANT: [
+    { name: 'Restaurants', slug: 'restaurants', children: [
+      { name: 'Fine Dining', slug: 'fine-dining' },
+      { name: 'Casual Dining', slug: 'casual-dining' },
+      { name: 'Fast Food', slug: 'fast-food' },
+      { name: 'Cafes & Bakeries', slug: 'cafes-bakeries' },
+    ]},
+    { name: 'Cuisines', slug: 'cuisines', children: [
+      { name: 'Italian', slug: 'italian' },
+      { name: 'Asian', slug: 'asian' },
+      { name: 'Mexican', slug: 'mexican' },
+      { name: 'Mediterranean', slug: 'mediterranean' },
+    ]},
+    { name: 'Special Dietary Options', slug: 'special-dietary', children: [
+      { name: 'Vegetarian & Vegan', slug: 'vegetarian-vegan' },
+      { name: 'Gluten-Free', slug: 'gluten-free' },
+      { name: 'Organic', slug: 'organic' },
+    ]},
+  ],
+  HOTEL: [
+    { name: 'Types of Accommodations', slug: 'accommodations', children: [
+      { name: 'Hotels', slug: 'hotels' },
+      { name: 'Motels', slug: 'motels' },
+      { name: 'Bed & Breakfasts', slug: 'bed-breakfasts' },
+      { name: 'Hostels', slug: 'hostels' },
+      { name: 'Vacation Rentals', slug: 'vacation-rentals' },
+    ]},
+    { name: 'Amenities', slug: 'amenities', children: [
+      { name: 'Pool & Spa Facilities', slug: 'pool-spa' },
+      { name: 'Conference Rooms', slug: 'conference-rooms' },
+      { name: 'Restaurants & Bars', slug: 'restaurants-bars' },
+    ]},
+  ],
+  TRAVEL: [
+    { name: 'Transportation', slug: 'transportation', children: [
+      { name: 'Flights', slug: 'flights' },
+      { name: 'Trains', slug: 'trains' },
+      { name: 'Car Rentals', slug: 'car-rentals' },
+      { name: 'Buses & Coaches', slug: 'buses-coaches' },
+    ]},
+    { name: 'Travel Packages', slug: 'travel-packages', children: [
+      { name: 'All-Inclusive Resorts', slug: 'all-inclusive-resorts' },
+      { name: 'Guided Tours', slug: 'guided-tours' },
+      { name: 'Adventure Travel', slug: 'adventure-travel' },
+    ]},
+    { name: 'Travel Accessories', slug: 'travel-accessories', children: [
+      { name: 'Luggage & Bags', slug: 'luggage-bags' },
+      { name: 'Travel Gadgets', slug: 'travel-gadgets' },
+    ]},
+  ],
+  RECREATION: [
+    { name: 'Outdoor Activities', slug: 'outdoor-activities', children: [
+      { name: 'Hiking & Camping', slug: 'hiking-camping' },
+      { name: 'Biking & Cycling', slug: 'biking-cycling' },
+      { name: 'Water Sports', slug: 'water-sports' },
+    ]},
+    { name: 'Indoor Activities', slug: 'indoor-activities', children: [
+      { name: 'Bowling & Billiards', slug: 'bowling-billiards' },
+      { name: 'Escape Rooms', slug: 'escape-rooms' },
+      { name: 'Trampoline Parks', slug: 'trampoline-parks' },
+    ]},
+    { name: 'Cultural Activities', slug: 'cultural-activities', children: [
+      { name: 'Museums & Galleries', slug: 'museums-galleries' },
+      { name: 'Concerts & Festivals', slug: 'concerts-festivals' },
+      { name: 'Theater & Performing Arts', slug: 'theater-performing-arts' },
+    ]},
+  ],
+  GENERAL: [
+    { name: 'Products', slug: 'products', children: [] },
+    { name: 'Services', slug: 'services', children: [] },
+  ],
+}
 
-  // Get or create admin user
+// Demo stores configuration
+const demoStores = [
+  {
+    name: 'TechZone Electronics',
+    slug: 'techzone',
+    domain: 'techzone.foxcard.demo',
+    description: 'Your one-stop shop for the latest electronics and gadgets',
+    commerceType: 'ELECTRONICS' as CommerceType,
+    merchantEmail: 'merchant.tech@foxcard.demo',
+    merchantName: 'Alex Tech',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'Urban Style Fashion',
+    slug: 'urban-style',
+    domain: 'urbanstyle.foxcard.demo',
+    description: 'Trendy fashion for modern lifestyles',
+    commerceType: 'FASHION' as CommerceType,
+    merchantEmail: 'merchant.fashion@foxcard.demo',
+    merchantName: 'Sophie Mode',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'Casa & Garden',
+    slug: 'casa-garden',
+    domain: 'casagarden.foxcard.demo',
+    description: 'Beautiful furniture and garden supplies for your home',
+    commerceType: 'HOME' as CommerceType,
+    merchantEmail: 'merchant.home@foxcard.demo',
+    merchantName: 'Marc Maison',
+    country: 'ES',
+    currency: 'EUR',
+  },
+  {
+    name: 'Glow Beauty',
+    slug: 'glow-beauty',
+    domain: 'glowbeauty.foxcard.demo',
+    description: 'Premium skincare, makeup and wellness products',
+    commerceType: 'BEAUTY' as CommerceType,
+    merchantEmail: 'merchant.beauty@foxcard.demo',
+    merchantName: 'Emma Beaute',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'SportMax Outdoor',
+    slug: 'sportmax',
+    domain: 'sportmax.foxcard.demo',
+    description: 'Equipment for athletes and outdoor enthusiasts',
+    commerceType: 'SPORTS' as CommerceType,
+    merchantEmail: 'merchant.sports@foxcard.demo',
+    merchantName: 'Lucas Sport',
+    country: 'DE',
+    currency: 'EUR',
+  },
+  {
+    name: 'ToyWorld Kids',
+    slug: 'toyworld',
+    domain: 'toyworld.foxcard.demo',
+    description: 'Toys, games and fun for all ages',
+    commerceType: 'TOYS' as CommerceType,
+    merchantEmail: 'merchant.toys@foxcard.demo',
+    merchantName: 'Marie Jouets',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'AutoParts Plus',
+    slug: 'autoparts-plus',
+    domain: 'autoparts.foxcard.demo',
+    description: 'Quality automotive parts and tools',
+    commerceType: 'AUTOMOTIVE' as CommerceType,
+    merchantEmail: 'merchant.auto@foxcard.demo',
+    merchantName: 'Pierre Auto',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'BookHaven',
+    slug: 'bookhaven',
+    domain: 'bookhaven.foxcard.demo',
+    description: 'Books and stationery for curious minds',
+    commerceType: 'BOOKS' as CommerceType,
+    merchantEmail: 'merchant.books@foxcard.demo',
+    merchantName: 'Claire Livres',
+    country: 'GB',
+    currency: 'GBP',
+  },
+  {
+    name: 'PetPals Store',
+    slug: 'petpals',
+    domain: 'petpals.foxcard.demo',
+    description: 'Everything your furry friends need',
+    commerceType: 'PETS' as CommerceType,
+    merchantEmail: 'merchant.pets@foxcard.demo',
+    merchantName: 'Thomas Animaux',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'FreshMart Grocery',
+    slug: 'freshmart',
+    domain: 'freshmart.foxcard.demo',
+    description: 'Fresh groceries and gourmet food delivered',
+    commerceType: 'FOOD' as CommerceType,
+    merchantEmail: 'merchant.food@foxcard.demo',
+    merchantName: 'Julie Fresh',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'Cave des Vignerons',
+    slug: 'cave-vignerons',
+    domain: 'cavevignerons.foxcard.demo',
+    description: 'Fine wines and spirits from around the world',
+    commerceType: 'ALCOHOL' as CommerceType,
+    merchantEmail: 'merchant.wine@foxcard.demo',
+    merchantName: 'Antoine Vins',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'DigiStore',
+    slug: 'digistore',
+    domain: 'digistore.foxcard.demo',
+    description: 'Digital products, software and online courses',
+    commerceType: 'DIGITAL' as CommerceType,
+    merchantEmail: 'merchant.digital@foxcard.demo',
+    merchantName: 'Nicolas Digital',
+    country: 'US',
+    currency: 'USD',
+  },
+  {
+    name: 'Fetes & Saisons',
+    slug: 'fetes-saisons',
+    domain: 'fetes-saisons.foxcard.demo',
+    description: 'Decorations and seasonal products for all occasions',
+    commerceType: 'SEASONAL' as CommerceType,
+    merchantEmail: 'merchant.seasonal@foxcard.demo',
+    merchantName: 'Noel Saisons',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'Saveurs du Monde',
+    slug: 'saveurs-monde',
+    domain: 'saveurs-monde.foxcard.demo',
+    description: 'Restaurant delivery and gourmet food experiences',
+    commerceType: 'RESTAURANT' as CommerceType,
+    merchantEmail: 'merchant.restaurant@foxcard.demo',
+    merchantName: 'Chef Martin',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'StayEasy Hotels',
+    slug: 'stayeasy',
+    domain: 'stayeasy.foxcard.demo',
+    description: 'Hotels and accommodations booking platform',
+    commerceType: 'HOTEL' as CommerceType,
+    merchantEmail: 'merchant.hotel@foxcard.demo',
+    merchantName: 'Henri Hotelier',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'Voyage Express',
+    slug: 'voyage-express',
+    domain: 'voyage-express.foxcard.demo',
+    description: 'Book flights, trains, car rentals and travel packages',
+    commerceType: 'TRAVEL' as CommerceType,
+    merchantEmail: 'merchant.travel@foxcard.demo',
+    merchantName: 'Paul Voyageur',
+    country: 'FR',
+    currency: 'EUR',
+  },
+  {
+    name: 'FunZone Activities',
+    slug: 'funzone',
+    domain: 'funzone.foxcard.demo',
+    description: 'Book outdoor, indoor and cultural activities',
+    commerceType: 'RECREATION' as CommerceType,
+    merchantEmail: 'merchant.recreation@foxcard.demo',
+    merchantName: 'Laura Loisirs',
+    country: 'FR',
+    currency: 'EUR',
+  },
+]
+
+async function cleanDatabase() {
+  console.log('🧹 Cleaning database...')
+
+  // Delete in order to respect foreign key constraints
+  try { await prisma.orderItem.deleteMany({}) } catch {}
+  try { await prisma.order.deleteMany({}) } catch {}
+  try { await prisma.productVariant.deleteMany({}) } catch {}
+  try { await prisma.product.deleteMany({}) } catch {}
+  // Delete child categories first (those with parentId)
+  try { await prisma.category.deleteMany({ where: { parentId: { not: null } } }) } catch {}
+  try { await prisma.category.deleteMany({}) } catch {}
+  try { await prisma.customer.deleteMany({}) } catch {}
+  try { await prisma.discountCode.deleteMany({}) } catch {}
+  try { await prisma.shippingZone.deleteMany({}) } catch {}
+  try { await prisma.storeUser.deleteMany({}) } catch {}
+  try { await prisma.suspensionAppeal.deleteMany({}) } catch {}
+  try { await prisma.auditLog.deleteMany({}) } catch {}
+  try { await prisma.store.deleteMany({}) } catch {}
+
+  // Delete merchant users (not SUPER_ADMIN)
+  await prisma.user.deleteMany({
+    where: { role: { not: 'SUPER_ADMIN' } }
+  })
+
+  console.log('✅ Database cleaned')
+}
+
+async function createCategoriesForStore(storeId: string, commerceType: CommerceType) {
+  const categories = categoryData[commerceType] || categoryData.GENERAL
+
+  for (const cat of categories) {
+    const parentCategory = await prisma.category.create({
+      data: {
+        storeId,
+        name: cat.name,
+        slug: cat.slug,
+        description: `${cat.name} category`,
+      }
+    })
+
+    // Create child categories
+    for (const child of cat.children) {
+      await prisma.category.create({
+        data: {
+          storeId,
+          name: child.name,
+          slug: child.slug,
+          parentId: parentCategory.id,
+          description: `${child.name} subcategory`,
+        }
+      })
+    }
+  }
+}
+
+async function main() {
+  console.log('🌱 Starting FoxCard seed...')
+
+  // Clean existing data
+  await cleanDatabase()
+
+  // Ensure admin user exists
   const hashedPassword = await hash('admin123', 10)
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@foxcard.com' },
     update: {},
     create: {
       email: 'admin@foxcard.com',
-      name: 'Admin User',
+      name: 'Super Admin',
       password: hashedPassword,
       role: 'SUPER_ADMIN',
     },
   })
+  console.log('✅ Admin user ready:', adminUser.email)
 
-  // Store configurations
-  const storesConfig = [
-    {
-      slug: 'grocery-store',
-      domain: 'freshmart.foxcard.local',
-      name: 'FreshMart Grocery',
-      tagline: 'Fresh products delivered to your door',
-      description: 'Your neighborhood online grocery store with fresh produce, dairy, meats, and pantry essentials. We source locally whenever possible.',
-      logo: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop',
-      bannerImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1920&h=400&fit=crop',
-      categories: [
-        { name: 'Fruits & Légumes', slug: 'fruits-legumes' },
-        { name: 'Produits Laitiers', slug: 'produits-laitiers' },
-        { name: 'Viandes & Poissons', slug: 'viandes-poissons' },
-        { name: 'Épicerie', slug: 'epicerie' },
-        { name: 'Boissons', slug: 'boissons' },
-      ],
-      products: [
-        { name: 'Pommes Bio', slug: 'pommes-bio', price: 399, category: 'fruits-legumes', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500' },
-        { name: 'Lait Frais', slug: 'lait-frais', price: 189, category: 'produits-laitiers', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500' },
-        { name: 'Poulet Fermier', slug: 'poulet-fermier', price: 1299, category: 'viandes-poissons', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=500' },
-        { name: 'Pâtes Italiennes', slug: 'pates-italiennes', price: 249, category: 'epicerie', image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1?w=500' },
-        { name: 'Jus d\'Orange Pressé', slug: 'jus-orange-presse', price: 349, category: 'boissons', image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500' },
-      ],
-    },
-    {
-      slug: 'fashion-boutique',
-      domain: 'urbanstyle.foxcard.local',
-      name: 'Urban Style Clothing',
-      tagline: 'Your style, your way',
-      description: 'Contemporary fashion for the modern individual. Discover our curated collection of clothing and accessories.',
-      logo: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&h=200&fit=crop',
-      bannerImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=400&fit=crop',
-      categories: [
-        { name: 'Homme', slug: 'homme' },
-        { name: 'Femme', slug: 'femme' },
-        { name: 'Chaussures', slug: 'chaussures' },
-        { name: 'Accessoires', slug: 'accessoires' },
-      ],
-      products: [
-        { name: 'T-Shirt Classique', slug: 't-shirt-classique', price: 2999, category: 'homme', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500' },
-        { name: 'Robe d\'Été', slug: 'robe-ete', price: 5999, category: 'femme', image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500' },
-        { name: 'Sneakers Urban', slug: 'sneakers-urban', price: 8999, category: 'chaussures', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500' },
-        { name: 'Sac à Main Cuir', slug: 'sac-main-cuir', price: 12999, category: 'accessoires', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500' },
-      ],
-    },
-    {
-      slug: 'pet-paradise',
-      domain: 'petparadise.foxcard.local',
-      name: 'Pet Paradise',
-      tagline: 'Everything for your furry friends',
-      description: 'Premium pet supplies, food, and accessories. Because your pets deserve the best!',
-      logo: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop',
-      bannerImage: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1920&h=400&fit=crop',
-      categories: [
-        { name: 'Chiens', slug: 'chiens' },
-        { name: 'Chats', slug: 'chats' },
-        { name: 'Alimentation', slug: 'alimentation' },
-        { name: 'Accessoires', slug: 'accessoires-animaux' },
-      ],
-      products: [
-        { name: 'Croquettes Premium Chien', slug: 'croquettes-premium-chien', price: 4999, category: 'chiens', image: 'https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?w=500' },
-        { name: 'Arbre à Chat Deluxe', slug: 'arbre-chat-deluxe', price: 8999, category: 'chats', image: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=500' },
-        { name: 'Laisse Rétractable', slug: 'laisse-retractable', price: 2499, category: 'accessoires-animaux', image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500' },
-        { name: 'Jouet Interactif Chat', slug: 'jouet-interactif-chat', price: 1999, category: 'chats', image: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=500' },
-      ],
-    },
-    {
-      slug: 'hardware-depot',
-      domain: 'hardwaredepot.foxcard.local',
-      name: 'Hardware Depot',
-      tagline: 'Build it right, build it with us',
-      description: 'Professional-grade tools, building materials, and hardware supplies for contractors and DIY enthusiasts.',
-      logo: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=200&fit=crop',
-      bannerImage: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1920&h=400&fit=crop',
-      categories: [
-        { name: 'Outillage', slug: 'outillage' },
-        { name: 'Quincaillerie', slug: 'quincaillerie' },
-        { name: 'Peinture', slug: 'peinture' },
-        { name: 'Plomberie', slug: 'plomberie' },
-        { name: 'Électricité', slug: 'electricite' },
-      ],
-      products: [
-        { name: 'Perceuse Sans Fil Pro', slug: 'perceuse-sans-fil-pro', price: 14999, category: 'outillage', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500' },
-        { name: 'Kit Visserie 500pcs', slug: 'kit-visserie-500', price: 2999, category: 'quincaillerie', image: 'https://images.unsplash.com/photo-1586864387789-628af9feed72?w=500' },
-        { name: 'Peinture Blanche 10L', slug: 'peinture-blanche-10l', price: 4999, category: 'peinture', image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500' },
-        { name: 'Robinet Mitigeur', slug: 'robinet-mitigeur', price: 7999, category: 'plomberie', image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=500' },
-      ],
-    },
-    {
-      slug: 'tech-zone',
-      domain: 'techzone.foxcard.local',
-      name: 'TechZone Electronics',
-      tagline: 'Your gateway to the digital world',
-      description: 'The latest in consumer electronics, computers, smartphones, and smart home devices.',
-      logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop',
-      bannerImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&h=400&fit=crop',
-      categories: [
-        { name: 'Smartphones', slug: 'smartphones' },
-        { name: 'Ordinateurs', slug: 'ordinateurs' },
-        { name: 'Audio', slug: 'audio' },
-        { name: 'Gaming', slug: 'gaming' },
-        { name: 'Smart Home', slug: 'smart-home' },
-      ],
-      products: [
-        { name: 'Smartphone Pro Max', slug: 'smartphone-pro-max', price: 99999, category: 'smartphones', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500' },
-        { name: 'Laptop Ultrabook 15"', slug: 'laptop-ultrabook-15', price: 129999, category: 'ordinateurs', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500' },
-        { name: 'Casque Bluetooth ANC', slug: 'casque-bluetooth-anc', price: 24999, category: 'audio', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500' },
-        { name: 'Manette Gaming Pro', slug: 'manette-gaming-pro', price: 6999, category: 'gaming', image: 'https://images.unsplash.com/photo-1592840496694-26d035b52b48?w=500' },
-        { name: 'Ampoule Connectée', slug: 'ampoule-connectee', price: 1999, category: 'smart-home', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500' },
-      ],
-    },
-  ]
-
-  for (const storeConfig of storesConfig) {
-    console.log(`\n🏪 Creating store: ${storeConfig.name}`)
+  // Create demo stores
+  for (const storeConfig of demoStores) {
+    // Create merchant user (ADMIN role for store owners)
+    const merchant = await prisma.user.create({
+      data: {
+        email: storeConfig.merchantEmail,
+        name: storeConfig.merchantName,
+        password: hashedPassword,
+        role: 'ADMIN',
+      }
+    })
 
     // Create store
-    const store = await prisma.store.upsert({
-      where: { slug: storeConfig.slug },
-      update: {
-        name: storeConfig.name,
-        tagline: storeConfig.tagline,
-        description: storeConfig.description,
-        logo: storeConfig.logo,
-        bannerImage: storeConfig.bannerImage,
-        domain: storeConfig.domain,
-      },
-      create: {
+    const store = await prisma.store.create({
+      data: {
         name: storeConfig.name,
         slug: storeConfig.slug,
         domain: storeConfig.domain,
-        tagline: storeConfig.tagline,
         description: storeConfig.description,
-        logo: storeConfig.logo,
-        bannerImage: storeConfig.bannerImage,
-        ownerId: adminUser.id,
-      },
+        commerceType: storeConfig.commerceType,
+        ownerId: merchant.id,
+        status: 'ACTIVE',
+        showOnDirectory: true,
+        settings: {
+          locale: storeConfig.country === 'GB' ? 'en' : storeConfig.country === 'US' ? 'en' : storeConfig.country === 'ES' ? 'es' : storeConfig.country === 'DE' ? 'de' : 'fr',
+          country: storeConfig.country,
+          currency: storeConfig.currency,
+        },
+      }
     })
 
-    console.log(`  ✅ Store created: ${store.name} (${store.slug})`)
+    // Create categories for the store
+    await createCategoriesForStore(store.id, storeConfig.commerceType)
 
-    // Create categories
-    const categoryMap: Record<string, string> = {}
-    for (const cat of storeConfig.categories) {
-      const category = await prisma.category.upsert({
-        where: { storeId_slug: { storeId: store.id, slug: cat.slug } },
-        update: { name: cat.name },
-        create: {
-          storeId: store.id,
-          name: cat.name,
-          slug: cat.slug,
-        },
-      })
-      categoryMap[cat.slug] = category.id
-    }
-    console.log(`  ✅ ${storeConfig.categories.length} categories created`)
-
-    // Create products
-    for (const prod of storeConfig.products) {
-      await prisma.product.upsert({
-        where: { storeId_slug: { storeId: store.id, slug: prod.slug } },
-        update: {
-          name: prod.name,
-          price: prod.price,
-          images: [prod.image],
-          thumbnail: prod.image,
-        },
-        create: {
-          storeId: store.id,
-          name: prod.name,
-          slug: prod.slug,
-          description: `${prod.name} - Produit de qualité disponible chez ${storeConfig.name}`,
-          price: prod.price,
-          quantity: Math.floor(Math.random() * 100) + 10,
-          images: [prod.image],
-          thumbnail: prod.image,
-          status: 'ACTIVE',
-          featured: Math.random() > 0.5,
-          sku: `${storeConfig.slug.substring(0, 3).toUpperCase()}-${prod.slug.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 1000)}`,
-          categoryId: categoryMap[prod.category],
-        },
-      })
-    }
-    console.log(`  ✅ ${storeConfig.products.length} products created`)
+    console.log(`✅ Store created: ${store.name} (${storeConfig.commerceType})`)
   }
 
-  console.log('\n🎉 All test stores created successfully!')
-  console.log('\n📋 Summary:')
-  console.log('  - FreshMart Grocery (grocery-store)')
-  console.log('  - Urban Style Clothing (fashion-boutique)')
-  console.log('  - Pet Paradise (pet-paradise)')
-  console.log('  - Hardware Depot (hardware-depot)')
-  console.log('  - TechZone Electronics (tech-zone)')
-  console.log('\n🔐 Login: admin@foxcard.com / admin123')
+  console.log('\n🎉 Seed completed successfully!')
+  console.log(`📊 Created ${demoStores.length} demo stores with categories`)
+  console.log('\n🔐 Admin login: admin@foxcard.com / admin123')
+  console.log('🔐 Store owner login: merchant.tech@foxcard.demo / admin123 (and others)')
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error:', e)
+    console.error('❌ Seed failed:', e)
     process.exit(1)
   })
   .finally(async () => {

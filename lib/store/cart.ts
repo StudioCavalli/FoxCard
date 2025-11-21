@@ -14,6 +14,10 @@ export interface CartItem {
   variantId?: string
   variantName?: string
   maxQuantity?: number
+  // Commerce type fields for adaptive checkout
+  commerceType?: string // Store commerce type (HOTEL, RESTAURANT, etc.)
+  productType?: 'SIMPLE' | 'VARIABLE' | 'DIGITAL' // Product type
+  attributes?: Record<string, unknown> // Commerce-specific attributes
 }
 
 interface CartStore {

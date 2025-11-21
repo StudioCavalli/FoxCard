@@ -14,8 +14,12 @@ import {
   Image as ImageIcon,
   X,
   Plus,
-  Loader2
+  Loader2,
+  Info,
 } from 'lucide-react'
+import { useStoreCommerceType } from '@/lib/commerce-types/hooks'
+import { CommerceTypeFields } from '@/components/merchant/product-form/CommerceTypeFields'
+import { commerceTypeConfigs, type CommerceType } from '@/lib/commerce-types'
 
 function slugify(str: string): string {
   return str
@@ -32,6 +36,7 @@ export default function NewProductPage() {
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
   const { storeId } = useStoreContext()
+  const { type: commerceType, config: commerceConfig } = useStoreCommerceType(storeId || undefined)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -54,6 +59,7 @@ export default function NewProductPage() {
     status: ProductStatus.DRAFT as ProductStatus,
     featured: false,
     categoryId: '',
+    commerceAttributes: {} as Record<string, unknown>,
   })
   const [tagInput, setTagInput] = useState('')
   const [imageInput, setImageInput] = useState('')
@@ -142,6 +148,7 @@ export default function NewProductPage() {
       status: formData.status,
       featured: formData.featured,
       categoryId: formData.categoryId || undefined,
+      attributes: Object.keys(formData.commerceAttributes).length > 0 ? formData.commerceAttributes : undefined,
     })
   }
 
@@ -208,6 +215,29 @@ export default function NewProductPage() {
               </div>
             </div>
           </div>
+
+          {/* Commerce Type Specific Fields */}
+          {commerceType && commerceType !== 'GENERAL' && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Attributs {commerceConfig?.name || commerceType}
+                </h2>
+                <span className="text-xl">{commerceConfig?.emoji}</span>
+              </div>
+              {commerceConfig?.description && (
+                <p className="text-sm text-gray-500 mb-4 flex items-start gap-2">
+                  <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  {commerceConfig.description}
+                </p>
+              )}
+              <CommerceTypeFields
+                commerceType={commerceType}
+                attributes={formData.commerceAttributes}
+                onChange={(attrs) => setFormData({ ...formData, commerceAttributes: attrs })}
+              />
+            </div>
+          )}
 
           {/* Media */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">

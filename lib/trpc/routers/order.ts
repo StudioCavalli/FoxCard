@@ -107,9 +107,21 @@ export const orderRouter = router({
             variantName: z.string().optional(),
           })
         ),
-        shippingAddress: z.any(),
+        shippingAddress: z.any().optional(), // Optional for digital/booking only orders
         billingAddress: z.any().optional(),
         notes: z.string().optional(),
+        // Booking data for reservation-type orders
+        bookingData: z.object({
+          commerceType: z.string(),
+          checkInDate: z.string().optional(),
+          checkOutDate: z.string().optional(),
+          selectedDate: z.string().optional(),
+          selectedTime: z.string().optional(),
+          adults: z.number().optional(),
+          children: z.number().optional(),
+          roomType: z.string().optional(),
+          specialRequests: z.string().optional(),
+        }).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -256,10 +268,22 @@ export const orderRouter = router({
             variantName: z.string().optional(),
           })
         ),
-        shippingAddress: z.any(),
+        shippingAddress: z.any().optional(), // Optional for digital/booking only orders
         billingAddress: z.any().optional(),
         notes: z.string().optional(),
         discountCodeId: z.string().optional(),
+        // Booking data for reservation-type orders
+        bookingData: z.object({
+          commerceType: z.string(),
+          checkInDate: z.string().optional(),
+          checkOutDate: z.string().optional(),
+          selectedDate: z.string().optional(),
+          selectedTime: z.string().optional(),
+          adults: z.number().optional(),
+          children: z.number().optional(),
+          roomType: z.string().optional(),
+          specialRequests: z.string().optional(),
+        }).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
