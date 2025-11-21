@@ -10,6 +10,7 @@ import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { CartDrawerWrapper } from '@/components/cart/CartDrawerWrapper'
 import { CurrencyProvider } from '@/lib/currency/CurrencyContext'
+import { PublicStoreProvider } from '@/lib/context/public-store-context'
 import '../globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -100,14 +101,16 @@ export default async function LocaleLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <TRPCProvider>
-            <CurrencyProvider>
-              <ThemeProvider>
-                <Header />
-                <main className="min-h-screen bg-theme-background">{children}</main>
-                <Footer />
-                <CartDrawerWrapper />
-              </ThemeProvider>
-            </CurrencyProvider>
+            <PublicStoreProvider>
+              <CurrencyProvider>
+                <ThemeProvider>
+                  <Header />
+                  <main className="min-h-screen bg-theme-background">{children}</main>
+                  <Footer />
+                  <CartDrawerWrapper />
+                </ThemeProvider>
+              </CurrencyProvider>
+            </PublicStoreProvider>
           </TRPCProvider>
         </NextIntlClientProvider>
       </body>

@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
-import { Filter, X, Search, ExternalLink } from 'lucide-react'
+import { usePublicStore } from '@/lib/context/public-store-context'
+import { Filter, X, Search, ExternalLink, Store } from 'lucide-react'
 
 function ProductsContent() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { selectedStore, setSelectedStore, stores } = usePublicStore()
   const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
   const [showFilters, setShowFilters] = useState(false)
@@ -30,12 +31,12 @@ function ProductsContent() {
   }, [searchParams])
 
   const { data: categories } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: selectedStore === 'all' ? undefined : selectedStore,
   })
 
   const { data, isLoading, fetchNextPage, hasNextPage } = trpc.product.getAll.useInfiniteQuery(
     {
-      storeId: DEMO_STORE_ID,
+      storeId: selectedStore === 'all' ? undefined : selectedStore,
       status: 'ACTIVE',
       categoryId: selectedCategory,
       search: searchQuery || undefined,
@@ -65,6 +66,27 @@ function ProductsContent() {
           </h1>
           <p className="text-xl text-theme-text-secondary">Découvrez notre collection complète</p>
         </div>
+
+        {/* Store Selector */}
+        {stores.length > 0 && (
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-theme-surface border border-theme-border rounded-xl">
+              <Store className="w-4 h-4 text-theme-text-muted" />
+              <select
+                value={selectedStore}
+                onChange={(e) => setSelectedStore(e.target.value as string | 'all')}
+                className="bg-transparent text-theme-text text-sm font-medium focus:outline-none cursor-pointer"
+              >
+                <option value="all">Toutes les boutiques</option>
+                {stores.map((store) => (
+                  <option key={store.id} value={store.id}>
+                    {store.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Search Bar & Sort */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
@@ -357,7 +379,12 @@ function ProductsContent() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} storeSlug="demo" />
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      storeSlug={product.store?.slug || 'demo'}
+                      showStoreName={selectedStore === 'all'}
+                    />
                   ))}
                 </div>
 

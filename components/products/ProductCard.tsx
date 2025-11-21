@@ -17,12 +17,19 @@ interface ProductCardProps {
     thumbnail?: string | null
     quantity: number
     tags?: string[]
+    store?: {
+      id: string
+      name: string
+      slug: string
+      logo: string | null
+    }
   }
-  storeSlug: string
+  storeSlug?: string
+  showStoreName?: boolean
   colorVariant?: 'teal' | 'pink' | 'yellow' | 'blue' | 'green' | 'purple' | 'orange'
 }
 
-export function ProductCard({ product, storeSlug }: ProductCardProps) {
+export function ProductCard({ product, storeSlug, showStoreName = false }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
 
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
@@ -102,6 +109,25 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
         {/* Product Info */}
         <div className="relative p-5">
+          {/* Store Info (All Stores mode) */}
+          {showStoreName && product.store && (
+            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-theme-border">
+              {product.store.logo && (
+                <div className="relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                  <Image
+                    src={product.store.logo}
+                    alt={product.store.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <span className="text-xs font-medium text-theme-text-muted truncate">
+                {product.store.name}
+              </span>
+            </div>
+          )}
+
           {/* Product Name */}
           <h3
             className="font-semibold text-theme-text text-base mb-2 line-clamp-2 group-hover:text-theme-primary transition-colors duration-200"
