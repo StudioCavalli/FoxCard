@@ -17,7 +17,7 @@ const STEPS = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, getTotalPrice, clearCart } = useCartStore()
+  const { items, getTotalPrice, clearCart, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
   const [currentStep, setCurrentStep] = useState(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -310,61 +310,13 @@ export default function CheckoutPage() {
 
   const subtotal = getTotalPrice()
 
-  const { data: shippingCalculation } = trpc.shipping.calculateShipping.useQuery(
-    {
-      storeId: '000000000000000000000001',
-      country: formData.country || 'France',
-      orderAmount: subtotal,
-    },
-    {
-      enabled: !!formData.country && subtotal > 0,
-    }
-  )
-
-  // Get country code from country name (simplified mapping)
-  const getCountryCode = (country: string): string => {
-    const countryMap: Record<string, string> = {
-      'France': 'FR',
-      'Belgique': 'BE',
-      'Belgium': 'BE',
-      'Suisse': 'CH',
-      'Switzerland': 'CH',
-      'Luxembourg': 'LU',
-      'Allemagne': 'DE',
-      'Germany': 'DE',
-      'Italie': 'IT',
-      'Italy': 'IT',
-      'Espagne': 'ES',
-      'Spain': 'ES',
-      'Portugal': 'PT',
-      'Pays-Bas': 'NL',
-      'Netherlands': 'NL',
-      'Royaume-Uni': 'GB',
-      'United Kingdom': 'GB',
-    }
-    return countryMap[country] || 'FR'
-  }
-
-  const { data: taxCalculation } = trpc.tax.calculateTax.useQuery(
-    {
-      storeId: '000000000000000000000001',
-      countryCode: getCountryCode(formData.country || 'France'),
-      amount: subtotal,
-    },
-    {
-      enabled: !!formData.country && subtotal > 0,
-    }
-  )
-
-  const shipping = shippingCalculation?.rate?.price || 0
+  // Multi-store: shipping and tax calculated per store in backend (createFromCart)
+  // Display estimated total only
+  const shipping = subtotal > 50 ? 0 : 5.99 // Estimated shipping
   const discount = appliedDiscount?.discountAmount || 0
   const loyaltyDiscount = loyaltyPointsUsed // 1 point = 1€
-  const tax = taxCalculation?.taxAmount || 0
 
-  // Calculate total: if tax is included in price, don't add it again
-  const total = (taxCalculation?.available && taxCalculation?.taxRate?.includedInPrice)
-    ? Math.max(0, subtotal + shipping - discount - loyaltyDiscount)
-    : Math.max(0, subtotal + shipping + tax - discount - loyaltyDiscount)
+  const total = Math.max(0, subtotal + shipping - discount - loyaltyDiscount)
 
   if (items.length === 0) {
     return (
@@ -836,23 +788,42 @@ export default function CheckoutPage() {
                 Récapitulatif
               </h2>
 
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative w-16 h-16 flex-shrink-0 bg-theme-background border border-theme-border rounded-xl overflow-hidden">
-                      {item.image && (
-                        <Image src={item.image} alt={item.name} fill className="object-contain p-2" sizes="64px" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-theme-text text-sm line-clamp-2">{item.name}</h3>
-                      {item.variantName && (
-                        <p className="text-xs text-theme-text-muted mt-0.5">{item.variantName}</p>
-                      )}
-                      <p className="text-sm text-theme-text-secondary mt-1">
-                        Qté: {item.quantity} × {formatPrice(item.price)}
-                      </p>
-                    </div>
+              <div className="space-y-6 mb-6">
+                {Object.entries(getItemsByStore()).map(([storeId, storeItems]) => (
+                  <div key={storeId} className="space-y-3">
+                    {/* Store Header (only if multiple stores) */}
+                    {getUniqueStoresCount() > 1 && (
+                      <div className="pb-2 border-b border-theme-border">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-bold text-theme-text uppercase tracking-wide">
+                            {storeItems[0]?.storeName || 'Boutique'}
+                          </h4>
+                          <span className="text-xs font-medium text-theme-text-muted">
+                            {formatPrice(getStoreSubtotal(storeId))}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Store Items */}
+                    {storeItems.map((item) => (
+                      <div key={item.id} className="flex gap-3">
+                        <div className="relative w-16 h-16 flex-shrink-0 bg-theme-background border border-theme-border rounded-xl overflow-hidden">
+                          {item.image && (
+                            <Image src={item.image} alt={item.name} fill className="object-contain p-2" sizes="64px" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-theme-text text-sm line-clamp-2">{item.name}</h3>
+                          {item.variantName && (
+                            <p className="text-xs text-theme-text-muted mt-0.5">{item.variantName}</p>
+                          )}
+                          <p className="text-sm text-theme-text-secondary mt-1">
+                            Qté: {item.quantity} × {formatPrice(item.price)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -1021,17 +992,15 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-theme-text-secondary">
                     <div className="flex flex-col">
                       <span>Livraison</span>
-                      {shippingCalculation?.rate?.estimatedDays && (
-                        <span className="text-xs text-theme-text-muted">
-                          Délai: {shippingCalculation.rate.estimatedDays}
-                        </span>
-                      )}
+                      <span className="text-xs text-theme-text-muted">
+                        Calculée par boutique
+                      </span>
                     </div>
                     <span className="font-semibold">
                       {shipping === 0 ? (
                         <span className="text-green-600 font-bold">Gratuite</span>
                       ) : (
-                        <span className="text-theme-text">{formatPrice(shipping)}</span>
+                        <span className="text-theme-text">{formatPrice(shipping)} <span className="text-xs text-theme-text-muted">est.</span></span>
                       )}
                     </span>
                   </div>
@@ -1045,28 +1014,6 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-orange-600">
                       <span className="font-medium">Points de fidélité</span>
                       <span className="font-bold">-{formatPrice(loyaltyDiscount)}</span>
-                    </div>
-                  )}
-                  {taxCalculation && taxCalculation.available && taxCalculation.taxRate && (
-                    <div className="flex justify-between text-theme-text-secondary">
-                      <div className="flex flex-col">
-                        <span>{taxCalculation.taxRate.name}</span>
-                        <span className="text-xs text-theme-text-muted">
-                          {taxCalculation.taxRate.rate}% {taxCalculation.taxRate.includedInPrice ? '(inclus)' : ''}
-                        </span>
-                      </div>
-                      <span className={`font-semibold ${taxCalculation.taxRate.includedInPrice ? 'text-theme-text-muted' : 'text-theme-text'}`}>
-                        {taxCalculation.taxRate.includedInPrice ? (
-                          <span className="text-xs">Inclus</span>
-                        ) : (
-                          formatPrice(tax)
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {shippingCalculation?.rate?.name && shippingCalculation?.shippingZone && (
-                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-700 font-medium">
-                      {shippingCalculation.rate.name} - {shippingCalculation.shippingZone.name}
                     </div>
                   )}
                   <div className="flex justify-between pt-3 border-t border-theme-border">

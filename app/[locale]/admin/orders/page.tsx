@@ -5,21 +5,27 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { Eye, RefreshCw } from 'lucide-react'
+import { Eye, RefreshCw, Store } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminOrdersPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { storeId } = useStoreContext()
 
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState('')
 
-  const { data, isLoading, refetch } = trpc.order.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
-    limit: 50,
-  })
+  const { data, isLoading, refetch } = trpc.order.getAll.useQuery(
+    {
+      storeId: storeId!,
+      limit: 50,
+    },
+    {
+      enabled: !!storeId,
+    }
+  )
 
   const refundMutation = trpc.payment.refundPayment.useMutation({
     onSuccess: () => {
@@ -88,6 +94,7 @@ export default function AdminOrdersPage() {
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Articles</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Statut</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Boutique</th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -130,6 +137,14 @@ export default function AdminOrdersPage() {
                         {order.status === 'CANCELLED' && 'Annulée'}
                         {order.status === 'REFUNDED' && 'Remboursée'}
                       </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {order.store && (
+                        <div className="flex items-center gap-1.5">
+                          <Store className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="text-xs text-gray-600">{order.store.name}</span>
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-2">
