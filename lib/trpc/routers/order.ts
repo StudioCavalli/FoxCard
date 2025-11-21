@@ -35,6 +35,13 @@ export const orderRouter = router({
             },
           },
           customer: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
         },
       })
 

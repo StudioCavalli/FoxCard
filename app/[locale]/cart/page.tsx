@@ -12,7 +12,7 @@ import { ShoppingBag, Minus, Plus, X, ArrowLeft, ArrowRight } from 'lucide-react
 
 export default function CartPage() {
   const router = useRouter()
-  const { items, updateQuantity, removeItem, clearCart, getTotalPrice, getTotalItems } = useCartStore()
+  const { items, updateQuantity, removeItem, clearCart, getTotalPrice, getTotalItems, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
 
   const subtotal = getTotalPrice()
   const shipping = subtotal > 50 ? 0 : 5.99
@@ -67,9 +67,24 @@ export default function CartPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <div key={item.productId} className="group p-6 bg-theme-surface border border-theme-border rounded-2xl hover:shadow-xl hover:shadow-theme-primary/10 transition-all duration-300">
+          <div className="lg:col-span-2 space-y-6">
+            {Object.entries(getItemsByStore()).map(([storeId, storeItems]) => (
+              <div key={storeId} className="space-y-4">
+                {/* Store Header (only show if multiple stores) */}
+                {getUniqueStoresCount() > 1 && (
+                  <div className="flex items-center justify-between px-4 py-3 bg-theme-primary/5 border border-theme-primary/20 rounded-xl">
+                    <h3 className="font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                      {storeItems[0]?.storeName || 'Boutique'}
+                    </h3>
+                    <span className="text-sm font-medium text-theme-text-secondary">
+                      Sous-total: {formatPrice(getStoreSubtotal(storeId))}
+                    </span>
+                  </div>
+                )}
+
+                {/* Store Items */}
+                {storeItems.map((item) => (
+                  <div key={item.productId} className="group p-6 bg-theme-surface border border-theme-border rounded-2xl hover:shadow-xl hover:shadow-theme-primary/10 transition-all duration-300">
                 <div className="flex gap-6">
                   {/* Product Image */}
                   <Link href={`/products/${item.slug}`} className="flex-shrink-0">
@@ -147,6 +162,8 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            ))}
               </div>
             ))}
 
