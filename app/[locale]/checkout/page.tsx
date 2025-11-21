@@ -311,10 +311,50 @@ export default function CheckoutPage() {
     }
   )
 
+  // Get country code from country name (simplified mapping)
+  const getCountryCode = (country: string): string => {
+    const countryMap: Record<string, string> = {
+      'France': 'FR',
+      'Belgique': 'BE',
+      'Belgium': 'BE',
+      'Suisse': 'CH',
+      'Switzerland': 'CH',
+      'Luxembourg': 'LU',
+      'Allemagne': 'DE',
+      'Germany': 'DE',
+      'Italie': 'IT',
+      'Italy': 'IT',
+      'Espagne': 'ES',
+      'Spain': 'ES',
+      'Portugal': 'PT',
+      'Pays-Bas': 'NL',
+      'Netherlands': 'NL',
+      'Royaume-Uni': 'GB',
+      'United Kingdom': 'GB',
+    }
+    return countryMap[country] || 'FR'
+  }
+
+  const { data: taxCalculation } = trpc.tax.calculateTax.useQuery(
+    {
+      storeId: '000000000000000000000001',
+      countryCode: getCountryCode(formData.country || 'France'),
+      amount: subtotal,
+    },
+    {
+      enabled: !!formData.country && subtotal > 0,
+    }
+  )
+
   const shipping = shippingCalculation?.rate?.price || 0
   const discount = appliedDiscount?.discountAmount || 0
   const loyaltyDiscount = loyaltyPointsUsed // 1 point = 1€
-  const total = Math.max(0, subtotal + shipping - discount - loyaltyDiscount)
+  const tax = taxCalculation?.taxAmount || 0
+
+  // Calculate total: if tax is included in price, don't add it again
+  const total = (taxCalculation?.available && taxCalculation?.taxRate?.includedInPrice)
+    ? Math.max(0, subtotal + shipping - discount - loyaltyDiscount)
+    : Math.max(0, subtotal + shipping + tax - discount - loyaltyDiscount)
 
   if (items.length === 0) {
     return (
@@ -995,6 +1035,23 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-orange-600">
                       <span className="font-medium">Points de fidélité</span>
                       <span className="font-bold">-{formatPrice(loyaltyDiscount)}</span>
+                    </div>
+                  )}
+                  {taxCalculation && taxCalculation.available && taxCalculation.taxRate && (
+                    <div className="flex justify-between text-theme-text-secondary">
+                      <div className="flex flex-col">
+                        <span>{taxCalculation.taxRate.name}</span>
+                        <span className="text-xs text-theme-text-muted">
+                          {taxCalculation.taxRate.rate}% {taxCalculation.taxRate.includedInPrice ? '(inclus)' : ''}
+                        </span>
+                      </div>
+                      <span className={`font-semibold ${taxCalculation.taxRate.includedInPrice ? 'text-theme-text-muted' : 'text-theme-text'}`}>
+                        {taxCalculation.taxRate.includedInPrice ? (
+                          <span className="text-xs">Inclus</span>
+                        ) : (
+                          formatPrice(tax)
+                        )}
+                      </span>
                     </div>
                   )}
                   {shippingCalculation?.rate?.name && shippingCalculation?.shippingZone && (

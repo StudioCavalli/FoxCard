@@ -7,6 +7,8 @@ import { useUIStore } from '@/lib/store/ui'
 import { Button } from '@/components/ui/Button'
 import { CartButton } from './CartButton'
 import { SearchBar } from './SearchBar'
+import { LanguageSelector } from '../i18n/LanguageSelector'
+import { CurrencySelector } from '../currency/CurrencySelector'
 import { useEffect, useState } from 'react'
 
 export function Header() {
@@ -96,6 +98,16 @@ export function Header() {
                 </kbd>
               </button>
 
+              {/* Language Selector */}
+              <div className="hidden md:block">
+                <LanguageSelector />
+              </div>
+
+              {/* Currency Selector */}
+              <div className="hidden md:block">
+                <CurrencySelector />
+              </div>
+
               {/* User */}
               {session ? (
                 <Link href="/account" className="hidden md:block">
@@ -175,6 +187,12 @@ export function Header() {
                   </Link>
                 ))}
               </nav>
+
+              {/* Language & Currency Selectors - Mobile */}
+              <div className="pb-6 space-y-3">
+                <LanguageSelector />
+                <CurrencySelector />
+              </div>
 
               {/* Footer */}
               <div className="pt-6 border-t border-theme-border text-sm text-theme-text-muted">

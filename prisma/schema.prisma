@@ -34,6 +34,7 @@ model Store {
   customers   Customer[]
   discountCodes DiscountCode[]
   shippingZones ShippingZone[]
+  taxRates    TaxRate[]
   webhooks    Webhook[]
   apiKeys     ApiKey[]
   envVariables EnvVariable[] @relation("StoreEnvVariables")
@@ -1702,3 +1703,38 @@ enum AutomationExecutionStatus {
   CANCELLED
   FAILED
 }
+// ====================================
+// TAX CONFIGURATION
+// ====================================
+
+model TaxRate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  name        String   // e.g., "TVA France", "VAT UK", "Sales Tax USA"
+  countryCode String   // ISO 3166-1 alpha-2 (FR, GB, US, etc.)
+  rate        Float    // Tax rate as percentage (20 for 20%)
+  
+  // Optional: state/province level tax
+  stateCode   String?  // For countries with state-level taxes (US, CA, etc.)
+  
+  // Display options
+  includedInPrice Boolean @default(false) // If true, prices include tax (TTC), else HT
+  
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false) // Default tax for the country
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, countryCode, stateCode])
+  @@index([storeId])
+  @@index([countryCode])
+}
+
+// ====================================
+// SHIPPING ZONES AND RATES
+// ====================================
+
+

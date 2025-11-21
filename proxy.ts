@@ -1,28 +1,52 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './lib/i18n/config'
+
+// Create i18n middleware
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'always',
+})
 
 export default withAuth(
   function middleware(req) {
+    // First, handle i18n routing
+    const response = intlMiddleware(req)
+
+    // Then handle authentication/authorization
     const token = req.nextauth.token
     const isAuth = !!token
-    const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
-    const isAdminPage = req.nextUrl.pathname.startsWith('/admin')
-    const isAccountPage = req.nextUrl.pathname.startsWith('/account')
+    const pathname = req.nextUrl.pathname
+
+    // Extract locale from pathname (e.g., /fr/admin -> fr)
+    const pathnameIsMissingLocale = locales.every(
+      (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    )
+
+    // Check if the path (without locale) matches protected routes
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
+    const isAuthPage = pathWithoutLocale.startsWith('/auth')
+    const isAdminPage = pathWithoutLocale.startsWith('/admin')
+    const isAccountPage = pathWithoutLocale.startsWith('/account')
 
     // Redirect authenticated users away from auth pages
     if (isAuthPage && isAuth) {
-      return NextResponse.redirect(new URL('/account', req.url))
+      const locale = pathname.split('/')[1]
+      return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
     }
 
     // Redirect non-authenticated users from protected pages
     if ((isAdminPage || isAccountPage) && !isAuth) {
-      let from = req.nextUrl.pathname
+      const locale = pathname.split('/')[1]
+      let from = pathname
       if (req.nextUrl.search) {
         from += req.nextUrl.search
       }
 
       return NextResponse.redirect(
-        new URL(`/auth/login?from=${encodeURIComponent(from)}`, req.url)
+        new URL(`/${locale}/auth/login?from=${encodeURIComponent(from)}`, req.url)
       )
     }
 
@@ -30,11 +54,12 @@ export default withAuth(
     if (isAdminPage && isAuth) {
       const userRole = token?.role as string | undefined
       if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
-        return NextResponse.redirect(new URL('/account', req.url))
+        const locale = pathname.split('/')[1]
+        return NextResponse.redirect(new URL(`/${locale}/account`, req.url))
       }
     }
 
-    return NextResponse.next()
+    return response
   },
   {
     callbacks: {
@@ -45,8 +70,9 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/account/:path*',
-    '/auth/:path*',
+    // Match all pathnames except for
+    // - … if they start with `/api`, `/_next` or `/_vercel`
+    // - … the ones containing a dot (e.g. `favicon.ico`)
+    '/((?!api|_next|_vercel|.*\\..*).*)',
   ],
 }
