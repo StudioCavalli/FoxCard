@@ -57,7 +57,7 @@ export const orderRouter = router({
       }
     }),
 
-  getById: publicProcedure
+  getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       return ctx.prisma.order.findUnique({

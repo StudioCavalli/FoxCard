@@ -188,8 +188,8 @@ export const discountRouter = router({
       })
     }),
 
-  // Increment usage count
-  incrementUsage: publicProcedure
+  // Increment usage count (internal use only - called when order is created)
+  incrementUsage: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.prisma.discountCode.update({
