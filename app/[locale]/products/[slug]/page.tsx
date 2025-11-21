@@ -103,6 +103,7 @@ export default function ProductDetailPage({
     addItem({
       id: product.id,
       productId: product.id,
+      storeId: DEMO_STORE_ID, // Multi-store support (using demo store for detail page)
       name: product.name,
       slug: product.slug,
       price: product.price,

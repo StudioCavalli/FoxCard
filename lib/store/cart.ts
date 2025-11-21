@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware'
 export interface CartItem {
   id: string
   productId: string
+  storeId: string // Store ID for multi-store support
+  storeName?: string // Optional store name for display
   name: string
   slug: string
   price: number
@@ -22,6 +24,9 @@ interface CartStore {
   clearCart: () => void
   getTotalItems: () => number
   getTotalPrice: () => number
+  getItemsByStore: () => Record<string, CartItem[]>
+  getStoreSubtotal: (storeId: string) => number
+  getUniqueStoresCount: () => number
 }
 
 export const useCartStore = create<CartStore>()(
@@ -98,6 +103,27 @@ export const useCartStore = create<CartStore>()(
 
       getTotalPrice: () => {
         return get().items.reduce((total, item) => total + item.price * item.quantity, 0)
+      },
+
+      getItemsByStore: () => {
+        const items = get().items
+        return items.reduce((acc, item) => {
+          if (!acc[item.storeId]) {
+            acc[item.storeId] = []
+          }
+          acc[item.storeId].push(item)
+          return acc
+        }, {} as Record<string, CartItem[]>)
+      },
+
+      getStoreSubtotal: (storeId) => {
+        const items = get().items.filter((item) => item.storeId === storeId)
+        return items.reduce((total, item) => total + item.price * item.quantity, 0)
+      },
+
+      getUniqueStoresCount: () => {
+        const storeIds = new Set(get().items.map((item) => item.storeId))
+        return storeIds.size
       },
     }),
     {

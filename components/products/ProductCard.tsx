@@ -39,6 +39,8 @@ export function ProductCard({ product, storeSlug, showStoreName = false }: Produ
     addItem({
       id: product.id,
       productId: product.id,
+      storeId: product.store?.id || '', // Multi-store support
+      storeName: product.store?.name, // Optional store name for display
       name: product.name,
       slug: product.slug,
       price: product.price,
