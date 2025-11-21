@@ -46,7 +46,7 @@ export default function MerchantStorePage() {
 
   const handleSave = () => {
     updateStore.mutate({
-      id: storeId!,
+      storeId: storeId!,
       ...formData,
     })
   }
