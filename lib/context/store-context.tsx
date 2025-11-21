@@ -7,6 +7,7 @@ import { trpc } from '@/lib/trpc/client'
 interface Store {
   id: string
   name: string
+  slug?: string
 }
 
 interface StoreContextType {
@@ -15,6 +16,7 @@ interface StoreContextType {
   stores: Store[]
   isLoading: boolean
   error: string | null
+  isSuperAdmin: boolean
   setStoreId: (id: string) => void
 }
 
@@ -27,10 +29,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Get user's stores
-  const { data: stores, error: storesError } = trpc.store.getUserStores.useQuery(undefined, {
-    enabled: !!session?.user
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN'
+
+  // Get user's stores (for regular admins)
+  const { data: userStores, error: userStoresError } = trpc.store.getUserStores.useQuery(undefined, {
+    enabled: !!session?.user && !isSuperAdmin
   })
+
+  // Get ALL stores (for super admins)
+  const { data: allStoresData, error: allStoresError } = trpc.superadmin.getAllStores.useQuery(
+    { limit: 1000, offset: 0 },
+    { enabled: !!session?.user && isSuperAdmin }
+  )
+
+  // Combine stores based on role
+  const stores = isSuperAdmin
+    ? allStoresData?.stores
+    : userStores
+
+  const storesError = isSuperAdmin ? allStoresError : userStoresError
 
   useEffect(() => {
     // Reset error state
@@ -83,7 +100,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }
 
   // Map stores to simple format
-  const storesList: Store[] = stores?.map(s => ({ id: s.id, name: s.name })) || []
+  const storesList: Store[] = stores?.map(s => ({
+    id: s.id,
+    name: s.name,
+    slug: 'slug' in s ? s.slug : undefined
+  })) || []
 
   return (
     <StoreContext.Provider
@@ -93,6 +114,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         stores: storesList,
         isLoading,
         error,
+        isSuperAdmin,
         setStoreId: handleSetStoreId
       }}
     >
