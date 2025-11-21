@@ -55,6 +55,21 @@ export const adminProcedure = t.procedure.use(({ ctx, next }) => {
   })
 })
 
+export const superAdminProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated' })
+  }
+  if (ctx.session.user.role !== 'SUPER_ADMIN') {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Super admin access required' })
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  })
+})
+
 /**
  * Permission-based middleware
  * Usage:
