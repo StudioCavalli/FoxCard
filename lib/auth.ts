@@ -48,6 +48,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          status: user.status,
+          suspendedReason: user.suspendedReason,
         }
       }
     })
@@ -59,17 +61,35 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.status = user.status
+        token.suspendedReason = user.suspendedReason
       }
+
+      // Refresh user status on session update
+      if (trigger === 'update' && token.id) {
+        const freshUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, status: true, suspendedReason: true },
+        })
+        if (freshUser) {
+          token.role = freshUser.role
+          token.status = freshUser.status
+          token.suspendedReason = freshUser.suspendedReason
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.role = token.role
         session.user.id = token.id
+        session.user.status = token.status as string | undefined
+        session.user.suspendedReason = token.suspendedReason as string | undefined
       }
       return session
     }

@@ -10,11 +10,12 @@ export default function SuperAdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    // Full-screen overlay to isolate from parent layout
+    <div className="fixed inset-0 z-[100] flex bg-slate-50 dark:bg-slate-900">
       <SuperAdminSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <SuperAdminHeader />
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>

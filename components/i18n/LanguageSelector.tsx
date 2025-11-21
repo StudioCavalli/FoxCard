@@ -4,6 +4,7 @@ import { useLocale } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useRef, useState, useEffect } from 'react'
 import { locales, localeLabels, localeFlags, type Locale } from '@/lib/i18n/config'
+import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 import { Globe } from 'lucide-react'
 
 export function LanguageSelector() {
@@ -12,6 +13,12 @@ export function LanguageSelector() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { settings } = usePlatformSettings()
+
+  // Filter locales based on platform settings
+  const supportedLocales = locales.filter((loc) =>
+    settings.supportedLanguages.includes(loc)
+  )
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -52,7 +59,7 @@ export function LanguageSelector() {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-theme-surface border border-theme-border rounded-lg shadow-xl overflow-hidden z-50">
-          {locales.map((loc) => (
+          {supportedLocales.map((loc) => (
             <button
               key={loc}
               onClick={() => switchLocale(loc)}

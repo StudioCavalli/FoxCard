@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { trpc } from '@/lib/trpc/client'
-import { Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Mail, Lock, User, ArrowLeft, AlertCircle, XCircle, Loader2 } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -16,6 +16,30 @@ export default function RegisterPage() {
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [registrationDisabled, setRegistrationDisabled] = useState(false)
+  const [platformName, setPlatformName] = useState('FoxCard')
+  const [checkingSettings, setCheckingSettings] = useState(true)
+
+  // Check if registration is allowed
+  useEffect(() => {
+    async function checkSettings() {
+      try {
+        const response = await fetch('/api/platform/settings')
+        if (response.ok) {
+          const settings = await response.json()
+          setRegistrationDisabled(!settings.allowRegistration)
+          if (settings.platformName) {
+            setPlatformName(settings.platformName)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching platform settings:', error)
+      } finally {
+        setCheckingSettings(false)
+      }
+    }
+    checkSettings()
+  }, [])
 
   const registerMutation = trpc.user.register.useMutation({
     onSuccess: () => {
@@ -41,12 +65,12 @@ export default function RegisterPage() {
     }
 
     if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setError('Le mot de passe doit contenir au moins 6 caracteres')
       return
     }
 
     if (formData.name.length < 2) {
-      setError('Le nom doit contenir au moins 2 caractères')
+      setError('Le nom doit contenir au moins 2 caracteres')
       return
     }
 
@@ -55,6 +79,65 @@ export default function RegisterPage() {
       email: formData.email,
       password: formData.password,
     })
+  }
+
+  // Loading state
+  if (checkingSettings) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-theme-background via-theme-surface/30 to-theme-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
+      </div>
+    )
+  }
+
+  // Registration disabled
+  if (registrationDisabled) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-theme-background via-theme-surface/30 to-theme-background flex items-center justify-center px-4 py-16">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-theme-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-theme-accent/10 rounded-full blur-3xl" />
+
+        <div className="relative w-full max-w-md">
+          <Link
+            href="/"
+            className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-6 transition-colors duration-200"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
+            Retour a l'accueil
+          </Link>
+
+          <div className="p-8 bg-theme-surface/80 backdrop-blur-xl border border-theme-border rounded-2xl shadow-2xl shadow-theme-primary/10 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-theme-text mb-4">
+              Inscriptions desactivees
+            </h1>
+
+            <p className="text-theme-text-secondary mb-6">
+              Les inscriptions sont temporairement desactivees sur {platformName}.
+              Veuillez reessayer plus tard ou contacter le support.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/auth/login"
+                className="w-full px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold transition-colors"
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/"
+                className="w-full px-6 py-3 border border-theme-border hover:bg-theme-surface text-theme-text rounded-xl font-semibold transition-colors"
+              >
+                Retour a l'accueil
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -70,7 +153,7 @@ export default function RegisterPage() {
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-6 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
-          Retour à l'accueil
+          Retour a l'accueil
         </Link>
 
         <div className="p-8 bg-theme-surface/80 backdrop-blur-xl border border-theme-border rounded-2xl shadow-2xl shadow-theme-primary/10">
@@ -86,9 +169,9 @@ export default function RegisterPage() {
               className="text-3xl md:text-4xl font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Créer un compte
+              Creer un compte
             </h1>
-            <p className="text-theme-text-secondary text-lg">Rejoignez FoxCard gratuitement</p>
+            <p className="text-theme-text-secondary text-lg">Rejoignez {platformName} gratuitement</p>
           </div>
 
           {/* Success Message */}
@@ -100,7 +183,7 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <p className="text-sm text-green-600 font-medium">
-                Compte créé avec succès ! Redirection vers la page de connexion...
+                Compte cree avec succes ! Redirection vers la page de connexion...
               </p>
             </div>
           )}
@@ -180,7 +263,7 @@ export default function RegisterPage() {
                 />
               </div>
               <p className="text-xs text-theme-text-muted mt-1.5">
-                Minimum 6 caractères
+                Minimum 6 caracteres
               </p>
             </div>
 
@@ -219,7 +302,7 @@ export default function RegisterPage() {
                 </Link>{' '}
                 et la{' '}
                 <Link href="/privacy" className="text-theme-primary hover:text-theme-primary/80 font-medium transition-colors">
-                  politique de confidentialité
+                  politique de confidentialite
                 </Link>
               </label>
             </div>
@@ -236,17 +319,17 @@ export default function RegisterPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Création en cours...
+                  Creation en cours...
                 </>
               ) : success ? (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
-                  Compte créé !
+                  Compte cree !
                 </>
               ) : (
-                'Créer mon compte'
+                'Creer mon compte'
               )}
             </button>
           </form>
@@ -261,7 +344,7 @@ export default function RegisterPage() {
           {/* Login Link */}
           <div className="text-center">
             <p className="text-theme-text-secondary">
-              Vous avez déjà un compte ?{' '}
+              Vous avez deja un compte ?{' '}
               <Link
                 href="/auth/login"
                 className="text-theme-primary hover:text-theme-primary/80 font-semibold transition-colors"

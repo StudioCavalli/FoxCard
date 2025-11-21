@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { router, superAdminProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
+import { invalidateSettingsCache } from '@/lib/platform/settings'
+import { invalidateAllPlatformPermissionsCache } from '@/lib/platform/permissions'
 
 export const superadminRouter = router({
   // Get all stores with pagination
@@ -1150,4 +1152,606 @@ export const superadminRouter = router({
         appeal: updatedAppeal,
       }
     }),
+
+  // ============================================
+  // ACTIVITY / AUDIT LOG MANAGEMENT
+  // ============================================
+
+  // Get all activity logs across platform
+  getAllActivity: superAdminProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+        search: z.string().optional(),
+        action: z.string().optional(), // Filter by action type
+        entity: z.string().optional(), // Filter by entity type
+        userId: z.string().optional(), // Filter by user
+        storeId: z.string().optional(), // Filter by store
+        startDate: z.string().optional(), // Filter by date range
+        endDate: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+
+      // Search in action, entity, or metadata
+      if (input.search) {
+        where.OR = [
+          { action: { contains: input.search, mode: 'insensitive' } },
+          { entity: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      // Filter by action type
+      if (input.action) {
+        where.action = { contains: input.action, mode: 'insensitive' }
+      }
+
+      // Filter by entity type
+      if (input.entity) {
+        where.entity = input.entity
+      }
+
+      // Filter by user
+      if (input.userId) {
+        where.userId = input.userId
+      }
+
+      // Filter by store
+      if (input.storeId) {
+        where.storeId = input.storeId
+      }
+
+      // Filter by date range
+      if (input.startDate || input.endDate) {
+        where.createdAt = {}
+        if (input.startDate) {
+          where.createdAt.gte = new Date(input.startDate)
+        }
+        if (input.endDate) {
+          where.createdAt.lte = new Date(input.endDate)
+        }
+      }
+
+      const [activities, total, entityCounts, recentActions] = await Promise.all([
+        ctx.prisma.auditLog.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+            store: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.auditLog.count({ where }),
+        // Get counts by entity type
+        ctx.prisma.auditLog.groupBy({
+          by: ['entity'],
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+        // Get most recent action types
+        ctx.prisma.auditLog.groupBy({
+          by: ['action'],
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 20,
+        }),
+      ])
+
+      return {
+        activities,
+        total,
+        hasMore: input.offset + input.limit < total,
+        entityCounts: entityCounts.map((e) => ({
+          entity: e.entity,
+          count: e._count.id,
+        })),
+        actionCounts: recentActions.map((a) => ({
+          action: a.action,
+          count: a._count.id,
+        })),
+      }
+    }),
+
+  // Get activity stats
+  getActivityStats: superAdminProcedure.query(async ({ ctx }) => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+    const [totalActivities, todayCount, weekCount, monthCount] = await Promise.all([
+      ctx.prisma.auditLog.count(),
+      ctx.prisma.auditLog.count({ where: { createdAt: { gte: today } } }),
+      ctx.prisma.auditLog.count({ where: { createdAt: { gte: thisWeek } } }),
+      ctx.prisma.auditLog.count({ where: { createdAt: { gte: thisMonth } } }),
+    ])
+
+    return {
+      total: totalActivities,
+      today: todayCount,
+      thisWeek: weekCount,
+      thisMonth: monthCount,
+    }
+  }),
+
+  // ============================================
+  // PLATFORM SETTINGS
+  // ============================================
+
+  // Get platform settings
+  getSettings: superAdminProcedure.query(async ({ ctx }) => {
+    let settings = await ctx.prisma.platformSettings.findFirst()
+
+    // Create default settings if none exist
+    if (!settings) {
+      settings = await ctx.prisma.platformSettings.create({
+        data: {},
+      })
+    }
+
+    return settings
+  }),
+
+  // Update platform settings
+  updateSettings: superAdminProcedure
+    .input(
+      z.object({
+        platformName: z.string().optional(),
+        platformUrl: z.string().optional(),
+        supportEmail: z.string().email().optional(),
+        maxStoresPerUser: z.number().min(1).optional(),
+        maintenanceMode: z.boolean().optional(),
+        maintenanceMessage: z.string().optional(),
+        defaultCurrency: z.string().optional(),
+        defaultLanguage: z.string().optional(),
+        supportedCurrencies: z.array(z.string()).optional(),
+        supportedLanguages: z.array(z.string()).optional(),
+        allowRegistration: z.boolean().optional(),
+        requireEmailVerification: z.boolean().optional(),
+        sessionTimeout: z.number().min(5).optional(),
+        stripeEnabled: z.boolean().optional(),
+        paypalEnabled: z.boolean().optional(),
+        bankTransferEnabled: z.boolean().optional(),
+        smtpHost: z.string().optional(),
+        smtpPort: z.number().optional(),
+        smtpUser: z.string().optional(),
+        smtpPassword: z.string().optional(),
+        smtpFromEmail: z.string().optional(),
+        smtpFromName: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      let settings = await ctx.prisma.platformSettings.findFirst()
+
+      if (!settings) {
+        settings = await ctx.prisma.platformSettings.create({
+          data: {
+            ...input,
+            updatedBy: ctx.session.user.id,
+          },
+        })
+      } else {
+        settings = await ctx.prisma.platformSettings.update({
+          where: { id: settings.id },
+          data: {
+            ...input,
+            updatedBy: ctx.session.user.id,
+          },
+        })
+      }
+
+      // Invalidate settings cache so changes take effect immediately
+      invalidateSettingsCache()
+
+      return {
+        success: true,
+        message: 'Parametres mis a jour',
+        settings,
+      }
+    }),
+
+  // ============================================
+  // PLATFORM ROLES
+  // ============================================
+
+  // Get all platform roles
+  getPlatformRoles: superAdminProcedure.query(async ({ ctx }) => {
+    const roles = await ctx.prisma.platformRole.findMany({
+      include: {
+        _count: {
+          select: { users: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    return roles.map((role) => ({
+      ...role,
+      usersCount: role._count.users,
+    }))
+  }),
+
+  // Create platform role
+  createPlatformRole: superAdminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        permissions: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if role name exists
+      const existing = await ctx.prisma.platformRole.findUnique({
+        where: { name: input.name },
+      })
+
+      if (existing) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Un role avec ce nom existe deja',
+        })
+      }
+
+      const role = await ctx.prisma.platformRole.create({
+        data: input,
+      })
+
+      return {
+        success: true,
+        message: 'Role cree avec succes',
+        role,
+      }
+    }),
+
+  // Update platform role
+  updatePlatformRole: superAdminProcedure
+    .input(
+      z.object({
+        roleId: z.string(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        permissions: z.array(z.string()).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { roleId, ...data } = input
+
+      const role = await ctx.prisma.platformRole.findUnique({
+        where: { id: roleId },
+      })
+
+      if (!role) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Role non trouve' })
+      }
+
+      if (role.isSystem && data.name && data.name !== role.name) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Impossible de renommer un role systeme',
+        })
+      }
+
+      // Check name uniqueness
+      if (data.name && data.name !== role.name) {
+        const existing = await ctx.prisma.platformRole.findUnique({
+          where: { name: data.name },
+        })
+        if (existing) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Un role avec ce nom existe deja',
+          })
+        }
+      }
+
+      const updatedRole = await ctx.prisma.platformRole.update({
+        where: { id: roleId },
+        data,
+      })
+
+      // Invalidate permissions cache so changes take effect immediately
+      invalidateAllPlatformPermissionsCache()
+
+      return {
+        success: true,
+        message: 'Role mis a jour',
+        role: updatedRole,
+      }
+    }),
+
+  // Delete platform role
+  deletePlatformRole: superAdminProcedure
+    .input(z.object({ roleId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const role = await ctx.prisma.platformRole.findUnique({
+        where: { id: input.roleId },
+        include: { _count: { select: { users: true } } },
+      })
+
+      if (!role) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Role non trouve' })
+      }
+
+      if (role.isSystem) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Impossible de supprimer un role systeme',
+        })
+      }
+
+      if (role._count.users > 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Ce role est assigne a ${role._count.users} utilisateur(s). Retirez-les d'abord.`,
+        })
+      }
+
+      await ctx.prisma.platformRole.delete({
+        where: { id: input.roleId },
+      })
+
+      // Invalidate permissions cache so changes take effect immediately
+      invalidateAllPlatformPermissionsCache()
+
+      return {
+        success: true,
+        message: 'Role supprime',
+      }
+    }),
+
+  // ============================================
+  // SUPPORT TICKETS
+  // ============================================
+
+  // Get all support tickets
+  getAllTickets: superAdminProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+        search: z.string().optional(),
+        status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED', 'all']).default('all'),
+        priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT', 'all']).default('all'),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+
+      if (input.search) {
+        where.OR = [
+          { subject: { contains: input.search, mode: 'insensitive' } },
+          { ticketNumber: { contains: input.search, mode: 'insensitive' } },
+          { user: { email: { contains: input.search, mode: 'insensitive' } } },
+        ]
+      }
+
+      if (input.status !== 'all') {
+        where.status = input.status
+      }
+
+      if (input.priority !== 'all') {
+        where.priority = input.priority
+      }
+
+      const [tickets, total, statusCounts] = await Promise.all([
+        ctx.prisma.supportTicket.findMany({
+          where,
+          include: {
+            user: {
+              select: { id: true, name: true, email: true },
+            },
+            messages: {
+              select: { id: true },
+            },
+          },
+          orderBy: { updatedAt: 'desc' },
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.supportTicket.count({ where }),
+        Promise.all([
+          ctx.prisma.supportTicket.count({ where: { status: 'OPEN' } }),
+          ctx.prisma.supportTicket.count({ where: { status: 'IN_PROGRESS' } }),
+          ctx.prisma.supportTicket.count({ where: { status: 'WAITING_CUSTOMER' } }),
+          ctx.prisma.supportTicket.count({ where: { status: 'RESOLVED' } }),
+          ctx.prisma.supportTicket.count({ where: { status: 'CLOSED' } }),
+        ]),
+      ])
+
+      return {
+        tickets: tickets.map((t) => ({
+          ...t,
+          messagesCount: t.messages.length,
+        })),
+        total,
+        statusCounts: {
+          open: statusCounts[0],
+          inProgress: statusCounts[1],
+          waitingCustomer: statusCounts[2],
+          resolved: statusCounts[3],
+          closed: statusCounts[4],
+        },
+      }
+    }),
+
+  // Get single ticket with messages
+  getTicket: superAdminProcedure
+    .input(z.object({ ticketId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const ticket = await ctx.prisma.supportTicket.findUnique({
+        where: { id: input.ticketId },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+          messages: {
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      })
+
+      if (!ticket) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Ticket non trouve' })
+      }
+
+      // Get store info if storeId exists
+      let store = null
+      if (ticket.storeId) {
+        store = await ctx.prisma.store.findUnique({
+          where: { id: ticket.storeId },
+          select: { id: true, name: true, slug: true },
+        })
+      }
+
+      return { ...ticket, store }
+    }),
+
+  // Update ticket status
+  updateTicketStatus: superAdminProcedure
+    .input(
+      z.object({
+        ticketId: z.string(),
+        status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED']),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const ticket = await ctx.prisma.supportTicket.findUnique({
+        where: { id: input.ticketId },
+      })
+
+      if (!ticket) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Ticket non trouve' })
+      }
+
+      const data: any = { status: input.status }
+
+      if (input.status === 'RESOLVED' && !ticket.resolvedAt) {
+        data.resolvedAt = new Date()
+      }
+      if (input.status === 'CLOSED' && !ticket.closedAt) {
+        data.closedAt = new Date()
+      }
+
+      const updatedTicket = await ctx.prisma.supportTicket.update({
+        where: { id: input.ticketId },
+        data,
+      })
+
+      return {
+        success: true,
+        message: 'Statut mis a jour',
+        ticket: updatedTicket,
+      }
+    }),
+
+  // Add message to ticket
+  addTicketMessage: superAdminProcedure
+    .input(
+      z.object({
+        ticketId: z.string(),
+        content: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const ticket = await ctx.prisma.supportTicket.findUnique({
+        where: { id: input.ticketId },
+      })
+
+      if (!ticket) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Ticket non trouve' })
+      }
+
+      if (ticket.status === 'CLOSED') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Impossible de repondre a un ticket ferme',
+        })
+      }
+
+      const message = await ctx.prisma.ticketMessage.create({
+        data: {
+          ticketId: input.ticketId,
+          authorId: ctx.session.user.id,
+          authorName: ctx.session.user.name || 'Support FoxCard',
+          isAdmin: true,
+          content: input.content,
+        },
+      })
+
+      // Update ticket status to IN_PROGRESS if it was OPEN
+      if (ticket.status === 'OPEN') {
+        await ctx.prisma.supportTicket.update({
+          where: { id: input.ticketId },
+          data: { status: 'WAITING_CUSTOMER' },
+        })
+      }
+
+      return {
+        success: true,
+        message: 'Message envoye',
+        ticketMessage: message,
+      }
+    }),
+
+  // Get support stats
+  getSupportStats: superAdminProcedure.query(async ({ ctx }) => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    const [total, openCount, urgentCount, todayCount, weekCount, avgResponseTime] = await Promise.all([
+      ctx.prisma.supportTicket.count(),
+      ctx.prisma.supportTicket.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } } }),
+      ctx.prisma.supportTicket.count({ where: { priority: 'URGENT', status: { not: 'CLOSED' } } }),
+      ctx.prisma.supportTicket.count({ where: { createdAt: { gte: today } } }),
+      ctx.prisma.supportTicket.count({ where: { createdAt: { gte: thisWeek } } }),
+      // Average resolution time (simplified)
+      ctx.prisma.supportTicket.findMany({
+        where: { resolvedAt: { not: null } },
+        select: { createdAt: true, resolvedAt: true },
+        take: 100,
+        orderBy: { resolvedAt: 'desc' },
+      }),
+    ])
+
+    // Calculate average resolution time in hours
+    let avgHours = 0
+    if (avgResponseTime.length > 0) {
+      const totalHours = avgResponseTime.reduce((sum, t) => {
+        if (t.resolvedAt) {
+          return sum + (t.resolvedAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60)
+        }
+        return sum
+      }, 0)
+      avgHours = Math.round(totalHours / avgResponseTime.length)
+    }
+
+    return {
+      total,
+      open: openCount,
+      urgent: urgentCount,
+      today: todayCount,
+      thisWeek: weekCount,
+      avgResolutionHours: avgHours,
+    }
+  }),
 })

@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Mail, Lock, ArrowLeft, AlertCircle, AlertTriangle } from 'lucide-react'
+import { usePlatformName, usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const platformName = usePlatformName()
+  const { settings } = usePlatformSettings()
   const from = searchParams.get('from') || '/account'
   const registered = searchParams.get('registered') === 'true'
 
@@ -18,6 +21,12 @@ function LoginForm() {
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false)
+
+  // Check maintenance mode
+  useEffect(() => {
+    setIsMaintenanceMode(settings.maintenanceMode)
+  }, [settings.maintenanceMode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,8 +84,19 @@ function LoginForm() {
             >
               Connexion
             </h1>
-            <p className="text-theme-text-secondary text-lg">Accédez à votre compte FoxCard</p>
+            <p className="text-theme-text-secondary text-lg">Accédez à votre compte {platformName}</p>
           </div>
+
+          {/* Maintenance Mode Warning */}
+          {isMaintenanceMode && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-700">
+                <p className="font-semibold mb-1">Site en maintenance</p>
+                <p>Seuls les administrateurs peuvent se connecter pendant la maintenance.</p>
+              </div>
+            </div>
+          )}
 
           {/* Success Message */}
           {registered && (

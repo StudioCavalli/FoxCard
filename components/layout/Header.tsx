@@ -10,11 +10,13 @@ import { SearchBar } from './SearchBar'
 import { LanguageSelector } from '../i18n/LanguageSelector'
 import { CurrencySelector } from '../currency/CurrencySelector'
 import { PublicStoreSelector } from './PublicStoreSelector'
+import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
 import { useEffect, useState } from 'react'
 
 export function Header() {
   const { isMobileMenuOpen, toggleMobileMenu } = useUIStore()
   const { data: session } = useSession()
+  const platformName = usePlatformName()
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('')
 
@@ -63,7 +65,7 @@ export function Header() {
                 }`}
                 style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
               >
-                FoxCard
+                {platformName}
               </span>
             </Link>
 
@@ -205,7 +207,7 @@ export function Header() {
 
               {/* Footer */}
               <div className="pt-6 border-t border-theme-border text-sm text-theme-text-muted">
-                <p>© 2024 FoxCard</p>
+                <p>© {new Date().getFullYear()} {platformName}</p>
                 <p className="mt-1">E-commerce open source</p>
               </div>
             </div>

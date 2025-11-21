@@ -12,7 +12,7 @@ import {
 import { DollarSign } from 'lucide-react'
 
 export function CurrencySelector() {
-  const { currency, setCurrency } = useCurrency()
+  const { currency, setCurrency, supportedCurrencies } = useCurrency()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -47,7 +47,7 @@ export function CurrencySelector() {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-theme-surface border border-theme-border rounded-lg shadow-xl overflow-hidden z-50">
-          {currencies.map((curr) => (
+          {supportedCurrencies.map((curr) => (
             <button
               key={curr}
               onClick={() => {
