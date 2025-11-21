@@ -112,6 +112,11 @@ model User {
   password      String    // Hashed password
   role          UserRole  @default(USER)
 
+  // User status (for admin control)
+  status        UserStatus @default(ACTIVE)
+  suspendedAt   DateTime?  // When the user was suspended
+  suspendedReason String?  // Reason for suspension
+
   stores        Store[]
   accounts      Account[]
   sessions      Session[]
@@ -380,6 +385,12 @@ enum UserRole {
   USER
   ADMIN
   SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE      // User can log in and use the platform
+  SUSPENDED   // Temporarily suspended, cannot log in
+  BANNED      // Permanently banned
 }
 
 enum StoreStatus {
