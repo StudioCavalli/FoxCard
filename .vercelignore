@@ -1,0 +1,9 @@
+# Exclude development/AI assistance files from deployment
+CLAUDE.md
+.claude/
+
+# Exclude other dev files
+todo/
+*.log
+.env.local
+.env.development
