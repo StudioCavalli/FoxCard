@@ -181,3 +181,72 @@ export const requireAnyPermission = (permissions: string[]) =>
       },
     })
   })
+
+/**
+ * Store access middleware
+ * Verifies that the user has access to the specified store either as:
+ * 1. The store owner (ownerId)
+ * 2. A store member with ACTIVE status (via StoreUser)
+ *
+ * The input must contain a storeId field for verification
+ */
+export const requireStoreAccess = protectedProcedure.use(async ({ ctx, next, input }) => {
+  const storeId = (input as any)?.storeId
+
+  if (!storeId) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'storeId is required for store access check',
+    })
+  }
+
+  // Check if store exists
+  const store = await ctx.prisma.store.findUnique({
+    where: { id: storeId },
+    select: { id: true, ownerId: true },
+  })
+
+  if (!store) {
+    throw new TRPCError({
+      code: 'NOT_FOUND',
+      message: 'Store not found',
+    })
+  }
+
+  // Check if user is the store owner
+  if (store.ownerId === ctx.session.user.id) {
+    return next({
+      ctx: {
+        ...ctx,
+        storeId,
+        isStoreOwner: true,
+      },
+    })
+  }
+
+  // Check if user has access via StoreUser with ACTIVE status
+  const storeUser = await ctx.prisma.storeUser.findUnique({
+    where: {
+      userId_storeId: {
+        userId: ctx.session.user.id,
+        storeId: storeId,
+      },
+    },
+    select: { status: true },
+  })
+
+  if (!storeUser || storeUser.status !== 'ACTIVE') {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'You do not have access to this store',
+    })
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      storeId,
+      isStoreOwner: false,
+    },
+  })
+})

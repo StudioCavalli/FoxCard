@@ -38,7 +38,7 @@ export default function StorePage() {
 
     updateStoreMutation.mutate(
       {
-        id: storeId!,
+        storeId: storeId!,
         ...formData,
       },
       {

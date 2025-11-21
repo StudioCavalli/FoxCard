@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
+import { router, publicProcedure, protectedProcedure, requireStoreAccess } from '../trpc'
 
 export const storeRouter = router({
   getBySlug: publicProcedure
@@ -19,7 +19,8 @@ export const storeRouter = router({
     }),
 
   getUserStores: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.store.findMany({
+    // Get stores owned by the user
+    const ownedStores = await ctx.prisma.store.findMany({
       where: {
         ownerId: ctx.session.user.id,
       },
@@ -27,6 +28,35 @@ export const storeRouter = router({
         createdAt: 'desc',
       },
     })
+
+    // Get stores where user is a member with ACTIVE status
+    const memberStores = await ctx.prisma.storeUser.findMany({
+      where: {
+        userId: ctx.session.user.id,
+        status: 'ACTIVE',
+      },
+      include: {
+        store: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    // Combine and deduplicate stores
+    const allStores = [
+      ...ownedStores,
+      ...memberStores.map(su => su.store),
+    ]
+
+    // Remove duplicates based on store ID
+    const uniqueStores = allStores.filter((store, index, self) =>
+      index === self.findIndex(s => s.id === store.id)
+    )
+
+    return uniqueStores.sort((a, b) =>
+      b.createdAt.getTime() - a.createdAt.getTime()
+    )
   }),
 
   create: protectedProcedure
@@ -48,10 +78,10 @@ export const storeRouter = router({
       })
     }),
 
-  update: adminProcedure
+  update: requireStoreAccess
     .input(
       z.object({
-        id: z.string(),
+        storeId: z.string(),
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
         description: z.string().optional(),
@@ -62,18 +92,23 @@ export const storeRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input
+      const { storeId, ...data } = input
       return ctx.prisma.store.update({
-        where: { id },
+        where: { id: storeId },
         data,
       })
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+  delete: requireStoreAccess
+    .input(z.object({ storeId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Only store owner can delete the store
+      if (!(ctx as any).isStoreOwner) {
+        throw new Error('Only the store owner can delete the store')
+      }
+
       return ctx.prisma.store.delete({
-        where: { id: input.id },
+        where: { id: input.storeId },
       })
     }),
 })
