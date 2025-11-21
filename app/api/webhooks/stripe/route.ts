@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         }
 
         // Update order status
-        await prisma.order.update({
+        const updatedOrder = await prisma.order.update({
           where: { id: orderId },
           data: {
             status: 'PROCESSING',
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
             if (order) {
               // Check if customer exists
-              const existingCustomer = await prisma.customer.findUnique({
+              let customer = await prisma.customer.findUnique({
                 where: {
                   storeId_email: {
                     storeId: order.storeId,
@@ -77,10 +77,10 @@ export async function POST(req: Request) {
                 },
               })
 
-              if (!existingCustomer) {
+              if (!customer) {
                 // Create new customer
                 const [firstName, ...lastNameParts] = (name || '').split(' ')
-                await prisma.customer.create({
+                customer = await prisma.customer.create({
                   data: {
                     storeId: order.storeId,
                     email: email,
@@ -88,6 +88,55 @@ export async function POST(req: Request) {
                     lastName: lastNameParts.join(' ') || undefined,
                   },
                 })
+              }
+
+              // Award loyalty points if customer exists
+              if (customer && order.total > 0) {
+                try {
+                  const pointsToAward = Math.floor(order.total)
+                  const expiresAt = new Date()
+                  expiresAt.setMonth(expiresAt.getMonth() + 12)
+
+                  // Check if points already awarded
+                  const existingTransaction = await prisma.loyaltyTransaction.findFirst({
+                    where: {
+                      orderId: order.id,
+                      type: 'EARN',
+                    },
+                  })
+
+                  if (!existingTransaction) {
+                    await prisma.$transaction([
+                      prisma.customer.update({
+                        where: { id: customer.id },
+                        data: {
+                          loyaltyPoints: {
+                            increment: pointsToAward,
+                          },
+                          totalPointsEarned: {
+                            increment: pointsToAward,
+                          },
+                        },
+                      }),
+                      prisma.loyaltyTransaction.create({
+                        data: {
+                          customerId: customer.id,
+                          storeId: order.storeId,
+                          type: 'EARN',
+                          points: pointsToAward,
+                          orderId: order.id,
+                          description: `Achat confirmé`,
+                          expiresAt,
+                        },
+                      }),
+                    ])
+
+                    console.log(`[Loyalty] Awarded ${pointsToAward} points to ${customer.email} for order ${orderId}`)
+                  }
+                } catch (loyaltyError) {
+                  console.error('[Loyalty] Error awarding points:', loyaltyError)
+                  // Don't fail the webhook if loyalty fails
+                }
               }
             }
           }

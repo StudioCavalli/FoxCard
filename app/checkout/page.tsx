@@ -6,7 +6,7 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check } from 'lucide-react'
+import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift } from 'lucide-react'
 import Link from 'next/link'
 
 const STEPS = [
@@ -31,6 +31,14 @@ export default function CheckoutPage() {
     discountAmount: number
   } | null>(null)
   const [discountError, setDiscountError] = useState('')
+
+  // Loyalty points
+  const [loyaltyPointsUsed, setLoyaltyPointsUsed] = useState(0)
+  const [loyaltyPointsInput, setLoyaltyPointsInput] = useState('')
+  const [loyaltyError, setLoyaltyError] = useState('')
+
+  // TODO: Get actual customer ID from session
+  const DEMO_CUSTOMER_ID = '000000000000000000000001'
 
   const [formData, setFormData] = useState({
     email: '',
@@ -129,6 +137,13 @@ export default function CheckoutPage() {
   const incrementUsage = trpc.discount.incrementUsage.useMutation()
   const trackAbandonedCart = trpc.abandonedCart.track.useMutation()
 
+  // Loyalty queries
+  const { data: loyaltyData } = trpc.loyalty.getBalance.useQuery(
+    { customerId: DEMO_CUSTOMER_ID },
+    { enabled: !!formData.email } // Only fetch if user has entered email
+  )
+  const redeemPoints = trpc.loyalty.redeemPoints.useMutation()
+
   // Track abandoned cart when user enters email and has items
   useEffect(() => {
     if (formData.email && formData.email.includes('@') && items.length > 0) {
@@ -173,12 +188,42 @@ export default function CheckoutPage() {
     setDiscountError('')
   }
 
+  const handleApplyLoyaltyPoints = () => {
+    const pointsToUse = parseInt(loyaltyPointsInput)
+
+    if (!pointsToUse || pointsToUse <= 0) {
+      setLoyaltyError('Veuillez entrer un nombre de points valide')
+      return
+    }
+
+    if (!loyaltyData || pointsToUse > loyaltyData.points) {
+      setLoyaltyError(`Vous n'avez que ${loyaltyData?.points || 0} points disponibles`)
+      return
+    }
+
+    // Calculate max points that can be used (can't exceed order total)
+    const maxPointsUsable = Math.floor(subtotal + shipping - discount)
+    if (pointsToUse > maxPointsUsable) {
+      setLoyaltyError(`Vous ne pouvez utiliser que ${maxPointsUsable} points maximum pour cette commande`)
+      return
+    }
+
+    setLoyaltyPointsUsed(pointsToUse)
+    setLoyaltyPointsInput('')
+    setLoyaltyError('')
+  }
+
+  const handleRemoveLoyaltyPoints = () => {
+    setLoyaltyPointsUsed(0)
+    setLoyaltyError('')
+  }
+
   const handleSubmit = async () => {
     setError('')
     setIsProcessing(true)
 
     try {
-      await createOrder.mutateAsync({
+      const order = await createOrder.mutateAsync({
         storeId: '000000000000000000000001',
         customerEmail: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`,
@@ -202,6 +247,20 @@ export default function CheckoutPage() {
 
       if (appliedDiscount) {
         incrementUsage.mutate({ id: appliedDiscount.id })
+      }
+
+      // Redeem loyalty points if used
+      if (loyaltyPointsUsed > 0 && order) {
+        try {
+          await redeemPoints.mutateAsync({
+            customerId: DEMO_CUSTOMER_ID,
+            points: loyaltyPointsUsed,
+            orderId: order.id,
+          })
+        } catch (loyaltyErr) {
+          console.error('Failed to redeem loyalty points:', loyaltyErr)
+          // Don't fail the order if loyalty redemption fails
+        }
       }
     } catch (err) {
       console.error('Order creation failed:', err)
@@ -254,7 +313,8 @@ export default function CheckoutPage() {
 
   const shipping = shippingCalculation?.rate?.price || 0
   const discount = appliedDiscount?.discountAmount || 0
-  const total = Math.max(0, subtotal + shipping - discount)
+  const loyaltyDiscount = loyaltyPointsUsed // 1 point = 1€
+  const total = Math.max(0, subtotal + shipping - discount - loyaltyDiscount)
 
   if (items.length === 0) {
     return (
@@ -824,6 +884,84 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Loyalty Points */}
+                {loyaltyData && loyaltyData.points > 0 && !loyaltyPointsUsed && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label
+                        className="block text-sm font-semibold text-theme-text"
+                        style={{ fontFamily: 'var(--theme-font-heading)' }}
+                      >
+                        Points de fidélité
+                      </label>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-full">
+                        <Star className="w-3.5 h-3.5" fill="currentColor" />
+                        <span className="text-xs font-bold">{loyaltyData.points} pts</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max={Math.min(loyaltyData.points, Math.floor(subtotal + shipping - discount))}
+                        value={loyaltyPointsInput}
+                        onChange={(e) => {
+                          setLoyaltyPointsInput(e.target.value)
+                          setLoyaltyError('')
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleApplyLoyaltyPoints()
+                          }
+                        }}
+                        placeholder={`Max: ${Math.min(loyaltyData.points, Math.floor(subtotal + shipping - discount))}`}
+                        className="flex-1 px-3 py-2.5 rounded-lg bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyLoyaltyPoints}
+                        disabled={!loyaltyPointsInput || parseInt(loyaltyPointsInput) <= 0}
+                        className="px-4 py-2.5 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-lg font-semibold text-sm transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        Utiliser
+                      </button>
+                    </div>
+                    {loyaltyError && (
+                      <p className="text-xs text-red-600 font-medium">{loyaltyError}</p>
+                    )}
+                    <p className="text-xs text-theme-text-muted">
+                      1 point = 1€ de réduction • Niveau {loyaltyData.tier}
+                    </p>
+                  </div>
+                )}
+
+                {/* Applied Loyalty Points */}
+                {loyaltyPointsUsed > 0 && (
+                  <div className="p-3 bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-orange-600" />
+                        <div>
+                          <p className="text-sm font-bold text-orange-900">
+                            {loyaltyPointsUsed} points utilisés
+                          </p>
+                          <p className="text-xs text-orange-700">
+                            -{formatPrice(loyaltyPointsUsed)} de réduction
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveLoyaltyPoints}
+                        className="p-1.5 text-orange-600 hover:text-orange-800 hover:bg-orange-500/20 rounded-lg transition-all duration-200"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Order Summary */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-theme-text-secondary">
@@ -851,6 +989,12 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-green-600">
                       <span className="font-medium">Réduction</span>
                       <span className="font-bold">-{formatPrice(discount)}</span>
+                    </div>
+                  )}
+                  {loyaltyPointsUsed > 0 && (
+                    <div className="flex justify-between text-orange-600">
+                      <span className="font-medium">Points de fidélité</span>
+                      <span className="font-bold">-{formatPrice(loyaltyDiscount)}</span>
                     </div>
                   )}
                   {shippingCalculation?.rate?.name && shippingCalculation?.shippingZone && (
