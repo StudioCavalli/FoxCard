@@ -33,6 +33,7 @@ import { loyaltyRouter } from './loyalty'
 import { campaignRouter } from './campaign'
 import { automationRouter } from './automation'
 import { taxRouter } from './tax'
+import { crsdpayRouter } from './crsdpay'
 import { commerceTypeRouter } from './commerce-type'
 import { paymentGatewayRouter } from './payment-gateway'
 
@@ -71,6 +72,7 @@ export const appRouter = router({
   campaign: campaignRouter,
   automation: automationRouter,
   tax: taxRouter,
+  crsdpay: crsdpayRouter,
   commerceType: commerceTypeRouter,
   paymentGateway: paymentGatewayRouter,
 })

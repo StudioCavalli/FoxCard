@@ -1,5 +1,4 @@
 import { getRequestConfig } from 'next-intl/server'
-import { notFound } from 'next/navigation'
 
 // Supported locales
 export const locales = ['fr', 'en'] as const
@@ -20,14 +19,24 @@ export const localeFlags: Record<Locale, string> = {
   en: '🇬🇧',
 }
 
-export default getRequestConfig(async ({ locale }) => {
-  // Validate that the incoming `locale` parameter is valid
-  if (!locale || !locales.includes(locale as Locale)) {
-    notFound()
+export default getRequestConfig(async ({ requestLocale }) => {
+  // Get locale from request (Next.js 16+ pattern)
+  let locale = await requestLocale
+
+  // Fallback to default if not provided
+  if (!locale) {
+    locale = defaultLocale
   }
 
+  // Validate and fallback
+  if (!locales.includes(locale as Locale)) {
+    locale = defaultLocale
+  }
+
+  const messages = (await import(`../../messages/${locale}.json`)).default
+
   return {
-    locale: locale as string,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    locale,
+    messages,
   }
 })
