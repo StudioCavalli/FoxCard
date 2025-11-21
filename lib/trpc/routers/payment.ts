@@ -406,6 +406,10 @@ export const paymentRouter = router({
           })
         }
 
+        // Set expiration date (7 days from now)
+        const expiresAt = new Date()
+        expiresAt.setDate(expiresAt.getDate() + 7)
+
         // Update order payment method to bank transfer
         await ctx.prisma.order.update({
           where: { id: order.id },
@@ -413,6 +417,7 @@ export const paymentRouter = router({
             paymentMethod: 'bank_transfer',
             paymentStatus: 'PENDING',
             status: 'PENDING',
+            paymentExpiresAt: expiresAt,
           },
         })
 
@@ -426,7 +431,21 @@ export const paymentRouter = router({
           reference: order.orderNumber,
           amount: order.total,
           currency: 'EUR',
+          expiresAt: expiresAt.toISOString(),
         }
+
+        // TODO: Send email with bank transfer instructions
+        // await emailService.sendEmail({
+        //   to: order.customerEmail,
+        //   subject: `Instructions de paiement - Commande #${order.orderNumber}`,
+        //   template: 'bank-transfer-instructions',
+        //   data: {
+        //     orderNumber: order.orderNumber,
+        //     bankDetails,
+        //     expiresAt,
+        //   },
+        // })
+        console.log(`[Bank Transfer] Would send instructions to ${order.customerEmail} for order ${order.orderNumber}`)
 
         return bankDetails
       } catch (error: any) {
@@ -539,6 +558,176 @@ export const paymentRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get payment stats',
+          cause: error,
+        })
+      }
+    }),
+
+  // Admin: Refund payment
+  refundPayment: adminProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        amount: z.number().positive().optional(), // Optional for partial refund
+        reason: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get the order
+        const order = await ctx.prisma.order.findUnique({
+          where: { id: input.orderId },
+        })
+
+        if (!order) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Order not found',
+          })
+        }
+
+        if (order.paymentStatus !== 'PAID') {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Order is not paid, cannot refund',
+          })
+        }
+
+        if (!order.paymentIntentId) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'No payment intent ID found for this order',
+          })
+        }
+
+        const isPartialRefund = input.amount !== undefined && input.amount < order.total
+        const refundAmount = input.amount || order.total
+
+        let refundId: string | undefined
+
+        // Process refund based on payment method
+        if (order.paymentMethod === 'card' && stripe) {
+          // Stripe refund
+          const paymentIntent = await stripe.paymentIntents.retrieve(order.paymentIntentId, {
+            expand: ['charges'],
+          })
+
+          const charges = (paymentIntent as any).charges?.data
+          if (!charges || charges.length === 0) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'No charge found for this payment',
+            })
+          }
+
+          const chargeId = charges[0].id
+
+          const refund = await stripe.refunds.create({
+            charge: chargeId,
+            amount: input.amount ? formatAmountForStripe(input.amount) : undefined,
+            reason: input.reason as any,
+            metadata: {
+              orderId: order.id,
+              orderNumber: order.orderNumber,
+            },
+          })
+
+          refundId = refund.id
+        } else if (order.paymentMethod === 'paypal' && paypalClient) {
+          // PayPal refund
+          const ordersController = new OrdersController(paypalClient)
+
+          // Get the PayPal order to find the capture ID
+          const { result: paypalOrder } = await ordersController.getOrder({
+            id: order.paymentIntentId,
+          })
+
+          const captureId = paypalOrder.purchaseUnits?.[0]?.payments?.captures?.[0]?.id
+
+          if (!captureId) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'No capture found for this PayPal order',
+            })
+          }
+
+          // Refund the capture via API call
+          const refundBody: any = {}
+          if (input.amount) {
+            refundBody.amount = {
+              value: formatAmountForPayPal(input.amount),
+              currency_code: PAYPAL_CURRENCY,
+            }
+          }
+          if (input.reason) {
+            refundBody.note_to_payer = input.reason
+          }
+
+          // Make direct API call for refund (SDK might not have captures controller)
+          const accessToken = await (paypalClient as any).clientCredentialsAuthManager.fetchToken()
+          const apiUrl = process.env.PAYPAL_MODE === 'live'
+            ? 'https://api-m.paypal.com'
+            : 'https://api-m.sandbox.paypal.com'
+
+          const refundResponse = await fetch(`${apiUrl}/v2/payments/captures/${captureId}/refund`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(refundBody),
+          })
+
+          if (!refundResponse.ok) {
+            throw new Error(`PayPal refund failed: ${await refundResponse.text()}`)
+          }
+
+          const refund = await refundResponse.json()
+          refundId = refund.id
+        } else {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Cannot refund ${order.paymentMethod} payments automatically. Please process manually.`,
+          })
+        }
+
+        // Update order status
+        const updateData: any = {
+          paymentStatus: isPartialRefund ? 'PARTIALLY_REFUNDED' : 'REFUNDED',
+          notes: `${order.notes || ''}\n\nRemboursement ${
+            isPartialRefund ? 'partiel' : 'total'
+          } de ${refundAmount}€${input.reason ? ` - Raison: ${input.reason}` : ''} - Ref: ${refundId}`.trim(),
+        }
+
+        // Only update status if full refund
+        if (!isPartialRefund) {
+          updateData.status = 'REFUNDED'
+        }
+
+        await ctx.prisma.order.update({
+          where: { id: order.id },
+          data: updateData,
+        })
+
+        // TODO: Send refund confirmation email to customer
+
+        return {
+          success: true,
+          refundId,
+          amount: refundAmount,
+          isPartial: isPartialRefund,
+        }
+      } catch (error: any) {
+        console.error('Error processing refund:', error)
+
+        // Check if it's already a TRPCError
+        if (error.code) {
+          throw error
+        }
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message || 'Failed to process refund',
           cause: error,
         })
       }

@@ -1,19 +1,61 @@
 'use client'
 
+import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { Eye } from 'lucide-react'
+import { Eye, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminOrdersPage() {
   const DEMO_STORE_ID = '000000000000000000000001'
 
-  const { data, isLoading } = trpc.order.getAll.useQuery({
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [refundAmount, setRefundAmount] = useState('')
+  const [refundReason, setRefundReason] = useState('')
+
+  const { data, isLoading, refetch } = trpc.order.getAll.useQuery({
     storeId: DEMO_STORE_ID,
     limit: 50,
   })
+
+  const refundMutation = trpc.payment.refundPayment.useMutation({
+    onSuccess: () => {
+      alert('Remboursement effectué avec succès')
+      setRefundModalOpen(false)
+      setSelectedOrder(null)
+      setRefundAmount('')
+      setRefundReason('')
+      refetch()
+    },
+    onError: (error) => {
+      alert(`Erreur: ${error.message}`)
+    },
+  })
+
+  const handleRefund = () => {
+    if (!selectedOrder) return
+
+    const isPartial = refundAmount && parseFloat(refundAmount) > 0
+    const amount = isPartial ? parseFloat(refundAmount) : undefined
+
+    if (isPartial && amount! > selectedOrder.total) {
+      alert('Le montant du remboursement ne peut pas dépasser le total de la commande')
+      return
+    }
+
+    if (confirm(
+      `Confirmez-vous le remboursement ${isPartial ? 'partiel de ' + amount + '€' : 'total de ' + selectedOrder.total + '€'} pour la commande #${selectedOrder.orderNumber} ?`
+    )) {
+      refundMutation.mutate({
+        orderId: selectedOrder.id,
+        amount,
+        reason: refundReason || undefined,
+      })
+    }
+  }
 
   const orders = data?.orders || []
 
@@ -96,6 +138,19 @@ export default function AdminOrdersPage() {
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
+                        {order.paymentStatus === 'PAID' && (order.paymentMethod === 'card' || order.paymentMethod === 'paypal') && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setRefundModalOpen(true)
+                            }}
+                            title="Rembourser"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -105,6 +160,104 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </Card>
+
+      {/* Refund Modal */}
+      {refundModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <div className="p-6 space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                Rembourser la commande #{selectedOrder.orderNumber}
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Type de remboursement
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="refundType"
+                        checked={!refundAmount}
+                        onChange={() => setRefundAmount('')}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-900">
+                        Remboursement total ({formatPrice(selectedOrder.total)})
+                      </span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="refundType"
+                        checked={!!refundAmount}
+                        onChange={() => setRefundAmount('0')}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-900">Remboursement partiel</span>
+                    </label>
+                  </div>
+                </div>
+
+                {refundAmount !== '' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Montant du remboursement (€)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={selectedOrder.total}
+                      step="0.01"
+                      value={refundAmount}
+                      onChange={(e) => setRefundAmount(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none"
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Raison du remboursement (optionnel)
+                  </label>
+                  <textarea
+                    value={refundReason}
+                    onChange={(e) => setRefundReason(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none resize-none"
+                    placeholder="Ex: Produit défectueux, demande du client..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <Button
+                  onClick={() => {
+                    setRefundModalOpen(false)
+                    setSelectedOrder(null)
+                    setRefundAmount('')
+                    setRefundReason('')
+                  }}
+                  variant="ghost"
+                  className="flex-1"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleRefund}
+                  disabled={refundMutation.isPending}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                >
+                  {refundMutation.isPending ? 'Traitement...' : 'Rembourser'}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

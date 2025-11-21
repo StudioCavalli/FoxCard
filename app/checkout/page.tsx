@@ -127,6 +127,27 @@ export default function CheckoutPage() {
   )
 
   const incrementUsage = trpc.discount.incrementUsage.useMutation()
+  const trackAbandonedCart = trpc.abandonedCart.track.useMutation()
+
+  // Track abandoned cart when user enters email and has items
+  useEffect(() => {
+    if (formData.email && formData.email.includes('@') && items.length > 0) {
+      const timer = setTimeout(() => {
+        // Track after 5 minutes of inactivity on checkout page
+        trackAbandonedCart.mutate({
+          storeId: '000000000000000000000001',
+          email: formData.email,
+          customerName: formData.firstName && formData.lastName
+            ? `${formData.firstName} ${formData.lastName}`
+            : undefined,
+          phone: formData.phone || undefined,
+          cartData: { items },
+        })
+      }, 5 * 60 * 1000) // 5 minutes
+
+      return () => clearTimeout(timer)
+    }
+  }, [formData.email, formData.firstName, formData.lastName, formData.phone, items])
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) {
