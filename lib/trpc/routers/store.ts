@@ -1,13 +1,134 @@
 import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, requireStoreAccess } from '../trpc'
+import { TRPCError } from '@trpc/server'
 
 export const storeRouter = router({
+  // Get store directory with pagination and filters
+  getDirectory: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(20),
+        offset: z.number().min(0).default(0),
+        search: z.string().optional(),
+        sortBy: z.enum(['name', 'newest', 'rating', 'products']).default('name'),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {
+        showOnDirectory: true, // Only show stores that opted in
+      }
+
+      // Search by name or description
+      if (input.search) {
+        where.OR = [
+          { name: { contains: input.search, mode: 'insensitive' } },
+          { description: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      // Determine sort order
+      let orderBy: any = { name: 'asc' }
+      switch (input.sortBy) {
+        case 'newest':
+          orderBy = { createdAt: 'desc' }
+          break
+        case 'rating':
+          orderBy = { rating: 'desc' }
+          break
+        case 'products':
+          // For products count, we'll sort in memory after fetching
+          orderBy = { name: 'asc' }
+          break
+      }
+
+      const [stores, total] = await Promise.all([
+        ctx.prisma.store.findMany({
+          where,
+          include: {
+            _count: {
+              select: {
+                products: { where: { status: 'ACTIVE' } },
+              },
+            },
+          },
+          orderBy,
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.store.count({ where }),
+      ])
+
+      // Sort by products count if requested
+      let sortedStores = stores
+      if (input.sortBy === 'products') {
+        sortedStores = stores.sort((a, b) => b._count.products - a._count.products)
+      }
+
+      return {
+        stores: sortedStores.map((store) => ({
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          description: store.description,
+          logo: store.logo,
+          tagline: store.tagline,
+          rating: store.rating,
+          reviewsCount: store.reviewsCount,
+          productsCount: store._count.products,
+        })),
+        total,
+        hasMore: input.offset + input.limit < total,
+      }
+    }),
+
+  // Get store by slug with full details for public storefront
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.store.findUnique({
+      const store = await ctx.prisma.store.findUnique({
         where: { slug: input.slug },
+        include: {
+          owner: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          categories: {
+            where: {
+              products: {
+                some: {
+                  status: 'ACTIVE',
+                },
+              },
+            },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              description: true,
+              image: true,
+              _count: {
+                select: {
+                  products: { where: { status: 'ACTIVE' } },
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              products: { where: { status: 'ACTIVE' } },
+              orders: { where: { status: 'COMPLETED' } },
+            },
+          },
+        },
       })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
+      }
+
+      return store
     }),
 
   getById: publicProcedure
@@ -126,6 +247,176 @@ export const storeRouter = router({
 
       return ctx.prisma.store.delete({
         where: { id: input.storeId },
+      })
+    }),
+
+  // Get featured products for a store
+  getFeaturedProducts: publicProcedure
+    .input(z.object({ storeId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+        select: { featuredProductIds: true },
+      })
+
+      if (!store || !store.featuredProductIds || store.featuredProductIds.length === 0) {
+        return []
+      }
+
+      // Get featured products in the order specified
+      const products = await ctx.prisma.product.findMany({
+        where: {
+          id: { in: store.featuredProductIds },
+          status: 'ACTIVE',
+        },
+        include: {
+          category: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // Sort by featured order
+      return store.featuredProductIds
+        .map(id => products.find(p => p.id === id))
+        .filter(Boolean)
+    }),
+
+  // Get public stats for a store
+  getStats: publicProcedure
+    .input(z.object({ storeId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [productsCount, completedOrdersCount] = await Promise.all([
+        ctx.prisma.product.count({
+          where: {
+            storeId: input.storeId,
+            status: 'ACTIVE',
+          },
+        }),
+        ctx.prisma.order.count({
+          where: {
+            storeId: input.storeId,
+            status: 'COMPLETED',
+          },
+        }),
+      ])
+
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+        select: {
+          rating: true,
+          reviewsCount: true,
+        },
+      })
+
+      return {
+        productsCount,
+        ordersCount: completedOrdersCount,
+        rating: store?.rating || 0,
+        reviewsCount: store?.reviewsCount || 0,
+      }
+    }),
+
+  // Send contact message to merchant
+  sendContactMessage: publicProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        name: z.string().min(1),
+        email: z.string().email(),
+        subject: z.string().min(1),
+        message: z.string().min(10),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+        include: {
+          owner: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
+      }
+
+      // Create email log for contact form
+      await ctx.prisma.emailLog.create({
+        data: {
+          storeId: input.storeId,
+          templateName: 'contact_form',
+          to: store.publicEmail || store.owner.email,
+          from: input.email,
+          subject: `Contact Form: ${input.subject}`,
+          htmlBody: `
+            <h2>New Contact Form Message</h2>
+            <p><strong>From:</strong> ${input.name} (${input.email})</p>
+            <p><strong>Subject:</strong> ${input.subject}</p>
+            <p><strong>Message:</strong></p>
+            <p>${input.message.replace(/\n/g, '<br>')}</p>
+          `,
+          textBody: `
+            New Contact Form Message
+            From: ${input.name} (${input.email})
+            Subject: ${input.subject}
+            Message: ${input.message}
+          `,
+          status: 'PENDING',
+        },
+      })
+
+      return {
+        success: true,
+        message: 'Your message has been sent successfully. The merchant will contact you soon.',
+      }
+    }),
+
+  // Update storefront content (admin only)
+  updateStorefront: requireStoreAccess
+    .input(
+      z.object({
+        storeId: z.string(),
+        tagline: z.string().optional(),
+        bannerImage: z.string().optional(),
+        story: z.string().optional(),
+        foundedAt: z.date().optional(),
+        socialLinks: z
+          .object({
+            facebook: z.string().optional(),
+            instagram: z.string().optional(),
+            twitter: z.string().optional(),
+            linkedin: z.string().optional(),
+            youtube: z.string().optional(),
+          })
+          .optional(),
+        publicEmail: z.string().email().optional(),
+        publicPhone: z.string().optional(),
+        publicAddress: z
+          .object({
+            street: z.string().optional(),
+            city: z.string().optional(),
+            postalCode: z.string().optional(),
+            country: z.string().optional(),
+          })
+          .optional(),
+        featuredProductIds: z.array(z.string()).max(6).optional(),
+        showOnDirectory: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { storeId, ...data } = input
+
+      return ctx.prisma.store.update({
+        where: { id: storeId },
+        data,
       })
     }),
 })
