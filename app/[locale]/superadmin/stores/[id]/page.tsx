@@ -195,7 +195,7 @@ export default function StoreDetailsPage({
             <div>
               <p className="font-semibold text-rose-900 dark:text-rose-300">Boutique suspendue</p>
               <p className="text-sm text-rose-700 dark:text-rose-400 mt-1">
-                {store.suspensionReason || 'Aucune raison spécifiée'}
+                {store.suspendedReason || 'Aucune raison spécifiée'}
               </p>
               <p className="text-xs text-rose-600 dark:text-rose-500 mt-2">
                 Suspendue le {new Date(store.suspendedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}

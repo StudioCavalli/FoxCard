@@ -187,7 +187,7 @@ export default function SuperAdminUsersPage() {
                     {/* Avatar */}
                     <div className="flex-shrink-0">
                       {user.image ? (
-                        <img src={user.image} alt={user.name} className="w-12 h-12 rounded-xl object-cover" />
+                        <img src={user.image} alt={user.name || 'User'} className="w-12 h-12 rounded-xl object-cover" />
                       ) : (
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
                           {(user.name || user.email).charAt(0).toUpperCase()}

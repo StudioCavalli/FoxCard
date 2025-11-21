@@ -178,7 +178,7 @@ export default function SuperAdminOrdersPage() {
           {/* Search */}
           <AdminSearchInput
             value={search}
-            onChange={setSearch}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par numéro de commande, email ou nom client..."
           />
         </div>

@@ -6,13 +6,13 @@ Alternative 100% gratuite et open source à Shopify, construite avec les technol
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-success)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14+-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16+-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
 
 ## 🚀 Stack Technique
 
 ### Frontend
-- **Next.js 14+** avec App Router
+- **Next.js 16+** avec App Router
 - **React 18+** avec TypeScript
 - **Tailwind CSS** pour le styling
 - **Zustand** pour le state management

@@ -108,9 +108,9 @@ export default function SuperAdminSupportPage() {
     addMessage.mutate({ ticketId: selectedTicketId, content: newMessage })
   }
 
-  const handleUpdateStatus = async (newStatus: string) => {
+  const handleUpdateStatus = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!selectedTicketId) return
-    updateStatus.mutate({ ticketId: selectedTicketId, status: newStatus as TicketStatus })
+    updateStatus.mutate({ ticketId: selectedTicketId, status: e.target.value as TicketStatus })
   }
 
   const formatDate = (date: Date | string) => {
@@ -443,8 +443,8 @@ export default function SuperAdminSupportPage() {
             <div className="flex-1">
               <AdminSearchInput
                 value={search}
-                onChange={(v) => {
-                  setSearch(v)
+                onChange={(e) => {
+                  setSearch(e.target.value)
                   setPage(0)
                 }}
                 placeholder="Rechercher par sujet, numéro ou email..."
@@ -453,8 +453,8 @@ export default function SuperAdminSupportPage() {
             <div className="sm:w-48">
               <AdminSelect
                 value={priorityFilter}
-                onChange={(v) => {
-                  setPriorityFilter(v)
+                onChange={(e) => {
+                  setPriorityFilter(e.target.value)
                   setPage(0)
                 }}
                 options={priorityOptions}

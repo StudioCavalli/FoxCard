@@ -1023,6 +1023,7 @@ export const superadminRouter = router({
                 id: true,
                 name: true,
                 slug: true,
+                logo: true,
                 suspendedAt: true,
                 suspendedReason: true,
               },
@@ -1754,4 +1755,112 @@ export const superadminRouter = router({
       avgResolutionHours: avgHours,
     }
   }),
+
+  // ============================================
+  // STORE SUSPENSION MANAGEMENT
+  // ============================================
+
+  // Suspend a store
+  suspendStore: superAdminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+        reason: z.string().min(1, 'La raison est requise'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Boutique non trouvée' })
+      }
+
+      if (store.status === 'SUSPENDED') {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'La boutique est déjà suspendue' })
+      }
+
+      const updatedStore = await ctx.prisma.store.update({
+        where: { id: input.storeId },
+        data: {
+          status: 'SUSPENDED',
+          suspendedAt: new Date(),
+          suspendedReason: input.reason,
+        },
+      })
+
+      // Log the suspension
+      await ctx.prisma.auditLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          storeId: input.storeId,
+          action: 'STORE_SUSPENDED',
+          entity: 'Store',
+          entityId: input.storeId,
+          metadata: {
+            reason: input.reason,
+            performedBy: ctx.session.user.email,
+          },
+        },
+      })
+
+      return {
+        success: true,
+        message: 'Boutique suspendue avec succès',
+        store: updatedStore,
+      }
+    }),
+
+  // Unsuspend/reactivate a store
+  unsuspendStore: superAdminProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: input.storeId },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Boutique non trouvée' })
+      }
+
+      if (store.status !== 'SUSPENDED') {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'La boutique n\'est pas suspendue' })
+      }
+
+      const updatedStore = await ctx.prisma.store.update({
+        where: { id: input.storeId },
+        data: {
+          status: 'ACTIVE',
+          suspendedAt: null,
+          suspendedReason: null,
+        },
+      })
+
+      // Log the reactivation
+      await ctx.prisma.auditLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          storeId: input.storeId,
+          action: 'STORE_REACTIVATED',
+          entity: 'Store',
+          entityId: input.storeId,
+          metadata: {
+            previousStatus: 'SUSPENDED',
+            newStatus: 'ACTIVE',
+            performedBy: ctx.session.user.email,
+          },
+        },
+      })
+
+      return {
+        success: true,
+        message: 'Boutique réactivée avec succès',
+        store: updatedStore,
+      }
+    }),
 })
