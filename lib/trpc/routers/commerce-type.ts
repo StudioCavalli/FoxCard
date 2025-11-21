@@ -18,7 +18,18 @@ const CommerceTypeEnum = z.enum([
   'ELECTRONICS',
   'BEAUTY',
   'HOME',
-  'SPORTS'
+  'SPORTS',
+  'TOYS',
+  'AUTOMOTIVE',
+  'BOOKS',
+  'PETS',
+  'DIGITAL',
+  'SERVICES',
+  'SEASONAL',
+  'RESTAURANT',
+  'HOTEL',
+  'TRAVEL',
+  'RECREATION'
 ])
 
 export const commerceTypeRouter = router({

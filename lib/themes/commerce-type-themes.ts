@@ -312,6 +312,380 @@ export const commerceTypeThemes: Record<CommerceType, ThemeConfig> = {
       cardStyle: 'bordered',
       headerStyle: 'modern'
     }
+  },
+
+  TOYS: {
+    colors: {
+      primary: '#F59E0B',      // Amber/Yellow
+      primaryLight: '#FCD34D',
+      primaryDark: '#D97706',
+      secondary: '#EC4899',    // Pink
+      accent: '#8B5CF6',       // Purple
+      background: '#FFFBEB',
+      surface: '#FEF3C7',
+      text: '#78350F',
+      textMuted: '#92400E'
+    },
+    fonts: {
+      heading: 'Fredoka One, cursive',
+      body: 'Nunito, sans-serif'
+    },
+    borderRadius: {
+      small: '0.5rem',
+      medium: '1rem',
+      large: '1.5rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 2px 4px 0 rgb(245 158 11 / 0.1)',
+      medium: '0 4px 8px -1px rgb(245 158 11 / 0.15)',
+      large: '0 8px 16px -2px rgb(245 158 11 / 0.2)'
+    },
+    ui: {
+      buttonStyle: 'pill',
+      cardStyle: 'elevated',
+      headerStyle: 'modern'
+    }
+  },
+
+  AUTOMOTIVE: {
+    colors: {
+      primary: '#475569',      // Slate
+      primaryLight: '#94A3B8',
+      primaryDark: '#334155',
+      secondary: '#EF4444',    // Red accent
+      accent: '#F59E0B',       // Warning yellow
+      background: '#F8FAFC',
+      surface: '#F1F5F9',
+      text: '#0F172A',
+      textMuted: '#64748B'
+    },
+    fonts: {
+      heading: 'Barlow Condensed, sans-serif',
+      body: 'Roboto, sans-serif'
+    },
+    borderRadius: {
+      small: '0.25rem',
+      medium: '0.375rem',
+      large: '0.5rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 2px 0 rgb(15 23 42 / 0.05)',
+      medium: '0 4px 6px -1px rgb(15 23 42 / 0.1)',
+      large: '0 10px 15px -3px rgb(15 23 42 / 0.1)'
+    },
+    ui: {
+      buttonStyle: 'rounded',
+      cardStyle: 'bordered',
+      headerStyle: 'modern'
+    }
+  },
+
+  BOOKS: {
+    colors: {
+      primary: '#92400E',      // Amber/Brown
+      primaryLight: '#D97706',
+      primaryDark: '#78350F',
+      secondary: '#065F46',    // Emerald dark
+      accent: '#DC2626',       // Red accent
+      background: '#FFFBF0',   // Cream
+      surface: '#FEF3E2',
+      text: '#422006',
+      textMuted: '#78350F'
+    },
+    fonts: {
+      heading: 'Playfair Display, serif',
+      body: 'Merriweather, serif'
+    },
+    borderRadius: {
+      small: '0.125rem',
+      medium: '0.25rem',
+      large: '0.375rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 2px 0 rgb(66 32 6 / 0.05)',
+      medium: '0 2px 4px 0 rgb(66 32 6 / 0.1)',
+      large: '0 4px 8px 0 rgb(66 32 6 / 0.15)'
+    },
+    ui: {
+      buttonStyle: 'rounded',
+      cardStyle: 'minimal',
+      headerStyle: 'classic'
+    }
+  },
+
+  PETS: {
+    colors: {
+      primary: '#F97316',      // Orange
+      primaryLight: '#FDBA74',
+      primaryDark: '#EA580C',
+      secondary: '#22C55E',    // Green
+      accent: '#EAB308',       // Yellow
+      background: '#FFF7ED',
+      surface: '#FFEDD5',
+      text: '#7C2D12',
+      textMuted: '#C2410C'
+    },
+    fonts: {
+      heading: 'Baloo 2, cursive',
+      body: 'Poppins, sans-serif'
+    },
+    borderRadius: {
+      small: '0.5rem',
+      medium: '0.75rem',
+      large: '1rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 3px 0 rgb(249 115 22 / 0.1)',
+      medium: '0 4px 6px -1px rgb(249 115 22 / 0.1)',
+      large: '0 10px 15px -3px rgb(249 115 22 / 0.1)'
+    },
+    ui: {
+      buttonStyle: 'pill',
+      cardStyle: 'elevated',
+      headerStyle: 'modern'
+    }
+  },
+
+  DIGITAL: {
+    colors: {
+      primary: '#8B5CF6',      // Violet
+      primaryLight: '#C4B5FD',
+      primaryDark: '#7C3AED',
+      secondary: '#06B6D4',    // Cyan
+      accent: '#F472B6',       // Pink
+      background: '#0F0F1A',   // Dark blue
+      surface: '#1A1A2E',
+      text: '#F5F5F5',
+      textMuted: '#A3A3A3'
+    },
+    fonts: {
+      heading: 'Space Grotesk, sans-serif',
+      body: 'Inter, sans-serif'
+    },
+    borderRadius: {
+      small: '0.25rem',
+      medium: '0.5rem',
+      large: '0.75rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 0 10px rgb(139 92 246 / 0.1)',
+      medium: '0 0 20px rgb(139 92 246 / 0.15)',
+      large: '0 0 30px rgb(139 92 246 / 0.2)'
+    },
+    ui: {
+      buttonStyle: 'rounded',
+      cardStyle: 'bordered',
+      headerStyle: 'modern'
+    }
+  },
+
+  SERVICES: {
+    colors: {
+      primary: '#0EA5E9',      // Sky blue
+      primaryLight: '#7DD3FC',
+      primaryDark: '#0284C7',
+      secondary: '#6366F1',    // Indigo
+      accent: '#22C55E',       // Green (success)
+      background: '#F0F9FF',
+      surface: '#E0F2FE',
+      text: '#0C4A6E',
+      textMuted: '#0369A1'
+    },
+    fonts: {
+      heading: 'Poppins, sans-serif',
+      body: 'Open Sans, sans-serif'
+    },
+    borderRadius: {
+      small: '0.375rem',
+      medium: '0.5rem',
+      large: '0.75rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 2px 0 rgb(14 165 233 / 0.05)',
+      medium: '0 4px 6px -1px rgb(14 165 233 / 0.1)',
+      large: '0 10px 15px -3px rgb(14 165 233 / 0.1)'
+    },
+    ui: {
+      buttonStyle: 'rounded',
+      cardStyle: 'elevated',
+      headerStyle: 'modern'
+    }
+  },
+
+  SEASONAL: {
+    colors: {
+      primary: '#DC2626',      // Red (festive)
+      primaryLight: '#FCA5A5',
+      primaryDark: '#B91C1C',
+      secondary: '#16A34A',    // Green
+      accent: '#FBBF24',       // Gold
+      background: '#FEF2F2',
+      surface: '#FEE2E2',
+      text: '#7F1D1D',
+      textMuted: '#991B1B'
+    },
+    fonts: {
+      heading: 'Lobster, cursive',
+      body: 'Nunito Sans, sans-serif'
+    },
+    borderRadius: {
+      small: '0.5rem',
+      medium: '0.75rem',
+      large: '1rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 3px 0 rgb(220 38 38 / 0.1)',
+      medium: '0 4px 6px -1px rgb(220 38 38 / 0.1)',
+      large: '0 10px 15px -3px rgb(220 38 38 / 0.15)'
+    },
+    ui: {
+      buttonStyle: 'pill',
+      cardStyle: 'elevated',
+      headerStyle: 'classic'
+    }
+  },
+
+  RESTAURANT: {
+    colors: {
+      primary: '#B91C1C',      // Deep red
+      primaryLight: '#EF4444',
+      primaryDark: '#991B1B',
+      secondary: '#F59E0B',    // Warm amber
+      accent: '#22C55E',       // Fresh green
+      background: '#1C1917',   // Dark warm
+      surface: '#292524',
+      text: '#FAFAF9',
+      textMuted: '#A8A29E'
+    },
+    fonts: {
+      heading: 'Cormorant Garamond, serif',
+      body: 'Lato, sans-serif'
+    },
+    borderRadius: {
+      small: '0.125rem',
+      medium: '0.25rem',
+      large: '0.375rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 2px 0 rgb(0 0 0 / 0.2)',
+      medium: '0 4px 6px -1px rgb(0 0 0 / 0.3)',
+      large: '0 10px 15px -3px rgb(0 0 0 / 0.4)'
+    },
+    ui: {
+      buttonStyle: 'sharp',
+      cardStyle: 'minimal',
+      headerStyle: 'classic'
+    }
+  },
+
+  HOTEL: {
+    colors: {
+      primary: '#0F766E',      // Teal
+      primaryLight: '#2DD4BF',
+      primaryDark: '#115E59',
+      secondary: '#D4AF37',    // Gold
+      accent: '#0EA5E9',       // Sky blue
+      background: '#F0FDFA',
+      surface: '#CCFBF1',
+      text: '#134E4A',
+      textMuted: '#0F766E'
+    },
+    fonts: {
+      heading: 'Libre Baskerville, serif',
+      body: 'Source Sans Pro, sans-serif'
+    },
+    borderRadius: {
+      small: '0.125rem',
+      medium: '0.25rem',
+      large: '0.5rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 2px 0 rgb(15 118 110 / 0.05)',
+      medium: '0 4px 6px -1px rgb(15 118 110 / 0.1)',
+      large: '0 10px 15px -3px rgb(15 118 110 / 0.1)'
+    },
+    ui: {
+      buttonStyle: 'rounded',
+      cardStyle: 'elevated',
+      headerStyle: 'classic'
+    }
+  },
+
+  TRAVEL: {
+    colors: {
+      primary: '#2563EB',      // Blue
+      primaryLight: '#60A5FA',
+      primaryDark: '#1D4ED8',
+      secondary: '#F97316',    // Orange (sunset)
+      accent: '#10B981',       // Emerald
+      background: '#EFF6FF',
+      surface: '#DBEAFE',
+      text: '#1E3A8A',
+      textMuted: '#3B82F6'
+    },
+    fonts: {
+      heading: 'Rubik, sans-serif',
+      body: 'Nunito, sans-serif'
+    },
+    borderRadius: {
+      small: '0.375rem',
+      medium: '0.5rem',
+      large: '0.75rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 3px 0 rgb(37 99 235 / 0.1)',
+      medium: '0 4px 6px -1px rgb(37 99 235 / 0.1)',
+      large: '0 10px 15px -3px rgb(37 99 235 / 0.15)'
+    },
+    ui: {
+      buttonStyle: 'pill',
+      cardStyle: 'elevated',
+      headerStyle: 'modern'
+    }
+  },
+
+  RECREATION: {
+    colors: {
+      primary: '#7C3AED',      // Violet
+      primaryLight: '#A78BFA',
+      primaryDark: '#6D28D9',
+      secondary: '#EC4899',    // Pink
+      accent: '#FBBF24',       // Yellow
+      background: '#FAF5FF',
+      surface: '#F3E8FF',
+      text: '#4C1D95',
+      textMuted: '#7C3AED'
+    },
+    fonts: {
+      heading: 'Righteous, cursive',
+      body: 'Quicksand, sans-serif'
+    },
+    borderRadius: {
+      small: '0.5rem',
+      medium: '0.75rem',
+      large: '1rem',
+      full: '9999px'
+    },
+    shadows: {
+      small: '0 1px 3px 0 rgb(124 58 237 / 0.1)',
+      medium: '0 4px 6px -1px rgb(124 58 237 / 0.15)',
+      large: '0 10px 15px -3px rgb(124 58 237 / 0.2)'
+    },
+    ui: {
+      buttonStyle: 'pill',
+      cardStyle: 'elevated',
+      headerStyle: 'modern'
+    }
   }
 }
 

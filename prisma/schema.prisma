@@ -606,13 +606,24 @@ enum DiscountType {
 // E-commerce type enum
 enum CommerceType {
   GENERAL     // Standard e-commerce
-  FOOD        // Food & Restaurant
+  FOOD        // Food & Grocery
   ALCOHOL     // Wine & Spirits
   FASHION     // Clothing & Accessories
   ELECTRONICS // Electronics & Tech
-  BEAUTY      // Beauty & Cosmetics
-  HOME        // Home & Furniture
-  SPORTS      // Sports & Outdoor
+  BEAUTY      // Health & Beauty
+  HOME        // Home & Garden
+  SPORTS      // Sports & Outdoors
+  TOYS        // Toys & Games
+  AUTOMOTIVE  // Automotive & Tools
+  BOOKS       // Books & Stationery
+  PETS        // Pet Supplies
+  DIGITAL     // Digital Goods
+  SERVICES    // Services & Subscriptions
+  SEASONAL    // Seasonal Products
+  RESTAURANT  // Gastronomy & Restaurants
+  HOTEL       // Hotels & Accommodations
+  TRAVEL      // Travel & Transportation
+  RECREATION  // Recreational Activities
 }
 
 enum WebhookDeliveryStatus {

@@ -1,20 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift } from 'lucide-react'
+import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift, Calendar, Download, Wine } from 'lucide-react'
 import Link from 'next/link'
 import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
+import { analyzeCartForCheckout, type CheckoutFlowConfig } from '@/lib/checkout/checkout-flow'
+import { BookingStep, type BookingData } from '@/components/checkout/BookingStep'
+import { AlcoholCheckoutVerification } from '@/components/alcohol'
+import { type CommerceType } from '@/lib/commerce-types'
 
-const STEPS = [
-  { id: 1, name: 'Contact', icon: Mail },
-  { id: 2, name: 'Livraison', icon: MapPin },
-  { id: 3, name: 'Paiement', icon: CreditCard },
-]
+// Icon mapping for dynamic steps
+const STEP_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  Mail,
+  MapPin,
+  CreditCard,
+  Calendar,
+  Download,
+}
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -23,6 +30,42 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank_transfer'>('card')
+
+  // Booking data for booking-type checkouts
+  const [bookingData, setBookingData] = useState<BookingData>({})
+
+  // Age verification for alcohol products
+  const [alcoholAgeVerified, setAlcoholAgeVerified] = useState(false)
+
+  // Analyze cart for adaptive checkout flow
+  const checkoutFlow = useMemo<CheckoutFlowConfig>(() => {
+    const cartItems = items.map(item => ({
+      productId: item.productId,
+      storeId: item.storeId,
+      commerceType: item.commerceType as CommerceType | undefined,
+      productType: item.productType,
+      attributes: item.attributes,
+    }))
+    return analyzeCartForCheckout(cartItems)
+  }, [items])
+
+  // Build dynamic steps based on checkout flow
+  const STEPS = useMemo(() => {
+    return checkoutFlow.steps.map((step, index) => ({
+      id: index + 1,
+      stepId: step.id,
+      name: step.name,
+      icon: STEP_ICONS[step.icon] || Mail,
+    }))
+  }, [checkoutFlow.steps])
+
+  // Get primary commerce type for booking (first booking item)
+  const primaryBookingCommerceType = useMemo<CommerceType>(() => {
+    const bookingItem = items.find(item =>
+      ['HOTEL', 'TRAVEL', 'RECREATION', 'RESTAURANT', 'SERVICES'].includes(item.commerceType || '')
+    )
+    return (bookingItem?.commerceType as CommerceType) || 'GENERAL'
+  }, [items])
 
   // Platform payment settings
   const [paymentSettings, setPaymentSettings] = useState({
@@ -272,7 +315,9 @@ export default function CheckoutPage() {
     try {
       const result = await createOrder.mutateAsync({
         customerEmail: formData.email,
-        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerName: checkoutFlow.requiresShipping
+          ? `${formData.firstName} ${formData.lastName}`
+          : formData.email.split('@')[0], // Use email prefix for digital/booking only
         items: items.map((item) => ({
           productId: item.productId,
           storeId: item.storeId, // Multi-store support
@@ -280,15 +325,32 @@ export default function CheckoutPage() {
           variantId: item.variantId,
           variantName: item.variantName,
         })),
-        shippingAddress: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          country: formData.country,
-          phone: formData.phone,
-        },
+        // Only include shipping address for physical products
+        ...(checkoutFlow.requiresShipping && {
+          shippingAddress: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            country: formData.country,
+            phone: formData.phone,
+          },
+        }),
+        // Include booking data for reservation-type checkouts
+        ...(checkoutFlow.requiresBooking && {
+          bookingData: {
+            commerceType: primaryBookingCommerceType,
+            checkInDate: bookingData.checkInDate,
+            checkOutDate: bookingData.checkOutDate,
+            selectedDate: bookingData.selectedDate,
+            selectedTime: bookingData.selectedTime,
+            adults: bookingData.adults,
+            children: bookingData.children,
+            roomType: bookingData.roomType,
+            specialRequests: bookingData.specialRequests,
+          },
+        }),
       })
 
       if (appliedDiscount) {
@@ -314,20 +376,46 @@ export default function CheckoutPage() {
   }
 
   const validateStep = (step: number) => {
-    if (step === 1) {
-      return formData.email.trim() !== '' && formData.email.includes('@')
+    const stepConfig = STEPS[step - 1]
+    if (!stepConfig) return true
+
+    switch (stepConfig.stepId) {
+      case 'contact':
+        return formData.email.trim() !== '' && formData.email.includes('@')
+
+      case 'booking':
+        // Validate booking fields based on commerce type
+        if (primaryBookingCommerceType === 'HOTEL') {
+          return !!bookingData.checkInDate && !!bookingData.checkOutDate
+        }
+        if (['RESTAURANT', 'RECREATION', 'SERVICES'].includes(primaryBookingCommerceType)) {
+          return !!bookingData.selectedDate && !!bookingData.selectedTime
+        }
+        if (primaryBookingCommerceType === 'TRAVEL') {
+          return !!bookingData.selectedDate
+        }
+        return true
+
+      case 'shipping':
+        return (
+          formData.firstName.trim() !== '' &&
+          formData.lastName.trim() !== '' &&
+          formData.address.trim() !== '' &&
+          formData.city.trim() !== '' &&
+          formData.postalCode.trim() !== '' &&
+          formData.country.trim() !== ''
+        )
+
+      case 'payment':
+        // If alcohol products, require age verification
+        if (checkoutFlow.requiresAgeVerification && !alcoholAgeVerified) {
+          return false
+        }
+        return true
+
+      default:
+        return true
     }
-    if (step === 2) {
-      return (
-        formData.firstName.trim() !== '' &&
-        formData.lastName.trim() !== '' &&
-        formData.address.trim() !== '' &&
-        formData.city.trim() !== '' &&
-        formData.postalCode.trim() !== '' &&
-        formData.country.trim() !== ''
-      )
-    }
-    return true
   }
 
   const handleNext = () => {
@@ -405,12 +493,32 @@ export default function CheckoutPage() {
       <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
         {/* Header */}
         <div className="mb-10">
-          <h1
-            className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
-            style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
-          >
-            Commande
-          </h1>
+          <div className="flex items-center gap-4 mb-3">
+            <h1
+              className="text-4xl md:text-5xl font-bold text-theme-text"
+              style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+            >
+              Commande
+            </h1>
+            {/* Checkout type badge */}
+            {checkoutFlow.type === 'digital' && (
+              <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm font-semibold flex items-center gap-1.5">
+                <Download className="w-4 h-4" />
+                Produit numérique
+              </span>
+            )}
+            {checkoutFlow.type === 'booking' && (
+              <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm font-semibold flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                Réservation
+              </span>
+            )}
+            {checkoutFlow.type === 'mixed' && (
+              <span className="px-3 py-1 bg-orange-500/10 text-orange-600 rounded-full text-sm font-semibold">
+                Commande mixte
+              </span>
+            )}
+          </div>
           <p className="text-xl text-theme-text-secondary">
             Complétez vos informations pour finaliser votre achat
           </p>
@@ -474,8 +582,8 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Step 1: Contact Information */}
-            {currentStep === 1 && (
+            {/* Dynamic Step Rendering based on stepId */}
+            {STEPS[currentStep - 1]?.stepId === 'contact' && (
               <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-theme-primary/10 rounded-xl flex items-center justify-center">
@@ -529,8 +637,20 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Step 2: Shipping Address */}
-            {currentStep === 2 && (
+            {/* Booking Step (for hotels, restaurants, services, etc.) */}
+            {STEPS[currentStep - 1]?.stepId === 'booking' && (
+              <BookingStep
+                commerceType={primaryBookingCommerceType}
+                bookingData={bookingData}
+                onChange={setBookingData}
+                productName={items.find(item =>
+                  ['HOTEL', 'TRAVEL', 'RECREATION', 'RESTAURANT', 'SERVICES'].includes(item.commerceType || '')
+                )?.name}
+              />
+            )}
+
+            {/* Shipping Step */}
+            {STEPS[currentStep - 1]?.stepId === 'shipping' && (
               <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
@@ -652,12 +772,23 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Step 3: Payment Method */}
-            {currentStep === 3 && (
-              <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-green-600" />
+            {/* Payment Step */}
+            {STEPS[currentStep - 1]?.stepId === 'payment' && (
+              <>
+                {/* Age verification for alcohol products */}
+                {checkoutFlow.requiresAgeVerification && (
+                  <AlcoholCheckoutVerification
+                    country={formData.country}
+                    isVerified={alcoholAgeVerified}
+                    onVerificationChange={setAlcoholAgeVerified}
+                    className="mb-6"
+                  />
+                )}
+
+                <div className="p-6 bg-theme-surface border border-theme-border rounded-2xl animate-in fade-in duration-300">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-green-600" />
                   </div>
                   <h2
                     className="text-2xl font-bold text-theme-text"
@@ -789,7 +920,8 @@ export default function CheckoutPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+                </div>
+              </>
             )}
 
             {/* Navigation Buttons */}

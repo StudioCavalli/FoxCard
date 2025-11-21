@@ -377,6 +377,11 @@ export const superadminRouter = router({
         description: z.string().optional(),
         ownerEmail: z.string().email(),
         status: z.enum(['ACTIVE', 'PENDING']).default('ACTIVE'),
+        commerceType: z.enum([
+          'GENERAL', 'FOOD', 'ALCOHOL', 'FASHION', 'ELECTRONICS', 'BEAUTY', 'HOME', 'SPORTS',
+          'TOYS', 'AUTOMOTIVE', 'BOOKS', 'PETS', 'DIGITAL', 'SERVICES', 'SEASONAL',
+          'RESTAURANT', 'HOTEL', 'TRAVEL', 'RECREATION'
+        ]).default('GENERAL'),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -412,6 +417,7 @@ export const superadminRouter = router({
           description: input.description,
           ownerId: owner.id,
           status: input.status,
+          commerceType: input.commerceType,
         },
         include: {
           owner: {

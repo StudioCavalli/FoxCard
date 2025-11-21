@@ -31,8 +31,10 @@ import {
   ExternalLink,
   MoreVertical,
   Eye,
-  Power
+  Power,
+  ShoppingBag,
 } from 'lucide-react'
+import { commerceTypeConfigs, getAllCommerceTypes, type CommerceType } from '@/lib/commerce-types'
 
 type StoreStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'CLOSED' | 'all'
 
@@ -50,14 +52,14 @@ export default function SuperAdminStoresPage() {
   const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<any>(null)
   const [suspendReason, setSuspendReason] = useState('')
-  const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '', ownerEmail: '' })
+  const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' as CommerceType })
 
   const { data, isLoading, refetch } = trpc.superadmin.getAllStores.useQuery({
     limit: 50, offset: 0, search: search || undefined, status: statusFilter,
   })
 
   const createStore = trpc.superadmin.createStore.useMutation({
-    onSuccess: () => { setIsCreateModalOpen(false); setCreateForm({ name: '', slug: '', description: '', ownerEmail: '' }); refetch() },
+    onSuccess: () => { setIsCreateModalOpen(false); setCreateForm({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' }); refetch() },
   })
 
   const updateStoreStatus = trpc.superadmin.updateStoreStatus.useMutation({
@@ -71,8 +73,10 @@ export default function SuperAdminStoresPage() {
 
   const handleCreateStore = async (e: React.FormEvent) => {
     e.preventDefault()
-    await createStore.mutateAsync({ ...createForm, status: 'ACTIVE' })
+    await createStore.mutateAsync({ ...createForm, status: 'ACTIVE', commerceType: createForm.commerceType })
   }
+
+  const commerceTypes = getAllCommerceTypes()
 
   const handleStatusChange = async (storeId: string, newStatus: 'ACTIVE' | 'SUSPENDED' | 'CLOSED', reason?: string) => {
     await updateStoreStatus.mutateAsync({ storeId, status: newStatus, reason })
@@ -273,6 +277,35 @@ export default function SuperAdminStoresPage() {
           <AdminInput label="Nom de la boutique" value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value, slug: generateSlug(e.target.value) })} placeholder="Ma Boutique" required />
           <AdminInput label="Slug (URL)" value={createForm.slug} onChange={(e) => setCreateForm({ ...createForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} placeholder="ma-boutique" hint="foxcard.io/votre-slug" required />
           <AdminTextarea label="Description" value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} placeholder="Description..." rows={3} />
+          <AdminSelect
+            label="Type de commerce"
+            value={createForm.commerceType}
+            onChange={(e) => setCreateForm({ ...createForm, commerceType: e.target.value as CommerceType })}
+            options={commerceTypes.map((type) => ({
+              value: type,
+              label: `${commerceTypeConfigs[type].emoji} ${commerceTypeConfigs[type].name}`,
+            }))}
+            hint="Définit les fonctionnalités disponibles pour cette boutique"
+          />
+          {createForm.commerceType !== 'GENERAL' && (
+            <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
+              <p className="text-sm text-indigo-700 dark:text-indigo-300">{commerceTypeConfigs[createForm.commerceType].description}</p>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {commerceTypeConfigs[createForm.commerceType].features.hasPhysicalProducts && (
+                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">Physique</span>
+                )}
+                {commerceTypeConfigs[createForm.commerceType].features.hasDigitalProducts && (
+                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded">Digital</span>
+                )}
+                {commerceTypeConfigs[createForm.commerceType].features.hasBookings && (
+                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 text-xs rounded">Réservations</span>
+                )}
+                {commerceTypeConfigs[createForm.commerceType].features.requiresAgeVerification && (
+                  <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs rounded">18+</span>
+                )}
+              </div>
+            </div>
+          )}
           <AdminInput label="Email du propriétaire" type="email" value={createForm.ownerEmail} onChange={(e) => setCreateForm({ ...createForm, ownerEmail: e.target.value })} placeholder="email@exemple.com" hint="L'utilisateur doit avoir un compte" required />
           {createStore.error && <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400">{createStore.error.message}</div>}
         </form>
