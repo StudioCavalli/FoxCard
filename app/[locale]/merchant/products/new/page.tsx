@@ -40,7 +40,7 @@ export default function NewProductPage() {
     price: '',
     compareAtPrice: '',
     cost: '',
-    type: ProductType.PHYSICAL,
+    type: ProductType.SIMPLE,
     sku: '',
     barcode: '',
     trackInventory: true,
@@ -459,9 +459,9 @@ export default function NewProductPage() {
               onChange={(e) => setFormData({ ...formData, type: e.target.value as ProductType })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value={ProductType.PHYSICAL}>Physique</option>
+              <option value={ProductType.SIMPLE}>Simple</option>
+              <option value={ProductType.VARIABLE}>Variable</option>
               <option value={ProductType.DIGITAL}>Digital</option>
-              <option value={ProductType.SERVICE}>Service</option>
             </select>
           </div>
 
