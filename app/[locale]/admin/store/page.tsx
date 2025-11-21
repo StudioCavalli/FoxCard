@@ -1,187 +1,476 @@
 'use client'
 
-import { useState } from 'react'
-import { trpc } from '@/lib/trpc/client'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Store, Save, Image as ImageIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useStoreContext } from '@/lib/context/store-context'
+import { trpc } from '@/lib/trpc/client'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Store, Save, Eye, Image as ImageIcon, Globe, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Star } from 'lucide-react'
 
-export default function StorePage() {
+export default function StoreSettingsPage() {
   const { storeId } = useStoreContext()
+  const { data: store } = trpc.store.getById.useQuery(
+    { id: storeId! },
+    { enabled: !!storeId }
+  )
 
-  const { data: store } = trpc.store.getById.useQuery({ id: storeId! }, { enabled: !!storeId })
+  const updateMutation = trpc.store.update.useMutation()
+  const updateStorefrontMutation = trpc.store.updateStorefront.useMutation()
 
   const [formData, setFormData] = useState({
     name: '',
+    slug: '',
     description: '',
     logo: '',
-    domain: '',
+    tagline: '',
+    bannerImage: '',
+    story: '',
+    foundedAt: '',
+    publicEmail: '',
+    publicPhone: '',
+    publicAddress: {
+      street: '',
+      city: '',
+      postalCode: '',
+      country: '',
+    },
+    socialLinks: {
+      facebook: '',
+      instagram: '',
+      twitter: '',
+      linkedin: '',
+      youtube: '',
+    },
+    showOnDirectory: true,
   })
 
-  // Update form when store loads
-  useState(() => {
+  const [savedSuccessfully, setSavedSuccessfully] = useState(false)
+
+  useEffect(() => {
     if (store) {
+      const socialLinks = (store.socialLinks as any) || {}
+      const publicAddress = (store.publicAddress as any) || {}
+
       setFormData({
         name: store.name || '',
+        slug: store.slug || '',
         description: store.description || '',
         logo: store.logo || '',
-        domain: store.domain || '',
+        tagline: store.tagline || '',
+        bannerImage: store.bannerImage || '',
+        story: store.story || '',
+        foundedAt: store.foundedAt ? new Date(store.foundedAt).toISOString().split('T')[0] : '',
+        publicEmail: store.publicEmail || '',
+        publicPhone: store.publicPhone || '',
+        publicAddress: {
+          street: publicAddress.street || '',
+          city: publicAddress.city || '',
+          postalCode: publicAddress.postalCode || '',
+          country: publicAddress.country || '',
+        },
+        socialLinks: {
+          facebook: socialLinks.facebook || '',
+          instagram: socialLinks.instagram || '',
+          twitter: socialLinks.twitter || '',
+          linkedin: socialLinks.linkedin || '',
+          youtube: socialLinks.youtube || '',
+        },
+        showOnDirectory: store.showOnDirectory ?? true,
       })
     }
-  })
-
-  const updateStoreMutation = trpc.store.update.useMutation()
+  }, [store])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    updateStoreMutation.mutate(
-      {
-        storeId: storeId!,
-        ...formData,
-      },
-      {
-        onSuccess: () => {
-          alert('Boutique mise à jour avec succès')
-        },
-        onError: (error) => {
-          alert(error.message)
-        },
-      }
+    if (!storeId) return
+
+    try {
+      // Update basic store info
+      await updateMutation.mutateAsync({
+        storeId,
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description,
+        logo: formData.logo,
+      })
+
+      // Update storefront content
+      await updateStorefrontMutation.mutateAsync({
+        storeId,
+        tagline: formData.tagline,
+        bannerImage: formData.bannerImage,
+        story: formData.story,
+        foundedAt: formData.foundedAt ? new Date(formData.foundedAt) : undefined,
+        publicEmail: formData.publicEmail,
+        publicPhone: formData.publicPhone,
+        publicAddress: formData.publicAddress,
+        socialLinks: formData.socialLinks,
+        showOnDirectory: formData.showOnDirectory,
+      })
+
+      setSavedSuccessfully(true)
+      setTimeout(() => setSavedSuccessfully(false), 3000)
+    } catch (error) {
+      console.error('Failed to save store settings:', error)
+    }
+  }
+
+  if (!storeId) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Veuillez sélectionner une boutique</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres de la boutique</h1>
-        <p className="text-gray-600">
-          Gérez les informations générales de votre boutique
-        </p>
+    <div className="max-w-5xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Paramètres de la boutique</h1>
+          <p className="text-gray-600 mt-1">Configurez votre boutique et votre vitrine publique</p>
+        </div>
+        <a
+          href={`/stores/${store?.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <Eye className="w-4 h-4" />
+          Voir la vitrine
+        </a>
       </div>
 
-      <div className="max-w-3xl">
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Store className="w-5 h-5" />
+            Informations de base
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nom de la boutique *
               </label>
-              <input
+              <Input
                 type="text"
+                required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Ma Super Boutique"
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                URL (slug) *
+              </label>
+              <Input
+                type="text"
+                required
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                URL: /stores/{formData.slug || 'votre-boutique'}
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description courte
               </label>
               <textarea
+                rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Décrivez votre boutique..."
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Une brève description de votre boutique..."
               />
             </div>
 
-            {/* Logo URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Logo (URL)
               </label>
-              <div className="flex gap-3">
-                <input
-                  type="url"
-                  value={formData.logo}
-                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="https://example.com/logo.png"
-                />
-                {formData.logo && (
-                  <div className="w-12 h-12 border border-gray-300 rounded-lg overflow-hidden">
-                    <img
-                      src={formData.logo}
-                      alt="Logo preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                URL de votre logo (format recommandé : PNG ou SVG)
-              </p>
+              <Input
+                type="url"
+                value={formData.logo}
+                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                placeholder="https://example.com/logo.png"
+              />
             </div>
 
-            {/* Domain */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Domaine personnalisé
+                Date de fondation
               </label>
-              <input
-                type="text"
-                value={formData.domain}
-                onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="boutique.exemple.com"
+              <Input
+                type="date"
+                value={formData.foundedAt}
+                onChange={(e) => setFormData({ ...formData, foundedAt: e.target.value })}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Domaine personnalisé pour votre boutique (optionnel)
-              </p>
-            </div>
-
-            {/* Submit */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={updateStoreMutation.isPending}
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {updateStoreMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
-              </Button>
-            </div>
-          </form>
-        </Card>
-
-        {/* Store Info */}
-        <Card className="p-6 mt-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Store className="w-5 h-5" />
-            Informations du magasin
-          </h2>
-
-          <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-sm text-gray-600">ID du magasin</span>
-              <span className="text-sm font-mono text-gray-900">{storeId}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-sm text-gray-600">Créé le</span>
-              <span className="text-sm text-gray-900">
-                {store?.createdAt ? new Date(store.createdAt).toLocaleDateString('fr-FR') : '-'}
-              </span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span className="text-sm text-gray-600">Dernière modification</span>
-              <span className="text-sm text-gray-900">
-                {store?.updatedAt ? new Date(store.updatedAt).toLocaleDateString('fr-FR') : '-'}
-              </span>
             </div>
           </div>
-        </Card>
-      </div>
+        </div>
+
+        {/* Storefront Content */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            Contenu de la vitrine
+          </h2>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Slogan
+              </label>
+              <Input
+                type="text"
+                value={formData.tagline}
+                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                placeholder="Votre slogan accrocheur..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Image de bannière (URL)
+              </label>
+              <Input
+                type="url"
+                value={formData.bannerImage}
+                onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
+                placeholder="https://example.com/banner.jpg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Histoire de la boutique
+              </label>
+              <textarea
+                rows={8}
+                value={formData.story}
+                onChange={(e) => setFormData({ ...formData, story: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Racontez l'histoire de votre boutique, votre mission, vos valeurs..."
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="showOnDirectory"
+                checked={formData.showOnDirectory}
+                onChange={(e) => setFormData({ ...formData, showOnDirectory: e.target.checked })}
+                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              />
+              <label htmlFor="showOnDirectory" className="text-sm text-gray-700">
+                Afficher dans le répertoire des boutiques
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Mail className="w-5 h-5" />
+            Informations de contact publiques
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email public
+              </label>
+              <Input
+                type="email"
+                value={formData.publicEmail}
+                onChange={(e) => setFormData({ ...formData, publicEmail: e.target.value })}
+                placeholder="contact@votreboutique.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Téléphone public
+              </label>
+              <Input
+                type="tel"
+                value={formData.publicPhone}
+                onChange={(e) => setFormData({ ...formData, publicPhone: e.target.value })}
+                placeholder="+33 1 23 45 67 89"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Adresse publique
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  type="text"
+                  value={formData.publicAddress.street}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    publicAddress: { ...formData.publicAddress, street: e.target.value }
+                  })}
+                  placeholder="Rue"
+                />
+                <Input
+                  type="text"
+                  value={formData.publicAddress.city}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    publicAddress: { ...formData.publicAddress, city: e.target.value }
+                  })}
+                  placeholder="Ville"
+                />
+                <Input
+                  type="text"
+                  value={formData.publicAddress.postalCode}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    publicAddress: { ...formData.publicAddress, postalCode: e.target.value }
+                  })}
+                  placeholder="Code postal"
+                />
+                <Input
+                  type="text"
+                  value={formData.publicAddress.country}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    publicAddress: { ...formData.publicAddress, country: e.target.value }
+                  })}
+                  placeholder="Pays"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Social Links */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Globe className="w-5 h-5" />
+            Réseaux sociaux
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Facebook className="w-4 h-4 text-blue-600" />
+                Facebook
+              </label>
+              <Input
+                type="url"
+                value={formData.socialLinks.facebook}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: { ...formData.socialLinks, facebook: e.target.value }
+                })}
+                placeholder="https://facebook.com/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Instagram className="w-4 h-4 text-pink-600" />
+                Instagram
+              </label>
+              <Input
+                type="url"
+                value={formData.socialLinks.instagram}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: { ...formData.socialLinks, instagram: e.target.value }
+                })}
+                placeholder="https://instagram.com/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Twitter className="w-4 h-4 text-sky-600" />
+                Twitter
+              </label>
+              <Input
+                type="url"
+                value={formData.socialLinks.twitter}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: { ...formData.socialLinks, twitter: e.target.value }
+                })}
+                placeholder="https://twitter.com/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Linkedin className="w-4 h-4 text-blue-700" />
+                LinkedIn
+              </label>
+              <Input
+                type="url"
+                value={formData.socialLinks.linkedin}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: { ...formData.socialLinks, linkedin: e.target.value }
+                })}
+                placeholder="https://linkedin.com/company/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-red-600" />
+                YouTube
+              </label>
+              <Input
+                type="url"
+                value={formData.socialLinks.youtube}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: { ...formData.socialLinks, youtube: e.target.value }
+                })}
+                placeholder="https://youtube.com/@..."
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex items-center justify-end gap-4">
+          {savedSuccessfully && (
+            <div className="flex items-center gap-2 text-green-600">
+              <Star className="w-5 h-5 fill-green-600" />
+              <span className="font-medium">Enregistré avec succès!</span>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            disabled={updateMutation.isPending || updateStorefrontMutation.isPending}
+          >
+            {updateMutation.isPending || updateStorefrontMutation.isPending ? (
+              'Enregistrement...'
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Enregistrer les modifications
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

@@ -31,6 +31,30 @@ model Store {
   settings    Json?    // Flexible settings object
   theme       Json?    // Theme customization
 
+  // Storefront content (for public pages)
+  tagline       String?   // Short tagline for hero section
+  bannerImage   String?   // Banner/hero image URL
+  story         String?   // Long-form about content
+  foundedAt     DateTime? // When the store was founded
+
+  // Social links
+  socialLinks   Json?     // { facebook, instagram, twitter, linkedin, etc. }
+
+  // Public contact info
+  publicEmail   String?   // Public contact email
+  publicPhone   String?   // Public phone number
+  publicAddress Json?     // Public address { street, city, postalCode, country }
+
+  // Featured products for homepage
+  featuredProductIds String[] @default([]) @db.ObjectId
+
+  // Directory visibility
+  showOnDirectory    Boolean  @default(true) // Show in public store directory
+
+  // Stats (calculated/cached for performance)
+  rating        Float?    @default(0)    // Average rating
+  reviewsCount  Int       @default(0)    // Number of reviews
+
   // Relations
   products    Product[]
   categories  Category[]
