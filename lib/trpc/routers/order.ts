@@ -105,6 +105,16 @@ export const orderRouter = router({
             quantity: z.number().min(1),
             variantId: z.string().optional(),
             variantName: z.string().optional(),
+            // Restaurant modifiers
+            modifiers: z.array(z.object({
+              groupId: z.string(),
+              groupName: z.string(),
+              modifierId: z.string(),
+              modifierName: z.string(),
+              price: z.number(),
+              quantity: z.number().optional(),
+            })).optional(),
+            specialInstructions: z.string().optional(),
           })
         ),
         shippingAddress: z.any().optional(), // Optional for digital/booking only orders
@@ -153,7 +163,10 @@ export const orderRouter = router({
             const product = productsData.find((p) => p.id === item.productId)
             if (!product) throw new Error(`Product ${item.productId} not found`)
 
-            const itemTotal = product.price * item.quantity
+            // Calculate modifier total
+            const modifierTotal = item.modifiers?.reduce((sum, mod) => sum + (mod.price * (mod.quantity || 1)), 0) || 0
+            const itemTotal = (product.price + modifierTotal) * item.quantity
+
             return {
               productId: item.productId,
               name: product.name,
@@ -161,6 +174,10 @@ export const orderRouter = router({
               quantity: item.quantity,
               variantId: item.variantId,
               variantName: item.variantName,
+              // Restaurant modifiers
+              modifiers: item.modifiers || null,
+              modifierTotal: modifierTotal || null,
+              specialInstructions: item.specialInstructions || null,
               total: itemTotal,
             }
           })

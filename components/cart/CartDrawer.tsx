@@ -105,6 +105,23 @@ export function CartDrawer() {
                         {item.variantName && (
                           <p className="text-sm text-gray-600">{item.variantName}</p>
                         )}
+                        {/* Restaurant Modifiers */}
+                        {item.attributes?.options && Array.isArray(item.attributes.options) && item.attributes.options.length > 0 && (
+                          <div className="mt-1 space-y-0.5">
+                            {item.attributes.options.map((mod: any, idx: number) => (
+                              <p key={idx} className="text-xs text-emerald-600">
+                                + {mod.modifierName || mod.name}
+                                {mod.price > 0 && ` (+${formatPrice(mod.price)})`}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {/* Special Instructions */}
+                        {item.attributes?.specialInstructions && (
+                          <p className="text-xs text-amber-600 mt-1">
+                            ⚠️ {item.attributes.specialInstructions}
+                          </p>
+                        )}
                         <p className="text-lg font-bold text-gray-900 mt-1">
                           {formatPrice(item.price)}
                         </p>

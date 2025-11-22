@@ -173,16 +173,33 @@ export default function LiveOrdersPage() {
         </div>
 
         {/* Items */}
-        <div className="p-4 space-y-2">
-          {order.items.map((item, index) => (
+        <div className="p-4 space-y-3">
+          {order.items.map((item: any, index: number) => (
             <div key={index} className="flex items-start gap-2">
               <span className="flex-shrink-0 w-6 h-6 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 rounded-full flex items-center justify-center text-sm font-bold">
                 {item.quantity}
               </span>
-              <div>
+              <div className="flex-1">
                 <p className="text-slate-900 dark:text-white font-medium">{item.name}</p>
                 {item.variantName && (
                   <p className="text-xs text-slate-500 dark:text-slate-400">{item.variantName}</p>
+                )}
+                {/* Restaurant Modifiers */}
+                {item.modifiers && Array.isArray(item.modifiers) && item.modifiers.length > 0 && (
+                  <div className="mt-1 space-y-0.5">
+                    {item.modifiers.map((mod: any, modIndex: number) => (
+                      <p key={modIndex} className="text-xs text-emerald-600 dark:text-emerald-400">
+                        + {mod.modifierName || mod.name}
+                        {mod.price > 0 && ` (+${mod.price.toFixed(2)}€)`}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {/* Special Instructions */}
+                {item.specialInstructions && (
+                  <div className="mt-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 rounded text-xs text-amber-700 dark:text-amber-400">
+                    ⚠️ {item.specialInstructions}
+                  </div>
                 )}
               </div>
             </div>
