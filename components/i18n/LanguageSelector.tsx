@@ -6,6 +6,7 @@ import { useRef, useState, useEffect } from 'react'
 import { locales, localeLabels, localeFlags, type Locale } from '@/lib/i18n/config'
 import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 import { Globe } from 'lucide-react'
+import Cookies from 'js-cookie'
 
 interface LanguageSelectorProps {
   position?: 'bottom' | 'top' // bottom = dropdown goes down, top = dropdown goes up
@@ -43,6 +44,9 @@ export function LanguageSelector({ position = 'bottom', variant = 'default' }: L
   }, [isOpen])
 
   const switchLocale = (newLocale: Locale) => {
+    // Save locale preference in cookie (expires in 1 year)
+    Cookies.set('NEXT_LOCALE', newLocale, { expires: 365, path: '/' })
+
     // Get the current path without the locale prefix
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
     // Navigate to the new locale path

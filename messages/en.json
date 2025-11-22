@@ -519,7 +519,73 @@
     "paymentMethods": "Payment methods",
     "shippingZones": "Shipping zones",
     "taxSettings": "Tax settings",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "noStoreSelected": "No store selected",
+    "selectStoreDescription": "Select a store to access your dashboard and manage your products, orders and customers.",
+    "overviewOf": "Overview of {storeName}",
+    "last7Days": "Last 7 days",
+    "totalRevenue": "Total Revenue",
+    "revenueEvolution": "Evolution over the last 7 days",
+    "orderStatus": "Order status",
+    "currentDistribution": "Current distribution",
+    "noOrders": "No orders",
+    "orderVolume": "Order volume",
+    "ordersPerDay": "Orders per day",
+    "viewAll": "View all",
+    "viewAllFeminine": "View all",
+    "last5Orders": "Last 5 orders",
+    "noOrdersYet": "No orders yet",
+    "ordersWillAppearHere": "Orders will appear here",
+    "orderNumber": "Order #",
+    "client": "Customer",
+    "date": "Date",
+    "total": "Total",
+    "status": "Status",
+    "statusPending": "Pending",
+    "statusProcessing": "Processing",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled",
+    "addProduct": "Add Product",
+    "createNewProduct": "Create a new product",
+    "manageOrders": "Manage Orders",
+    "processOrders": "Process your orders",
+    "customerBase": "Customer Base",
+    "manageCustomers": "Manage your customers",
+    "configureSpace": "Configure your merchant space",
+    "save": "Save",
+    "saving": "Saving...",
+    "notificationSettings": "Email notifications",
+    "newOrder": "New order",
+    "newOrderDesc": "Receive an email for each new order",
+    "lowStockAlert": "Low stock",
+    "lowStockAlertDesc": "Alert when a product reaches low stock threshold",
+    "customerMessage": "Customer message",
+    "customerMessageDesc": "Notification when a customer contacts you",
+    "reports": "Reports",
+    "weeklyReport": "Weekly report",
+    "weeklyReportDesc": "Summary of your sales each week",
+    "monthlyReport": "Monthly report",
+    "monthlyReportDesc": "Complete analysis of your performance",
+    "languageAndLocalization": "Language and localization",
+    "interfaceLanguage": "Interface language",
+    "currency": "Currency",
+    "timezone": "Timezone",
+    "accountSecurity": "Account security",
+    "password": "Password",
+    "lastModified": "Last modified {days} days ago",
+    "modify": "Modify",
+    "twoFactorAuth": "Two-factor authentication",
+    "addSecurityLayer": "Add an extra layer of security",
+    "enable": "Enable",
+    "activeSessions": "Active sessions",
+    "manageConnections": "Manage your active connections",
+    "view": "View",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete my account",
+    "deleteAccountWarning": "This action is irreversible",
+    "delete": "Delete",
+    "languageCurrency": "Language & currency",
+    "security": "Security"
   },
   "superadmin": {
     "dashboard": "Dashboard",
@@ -548,6 +614,48 @@
     "suspendUser": "Suspend user",
     "activateUser": "Activate user",
     "deleteUser": "Delete user"
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "Discover our open-source e-commerce platform, designed for entrepreneurs and developers worldwide.",
+    "mission": {
+      "title": "Our Mission",
+      "description": "Democratize e-commerce by offering a powerful, free, and accessible solution for everyone. We believe every entrepreneur deserves the best tools to succeed online."
+    },
+    "values": {
+      "openSource": {
+        "title": "Open Source",
+        "description": "Open and transparent source code, developed by the community for the community."
+      },
+      "free": {
+        "title": "100% Free",
+        "description": "No hidden fees, no commissions. Your success belongs entirely to you."
+      },
+      "secure": {
+        "title": "Secure",
+        "description": "Enterprise-grade security with industry best practices."
+      },
+      "community": {
+        "title": "Community",
+        "description": "An active community of developers and entrepreneurs helping each other."
+      }
+    },
+    "tech": {
+      "title": "Technologies Used",
+      "withAppRouter": "with App Router",
+      "withTypeScript": "with TypeScript",
+      "forDesign": "for design",
+      "forState": "for state management",
+      "forAPIs": "for type-safe APIs",
+      "withMongoDB": "with MongoDB",
+      "forAuth": "for authentication",
+      "multiTenant": "Multi-tenant architecture"
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "subtitle": "Join thousands of merchants who trust our platform.",
+      "viewOnGithub": "View on GitHub"
+    }
   },
   "seo": {
     "home": {

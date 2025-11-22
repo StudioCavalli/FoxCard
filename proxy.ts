@@ -135,6 +135,16 @@ export default withAuth(
       }
     }
 
+    // Check for saved locale preference in cookie when no locale in path
+    if (pathnameIsMissingLocale) {
+      const savedLocale = req.cookies.get('NEXT_LOCALE')?.value
+      if (savedLocale && locales.includes(savedLocale as typeof locales[number])) {
+        const url = req.nextUrl.clone()
+        url.pathname = `/${savedLocale}${pathname}`
+        return NextResponse.redirect(url)
+      }
+    }
+
     // Handle i18n routing
     return intlMiddleware(req)
   },

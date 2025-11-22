@@ -16,6 +16,7 @@ import {
   Save,
   Loader2
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function MerchantSettingsPage() {
   const params = useParams()
@@ -23,6 +24,7 @@ export default function MerchantSettingsPage() {
   const { storeId } = useStoreContext()
   const [activeTab, setActiveTab] = useState('notifications')
   const [isSaving, setIsSaving] = useState(false)
+  const t = useTranslations('merchant')
 
   const [notificationSettings, setNotificationSettings] = useState({
     newOrderEmail: true,
@@ -46,9 +48,9 @@ export default function MerchantSettingsPage() {
   }
 
   const tabs = [
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'locale', label: 'Langue & devise', icon: Globe },
-    { id: 'security', label: 'Sécurité', icon: Shield },
+    { id: 'notifications', label: t('notifications'), icon: Bell },
+    { id: 'locale', label: t('languageCurrency'), icon: Globe },
+    { id: 'security', label: t('security'), icon: Shield },
   ]
 
   return (
@@ -56,19 +58,19 @@ export default function MerchantSettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-          <p className="text-gray-500 mt-1">Configurez votre espace marchand</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('settings')}</h1>
+          <p className="text-gray-500 mt-1">{t('configureSpace')}</p>
         </div>
         <Button variant="primary" onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Enregistrement...
+              {t('saving')}
             </>
           ) : (
             <>
               <Save className="w-4 h-4 mr-2" />
-              Enregistrer
+              {t('save')}
             </>
           )}
         </Button>
@@ -101,12 +103,12 @@ export default function MerchantSettingsPage() {
         <div className="lg:col-span-3">
           {activeTab === 'notifications' && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Notifications par email</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('notificationSettings')}</h2>
               <div className="space-y-4">
                 <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                   <div>
-                    <p className="font-medium text-gray-900">Nouvelle commande</p>
-                    <p className="text-sm text-gray-500">Recevez un email à chaque nouvelle commande</p>
+                    <p className="font-medium text-gray-900">{t('newOrder')}</p>
+                    <p className="text-sm text-gray-500">{t('newOrderDesc')}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -121,8 +123,8 @@ export default function MerchantSettingsPage() {
 
                 <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                   <div>
-                    <p className="font-medium text-gray-900">Stock faible</p>
-                    <p className="text-sm text-gray-500">Alerte quand un produit atteint le seuil de stock faible</p>
+                    <p className="font-medium text-gray-900">{t('lowStockAlert')}</p>
+                    <p className="text-sm text-gray-500">{t('lowStockAlertDesc')}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -137,8 +139,8 @@ export default function MerchantSettingsPage() {
 
                 <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                   <div>
-                    <p className="font-medium text-gray-900">Message client</p>
-                    <p className="text-sm text-gray-500">Notification quand un client vous contacte</p>
+                    <p className="font-medium text-gray-900">{t('customerMessage')}</p>
+                    <p className="text-sm text-gray-500">{t('customerMessageDesc')}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -152,12 +154,12 @@ export default function MerchantSettingsPage() {
                 </label>
 
                 <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="font-medium text-gray-900 mb-4">Rapports</h3>
+                  <h3 className="font-medium text-gray-900 mb-4">{t('reports')}</h3>
 
                   <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors mb-2">
                     <div>
-                      <p className="font-medium text-gray-900">Rapport hebdomadaire</p>
-                      <p className="text-sm text-gray-500">Résumé de vos ventes chaque semaine</p>
+                      <p className="font-medium text-gray-900">{t('weeklyReport')}</p>
+                      <p className="text-sm text-gray-500">{t('weeklyReportDesc')}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -172,8 +174,8 @@ export default function MerchantSettingsPage() {
 
                   <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                     <div>
-                      <p className="font-medium text-gray-900">Rapport mensuel</p>
-                      <p className="text-sm text-gray-500">Analyse complète de vos performances</p>
+                      <p className="font-medium text-gray-900">{t('monthlyReport')}</p>
+                      <p className="text-sm text-gray-500">{t('monthlyReportDesc')}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -192,11 +194,11 @@ export default function MerchantSettingsPage() {
 
           {activeTab === 'locale' && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Langue et régionalisation</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('languageAndLocalization')}</h2>
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Langue de l'interface
+                    {t('interfaceLanguage')}
                   </label>
                   <select
                     value={localeSettings.language}
@@ -209,14 +211,14 @@ export default function MerchantSettingsPage() {
                     <option value="fr">Français</option>
                     <option value="en">English</option>
                     <option value="de">Deutsch</option>
+                    <option value="es">Español</option>
                     <option value="sk">Slovenčina</option>
-                    <option value="cs">Čeština</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Devise
+                    {t('currency')}
                   </label>
                   <select
                     value={localeSettings.currency}
@@ -228,15 +230,15 @@ export default function MerchantSettingsPage() {
                   >
                     <option value="EUR">Euro (€)</option>
                     <option value="USD">US Dollar ($)</option>
-                    <option value="GBP">Livre Sterling (£)</option>
-                    <option value="CHF">Franc Suisse (CHF)</option>
-                    <option value="CZK">Couronne Tchèque (CZK)</option>
+                    <option value="GBP">British Pound (£)</option>
+                    <option value="CHF">Swiss Franc (CHF)</option>
+                    <option value="CZK">Czech Koruna (CZK)</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fuseau horaire
+                    {t('timezone')}
                   </label>
                   <select
                     value={localeSettings.timezone}
@@ -247,7 +249,7 @@ export default function MerchantSettingsPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
                     <option value="Europe/Paris">Paris (UTC+1)</option>
-                    <option value="Europe/London">Londres (UTC+0)</option>
+                    <option value="Europe/London">London (UTC+0)</option>
                     <option value="Europe/Berlin">Berlin (UTC+1)</option>
                     <option value="Europe/Prague">Prague (UTC+1)</option>
                     <option value="America/New_York">New York (UTC-5)</option>
@@ -259,16 +261,16 @@ export default function MerchantSettingsPage() {
 
           {activeTab === 'security' && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Sécurité du compte</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('accountSecurity')}</h2>
               <div className="space-y-6">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="font-medium text-gray-900">Mot de passe</p>
-                      <p className="text-sm text-gray-500">Dernière modification il y a 30 jours</p>
+                      <p className="font-medium text-gray-900">{t('password')}</p>
+                      <p className="text-sm text-gray-500">{t('lastModified', { days: 30 })}</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      Modifier
+                      {t('modify')}
                     </Button>
                   </div>
                 </div>
@@ -276,11 +278,11 @@ export default function MerchantSettingsPage() {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="font-medium text-gray-900">Authentification à deux facteurs</p>
-                      <p className="text-sm text-gray-500">Ajoutez une couche de sécurité supplémentaire</p>
+                      <p className="font-medium text-gray-900">{t('twoFactorAuth')}</p>
+                      <p className="text-sm text-gray-500">{t('addSecurityLayer')}</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      Activer
+                      {t('enable')}
                     </Button>
                   </div>
                 </div>
@@ -288,25 +290,25 @@ export default function MerchantSettingsPage() {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">Sessions actives</p>
-                      <p className="text-sm text-gray-500">Gérez vos connexions actives</p>
+                      <p className="font-medium text-gray-900">{t('activeSessions')}</p>
+                      <p className="text-sm text-gray-500">{t('manageConnections')}</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      Voir
+                      {t('view')}
                     </Button>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-6">
-                  <h3 className="font-medium text-red-600 mb-4">Zone de danger</h3>
+                  <h3 className="font-medium text-red-600 mb-4">{t('dangerZone')}</h3>
                   <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-red-900">Supprimer mon compte</p>
-                        <p className="text-sm text-red-700">Cette action est irréversible</p>
+                        <p className="font-medium text-red-900">{t('deleteAccount')}</p>
+                        <p className="text-sm text-red-700">{t('deleteAccountWarning')}</p>
                       </div>
                       <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-100">
-                        Supprimer
+                        {t('delete')}
                       </Button>
                     </div>
                   </div>
