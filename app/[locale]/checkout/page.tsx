@@ -334,6 +334,16 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           variantId: item.variantId,
           variantName: item.variantName,
+          // Restaurant modifiers from cart attributes
+          modifiers: item.attributes?.options?.map((opt: any) => ({
+            groupId: opt.groupId || '',
+            groupName: opt.groupName || '',
+            modifierId: opt.modifierId || opt.id || '',
+            modifierName: opt.modifierName || opt.name || '',
+            price: opt.price || 0,
+            quantity: opt.quantity || 1,
+          })),
+          specialInstructions: item.attributes?.specialInstructions,
         })),
         // Only include shipping address for physical products
         ...(checkoutFlow.requiresShipping && {

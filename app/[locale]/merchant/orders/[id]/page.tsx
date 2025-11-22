@@ -172,39 +172,66 @@ export default function OrderDetailPage() {
               </h2>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
-              {order.items.map((item) => (
-                <div key={item.id} className="p-4 flex items-center gap-4">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden flex-shrink-0">
-                    {item.product?.thumbnail || item.product?.images?.[0] ? (
-                      <Image
-                        src={item.product.thumbnail || item.product.images[0]}
-                        alt={item.name}
-                        width={64}
-                        height={64}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        <Package className="w-6 h-6" />
-                      </div>
-                    )}
+              {order.items.map((item) => {
+                const itemData = item as any
+                return (
+                  <div key={item.id} className="p-4 flex items-start gap-4">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden flex-shrink-0">
+                      {item.product?.thumbnail || item.product?.images?.[0] ? (
+                        <Image
+                          src={item.product.thumbnail || item.product.images[0]}
+                          alt={item.name}
+                          width={64}
+                          height={64}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <Package className="w-6 h-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
+                      {item.variantName && (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{item.variantName}</p>
+                      )}
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {formatPrice(item.price)} × {item.quantity}
+                      </p>
+                      {/* Restaurant Modifiers */}
+                      {itemData.modifiers && Array.isArray(itemData.modifiers) && itemData.modifiers.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {itemData.modifiers.map((mod: any, idx: number) => (
+                            <p key={idx} className="text-sm text-emerald-600 dark:text-emerald-400">
+                              + {mod.modifierName || mod.name}
+                              {mod.price > 0 && ` (+${formatPrice(mod.price)})`}
+                            </p>
+                          ))}
+                          {itemData.modifierTotal > 0 && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Options: +{formatPrice(itemData.modifierTotal)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {/* Special Instructions */}
+                      {itemData.specialInstructions && (
+                        <div className="mt-2 px-2 py-1.5 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
+                          <p className="text-sm text-amber-700 dark:text-amber-400">
+                            ⚠️ {itemData.specialInstructions}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-slate-900 dark:text-white">
+                        {formatPrice(item.total)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
-                    {item.variantName && (
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{item.variantName}</p>
-                    )}
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {formatPrice(item.price)} × {item.quantity}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-slate-900 dark:text-white">
-                      {formatPrice(item.total)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
             {/* Totals */}
             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 space-y-2">

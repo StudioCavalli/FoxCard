@@ -180,6 +180,35 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
   const handleAddToCart = () => {
     if (!canAddToCart()) return
 
+    // Build full modifier data for order processing
+    const fullModifierData: Array<{
+      groupId: string
+      groupName: string
+      modifierId: string
+      modifierName: string
+      price: number
+      quantity: number
+    }> = []
+
+    Object.entries(selectedOptions).forEach(([groupId, optionIds]) => {
+      const group = optionGroups.find(g => g.id === groupId)
+      if (!group) return
+
+      optionIds.forEach(optionId => {
+        const modifier = group.modifiers.find(m => m.id === optionId)
+        if (modifier) {
+          fullModifierData.push({
+            groupId: group.id,
+            groupName: group.name,
+            modifierId: modifier.id,
+            modifierName: modifier.name,
+            price: modifier.priceAdjustment,
+            quantity: 1,
+          })
+        }
+      })
+    })
+
     addItem({
       id: product.id,
       productId: product.id,
@@ -193,7 +222,7 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
       maxQuantity: 99,
       commerceType: 'RESTAURANT',
       attributes: {
-        options: selectedOptions,
+        options: fullModifierData,
         specialInstructions,
       },
     })

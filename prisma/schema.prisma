@@ -608,6 +608,11 @@ model OrderItem {
   variantId   String?
   variantName String?
 
+  // Restaurant modifiers (extras, toppings, etc.)
+  modifiers           Json?    // Array of { groupId, groupName, modifierId, modifierName, price, quantity }
+  modifierTotal       Float?   // Total price adjustment from modifiers
+  specialInstructions String?  // Customer notes for kitchen (no onions, allergies, etc.)
+
   total       Float
 
   createdAt   DateTime @default(now())
