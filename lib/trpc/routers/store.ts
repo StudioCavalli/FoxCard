@@ -207,6 +207,14 @@ export const storeRouter = router({
         description: z.string().optional(),
         logo: z.string().optional(),
         domain: z.string().optional(),
+        commerceType: z.enum([
+          'GENERAL', 'FOOD', 'ALCOHOL', 'FASHION', 'ELECTRONICS', 'BEAUTY',
+          'HOME', 'SPORTS', 'TOYS', 'AUTOMOTIVE', 'BOOKS', 'PETS', 'DIGITAL',
+          'SERVICES', 'SEASONAL', 'RESTAURANT', 'HOTEL', 'TRAVEL', 'RECREATION'
+        ]).optional(),
+        commerceConfig: z.record(z.string(), z.unknown()).optional(),
+        publicEmail: z.string().email().optional().or(z.literal('')),
+        publicPhone: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -228,7 +236,15 @@ export const storeRouter = router({
         // 1. Create the store
         const newStore = await tx.store.create({
           data: {
-            ...input,
+            name: input.name,
+            slug: input.slug,
+            description: input.description,
+            logo: input.logo,
+            domain: input.domain,
+            commerceType: input.commerceType,
+            commerceConfig: input.commerceConfig as any,
+            publicEmail: input.publicEmail || null,
+            publicPhone: input.publicPhone,
             ownerId: ctx.session.user.id,
           },
         })
