@@ -746,6 +746,30 @@
       "inventory": "Inventaire",
       "compliance": "Conformité",
       "sales": "Ventes"
+    },
+    "dashboard": {
+      "occupancyRate": "Taux d'occupation",
+      "todayCheckIns": "Check-ins aujourd'hui",
+      "todayCheckOuts": "Check-outs aujourd'hui",
+      "availableRooms": "Chambres disponibles",
+      "todayRevenue": "CA aujourd'hui",
+      "ordersToday": "Commandes du jour",
+      "inPreparation": "En préparation",
+      "avgTime": "Temps moyen",
+      "monthlyBookings": "Réservations ce mois",
+      "weeklyDepartures": "Départs cette semaine",
+      "travelingPassengers": "Passagers en voyage",
+      "monthlyRevenue": "CA du mois",
+      "downloads": "Téléchargements",
+      "activeProducts": "Produits actifs",
+      "conversionRate": "Taux de conversion",
+      "todayReservations": "Réservations aujourd'hui",
+      "expectedParticipants": "Participants attendus",
+      "activeEvents": "Événements actifs",
+      "dailyRevenue": "CA du jour",
+      "cellarReferences": "Références en cave",
+      "pendingOrders": "Commandes en attente",
+      "vsLastMonth": "vs mois dernier"
     }
   },
   "superadmin": {

@@ -745,6 +745,30 @@
       "vintages": "Añadas",
       "inventory": "Inventario",
       "compliance": "Cumplimiento"
+    },
+    "dashboard": {
+      "occupancyRate": "Tasa de ocupación",
+      "todayCheckIns": "Check-ins de hoy",
+      "todayCheckOuts": "Check-outs de hoy",
+      "availableRooms": "Habitaciones disponibles",
+      "todayRevenue": "Ingresos de hoy",
+      "ordersToday": "Pedidos de hoy",
+      "inPreparation": "En preparación",
+      "avgTime": "Tiempo promedio",
+      "monthlyBookings": "Reservas del mes",
+      "weeklyDepartures": "Salidas de la semana",
+      "travelingPassengers": "Pasajeros viajando",
+      "monthlyRevenue": "Ingresos del mes",
+      "downloads": "Descargas",
+      "activeProducts": "Productos activos",
+      "conversionRate": "Tasa de conversión",
+      "todayReservations": "Reservas de hoy",
+      "expectedParticipants": "Participantes esperados",
+      "activeEvents": "Eventos activos",
+      "dailyRevenue": "Ingresos del día",
+      "cellarReferences": "Referencias en bodega",
+      "pendingOrders": "Pedidos pendientes",
+      "vsLastMonth": "vs mes anterior"
     }
   },
   "superadmin": {
