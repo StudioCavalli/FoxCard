@@ -9,6 +9,124 @@ const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 // Helper to hash password
 const hashPassword = async (password: string) => bcrypt.hash(password, 10)
 
+// Unsplash image URLs by commerce type
+const unsplashImages: Record<string, string[]> = {
+  ELECTRONICS: [
+    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800',
+    'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800',
+  ],
+  FASHION: [
+    'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800',
+    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800',
+    'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800',
+    'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800',
+  ],
+  HOME: [
+    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
+    'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800',
+    'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800',
+    'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=800',
+  ],
+  BEAUTY: [
+    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
+    'https://images.unsplash.com/photo-1571875257727-256c39da42af?w=800',
+    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800',
+    'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800',
+  ],
+  SPORTS: [
+    'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
+    'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800',
+    'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800',
+    'https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=800',
+  ],
+  TOYS: [
+    'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=800',
+    'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800',
+    'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800',
+    'https://images.unsplash.com/photo-1559715745-e1b33a271c8f?w=800',
+  ],
+  AUTOMOTIVE: [
+    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800',
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800',
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800',
+    'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800',
+  ],
+  BOOKS: [
+    'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800',
+    'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800',
+    'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800',
+    'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800',
+  ],
+  PETS: [
+    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800',
+    'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800',
+    'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
+  ],
+  FOOD: [
+    'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800',
+    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800',
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
+  ],
+  ALCOHOL: [
+    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800',
+    'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=800',
+    'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=800',
+    'https://images.unsplash.com/photo-1569924694044-e6f7c8d19fec?w=800',
+  ],
+  DIGITAL: [
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800',
+    'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800',
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800',
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
+  ],
+  SERVICES: [
+    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800',
+    'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800',
+    'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800',
+    'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800',
+  ],
+  RESTAURANT: [
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
+    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800',
+    'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800',
+  ],
+  HOTEL: [
+    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+    'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800',
+    'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
+  ],
+  TRAVEL: [
+    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+    'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800',
+    'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800',
+  ],
+  RECREATION: [
+    'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800',
+    'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800',
+    'https://images.unsplash.com/photo-1445307806294-bff7f67ff225?w=800',
+    'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800',
+  ],
+  SEASONAL: [
+    'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800',
+    'https://images.unsplash.com/photo-1481355142855-3a3b6e3c35bb?w=800',
+    'https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?w=800',
+    'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=800',
+  ],
+}
+
+// Get random image for commerce type
+const getProductImage = (commerceType: string, index: number): string[] => {
+  const images = unsplashImages[commerceType] || unsplashImages.ELECTRONICS
+  return [images[index % images.length]]
+}
+
 // Marketplace structure based on commerce types
 const marketplaceData = [
   {
@@ -319,7 +437,8 @@ async function seedMarketplace() {
             featured: Math.random() > 0.8,
             storeId: store.id,
             categoryId: category.id,
-            images: [],
+            images: getProductImage(storeData.commerceType, i),
+            thumbnail: getProductImage(storeData.commerceType, i)[0],
             tags: [storeData.commerceType.toLowerCase(), catData.name.toLowerCase()],
           },
         })

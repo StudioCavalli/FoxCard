@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, protectedProcedure } from '../trpc'
+import { router, protectedProcedure, publicProcedure } from '../trpc'
 import { prisma } from '@/lib/prisma'
 import { TRPCError } from '@trpc/server'
 import {
@@ -58,8 +58,8 @@ export const commerceTypeRouter = router({
       }
     }),
 
-  // Get store's current commerce type
-  getStoreType: protectedProcedure
+  // Get store's current commerce type (public - needed for product page routing)
+  getStoreType: publicProcedure
     .input(z.object({
       storeId: z.string()
     }))
