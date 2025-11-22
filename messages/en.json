@@ -623,7 +623,16 @@
     "dashboard": "Dashboard",
     "store": "My Store",
     "products": "Products",
-    "orders": "Orders",
+    "orders": {
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "cancel": "Cancel"
+    },
     "customers": "Customers",
     "analytics": "Analytics",
     "settings": "Settings",
@@ -843,7 +852,7 @@
       "customerList": "Customer list",
       "loyalty": "Loyalty",
       "salesAnalytics": "Sales analytics",
-      "restaurantSettings": "Restaurant",
+      "restaurantSettings": "Restaurant settings",
       "openingHours": "Opening hours",
       "packages": "Packages",
       "trips": "Trips",
@@ -855,7 +864,7 @@
       "documents": "Documents",
       "vouchers": "Vouchers",
       "contracts": "Contracts",
-      "agencySettings": "Agency",
+      "agencySettings": "Agency settings",
       "downloads": "Downloads",
       "licenses": "Licenses",
       "downloadStats": "Download stats",
@@ -864,7 +873,7 @@
       "schedules": "Schedules",
       "participants": "Participants",
       "attendance": "Attendance",
-      "venueSettings": "Venue",
+      "venueSettings": "Venue settings",
       "cellar": "Cellar",
       "wines": "Wines",
       "vintages": "Vintages",
@@ -916,16 +925,6 @@
       "permissionDenied": "Camera access denied",
       "error": "Camera error"
     },
-    "orders": {
-      "status": {
-        "pending": "Pending",
-        "processing": "Processing",
-        "shipped": "Shipped",
-        "delivered": "Delivered",
-        "cancelled": "Cancelled"
-      },
-      "cancel": "Cancel"
-    },
     "common": {
       "viewAll": "View all",
       "remaining": "remaining",
@@ -974,6 +973,415 @@
       "settings": "Settings",
       "help": "Help",
       "logout": "Log out"
+    },
+    "hotel": {
+      "rooms": {
+        "title": "Rooms",
+        "list": "Room list",
+        "create": "New room",
+        "edit": "Edit room",
+        "roomNumber": "Room number",
+        "floor": "Floor",
+        "building": "Building",
+        "status": "Status",
+        "available": "Available",
+        "occupied": "Occupied",
+        "cleaning": "Cleaning",
+        "maintenance": "Maintenance",
+        "outOfOrder": "Out of order",
+        "lastCleaned": "Last cleaned",
+        "notes": "Internal notes"
+      },
+      "roomTypes": {
+        "title": "Room types",
+        "create": "New type",
+        "standard": "Standard",
+        "deluxe": "Deluxe",
+        "suite": "Suite",
+        "name": "Type name",
+        "basePrice": "Base price/night",
+        "maxOccupancy": "Max occupancy",
+        "maxAdults": "Max adults",
+        "maxChildren": "Max children",
+        "bedConfiguration": "Bed configuration",
+        "sizeSqm": "Size (sqm)",
+        "amenities": "Included amenities"
+      },
+      "amenities": {
+        "title": "Amenities",
+        "create": "New amenity",
+        "categories": {
+          "general": "General",
+          "bathroom": "Bathroom",
+          "bedroom": "Bedroom",
+          "outdoor": "Outdoor",
+          "wellness": "Wellness",
+          "dining": "Dining",
+          "business": "Business",
+          "family": "Family",
+          "accessibility": "Accessibility"
+        },
+        "wifi": "WiFi",
+        "pool": "Pool",
+        "spa": "Spa",
+        "parking": "Parking",
+        "gym": "Gym",
+        "restaurant": "Restaurant",
+        "roomService": "Room service"
+      },
+      "reservations": {
+        "title": "Reservations",
+        "calendar": "Calendar",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "nights": "Nights",
+        "guests": "Guests",
+        "adults": "Adults",
+        "children": "Children",
+        "guestName": "Guest name",
+        "guestEmail": "Email",
+        "guestPhone": "Phone",
+        "roomRate": "Rate/night",
+        "totalAmount": "Total amount",
+        "depositPaid": "Deposit paid",
+        "specialRequests": "Special requests",
+        "confirmed": "Confirmed",
+        "pending": "Pending",
+        "checkedIn": "Checked in",
+        "checkedOut": "Checked out",
+        "cancelled": "Cancelled",
+        "noShow": "No-show"
+      },
+      "guests": {
+        "title": "Guests",
+        "history": "History",
+        "visits": "Stays",
+        "totalSpent": "Total spent",
+        "lastVisit": "Last stay",
+        "preferences": "Preferences"
+      },
+      "checkIn": {
+        "title": "Check-in/out",
+        "todayArrivals": "Today's arrivals",
+        "todayDepartures": "Today's departures",
+        "doCheckIn": "Check in",
+        "doCheckOut": "Check out",
+        "selectRoom": "Select room"
+      },
+      "rates": {
+        "title": "Rates",
+        "grid": "Rate grid",
+        "perNight": "Per night",
+        "weekday": "Weekday",
+        "weekend": "Weekend"
+      },
+      "seasons": {
+        "title": "Seasons",
+        "create": "New season",
+        "highSeason": "High season",
+        "lowSeason": "Low season",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "pricePerNight": "Price/night",
+        "minStay": "Min stay"
+      },
+      "analytics": {
+        "title": "Hotel analytics",
+        "occupancy": "Occupancy rate",
+        "revpar": "RevPAR",
+        "adr": "ADR",
+        "forecast": "Forecast"
+      }
+    },
+    "restaurant": {
+      "modifiers": {
+        "title": "Modifiers",
+        "groups": "Modifier groups",
+        "createGroup": "New group",
+        "createModifier": "New modifier",
+        "groupName": "Group name",
+        "selectionType": "Selection type",
+        "single": "Single choice",
+        "multiple": "Multiple choice",
+        "quantity": "Quantity",
+        "minSelections": "Min selections",
+        "maxSelections": "Max selections",
+        "required": "Required",
+        "priceAdjustment": "Price adjustment",
+        "isDefault": "Default",
+        "calories": "Calories",
+        "allergens": "Allergens"
+      },
+      "liveOrders": {
+        "title": "Live orders",
+        "newOrders": "New",
+        "preparing": "Preparing",
+        "ready": "Ready",
+        "delivered": "Delivered",
+        "orderAge": "Order age",
+        "estimatedTime": "Estimated time"
+      },
+      "kds": {
+        "title": "Kitchen Display (KDS)",
+        "newOrder": "New order",
+        "startPreparing": "Start",
+        "markReady": "Ready",
+        "markDelivered": "Delivered"
+      },
+      "tables": {
+        "title": "Tables",
+        "floorPlan": "Floor plan",
+        "tableNumber": "Number",
+        "capacity": "Capacity",
+        "minCapacity": "Min",
+        "maxCapacity": "Max",
+        "position": "Position",
+        "shape": "Shape",
+        "rectangle": "Rectangle",
+        "square": "Square",
+        "round": "Round",
+        "oval": "Oval",
+        "outdoor": "Outdoor",
+        "accessible": "Accessible",
+        "vip": "VIP",
+        "status": {
+          "available": "Available",
+          "occupied": "Occupied",
+          "reserved": "Reserved",
+          "cleaning": "Cleaning"
+        }
+      },
+      "delivery": {
+        "title": "Delivery",
+        "zones": "Delivery zones",
+        "drivers": "Drivers",
+        "activeDeliveries": "Active deliveries",
+        "deliveryFee": "Delivery fee",
+        "minOrder": "Minimum order",
+        "estimatedTime": "Estimated time"
+      },
+      "hours": {
+        "title": "Opening hours",
+        "dayOfWeek": "Day",
+        "openTime": "Opening",
+        "closeTime": "Closing",
+        "closed": "Closed",
+        "lastOrder": "Last order",
+        "specialDates": "Special dates"
+      }
+    },
+    "travel": {
+      "destinations": {
+        "title": "Destinations",
+        "create": "New destination",
+        "country": "Country",
+        "region": "Region",
+        "highlights": "Highlights",
+        "bestTime": "Best time to visit",
+        "climate": "Climate",
+        "currency": "Currency",
+        "language": "Language",
+        "visaRequired": "Visa required"
+      },
+      "itineraries": {
+        "title": "Itineraries",
+        "create": "New itinerary",
+        "duration": "Duration",
+        "days": "days",
+        "nights": "nights",
+        "difficulty": "Difficulty",
+        "easy": "Easy",
+        "moderate": "Moderate",
+        "challenging": "Challenging",
+        "expert": "Expert",
+        "tripType": "Trip type",
+        "inclusions": "Included",
+        "exclusions": "Not included",
+        "dayByDay": "Day by day"
+      },
+      "departures": {
+        "title": "Departures",
+        "create": "New departure",
+        "departureDate": "Departure date",
+        "returnDate": "Return date",
+        "departureCity": "Departure city",
+        "maxParticipants": "Max participants",
+        "currentBookings": "Bookings",
+        "minParticipants": "Min participants",
+        "earlyBird": "Early bird",
+        "status": {
+          "open": "Open",
+          "almostFull": "Almost full",
+          "soldOut": "Sold out",
+          "cancelled": "Cancelled",
+          "completed": "Completed"
+        },
+        "guaranteed": "Guaranteed departure",
+        "guide": "Guide"
+      },
+      "vouchers": {
+        "title": "Vouchers",
+        "generate": "Generate voucher",
+        "voucherNumber": "Voucher #",
+        "type": {
+          "flight": "Flight",
+          "hotel": "Hotel",
+          "transfer": "Transfer",
+          "activity": "Activity",
+          "insurance": "Insurance",
+          "package": "Full package"
+        },
+        "validFrom": "Valid from",
+        "validUntil": "Valid until",
+        "passenger": "Passenger",
+        "issued": "Issued",
+        "sent": "Sent",
+        "used": "Used"
+      },
+      "contracts": {
+        "title": "Supplier contracts",
+        "create": "New contract",
+        "supplier": "Supplier",
+        "supplierType": "Type",
+        "contractNumber": "Contract #",
+        "startDate": "Start",
+        "endDate": "End",
+        "commission": "Commission",
+        "rates": "Negotiated rates",
+        "documents": "Documents"
+      }
+    },
+    "digital": {
+      "licenses": {
+        "title": "Licenses",
+        "create": "New license",
+        "type": "License type",
+        "single": "Single user",
+        "team": "Team",
+        "enterprise": "Enterprise",
+        "site": "Site",
+        "trial": "Trial",
+        "subscription": "Subscription",
+        "maxActivations": "Max activations",
+        "maxUsers": "Max users",
+        "validDays": "Valid days",
+        "features": "Included features"
+      },
+      "keys": {
+        "title": "License keys",
+        "generate": "Generate key",
+        "key": "Key",
+        "activations": "Activations",
+        "validFrom": "Valid from",
+        "validUntil": "Valid until",
+        "status": {
+          "unused": "Unused",
+          "active": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked",
+          "suspended": "Suspended"
+        },
+        "revoke": "Revoke",
+        "revokeReason": "Reason"
+      },
+      "analytics": {
+        "title": "Download analytics",
+        "totalDownloads": "Total downloads",
+        "uniqueUsers": "Unique users",
+        "byVersion": "By version",
+        "byPlatform": "By platform",
+        "byCountry": "By country"
+      }
+    },
+    "recreation": {
+      "schedules": {
+        "title": "Schedules",
+        "create": "New schedule",
+        "name": "Activity name",
+        "type": {
+          "oneTime": "One-time",
+          "weekly": "Weekly",
+          "daily": "Daily",
+          "custom": "Custom"
+        },
+        "dayOfWeek": "Day",
+        "startTime": "Start time",
+        "endTime": "End time",
+        "duration": "Duration",
+        "capacity": "Capacity",
+        "minParticipants": "Min participants",
+        "instructor": "Instructor",
+        "location": "Location",
+        "pricePerPerson": "Price/person",
+        "pricePerGroup": "Price/group"
+      },
+      "calendar": {
+        "title": "Calendar",
+        "sessions": "Sessions",
+        "upcoming": "Upcoming",
+        "today": "Today",
+        "thisWeek": "This week",
+        "availableSpots": "Available spots",
+        "full": "Full",
+        "waitlist": "Waitlist"
+      },
+      "attendance": {
+        "title": "Attendance",
+        "checkIn": "Check in",
+        "attendees": "Attendees",
+        "registered": "Registered",
+        "checkedIn": "Checked in",
+        "noShow": "No-show",
+        "waitlistPosition": "Waitlist position",
+        "attendanceRate": "Attendance rate",
+        "report": "Attendance report"
+      }
+    },
+    "alcohol": {
+      "vintages": {
+        "title": "Vintages",
+        "create": "New vintage",
+        "year": "Year",
+        "quantity": "Quantity",
+        "price": "Price",
+        "tastingNotes": "Tasting notes",
+        "sommelierNotes": "Sommelier notes",
+        "rating": "Rating",
+        "ratingSource": "Source",
+        "drinkingWindow": "Drinking window",
+        "drinkFrom": "Drink from",
+        "drinkUntil": "Drink until",
+        "peakYear": "Peak year",
+        "storage": "Storage",
+        "cellarTemp": "Cellar temperature",
+        "humidity": "Humidity"
+      },
+      "compliance": {
+        "title": "Alcohol compliance",
+        "settings": "Settings",
+        "minimumAge": "Minimum age",
+        "requireVerification": "Verification required",
+        "verificationMethods": "Verification methods",
+        "selfDeclaration": "Self-declaration",
+        "dateOfBirth": "Date of birth",
+        "documentUpload": "Document upload",
+        "thirdParty": "Third-party service",
+        "inPerson": "In-person",
+        "maxQuantity": "Max quantity/order",
+        "ageWarning": "Age warning message",
+        "legalDisclaimer": "Legal disclaimer",
+        "requireSignature": "Signature required"
+      },
+      "inventory": {
+        "title": "Cellar inventory",
+        "cellar": "Cellar",
+        "totalBottles": "Total bottles",
+        "totalValue": "Total value",
+        "avgRating": "Average rating",
+        "byDecade": "By decade",
+        "readyToDrink": "Ready to drink",
+        "stillCellaring": "Still cellaring"
+      }
     }
   },
   "superadmin": {
