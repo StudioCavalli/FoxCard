@@ -11,6 +11,7 @@ import {
   type CommerceTypeConfig,
   type CommerceTypeFeatures,
 } from './index'
+import { getTerminology, type CommerceTerminology } from './terminology'
 
 // Hook to get all commerce types
 export function useCommerceTypes() {
@@ -171,4 +172,22 @@ export function useDefaultCategories(type: CommerceType | undefined) {
     if (!type) return []
     return commerceTypeConfigs[type]?.defaultCategories || []
   }, [type])
+}
+
+// Hook to get commerce type terminology
+export function useCommerceTypeTerminology(type: CommerceType | undefined): CommerceTerminology {
+  return useMemo(() => {
+    return getTerminology(type || 'GENERAL')
+  }, [type])
+}
+
+// Hook to get terminology for a store (combines store lookup with terminology)
+export function useStoreTerminology(storeId: string | undefined) {
+  const { type, isLoading } = useStoreCommerceType(storeId)
+  const terminology = useCommerceTypeTerminology(type)
+
+  return {
+    terminology,
+    isLoading,
+  }
 }

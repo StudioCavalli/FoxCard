@@ -871,7 +871,74 @@
       "compliance": "Conformité",
       "sales": "Ventes"
     },
-    "dashboard": {
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "orders": "Commandes",
+      "products": "Produits",
+      "customers": "Clients",
+      "more": "Plus",
+      "store": "Boutique",
+      "categories": "Catégories",
+      "analytics": "Statistiques",
+      "messages": "Messages",
+      "settings": "Paramètres"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "addProduct": "Ajouter un produit",
+      "addCategory": "Ajouter une catégorie",
+      "addDiscount": "Créer une promo",
+      "scanBarcode": "Scanner un code",
+      "takePhoto": "Prendre une photo",
+      "createInvoice": "Créer une facture"
+    },
+    "scanner": {
+      "title": "Scanner",
+      "hint": "Placez le code-barres dans le cadre",
+      "loading": "Initialisation de la caméra...",
+      "error": "Erreur de caméra",
+      "permissionDenied": "Accès à la caméra refusé. Veuillez autoriser l'accès dans les paramètres.",
+      "cameraError": "Impossible d'accéder à la caméra. Vérifiez qu'elle n'est pas utilisée par une autre application.",
+      "notSupported": "Scanner non supporté",
+      "notSupportedDesc": "Votre navigateur ne supporte pas la détection de codes-barres. Essayez Chrome sur Android.",
+      "success": "Code scanné !",
+      "productFound": "Produit trouvé",
+      "productNotFound": "Aucun produit trouvé avec ce code",
+      "addToInventory": "Ajouter à l'inventaire"
+    },
+    "camera": {
+      "title": "Prendre une photo",
+      "capture": "Capturer",
+      "retake": "Reprendre",
+      "use": "Utiliser cette photo",
+      "switchCamera": "Changer de caméra",
+      "flash": "Flash",
+      "permissionDenied": "Accès à la caméra refusé",
+      "error": "Erreur de caméra"
+    },
+    "orders": {
+      "status": {
+        "pending": "En attente",
+        "processing": "En cours",
+        "shipped": "Expédiée",
+        "delivered": "Livrée",
+        "cancelled": "Annulée"
+      },
+      "cancel": "Annuler"
+    },
+    "common": {
+      "viewAll": "Voir tout",
+      "remaining": "restant(s)",
+      "retry": "Réessayer",
+      "close": "Fermer"
+    },
+    "stats": {
+      "revenue": "Chiffre d'affaires",
+      "orders": "Commandes",
+      "customers": "Clients",
+      "products": "Produits",
+      "recentOrders": "Commandes récentes",
+      "lowStock": "Stock faible",
       "occupancyRate": "Taux d'occupation",
       "todayCheckIns": "Check-ins aujourd'hui",
       "todayCheckOuts": "Check-outs aujourd'hui",
@@ -894,6 +961,19 @@
       "cellarReferences": "Références en cave",
       "pendingOrders": "Commandes en attente",
       "vsLastMonth": "vs mois dernier"
+    },
+    "header": {
+      "myStore": "Ma Boutique",
+      "search": "Rechercher produits, commandes...",
+      "viewStore": "Voir la boutique",
+      "notifications": "Notifications",
+      "noNotifications": "Aucune nouvelle notification",
+      "viewAllNotifications": "Voir toutes les notifications",
+      "merchant": "Marchand",
+      "myAccount": "Mon compte",
+      "settings": "Paramètres",
+      "help": "Aide",
+      "logout": "Déconnexion"
     }
   },
   "superadmin": {

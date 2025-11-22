@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import {
   Bell,
   User,
@@ -29,6 +30,7 @@ export function MerchantHeader() {
   const [showNotifications, setShowNotifications] = useState(false)
   const params = useParams()
   const locale = params?.locale || 'fr'
+  const t = useTranslations('merchant')
 
   // Get store for preview link
   const { data: store } = trpc.store.getById.useQuery(
@@ -52,13 +54,13 @@ export function MerchantHeader() {
 
             {/* Page Title - shown on mobile */}
             <div className="lg:hidden">
-              <h2 className="text-lg font-semibold text-gray-900">{storeName || 'Ma Boutique'}</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{storeName || t('header.myStore')}</h2>
             </div>
 
             {/* Search - Desktop */}
             <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-500 transition-colors cursor-pointer min-w-[280px]">
               <Search className="w-4 h-4" />
-              <span>Rechercher produits, commandes...</span>
+              <span>{t('header.search')}</span>
               <kbd className="ml-auto px-2 py-0.5 text-xs bg-white border border-gray-300 rounded">⌘K</kbd>
             </div>
           </div>
@@ -73,7 +75,7 @@ export function MerchantHeader() {
                 className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <Eye className="w-4 h-4" />
-                <span className="hidden md:inline">Voir la boutique</span>
+                <span className="hidden md:inline">{t('header.viewStore')}</span>
                 <ExternalLink className="w-3 h-3" />
               </Link>
             )}
@@ -94,17 +96,17 @@ export function MerchantHeader() {
                   <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
                   <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <h3 className="font-semibold text-gray-900">{t('header.notifications')}</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       <div className="p-8 text-center text-gray-500 text-sm">
                         <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                        <p>Aucune nouvelle notification</p>
+                        <p>{t('header.noNotifications')}</p>
                       </div>
                     </div>
                     <div className="p-3 border-t border-gray-100 bg-gray-50">
                       <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                        Voir toutes les notifications
+                        {t('header.viewAllNotifications')}
                       </button>
                     </div>
                   </div>
@@ -125,7 +127,7 @@ export function MerchantHeader() {
                   <p className="text-sm font-medium text-gray-900 max-w-[120px] truncate">
                     {session?.user?.name || session?.user?.email?.split('@')[0]}
                   </p>
-                  <p className="text-xs text-gray-500">Marchand</p>
+                  <p className="text-xs text-gray-500">{t('header.merchant')}</p>
                 </div>
                 <ChevronDown className="hidden lg:block w-4 h-4 text-gray-400" />
               </button>
@@ -146,7 +148,7 @@ export function MerchantHeader() {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <User className="w-4 h-4" />
-                        Mon compte
+                        {t('header.myAccount')}
                       </Link>
                       <Link
                         href={`/${locale}/merchant/store`}
@@ -154,7 +156,7 @@ export function MerchantHeader() {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Store className="w-4 h-4" />
-                        Ma boutique
+                        {t('header.myStore')}
                       </Link>
                       <Link
                         href={`/${locale}/merchant/settings`}
@@ -162,7 +164,7 @@ export function MerchantHeader() {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Settings className="w-4 h-4" />
-                        Paramètres
+                        {t('header.settings')}
                       </Link>
                       <a
                         href="https://docs.foxcard.io"
@@ -171,7 +173,7 @@ export function MerchantHeader() {
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <HelpCircle className="w-4 h-4" />
-                        Aide
+                        {t('header.help')}
                       </a>
                     </div>
                     <div className="p-2 border-t border-gray-100">
@@ -180,7 +182,7 @@ export function MerchantHeader() {
                         className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
-                        Déconnexion
+                        {t('header.logout')}
                       </button>
                     </div>
                   </div>
