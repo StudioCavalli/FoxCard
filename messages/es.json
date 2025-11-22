@@ -870,7 +870,7 @@
       "inventory": "Inventario",
       "compliance": "Cumplimiento"
     },
-    "dashboard": {
+    "stats": {
       "occupancyRate": "Tasa de ocupación",
       "todayCheckIns": "Check-ins de hoy",
       "todayCheckOuts": "Check-outs de hoy",

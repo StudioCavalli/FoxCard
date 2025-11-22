@@ -2,15 +2,13 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { EnhancedStatCard } from '@/components/admin/EnhancedStatCard'
 import { RevenueChart } from '@/components/admin/charts/RevenueChart'
 import { OrdersChart } from '@/components/admin/charts/OrdersChart'
 import { OrderStatusChart } from '@/components/admin/charts/OrderStatusChart'
+import { DashboardWidgets } from '@/components/merchant/dashboard/DashboardWidgets'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
-  DollarSign,
-  Package,
   ShoppingCart,
   Users,
   TrendingUp,
@@ -22,6 +20,8 @@ import {
 import { useStoreContext } from '@/lib/context/store-context'
 import { useMemo } from 'react'
 import { useTranslations } from 'next-intl'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { MobileDashboard } from '@/components/merchant/mobile'
 
 export default function MerchantDashboard() {
   const { storeId, storeName } = useStoreContext()
@@ -29,6 +29,12 @@ export default function MerchantDashboard() {
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
   const t = useTranslations('merchant')
+  const isMobile = useIsMobile()
+
+  // Show mobile dashboard on mobile devices
+  if (isMobile) {
+    return <MobileDashboard />
+  }
 
   const { data: products, isLoading: loadingProducts } = trpc.product.getAll.useQuery(
     {
@@ -155,44 +161,8 @@ export default function MerchantDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <EnhancedStatCard
-          title={t('totalRevenue')}
-          value={formatPrice(totalRevenue)}
-          change={12.5}
-          icon={DollarSign}
-          color="indigo"
-          href={`${basePath}/analytics`}
-          loading={isLoading}
-        />
-        <EnhancedStatCard
-          title={t('orders')}
-          value={totalOrders}
-          change={8.2}
-          icon={ShoppingCart}
-          color="green"
-          href={`${basePath}/orders`}
-          loading={isLoading}
-        />
-        <EnhancedStatCard
-          title={t('products')}
-          value={totalProducts}
-          icon={Package}
-          color="amber"
-          href={`${basePath}/products`}
-          loading={isLoading}
-        />
-        <EnhancedStatCard
-          title={t('customers')}
-          value={totalCustomers}
-          change={5.4}
-          icon={Users}
-          color="blue"
-          href={`${basePath}/customers`}
-          loading={isLoading}
-        />
-      </div>
+      {/* Commerce-Type Adaptive Stats Grid */}
+      <DashboardWidgets storeId={storeId} />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

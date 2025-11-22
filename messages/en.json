@@ -871,7 +871,74 @@
       "inventory": "Inventory",
       "compliance": "Compliance"
     },
-    "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "products": "Products",
+      "customers": "Customers",
+      "more": "More",
+      "store": "Store",
+      "categories": "Categories",
+      "analytics": "Analytics",
+      "messages": "Messages",
+      "settings": "Settings"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addProduct": "Add product",
+      "addCategory": "Add category",
+      "addDiscount": "Add discount",
+      "scanBarcode": "Scan barcode",
+      "takePhoto": "Take photo",
+      "createInvoice": "Create invoice"
+    },
+    "scanner": {
+      "title": "Scanner",
+      "hint": "Position the barcode within the frame",
+      "loading": "Initializing camera...",
+      "error": "Camera error",
+      "permissionDenied": "Camera access denied. Please allow access in your settings.",
+      "cameraError": "Unable to access camera. Make sure it's not being used by another app.",
+      "notSupported": "Scanner not supported",
+      "notSupportedDesc": "Your browser doesn't support barcode detection. Try Chrome on Android.",
+      "success": "Code scanned!",
+      "productFound": "Product found",
+      "productNotFound": "No product found with this code",
+      "addToInventory": "Add to inventory"
+    },
+    "camera": {
+      "title": "Take a photo",
+      "capture": "Capture",
+      "retake": "Retake",
+      "use": "Use this photo",
+      "switchCamera": "Switch camera",
+      "flash": "Flash",
+      "permissionDenied": "Camera access denied",
+      "error": "Camera error"
+    },
+    "orders": {
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "cancel": "Cancel"
+    },
+    "common": {
+      "viewAll": "View all",
+      "remaining": "remaining",
+      "retry": "Retry",
+      "close": "Close"
+    },
+    "stats": {
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "customers": "Customers",
+      "products": "Products",
+      "recentOrders": "Recent orders",
+      "lowStock": "Low stock alert",
       "occupancyRate": "Occupancy rate",
       "todayCheckIns": "Today's check-ins",
       "todayCheckOuts": "Today's check-outs",
@@ -894,6 +961,19 @@
       "cellarReferences": "Cellar references",
       "pendingOrders": "Pending orders",
       "vsLastMonth": "vs last month"
+    },
+    "header": {
+      "myStore": "My Store",
+      "search": "Search products, orders...",
+      "viewStore": "View store",
+      "notifications": "Notifications",
+      "noNotifications": "No new notifications",
+      "viewAllNotifications": "View all notifications",
+      "merchant": "Merchant",
+      "myAccount": "My account",
+      "settings": "Settings",
+      "help": "Help",
+      "logout": "Log out"
     }
   },
   "superadmin": {

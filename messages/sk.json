@@ -870,7 +870,7 @@
       "inventory": "Inventár",
       "compliance": "Súlad"
     },
-    "dashboard": {
+    "stats": {
       "occupancyRate": "Obsadenosť",
       "todayCheckIns": "Príchody dnes",
       "todayCheckOuts": "Odchody dnes",
