@@ -214,7 +214,7 @@ export const paymentRouter = router({
             referenceId: order.orderNumber,
             description: `Order #${order.orderNumber}`,
             customId: order.id,
-            softDescriptor: 'FoxCard',
+            softDescriptor: 'GoldenEra',
             amount: {
               currencyCode: PAYPAL_CURRENCY as any,
               value: formatAmountForPayPal(order.total),
@@ -267,7 +267,7 @@ export const paymentRouter = router({
             intent: CheckoutPaymentIntent.Capture,
             purchaseUnits,
             applicationContext: {
-              brandName: 'FoxCard',
+              brandName: 'GoldenEra',
               landingPage: OrderApplicationContextLandingPage.Billing,
               shippingPreference: OrderApplicationContextShippingPreference.SetProvidedAddress,
               userAction: OrderApplicationContextUserAction.PayNow,
@@ -424,7 +424,7 @@ export const paymentRouter = router({
         // Get bank details from environment variables or store settings
         // In production, this should be configured per store
         const bankDetails = {
-          accountHolder: order.store.name || 'FoxCard Store',
+          accountHolder: order.store.name || 'GoldenEra Store',
           iban: 'FR76 1234 5678 9012 3456 7890 123', // TODO: Get from store settings
           bic: 'ABCDEFGHXXX', // TODO: Get from store settings
           bankName: 'Banque Example',

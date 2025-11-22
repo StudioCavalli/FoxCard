@@ -10,8 +10,10 @@ import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { usePublicStore } from '@/lib/context/public-store-context'
 import { Filter, X, Search, ExternalLink, Store } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 function ProductsContent() {
+  const t = useTranslations()
   const { selectedStore, setSelectedStore, stores } = usePublicStore()
   const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
@@ -62,9 +64,9 @@ function ProductsContent() {
             className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
           >
-            Tous les produits
+            {t('common.products')}
           </h1>
-          <p className="text-xl text-theme-text-secondary">Découvrez notre collection complète</p>
+          <p className="text-xl text-theme-text-secondary">{t('seo.products.description')}</p>
         </div>
 
         {/* Store Selector */}
@@ -77,7 +79,7 @@ function ProductsContent() {
                 onChange={(e) => setSelectedStore(e.target.value as string | 'all')}
                 className="bg-transparent text-theme-text text-sm font-medium focus:outline-none cursor-pointer"
               >
-                <option value="all">Toutes les boutiques</option>
+                <option value="all">{t('store.allStores')}</option>
                 {stores.map((store) => (
                   <option key={store.id} value={store.id}>
                     {store.name}
@@ -96,7 +98,7 @@ function ProductsContent() {
             </div>
             <input
               type="text"
-              placeholder="Rechercher un produit par nom, description ou SKU..."
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-theme-surface border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
@@ -121,12 +123,12 @@ function ProductsContent() {
             }}
             className="px-4 py-3.5 rounded-xl bg-theme-surface border border-theme-border text-theme-text focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
           >
-            <option value="createdAt-desc">Plus récents</option>
-            <option value="price-asc">Prix croissant</option>
-            <option value="price-desc">Prix décroissant</option>
-            <option value="name-asc">Nom A-Z</option>
-            <option value="name-desc">Nom Z-A</option>
-            <option value="featured-desc">Populaires</option>
+            <option value="createdAt-desc">{t('products.sort.newest')}</option>
+            <option value="price-asc">{t('products.sort.priceAsc')}</option>
+            <option value="price-desc">{t('products.sort.priceDesc')}</option>
+            <option value="name-asc">{t('products.sort.nameAsc')}</option>
+            <option value="name-desc">{t('products.sort.nameDesc')}</option>
+            <option value="featured-desc">{t('products.sort.popular')}</option>
           </select>
         </div>
 
@@ -138,7 +140,7 @@ function ProductsContent() {
                 className="text-xl font-bold text-theme-text"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Filtres
+                {t('store.filter')}
               </h2>
 
               {/* Categories */}
@@ -147,7 +149,7 @@ function ProductsContent() {
                   className="font-semibold text-theme-text mb-3 text-sm uppercase tracking-wider"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Catégories
+                  {t('common.categories')}
                 </h3>
                 <div className="space-y-1">
                   <button
@@ -158,7 +160,7 @@ function ProductsContent() {
                         : 'text-theme-text-secondary hover:bg-theme-primary/5 hover:text-theme-text'
                     }`}
                   >
-                    Toutes
+                    {t('common.viewAll')}
                   </button>
                   {categories?.map((category) => (
                     <div key={category.id} className="flex items-center gap-1">
@@ -191,12 +193,12 @@ function ProductsContent() {
                   className="font-semibold text-theme-text mb-3 text-sm uppercase tracking-wider"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Prix
+                  {t('products.price')}
                 </h3>
                 <div className="space-y-3">
                   <input
                     type="number"
-                    placeholder="Prix min"
+                    placeholder={t('products.priceMin')}
                     value={minPrice?.toString() || ''}
                     onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
                     min="0"
@@ -204,7 +206,7 @@ function ProductsContent() {
                   />
                   <input
                     type="number"
-                    placeholder="Prix max"
+                    placeholder={t('products.priceMax')}
                     value={maxPrice?.toString() || ''}
                     onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
                     min="0"
@@ -218,7 +220,7 @@ function ProductsContent() {
                       }}
                       className="w-full px-3 py-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                     >
-                      Réinitialiser le prix
+                      {t('products.resetPrice')}
                     </button>
                   )}
                 </div>
@@ -234,7 +236,7 @@ function ProductsContent() {
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
               <Filter className="w-5 h-5" strokeWidth={2.5} />
-              Filtres
+              {t('products.filters')}
             </button>
           </div>
 
@@ -251,7 +253,7 @@ function ProductsContent() {
                     className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Filtres
+                    {t('products.filters')}
                   </h2>
                   <button onClick={() => setShowFilters(false)} className="text-theme-text-secondary hover:text-theme-text">
                     <X className="w-6 h-6" />
@@ -264,7 +266,7 @@ function ProductsContent() {
                     className="font-semibold text-theme-text mb-3 text-sm uppercase tracking-wider"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Catégories
+                    {t('common.categories')}
                   </h3>
                   <div className="space-y-1">
                     <button
@@ -278,7 +280,7 @@ function ProductsContent() {
                           : 'text-theme-text-secondary hover:bg-theme-primary/5 hover:text-theme-text'
                       }`}
                     >
-                      Toutes
+                      {t('products.all')}
                     </button>
                     {categories?.map((category) => (
                       <div key={category.id} className="flex items-center gap-1">
@@ -314,12 +316,12 @@ function ProductsContent() {
                     className="font-semibold text-theme-text mb-3 text-sm uppercase tracking-wider"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Prix
+                    {t('products.price')}
                   </h3>
                   <div className="space-y-3">
                     <input
                       type="number"
-                      placeholder="Prix min"
+                      placeholder={t('products.priceMin')}
                       value={minPrice?.toString() || ''}
                       onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
                       min="0"
@@ -327,7 +329,7 @@ function ProductsContent() {
                     />
                     <input
                       type="number"
-                      placeholder="Prix max"
+                      placeholder={t('products.priceMax')}
                       value={maxPrice?.toString() || ''}
                       onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
                       min="0"
@@ -341,7 +343,7 @@ function ProductsContent() {
                         }}
                         className="w-full px-3 py-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                       >
-                        Réinitialiser le prix
+                        {t('products.resetPrice')}
                       </button>
                     )}
                   </div>
@@ -353,7 +355,7 @@ function ProductsContent() {
                   className="w-full px-6 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Appliquer les filtres
+                  {t('products.applyFilters')}
                 </button>
               </div>
             </>
@@ -372,8 +374,8 @@ function ProductsContent() {
                 <div className="w-16 h-16 bg-theme-surface border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-theme-text-muted" />
                 </div>
-                <p className="text-theme-text text-lg font-medium mb-2">Aucun produit trouvé</p>
-                <p className="text-theme-text-secondary">Essayez de modifier vos filtres ou votre recherche</p>
+                <p className="text-theme-text text-lg font-medium mb-2">{t('store.noResults')}</p>
+                <p className="text-theme-text-secondary">{t('home.comeBackSoon')}</p>
               </div>
             ) : (
               <>
@@ -395,7 +397,7 @@ function ProductsContent() {
                       className="px-8 py-3 bg-theme-surface hover:bg-theme-surface/80 border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Voir plus de produits
+                      {t('products.loadMore')}
                     </button>
                   </div>
                 )}
@@ -417,7 +419,7 @@ export default function ProductsPage() {
             <div className="w-16 h-16 bg-theme-surface border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <Search className="w-8 h-8 text-theme-text-muted" />
             </div>
-            <p className="text-theme-text-secondary">Chargement...</p>
+            <p className="text-theme-text-secondary"></p>
           </div>
         </div>
       }

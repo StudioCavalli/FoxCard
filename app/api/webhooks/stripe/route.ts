@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { createDigitalDownloadsForOrder } from '@/lib/digital/download-manager'
 
 export async function POST(req: Request) {
   if (!stripe) {
@@ -137,6 +138,15 @@ export async function POST(req: Request) {
                   console.error('[Loyalty] Error awarding points:', loyaltyError)
                   // Don't fail the webhook if loyalty fails
                 }
+              }
+
+              // Create digital downloads for the order
+              try {
+                await createDigitalDownloadsForOrder(orderId, customer?.id)
+                console.log(`[Digital] Created downloads for order ${orderId}`)
+              } catch (digitalError) {
+                console.error('[Digital] Error creating downloads:', digitalError)
+                // Don't fail the webhook if digital downloads fail
               }
             }
           }

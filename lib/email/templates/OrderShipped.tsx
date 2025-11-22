@@ -10,6 +10,7 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 import { BaseLayout } from './layouts/Base'
+import { getOrderEmailTranslations, type Locale } from '../i18n'
 
 interface OrderShippedProps {
   storeName?: string
@@ -29,10 +30,11 @@ interface OrderShippedProps {
   }
   orderDetailsUrl?: string
   trackingPixelUrl?: string
+  locale?: Locale
 }
 
 export const OrderShipped = ({
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
   customerName,
   orderNumber,
@@ -44,7 +46,9 @@ export const OrderShipped = ({
   shippingAddress,
   orderDetailsUrl,
   trackingPixelUrl,
+  locale = 'fr',
 }: OrderShippedProps) => {
+  const t = getOrderEmailTranslations(locale)
   const formattedTrackingNumber = trackingNumber || 'N/A'
   const defaultTrackingUrl = trackingUrl || orderDetailsUrl || '#'
 
@@ -81,9 +85,9 @@ export const OrderShipped = ({
             />
           </svg>
         </div>
-        <Heading style={heroHeading}>Votre commande est en route !</Heading>
+        <Heading style={heroHeading}>{t.shipped.title}</Heading>
         <Text style={heroText}>
-          Bonjour {customerName}, votre commande a été expédiée et sera bientôt chez vous.
+          {t.common.hello(customerName)} {t.shipped.intro(orderNumber)}
         </Text>
       </Section>
 
@@ -92,13 +96,13 @@ export const OrderShipped = ({
       {/* Shipment Details */}
       <Section style={contentSection}>
         <Heading as="h2" style={sectionHeading}>
-          Détails de l'expédition
+          {t.confirmation.orderSummary}
         </Heading>
 
         <div style={detailsBox}>
           <Row style={detailRow}>
             <Column style={labelColumn}>
-              <Text style={label}>Numéro de commande</Text>
+              <Text style={label}>{t.confirmation.orderSummary}</Text>
             </Column>
             <Column style={valueColumn}>
               <Text style={value}>#{orderNumber}</Text>
@@ -107,7 +111,7 @@ export const OrderShipped = ({
 
           <Row style={detailRow}>
             <Column style={labelColumn}>
-              <Text style={label}>Date d'expédition</Text>
+              <Text style={label}>{t.formatDate(shipmentDate)}</Text>
             </Column>
             <Column style={valueColumn}>
               <Text style={value}>{shipmentDate}</Text>
@@ -116,7 +120,7 @@ export const OrderShipped = ({
 
           <Row style={detailRow}>
             <Column style={labelColumn}>
-              <Text style={label}>Transporteur</Text>
+              <Text style={label}>{t.shipped.carrier(carrier).split(':')[0]}</Text>
             </Column>
             <Column style={valueColumn}>
               <Text style={value}>{carrier}</Text>
@@ -126,7 +130,7 @@ export const OrderShipped = ({
           {trackingNumber && (
             <Row style={detailRow}>
               <Column style={labelColumn}>
-                <Text style={label}>Numéro de suivi</Text>
+                <Text style={label}>{t.shipped.trackingNumber(trackingNumber).split(':')[0]}</Text>
               </Column>
               <Column style={valueColumn}>
                 <Text style={{ ...value, fontFamily: 'monospace' }}>
@@ -139,7 +143,7 @@ export const OrderShipped = ({
           {estimatedDelivery && (
             <Row style={detailRow}>
               <Column style={labelColumn}>
-                <Text style={label}>Livraison estimée</Text>
+                <Text style={label}>{t.shipped.estimatedDelivery(estimatedDelivery).split(':')[0]}</Text>
               </Column>
               <Column style={valueColumn}>
                 <Text style={{ ...value, color: '#14b8a6', fontWeight: '600' }}>
@@ -155,10 +159,9 @@ export const OrderShipped = ({
       {trackingUrl && (
         <Section style={buttonSection}>
           <Button href={defaultTrackingUrl} style={trackingButton}>
-            Suivre ma commande
+            {t.shipped.trackShipment}
           </Button>
           <Text style={trackingHint}>
-            ou copiez ce lien dans votre navigateur :<br />
             <Link href={defaultTrackingUrl} style={trackingLink}>
               {defaultTrackingUrl}
             </Link>
@@ -170,7 +173,7 @@ export const OrderShipped = ({
       {shippingAddress && (
         <Section style={addressSection}>
           <Heading as="h3" style={addressHeading}>
-            Adresse de livraison
+            {t.confirmation.shippingAddress}
           </Heading>
           <div style={addressBox}>
             <Text style={addressText}>
@@ -189,10 +192,7 @@ export const OrderShipped = ({
       {/* Footer Info */}
       <Section style={footerSection}>
         <Text style={footerText}>
-          Une fois votre commande livrée, vous recevrez un email de confirmation.
-        </Text>
-        <Text style={footerText}>
-          Si vous avez des questions, n'hésitez pas à nous contacter.
+          {t.common.questions}
         </Text>
       </Section>
     </BaseLayout>

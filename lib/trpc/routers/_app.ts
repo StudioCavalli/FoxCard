@@ -37,6 +37,13 @@ import { crsdpayRouter } from './crsdpay'
 import { commerceTypeRouter } from './commerce-type'
 import { paymentGatewayRouter } from './payment-gateway'
 import { superadminRouter } from './superadmin'
+import { digitalRouter } from './digital'
+import { bookingRouter } from './booking'
+import { restaurantRouter } from './restaurant'
+import { hotelRouter } from './hotel'
+import { travelRouter } from './travel'
+import { subscriptionRouter } from './subscription'
+import { legalRouter } from './legal'
 
 export const appRouter = router({
   product: productRouter,
@@ -77,6 +84,13 @@ export const appRouter = router({
   commerceType: commerceTypeRouter,
   paymentGateway: paymentGatewayRouter,
   superadmin: superadminRouter,
+  digital: digitalRouter,
+  booking: bookingRouter,
+  restaurant: restaurantRouter,
+  hotel: hotelRouter,
+  travel: travelRouter,
+  subscription: subscriptionRouter,
+  legal: legalRouter,
 })
 
 export type AppRouter = typeof appRouter

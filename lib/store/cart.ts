@@ -131,7 +131,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'foxcard-cart',
+      name: 'goldenera-cart',
     }
   )
 )

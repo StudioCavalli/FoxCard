@@ -396,4 +396,129 @@ export const productRouter = router({
 
       return variant
     }),
+
+  // Bulk create/update variants for a product
+  bulkUpsertVariants: adminProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        variants: z.array(
+          z.object({
+            id: z.string().optional(), // If provided, update; otherwise create
+            name: z.string().min(1),
+            sku: z.string().optional(),
+            price: z.number().min(0).optional(),
+            quantity: z.number().int().min(0).default(0),
+            image: z.string().optional(),
+            options: z.record(z.string(), z.any()),
+          })
+        ),
+        deleteExisting: z.boolean().default(false), // Delete variants not in the list
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { productId, variants, deleteExisting } = input
+
+      // Verify product exists
+      const product = await ctx.prisma.product.findUnique({
+        where: { id: productId },
+      })
+
+      if (!product) {
+        throw new Error('Product not found')
+      }
+
+      // Get existing variants
+      const existingVariants = await ctx.prisma.productVariant.findMany({
+        where: { productId },
+      })
+
+      const existingIds = new Set(existingVariants.map((v) => v.id))
+      const inputIds = new Set(variants.filter((v) => v.id).map((v) => v.id!))
+
+      // Determine what to create, update, and delete
+      const toCreate = variants.filter((v) => !v.id)
+      const toUpdate = variants.filter((v) => v.id && existingIds.has(v.id))
+      const toDelete = deleteExisting
+        ? existingVariants.filter((v) => !inputIds.has(v.id))
+        : []
+
+      // Execute all operations in a transaction
+      await ctx.prisma.$transaction(async (tx) => {
+        // Delete old variants
+        if (toDelete.length > 0) {
+          await tx.productVariant.deleteMany({
+            where: {
+              id: { in: toDelete.map((v) => v.id) },
+            },
+          })
+        }
+
+        // Create new variants
+        if (toCreate.length > 0) {
+          await tx.productVariant.createMany({
+            data: toCreate.map((v) => ({
+              productId,
+              name: v.name,
+              sku: v.sku,
+              price: v.price,
+              quantity: v.quantity,
+              image: v.image,
+              options: v.options as any,
+            })),
+          })
+        }
+
+        // Update existing variants
+        for (const variant of toUpdate) {
+          await tx.productVariant.update({
+            where: { id: variant.id! },
+            data: {
+              name: variant.name,
+              sku: variant.sku,
+              price: variant.price,
+              quantity: variant.quantity,
+              image: variant.image,
+              options: variant.options as any,
+            },
+          })
+        }
+      })
+
+      // Return updated variants
+      const updatedVariants = await ctx.prisma.productVariant.findMany({
+        where: { productId },
+        orderBy: { createdAt: 'asc' },
+      })
+
+      return {
+        created: toCreate.length,
+        updated: toUpdate.length,
+        deleted: toDelete.length,
+        variants: updatedVariants,
+      }
+    }),
+
+  // Get variants for a product
+  getProductVariants: publicProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const variants = await ctx.prisma.productVariant.findMany({
+        where: { productId: input.productId },
+        orderBy: { createdAt: 'asc' },
+      })
+
+      return variants
+    }),
+
+  // Delete all variants for a product
+  deleteAllVariants: adminProcedure
+    .input(z.object({ productId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.prisma.productVariant.deleteMany({
+        where: { productId: input.productId },
+      })
+
+      return { deleted: result.count }
+    }),
 })

@@ -7,8 +7,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function NewsletterConfirmPage() {
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
@@ -22,7 +24,7 @@ export default function NewsletterConfirmPage() {
 
     if (!token || !email) {
       setStatus('error')
-      setMessage('Lien de confirmation invalide')
+      setMessage(t('newsletter.invalidLink'))
       return
     }
 
@@ -40,11 +42,11 @@ export default function NewsletterConfirmPage() {
         },
         onError: (error) => {
           setStatus('error')
-          setMessage(error.message || 'Erreur lors de la confirmation')
+          setMessage(error.message || t('newsletter.confirmError'))
         },
       }
     )
-  }, [searchParams])
+  }, [searchParams, t])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

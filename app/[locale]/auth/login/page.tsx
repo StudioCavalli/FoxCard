@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, ArrowLeft, AlertCircle, AlertTriangle } from 'lucide-react'
 import { usePlatformName, usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
+import { useTranslations } from 'next-intl'
 
 function LoginForm() {
+  const t = useTranslations()
   const router = useRouter()
   const searchParams = useSearchParams()
   const platformName = usePlatformName()
@@ -41,13 +43,13 @@ function LoginForm() {
       })
 
       if (result?.error) {
-        setError('Email ou mot de passe incorrect')
+        setError(t('auth.invalidCredentials'))
       } else {
         router.push(from)
         router.refresh()
       }
     } catch (error) {
-      setError('Une erreur est survenue')
+      setError(t('auth.genericError'))
     } finally {
       setIsLoading(false)
     }
@@ -66,7 +68,7 @@ function LoginForm() {
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-6 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
-          Retour à l'accueil
+          {t('auth.backToHome')}
         </Link>
 
         <div className="p-8 bg-theme-surface/80 backdrop-blur-xl border border-theme-border rounded-2xl shadow-2xl shadow-theme-primary/10">
@@ -82,9 +84,9 @@ function LoginForm() {
               className="text-3xl md:text-4xl font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Connexion
+              {t('auth.connection')}
             </h1>
-            <p className="text-theme-text-secondary text-lg">Accédez à votre compte {platformName}</p>
+            <p className="text-theme-text-secondary text-lg">{t('auth.accessAccount', { platform: platformName })}</p>
           </div>
 
           {/* Maintenance Mode Warning */}
@@ -92,8 +94,8 @@ function LoginForm() {
             <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-700">
-                <p className="font-semibold mb-1">Site en maintenance</p>
-                <p>Seuls les administrateurs peuvent se connecter pendant la maintenance.</p>
+                <p className="font-semibold mb-1">{t('auth.maintenanceTitle')}</p>
+                <p>{t('auth.maintenanceDesc')}</p>
               </div>
             </div>
           )}
@@ -107,7 +109,7 @@ function LoginForm() {
                 </svg>
               </div>
               <p className="text-sm text-green-600 font-medium">
-                Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.
+                {t('auth.accountCreated')}
               </p>
             </div>
           )}
@@ -127,7 +129,7 @@ function LoginForm() {
                 className="block text-sm font-semibold text-theme-text mb-2"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Email
+                {t('auth.email')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -149,7 +151,7 @@ function LoginForm() {
                 className="block text-sm font-semibold text-theme-text mb-2"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Mot de passe
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -173,14 +175,14 @@ function LoginForm() {
                   className="w-4 h-4 rounded border-theme-border text-theme-primary focus:ring-theme-primary/20 cursor-pointer"
                 />
                 <span className="ml-2 text-sm text-theme-text-secondary group-hover:text-theme-text transition-colors">
-                  Se souvenir de moi
+                  {t('auth.rememberMe')}
                 </span>
               </label>
               <Link
                 href="/auth/forgot-password"
                 className="text-sm text-theme-primary hover:text-theme-primary/80 font-medium transition-colors"
               >
-                Mot de passe oublié ?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
 
@@ -196,10 +198,10 @@ function LoginForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Connexion...
+                  {t('auth.loggingIn')}
                 </>
               ) : (
-                'Se connecter'
+                t('auth.loginButton')
               )}
             </button>
           </form>
@@ -207,19 +209,19 @@ function LoginForm() {
           {/* Divider */}
           <div className="my-6 flex items-center">
             <div className="flex-1 border-t border-theme-border"></div>
-            <span className="px-4 text-sm text-theme-text-muted">ou</span>
+            <span className="px-4 text-sm text-theme-text-muted">{t('auth.or')}</span>
             <div className="flex-1 border-t border-theme-border"></div>
           </div>
 
           {/* Register Link */}
           <div className="text-center">
             <p className="text-theme-text-secondary">
-              Vous n'avez pas de compte ?{' '}
+              {t('auth.noAccount')}{' '}
               <Link
                 href="/auth/register"
                 className="text-theme-primary hover:text-theme-primary/80 font-semibold transition-colors"
               >
-                Créer un compte
+                {t('auth.createAccount')}
               </Link>
             </p>
           </div>
@@ -227,11 +229,11 @@ function LoginForm() {
           {/* Demo Account */}
           <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
             <p className="text-sm text-blue-600 font-semibold mb-2" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-              Compte de démonstration:
+              {t('auth.demoAccount')}
             </p>
             <p className="text-xs text-blue-600 font-mono">
               Email: admin@foxcard.com<br />
-              Mot de passe: admin123
+              {t('auth.password')}: admin123
             </p>
           </div>
         </div>
@@ -249,7 +251,7 @@ export default function LoginPage() {
             <div className="w-16 h-16 bg-theme-surface border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <Lock className="w-8 h-8 text-theme-text-muted" />
             </div>
-            <p className="text-theme-text-secondary">Chargement...</p>
+            <p className="text-theme-text-secondary"></p>
           </div>
         </div>
       }

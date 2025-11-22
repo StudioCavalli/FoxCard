@@ -3,13 +3,17 @@
 import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Github, Mail, Phone, MapPin, ArrowUpRight, Heart } from 'lucide-react'
 import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
+import { useTranslations } from 'next-intl'
+import { LanguageSelector } from '../i18n/LanguageSelector'
+import { CurrencySelector } from '../currency/CurrencySelector'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
   const platformName = usePlatformName()
+  const t = useTranslations()
 
   return (
-    <footer className="relative bg-gradient-to-b from-theme-background to-theme-surface border-t border-theme-border mt-32" style={{ fontFamily: 'var(--theme-font-body)' }}>
+    <footer className="relative bg-gradient-to-b from-theme-background to-theme-surface border-t border-theme-border" style={{ fontFamily: 'var(--theme-font-body)' }}>
       {/* Top Border Gradient */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-theme-primary/30 to-transparent" />
 
@@ -33,8 +37,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-theme-text-secondary leading-relaxed mb-6 max-w-sm">
-              La plateforme e-commerce 100% gratuite et open source.
-              Construisez votre boutique en ligne sans limites.
+              {t('footer.description')}
             </p>
 
             {/* Social Links */}
@@ -62,14 +65,14 @@ export function Footer() {
           {/* Product Links */}
           <div>
             <h3 className="text-sm font-semibold text-theme-text mb-4 uppercase tracking-wider" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-              Produits
+              {t('common.products')}
             </h3>
             <ul className="space-y-3">
               {[
-                { label: 'Tous les produits', href: '/products' },
-                { label: 'Nouveautés', href: '/products?sort=newest' },
-                { label: 'Meilleures ventes', href: '/products?sort=popular' },
-                { label: 'Promotions', href: '/products?filter=sale' },
+                { label: t('common.viewAll'), href: '/products' },
+                { label: t('header.newArrivals'), href: '/products?sort=newest' },
+                { label: t('header.bestSellers'), href: '/products?sort=popular' },
+                { label: t('header.deals'), href: '/products?filter=sale' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -87,14 +90,14 @@ export function Footer() {
           {/* Company Links */}
           <div>
             <h3 className="text-sm font-semibold text-theme-text mb-4 uppercase tracking-wider" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-              Entreprise
+              {t('footer.company')}
             </h3>
             <ul className="space-y-3">
               {[
-                { label: 'À propos', href: '/about' },
-                { label: 'Blog', href: '/blog' },
-                { label: 'Carrières', href: '/careers' },
-                { label: 'Contact', href: '/contact' },
+                { label: t('footer.about'), href: '/about' },
+                { label: t('footer.blog'), href: '/blog' },
+                { label: t('footer.careers'), href: '/careers' },
+                { label: t('footer.contact'), href: '/contact' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -112,14 +115,14 @@ export function Footer() {
           {/* Support Links */}
           <div>
             <h3 className="text-sm font-semibold text-theme-text mb-4 uppercase tracking-wider" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-              Support
+              {t('footer.support')}
             </h3>
             <ul className="space-y-3">
               {[
-                { label: 'Centre d\'aide', href: '/help' },
-                { label: 'Documentation', href: '/docs' },
-                { label: 'Mon compte', href: '/account' },
-                { label: 'Suivi de commande', href: '/orders' },
+                { label: t('footer.helpCenter'), href: '/help' },
+                { label: t('footer.documentation'), href: '/docs' },
+                { label: t('footer.myAccount'), href: '/account' },
+                { label: t('footer.orderTracking'), href: '/orders' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -141,18 +144,24 @@ export function Footer() {
             {/* Copyright */}
             <div className="flex items-center gap-2 text-sm text-theme-text-muted">
               <span>© {currentYear} {platformName}.</span>
-              <span className="hidden sm:inline">Tous droits réservés.</span>
+              <span className="hidden sm:inline">{t('footer.allRightsReserved')}.</span>
               <span className="inline-flex items-center gap-1">
-                Fait avec <Heart className="w-3 h-3 text-red-500 fill-red-500" /> par Studio Cavalli
+                {t('footer.madeWith')} <Heart className="w-3 h-3 text-red-500 fill-red-500" /> {t('footer.by')} Foxcase
               </span>
+            </div>
+
+            {/* Language & Currency Selectors */}
+            <div className="flex items-center gap-2">
+              <LanguageSelector position="top" variant="compact" />
+              <CurrencySelector position="top" variant="compact" />
             </div>
 
             {/* Legal Links */}
             <div className="flex items-center gap-6">
               {[
-                { label: 'Confidentialité', href: '/privacy' },
-                { label: 'CGU', href: '/terms' },
-                { label: 'Mentions légales', href: '/legal' },
+                { label: t('footer.privacyPolicy'), href: '/privacy' },
+                { label: t('footer.termsOfService'), href: '/terms' },
+                { label: t('footer.legal'), href: '/legal' },
               ].map((link, index) => (
                 <Link
                   key={link.href}

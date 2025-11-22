@@ -1698,7 +1698,7 @@ export const superadminRouter = router({
         data: {
           ticketId: input.ticketId,
           authorId: ctx.session.user.id,
-          authorName: ctx.session.user.name || 'Support FoxCard',
+          authorName: ctx.session.user.name || 'Support GoldenEra',
           isAdmin: true,
           content: input.content,
         },

@@ -36,7 +36,7 @@ interface OrderInvoiceProps {
 }
 
 export const OrderInvoice = ({
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
   customerName,
   orderNumber,

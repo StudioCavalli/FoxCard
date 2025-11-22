@@ -20,13 +20,13 @@ interface PlatformSettingsContextType {
 }
 
 const defaultSettings: PlatformSettings = {
-  platformName: 'FoxCard',
+  platformName: 'GoldenEra',
   maintenanceMode: false,
   maintenanceMessage: '',
   defaultCurrency: 'EUR',
   defaultLanguage: 'fr',
-  supportedCurrencies: ['EUR', 'USD', 'GBP', 'CHF'],
-  supportedLanguages: ['fr', 'en', 'de'],
+  supportedCurrencies: ['EUR', 'USD', 'GBP', 'CHF', 'CZK'],
+  supportedLanguages: ['fr', 'en', 'de', 'es', 'sk'],
   allowRegistration: true,
 }
 

@@ -13,12 +13,8 @@ interface StoreState {
   clearCurrentStore: () => void
 }
 
-// Default store for development/demo
-const DEFAULT_STORE: Store = {
-  id: '000000000000000000000001',
-  name: 'FoxCard Demo Store',
-  slug: 'demo',
-}
+// Default store will be null - actual store comes from PublicStoreContext
+const DEFAULT_STORE: Store | null = null
 
 export const useStore = create<StoreState>()(
   persist(
@@ -28,7 +24,7 @@ export const useStore = create<StoreState>()(
       clearCurrentStore: () => set({ currentStore: null }),
     }),
     {
-      name: 'foxcard-store',
+      name: 'goldenera-store',
     }
   )
 )

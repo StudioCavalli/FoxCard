@@ -1,6 +1,7 @@
 import { Text, Heading, Button, Section } from '@react-email/components'
 import * as React from 'react'
 import { BaseLayout } from './layouts/Base'
+import { getAccountEmailTranslations, type Locale } from '../i18n'
 
 interface WelcomeEmailProps {
   storeName?: string
@@ -8,50 +9,56 @@ interface WelcomeEmailProps {
   customerName: string
   loginUrl?: string
   trackingPixelUrl?: string
+  locale?: Locale
 }
 
 export const WelcomeEmail = ({
-  storeName,
+  storeName = 'GoldenEra',
   storeLogo,
   customerName,
   loginUrl,
   trackingPixelUrl,
+  locale = 'fr',
 }: WelcomeEmailProps) => {
+  const t = getAccountEmailTranslations(locale)
+
   return (
     <BaseLayout
       storeName={storeName}
       storeLogo={storeLogo}
       trackingPixelUrl={trackingPixelUrl}
     >
-      <Heading style={h1}>Bienvenue {customerName} !</Heading>
+      <Heading style={h1}>{t.welcome.title(storeName)}</Heading>
 
       <Text style={text}>
-        Nous sommes ravis de vous compter parmi nous. Votre compte a été créé
-        avec succès.
+        {t.common.hello(customerName)}
       </Text>
 
       <Text style={text}>
-        Vous pouvez désormais profiter de nombreux avantages :
+        {t.welcome.intro}
+      </Text>
+
+      <Text style={text}>
+        {t.welcome.benefits}
       </Text>
 
       <ul style={list}>
-        <li style={listItem}>Suivi de vos commandes en temps réel</li>
-        <li style={listItem}>Historique de vos achats</li>
-        <li style={listItem}>Gestion de vos adresses de livraison</li>
-        <li style={listItem}>Offres exclusives réservées aux membres</li>
+        <li style={listItem}>{t.welcome.benefit1}</li>
+        <li style={listItem}>{t.welcome.benefit2}</li>
+        <li style={listItem}>{t.welcome.benefit3}</li>
+        <li style={listItem}>{t.welcome.benefit4}</li>
       </ul>
 
       {loginUrl && (
         <Section style={buttonContainer}>
           <Button href={loginUrl} style={button}>
-            Accéder à mon compte
+            {t.welcome.startShopping}
           </Button>
         </Section>
       )}
 
       <Text style={helpText}>
-        Des questions ? N'hésitez pas à nous contacter, nous sommes là pour
-        vous aider !
+        {t.common.questions}
       </Text>
     </BaseLayout>
   )

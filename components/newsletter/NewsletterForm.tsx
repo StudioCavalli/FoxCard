@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Mail, CheckCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export interface NewsletterFormProps {
   storeId?: string
@@ -17,9 +18,12 @@ export const NewsletterForm = ({
   storeId = '000000000000000000000001',
   variant = 'inline',
   showNames = false,
-  buttonText = 'S\'inscrire',
-  placeholder = 'Votre email',
+  buttonText,
+  placeholder,
 }: NewsletterFormProps) => {
+  const t = useTranslations()
+  const resolvedButtonText = buttonText || t('newsletter.subscribe')
+  const resolvedPlaceholder = placeholder || t('newsletter.emailPlaceholder')
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -33,7 +37,7 @@ export const NewsletterForm = ({
     setError('')
 
     if (!email) {
-      setError('Veuillez entrer votre email')
+      setError(t('newsletter.enterEmail'))
       return
     }
 
@@ -57,7 +61,7 @@ export const NewsletterForm = ({
           }
         },
         onError: (err) => {
-          setError(err.message || 'Une erreur est survenue')
+          setError(err.message || t('errors.generic'))
         },
       }
     )
@@ -105,14 +109,14 @@ export const NewsletterForm = ({
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Prénom"
+              placeholder={t('newsletter.firstName')}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Nom"
+              placeholder={t('newsletter.lastName')}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
@@ -124,7 +128,7 @@ export const NewsletterForm = ({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             />
@@ -137,7 +141,7 @@ export const NewsletterForm = ({
             className={variant === 'inline' ? '' : 'w-full'}
           >
             <Mail className="w-4 h-4 mr-2" />
-            {subscribeMutation.isPending ? 'Inscription...' : buttonText}
+            {subscribeMutation.isPending ? t('newsletter.subscribing') : resolvedButtonText}
           </Button>
         </div>
 

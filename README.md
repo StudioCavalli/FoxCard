@@ -1,13 +1,15 @@
-# 🦊 FoxCard - E-commerce Open Source
+# 🌟 GoldenEra - E-commerce Open Source
 
 **Version 1.0.0** 🎉 Production Ready
 
-Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. FoxCard est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
+Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. GoldenEra est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-success)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16+-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
+[![i18n](https://img.shields.io/badge/i18n-5%20languages-green)](https://next-intl-docs.vercel.app/)
+[![Multi-Currency](https://img.shields.io/badge/Currency-5%20supported-orange)]()
 
 ## 🚀 Stack Technique
 
@@ -35,8 +37,8 @@ Alternative 100% gratuite et open source à Shopify, construite avec les technol
 
 1. **Cloner le repository**
 ```bash
-git clone https://github.com/StudioCavalli/FoxCard.git
-cd FoxCard
+git clone https://github.com/Foxcase/GoldenEra.git
+cd GoldenEra
 ```
 
 2. **Installer les dépendances**
@@ -85,7 +87,7 @@ L'application sera disponible sur [http://localhost:3000](http://localhost:3000)
 ### Structure du Projet
 
 ```
-FoxCard/
+GoldenEra/
 ├── app/                      # Pages Next.js (App Router)
 │   ├── api/                  # API Routes
 │   │   ├── auth/            # NextAuth endpoints
@@ -147,7 +149,7 @@ Tous les composants utilisent des coins arrondis (`rounded-xl`, `rounded-2xl`) e
 ### Compte Admin par Défaut
 
 Après le seed, utilisez ces credentials :
-- **Email** : admin@foxcard.com
+- **Email** : admin@goldenera.com
 - **Password** : admin123
 
 ## 🛒 Fonctionnalités Principales
@@ -485,7 +487,7 @@ Après le seed, utilisez ces credentials :
 
 #### 🌍 Internationalisation (i18n)
 - [x] **Configuration next-intl** (`i18n.ts`) :
-  - Support de 4 langues : Français (FR), English (EN), Español (ES), Deutsch (DE)
+  - Support de 5 langues : Français (FR), English (EN), Español (ES), Deutsch (DE), Slovenčina (SK)
   - Langue par défaut : Français
   - Chargement dynamique des traductions
 - [x] **Fichiers de Traduction** (`messages/`) :
@@ -493,6 +495,7 @@ Après le seed, utilisez ces credentials :
   - `en.json` : Traductions anglaises
   - `es.json` : Traductions espagnoles
   - `de.json` : Traductions allemandes
+  - `sk.json` : Traductions slovaques
 - [x] **Catégories de Traduction** :
   - common : Termes génériques (save, cancel, delete, etc.)
   - nav : Navigation (home, products, cart, etc.)
@@ -613,9 +616,9 @@ Après le seed, utilisez ces credentials :
   - `delete` : Suppression
   - `getUsageStats` : Statistiques d'utilisation
 - [x] **Format de Clé** :
-  - Préfixe : `foxcard_`
+  - Préfixe : `goldenera_`
   - 64 caractères hexadécimaux aléatoires
-  - Exemple : `foxcard_a1b2c3d4e5f6...`
+  - Exemple : `goldenera_a1b2c3d4e5f6...`
 - [x] **Réponses API** :
   - Format JSON standard
   - Pagination : `{ data: [], pagination: { page, limit, total, pages } }`
@@ -862,7 +865,7 @@ Après le seed, utilisez ces credentials :
   - Désactivé en développement, actif en production
   - Support mode hors ligne avec page dédiée
 - [x] **Manifest PWA** (`public/manifest.json`) :
-  - Nom : "FoxCard - E-commerce Open Source"
+  - Nom : "GoldenEra - E-commerce Open Source"
   - Icônes PWA : 72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512
   - Display mode : standalone
   - Couleur de thème : #14b8a6 (Teal)
@@ -1123,7 +1126,8 @@ Après le seed, utilisez ces credentials :
 - [x] **API REST publique** documentée
 - [x] **Webhooks** pour intégrations
 - [x] **Export de données** (CSV/JSON)
-- [x] **Multi-langue** (FR, EN, ES, DE)
+- [x] **Multi-langue** (FR, EN, ES, DE, SK)
+- [x] **Multi-devise** (EUR, USD, GBP, CHF, CZK)
 - [x] **Plugins extensibles**
 
 #### 📋 Roadmap Future
@@ -1136,7 +1140,7 @@ Après le seed, utilisez ces credentials :
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! FoxCard est un projet open source qui vit grâce à sa communauté.
+Les contributions sont les bienvenues ! GoldenEra est un projet open source qui vit grâce à sa communauté.
 
 ### 📚 Documentation Complète
 
@@ -1149,8 +1153,8 @@ Les contributions sont les bienvenues ! FoxCard est un projet open source qui vi
 
 ```bash
 # 1. Fork et clone le repo
-git clone https://github.com/VOTRE-USERNAME/FoxCard.git
-cd FoxCard
+git clone https://github.com/VOTRE-USERNAME/GoldenEra.git
+cd GoldenEra
 
 # 2. Installer les dépendances
 npm install
@@ -1169,7 +1173,7 @@ npm run dev
 
 ### 🎯 Comment Contribuer
 
-1. Consultez les [issues ouvertes](https://github.com/StudioCavalli/FoxCard/issues)
+1. Consultez les [issues ouvertes](https://github.com/Foxcase/GoldenEra/issues)
 2. Cherchez le label `good first issue` pour débuter
 3. Commentez l'issue pour l'annoncer
 4. Créez une branche : `git checkout -b feature/ma-feature`
@@ -1201,4 +1205,4 @@ Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
 ---
 
-Développé avec ❤️ par [Studio Cavalli](https://github.com/StudioCavalli)
+Développé avec ❤️ par [Foxcase](https://github.com/Foxcase)

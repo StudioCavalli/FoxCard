@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { useCartStore } from '@/lib/store/cart'
 import { ShoppingCart, Plus, Tag } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ProductCardProps {
   product: {
@@ -31,6 +32,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, storeSlug, showStoreName = false }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
+  const t = useTranslations()
 
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
 
@@ -83,7 +85,7 @@ export function ProductCard({ product, storeSlug, showStoreName = false }: Produ
             {/* Out of Stock Badge */}
             {isOutOfStock && (
               <div className="px-3 py-1.5 bg-theme-surface/95 backdrop-blur-md border border-theme-border rounded-full text-xs font-semibold text-theme-text-muted shadow-lg">
-                Rupture de stock
+                {t('product.outOfStock')}
               </div>
             )}
 
@@ -104,7 +106,7 @@ export function ProductCard({ product, storeSlug, showStoreName = false }: Produ
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
-              {isOutOfStock ? 'Indisponible' : 'Ajouter'}
+              {isOutOfStock ? t('product.outOfStock') : t('common.add')}
             </button>
           </div>
         </div>
@@ -176,7 +178,7 @@ export function ProductCard({ product, storeSlug, showStoreName = false }: Produ
           {/* Stock Indicator */}
           {!isOutOfStock && product.quantity < 10 && (
             <p className="mt-2 text-xs text-theme-text-muted">
-              Plus que {product.quantity} en stock
+              {t('product.lowStock')}
             </p>
           )}
         </div>

@@ -16,7 +16,7 @@ export interface NewsletterWelcomeProps extends BaseLayoutProps {
 }
 
 export const NewsletterWelcome = ({
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
   firstName = 'Cher abonné',
   trackingPixelUrl,

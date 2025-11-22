@@ -7,8 +7,10 @@ import { Search, Star, Package } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { useTranslations } from 'next-intl'
 
 export default function StoresDirectoryPage() {
+  const t = useTranslations()
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'newest' | 'rating' | 'products'>('name')
 
@@ -24,9 +26,9 @@ export default function StoresDirectoryPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">Découvrez nos boutiques</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('store.discoverStores')}</h1>
           <p className="text-xl text-indigo-100 mb-8">
-            Explorez des centaines de boutiques indépendantes et trouvez des produits uniques
+            {t('store.subtitle')}
           </p>
 
           {/* Search Bar */}
@@ -35,7 +37,7 @@ export default function StoresDirectoryPage() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Rechercher une boutique..."
+                placeholder={t('store.search')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-12 pr-4 py-3 w-full bg-white text-gray-900 rounded-lg shadow-lg"
@@ -50,21 +52,21 @@ export default function StoresDirectoryPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-600">
-              {data?.total || 0} boutique{(data?.total || 0) > 1 ? 's' : ''} trouvée{(data?.total || 0) > 1 ? 's' : ''}
+              {t('store.storesFound', { count: data?.total || 0 })}
             </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700">Trier par:</label>
+            <label className="text-sm font-medium text-gray-700">{t('store.sort')}:</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="name">Nom</option>
-              <option value="newest">Plus récentes</option>
-              <option value="rating">Mieux notées</option>
-              <option value="products">Plus de produits</option>
+              <option value="name">{t('store.sortOptions.alphabetical')}</option>
+              <option value="newest">{t('store.sortOptions.newest')}</option>
+              <option value="rating">{t('store.sortOptions.rating')}</option>
+              <option value="products">{t('store.sortOptions.mostProducts')}</option>
             </select>
           </div>
         </div>
@@ -85,16 +87,16 @@ export default function StoresDirectoryPage() {
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <p className="text-red-600">Erreur lors du chargement des boutiques</p>
+            <p className="text-red-600">{t('store.loadError')}</p>
           </div>
         ) : !data?.stores || data.stores.length === 0 ? (
           <div className="text-center py-12">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Aucune boutique trouvée
+              {t('store.noResults')}
             </h3>
             <p className="text-gray-600">
-              Essayez une autre recherche ou revenez plus tard
+              {t('store.tryAgain')}
             </p>
           </div>
         ) : (
@@ -132,7 +134,7 @@ export default function StoresDirectoryPage() {
 
                 {/* Tagline or Description */}
                 <p className="text-sm text-gray-600 text-center mb-4 flex-grow line-clamp-2">
-                  {store.tagline || store.description || 'Découvrez nos produits'}
+                  {store.tagline || store.description || t('store.discoverProducts')}
                 </p>
 
                 {/* Stats */}
@@ -152,7 +154,7 @@ export default function StoresDirectoryPage() {
 
                 {/* Visit Button */}
                 <Button variant="outline" className="w-full">
-                  Visiter la boutique
+                  {t('store.viewStore')}
                 </Button>
               </Link>
             ))}

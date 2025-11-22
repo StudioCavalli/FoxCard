@@ -10,6 +10,7 @@ import {
   Text,
   Button,
 } from '@react-email/components'
+import { getAccountEmailTranslations, type Locale } from '../i18n'
 
 interface UserInvitationProps {
   inviterName: string
@@ -18,68 +19,66 @@ interface UserInvitationProps {
   roleName: string
   invitationUrl: string
   expiresInDays?: number
+  locale?: Locale
 }
 
 export default function UserInvitation({
   inviterName = 'John Doe',
   inviterEmail = 'john@example.com',
-  storeName = 'Ma Boutique',
+  storeName = 'My Store',
   roleName = 'Manager',
-  invitationUrl = 'https://foxcard.com/accept-invitation?token=xxx',
+  invitationUrl = 'https://goldenera.com/accept-invitation?token=xxx',
   expiresInDays = 7,
+  locale = 'fr',
 }: UserInvitationProps) {
+  const t = getAccountEmailTranslations(locale)
+
   return (
     <Html>
       <Head />
       <Preview>
-        {inviterName} vous invite à rejoindre {storeName} sur FoxCard
+        {t.invitation.subject(storeName)}
       </Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Heading style={h1}>Invitation à rejoindre {storeName}</Heading>
+            <Heading style={h1}>{t.invitation.title}</Heading>
           </Section>
 
           {/* Content */}
           <Section style={content}>
             <Text style={paragraph}>
-              <strong>{inviterName}</strong> ({inviterEmail}) vous invite à rejoindre{' '}
-              <strong>{storeName}</strong> en tant que <strong>{roleName}</strong>.
+              {t.invitation.intro(inviterName, storeName, roleName)}
             </Text>
 
             <Text style={paragraph}>
-              En acceptant cette invitation, vous pourrez collaborer sur ce magasin et
-              accéder aux fonctionnalités selon votre rôle.
+              ({inviterEmail})
             </Text>
 
             {/* CTA Button */}
             <Section style={buttonContainer}>
               <Button style={button} href={invitationUrl}>
-                Accepter l'invitation
+                {t.invitation.acceptButton}
               </Button>
             </Section>
 
-            <Text style={paragraph}>
-              Ou copiez et collez ce lien dans votre navigateur :
-            </Text>
             <Text style={link}>
               <Link href={invitationUrl}>{invitationUrl}</Link>
             </Text>
 
             <Text style={warningText}>
-              ⚠️ Cette invitation expire dans {expiresInDays} jours.
+              {t.invitation.expiry(expiresInDays)}
             </Text>
           </Section>
 
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email en toute
-              sécurité.
+              {t.common.questions}
             </Text>
             <Text style={footerText}>
-              © {new Date().getFullYear()} FoxCard. Tous droits réservés.
+              © {new Date().getFullYear()} GoldenEra
             </Text>
           </Section>
         </Container>

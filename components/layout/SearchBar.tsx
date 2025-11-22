@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function SearchBar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const router = useRouter()
+  const t = useTranslations()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +25,7 @@ export function SearchBar() {
       </div>
       <input
         type="text"
-        placeholder="Rechercher des produits..."
+        placeholder={t('common.searchPlaceholder')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         onFocus={() => setIsFocused(true)}

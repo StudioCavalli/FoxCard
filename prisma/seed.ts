@@ -9,10 +9,10 @@ async function main() {
   // Create admin user
   const hashedPassword = await hash('admin123', 10)
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@foxcard.com' },
+    where: { email: 'admin@goldenera.com' },
     update: {},
     create: {
-      email: 'admin@foxcard.com',
+      email: 'admin@goldenera.com',
       name: 'Admin User',
       password: hashedPassword,
       role: 'SUPER_ADMIN',
@@ -27,9 +27,9 @@ async function main() {
     update: {},
     create: {
       id: '000000000000000000000001',
-      name: 'FoxCard Demo Store',
+      name: 'GoldenEra Demo Store',
       slug: 'demo',
-      description: 'Boutique de démonstration FoxCard',
+      description: 'Boutique de démonstration GoldenEra',
       ownerId: adminUser.id,
     },
   })

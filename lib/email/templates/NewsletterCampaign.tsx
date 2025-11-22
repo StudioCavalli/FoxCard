@@ -18,7 +18,7 @@ export interface NewsletterCampaignProps extends BaseLayoutProps {
 }
 
 export const NewsletterCampaign = ({
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
   firstName = 'Cher abonné',
   htmlContent,

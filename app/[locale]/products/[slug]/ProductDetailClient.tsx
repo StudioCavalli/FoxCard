@@ -10,6 +10,7 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { ShoppingCart, ArrowLeft, Check, Minus, Plus, Star, Tag } from 'lucide-react'
 import { usePublicStore } from '@/lib/context/public-store-context'
+import { useTranslations } from 'next-intl'
 
 interface ProductDetailClientProps {
   slug: string
@@ -18,6 +19,7 @@ interface ProductDetailClientProps {
 
 export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClientProps) {
   const router = useRouter()
+  const t = useTranslations()
   const { selectedStore } = usePublicStore()
 
   const [quantity, setQuantity] = useState(1)
@@ -76,12 +78,12 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
             className="text-3xl font-bold text-theme-text mb-4"
             style={{ fontFamily: 'var(--theme-font-heading)' }}
           >
-            Produit introuvable
+            {t('product.notFound')}
           </h1>
-          <p className="text-theme-text-secondary mb-6">Ce produit n'existe pas ou a été supprimé</p>
+          <p className="text-theme-text-secondary mb-6">{t('product.notFoundDescription')}</p>
           <Link href="/products">
             <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200">
-              Retour aux produits
+              {t('product.backToProducts')}
             </button>
           </Link>
         </div>
@@ -125,7 +127,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-8 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
-          Retour aux produits
+          {t('product.backToProducts')}
         </Link>
 
         {/* Product Detail */}
@@ -149,7 +151,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
               {product.featured && (
                 <div className="absolute top-4 left-4 bg-gradient-to-r from-theme-primary to-theme-accent text-theme-background text-sm font-bold px-3 py-1.5 rounded-full shadow-lg shadow-theme-primary/50 flex items-center gap-1">
                   <Star className="w-4 h-4 fill-current" />
-                  Populaire
+                  {t('product.popular')}
                 </div>
               )}
             </div>
@@ -221,17 +223,17 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
               {isOutOfStock ? (
                 <>
                   <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  <span className="text-theme-text font-medium">Rupture de stock</span>
+                  <span className="text-theme-text font-medium">{t('product.outOfStock')}</span>
                 </>
               ) : product.quantity < 10 ? (
                 <>
                   <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                  <span className="text-theme-text font-medium">Plus que {product.quantity} en stock</span>
+                  <span className="text-theme-text font-medium">{t('product.onlyLeft', { count: product.quantity })}</span>
                 </>
               ) : (
                 <>
                   <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-theme-text font-medium">En stock</span>
+                  <span className="text-theme-text font-medium">{t('product.inStock')}</span>
                 </>
               )}
             </div>
@@ -256,7 +258,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                   className="font-semibold text-theme-text mb-3 text-lg"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Description
+                  {t('product.description')}
                 </h3>
                 <p className="text-theme-text-secondary leading-relaxed whitespace-pre-wrap">{product.description}</p>
               </div>
@@ -268,7 +270,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                   className="block text-sm font-semibold text-theme-text mb-3"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Options disponibles
+                  {t('product.availableOptions')}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {product.variants.map((variant) => (
@@ -286,10 +288,10 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                         {formatPrice(variant.price || product.price)}
                       </div>
                       {variant.quantity <= 0 && (
-                        <div className="text-xs text-red-600 mt-1">Rupture de stock</div>
+                        <div className="text-xs text-red-600 mt-1">{t('product.outOfStock')}</div>
                       )}
                       {variant.quantity > 0 && variant.quantity < 5 && (
-                        <div className="text-xs text-yellow-600 mt-1">Plus que {variant.quantity}</div>
+                        <div className="text-xs text-yellow-600 mt-1">{t('product.onlyLeftVariant', { count: variant.quantity })}</div>
                       )}
                     </button>
                   ))}
@@ -304,7 +306,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                     className="block text-sm font-semibold text-theme-text mb-3"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Quantité
+                    {t('product.quantity')}
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center bg-theme-surface border border-theme-border rounded-xl overflow-hidden">
@@ -327,7 +329,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                       </button>
                     </div>
                     <span className="text-theme-text-secondary font-medium">
-                      {formatPrice(product.price * quantity)} total
+                      {formatPrice(product.price * quantity)} {t('product.total')}
                     </span>
                   </div>
                 </div>
@@ -338,7 +340,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
                   <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
-                  Ajouter au panier
+                  {t('product.addToCart')}
                 </button>
               </div>
             )}
@@ -348,7 +350,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                 <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Check className="w-5 h-5 text-green-600" />
                 </div>
-                <span className="font-medium">Livraison gratuite</span>
+                <span className="font-medium">{t('product.freeDelivery')}</span>
               </div>
               <div className="flex items-center gap-3 text-theme-text-secondary">
                 <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -356,7 +358,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="font-medium">Paiement sécurisé</span>
+                <span className="font-medium">{t('product.securePayment')}</span>
               </div>
               <div className="flex items-center gap-3 text-theme-text-secondary">
                 <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -364,7 +366,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </div>
-                <span className="font-medium">Retours sous 30 jours</span>
+                <span className="font-medium">{t('product.returns30days')}</span>
               </div>
             </div>
           </div>
@@ -377,7 +379,7 @@ export function ProductDetailClient({ slug, initialStoreId }: ProductDetailClien
               className="text-3xl md:text-4xl font-bold text-theme-text mb-10"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Produits similaires
+              {t('product.relatedProducts')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredRelatedProducts.map((relatedProduct) => (
