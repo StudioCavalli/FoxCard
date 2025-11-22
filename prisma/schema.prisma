@@ -3047,3 +3047,1259 @@ model PlatformRoleAssignment {
   @@index([userId])
   @@index([roleId])
 }
+
+// ============================================
+// COMMERCE-TYPE SPECIFIC MODELS
+// ============================================
+
+// ============================================
+// HOTEL - Room Management
+// ============================================
+
+model RoomType {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  name        String   // "Standard", "Deluxe", "Suite", "Presidential"
+  slug        String
+  description String?
+
+  // Capacity
+  maxOccupancy   Int      @default(2)
+  maxAdults      Int      @default(2)
+  maxChildren    Int      @default(0)
+  bedConfiguration String? // "1 King" or "2 Queen" or "1 King + 1 Sofa"
+
+  // Size
+  sizeSqm        Float?   // Room size in square meters
+
+  // Base pricing
+  basePrice      Float    // Base price per night
+  currency       String   @default("EUR")
+
+  // Images
+  images         String[]
+  thumbnail      String?
+
+  // Amenities included
+  amenityIds     String[] @db.ObjectId
+
+  // Status
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+
+  // Relations
+  rooms          HotelRoom[]
+  seasonalRates  SeasonalRate[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([isActive])
+}
+
+model HotelRoom {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  roomTypeId  String   @db.ObjectId
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+
+  // Room identification
+  roomNumber  String   // "101", "201A"
+  floor       Int?
+  building    String?  // For hotels with multiple buildings
+
+  // Status
+  status      HotelRoomStatus @default(AVAILABLE)
+  isActive    Boolean  @default(true)
+
+  // Notes
+  notes       String?  // Internal notes about the room
+
+  // Maintenance
+  lastCleanedAt     DateTime?
+  lastMaintenanceAt DateTime?
+
+  // Relations
+  reservations HotelReservation[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, roomNumber])
+  @@index([storeId])
+  @@index([roomTypeId])
+  @@index([status])
+}
+
+model Amenity {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  name        String   // "WiFi", "Pool", "Spa", "Parking"
+  slug        String
+  description String?
+  icon        String?  // Icon name or URL
+
+  // Category
+  category    AmenityCategory @default(GENERAL)
+
+  // Display
+  isHighlighted Boolean @default(false) // Show prominently
+  sortOrder     Int     @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([category])
+}
+
+model SeasonalRate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  roomTypeId  String   @db.ObjectId
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+
+  // Season info
+  name        String   // "High Season", "Christmas", "Summer"
+
+  // Date range
+  startDate   DateTime
+  endDate     DateTime
+
+  // Pricing
+  pricePerNight Float  // Override price for this season
+  minStay       Int?   // Minimum nights required
+
+  // Day-specific pricing (optional)
+  weekdayPrice  Float? // Mon-Thu price
+  weekendPrice  Float? // Fri-Sun price
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([roomTypeId])
+  @@index([startDate, endDate])
+}
+
+model HotelReservation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  // Link to base booking (for common fields)
+  bookingId   String?  @db.ObjectId
+
+  // Room assignment
+  roomId      String   @db.ObjectId
+  room        HotelRoom @relation(fields: [roomId], references: [id])
+
+  // Stay details
+  checkInDate  DateTime
+  checkOutDate DateTime
+  nights       Int
+
+  // Guest info
+  guestCount   Int      @default(1)
+  adultCount   Int      @default(1)
+  childCount   Int      @default(0)
+
+  // Primary guest
+  guestName    String
+  guestEmail   String
+  guestPhone   String?
+
+  // Additional guests
+  additionalGuests Json? // Array of { name, isChild, age }
+
+  // Pricing
+  roomRate     Float    // Rate per night
+  totalAmount  Float
+  depositPaid  Float    @default(0)
+
+  // Status
+  status       HotelReservationStatus @default(CONFIRMED)
+
+  // Check-in/out
+  actualCheckIn  DateTime?
+  actualCheckOut DateTime?
+  checkedInBy    String?
+  checkedOutBy   String?
+
+  // Special requests
+  specialRequests String?
+  internalNotes   String?
+
+  // Extras
+  extras         Json?   // Array of { name, price, quantity }
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([roomId])
+  @@index([checkInDate])
+  @@index([status])
+}
+
+enum HotelRoomStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+  OUT_OF_ORDER
+}
+
+enum HotelReservationStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+enum AmenityCategory {
+  GENERAL      // WiFi, AC, TV
+  BATHROOM     // Bathtub, Shower, Toiletries
+  BEDROOM      // King bed, Safe, Minibar
+  OUTDOOR      // Pool, Garden, Terrace
+  WELLNESS     // Spa, Gym, Sauna
+  DINING       // Restaurant, Room service, Bar
+  BUSINESS     // Meeting room, Business center
+  FAMILY       // Kids club, Playground
+  ACCESSIBILITY // Wheelchair access, Elevator
+}
+
+// ============================================
+// RESTAURANT - Menu & Operations
+// ============================================
+
+model ModifierGroup {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  name        String   // "Choose your size", "Add extras", "Select sauce"
+  slug        String
+  description String?
+
+  // Selection rules
+  selectionType  ModifierSelectionType @default(SINGLE)
+  minSelections  Int      @default(0)  // Minimum required selections
+  maxSelections  Int?     // Maximum allowed (null = unlimited for MULTIPLE)
+
+  // Display
+  sortOrder      Int      @default(0)
+  isRequired     Boolean  @default(false)
+
+  // Product associations
+  productIds     String[] @db.ObjectId // Products this modifier group applies to
+
+  // Modifiers in this group
+  modifiers      Modifier[]
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+}
+
+model Modifier {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  groupId     String   @db.ObjectId
+  group       ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  name        String   // "Large", "Extra cheese", "Spicy sauce"
+  description String?
+
+  // Pricing
+  priceAdjustment Float @default(0) // +2.00 or -1.00
+
+  // Availability
+  isDefault   Boolean  @default(false) // Pre-selected
+  isAvailable Boolean  @default(true)
+
+  // Nutrition info (optional)
+  calories    Int?
+  allergens   String[] // "gluten", "dairy", "nuts"
+
+  sortOrder   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([groupId])
+}
+
+model RestaurantTable {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  floorPlanId String?  @db.ObjectId
+  floorPlan   FloorPlan? @relation(fields: [floorPlanId], references: [id])
+
+  // Table info
+  tableNumber String   // "1", "A1", "Terrace-3"
+  name        String?  // "Window table", "VIP booth"
+
+  // Capacity
+  minCapacity Int      @default(1)
+  maxCapacity Int      @default(4)
+
+  // Position on floor plan (for visual editor)
+  positionX   Float?
+  positionY   Float?
+  rotation    Float?   @default(0)
+  shape       TableShape @default(RECTANGLE)
+
+  // Status
+  status      TableStatus @default(AVAILABLE)
+
+  // Features
+  isOutdoor   Boolean  @default(false)
+  isAccessible Boolean @default(false) // Wheelchair accessible
+  isVIP       Boolean  @default(false)
+
+  // Reservation settings
+  acceptsReservations Boolean @default(true)
+  minReservationTime  Int?    // Minutes
+  maxReservationTime  Int?    // Minutes
+
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  // Relations
+  reservations TableReservation[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, tableNumber])
+  @@index([storeId])
+  @@index([floorPlanId])
+  @@index([status])
+}
+
+model FloorPlan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  name        String   // "Main Floor", "Terrace", "Private Room"
+  description String?
+
+  // Dimensions
+  width       Float    // Canvas width
+  height      Float    // Canvas height
+
+  // Background image
+  backgroundImage String?
+
+  // Status
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  // Relations
+  tables      RestaurantTable[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+model TableReservation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  tableId     String   @db.ObjectId
+  table       RestaurantTable @relation(fields: [tableId], references: [id])
+
+  // Customer info
+  customerName  String
+  customerEmail String?
+  customerPhone String
+
+  // Reservation details
+  date          DateTime
+  startTime     String   // "19:00"
+  endTime       String?  // "21:00"
+  partySize     Int
+
+  // Status
+  status        TableReservationStatus @default(PENDING)
+
+  // Notes
+  specialRequests String?
+  internalNotes   String?
+
+  // Confirmation
+  confirmationCode String?
+  confirmedAt      DateTime?
+
+  // Arrival
+  arrivedAt        DateTime?
+  seatedAt         DateTime?
+  departedAt       DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([tableId])
+  @@index([date])
+  @@index([status])
+}
+
+model OpeningHours {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  // Day configuration
+  dayOfWeek   Int      // 0 = Sunday, 6 = Saturday
+
+  // Hours (can have multiple periods per day)
+  isOpen      Boolean  @default(true)
+  openTime    String?  // "09:00"
+  closeTime   String?  // "22:00"
+
+  // Second period (for lunch break)
+  secondOpenTime  String? // "14:00"
+  secondCloseTime String? // "22:00"
+
+  // Special settings
+  lastOrderOffset Int?  // Minutes before close for last order
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, dayOfWeek])
+  @@index([storeId])
+}
+
+model SpecialDate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  date        DateTime
+  name        String   // "Christmas", "New Year's Eve"
+
+  // Override settings
+  isClosed    Boolean  @default(false)
+  openTime    String?
+  closeTime   String?
+
+  // Special menu/pricing
+  hasSpecialMenu  Boolean @default(false)
+  specialMenuNote String?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([storeId, date])
+  @@index([storeId])
+  @@index([date])
+}
+
+enum ModifierSelectionType {
+  SINGLE    // Radio buttons - select one
+  MULTIPLE  // Checkboxes - select many
+  QUANTITY  // Number input - select quantity of each
+}
+
+enum TableShape {
+  RECTANGLE
+  SQUARE
+  ROUND
+  OVAL
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  CLEANING
+  UNAVAILABLE
+}
+
+enum TableReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// ============================================
+// TRAVEL - Agency & Tours
+// ============================================
+
+model Destination {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  name        String   // "Paris", "Tokyo", "Bali"
+  slug        String
+  description String?
+  country     String   // ISO country code
+  region      String?  // "Ile-de-France", "Kanto"
+
+  // Location
+  latitude    Float?
+  longitude   Float?
+
+  // Media
+  images      String[]
+  thumbnail   String?
+  videoUrl    String?
+
+  // Highlights
+  highlights  String[] // "Eiffel Tower", "Louvre Museum"
+
+  // Climate info
+  bestTimeToVisit String?  // "April-October"
+  climate         String?  // "Temperate", "Tropical"
+
+  // Practical info
+  currency        String?  // "EUR"
+  timezone        String?  // "Europe/Paris"
+  language        String?  // "French"
+  visaRequired    Boolean  @default(false)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  // Relations
+  itineraries Itinerary[]
+  departures  Departure[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([country])
+  @@index([isActive])
+}
+
+model Itinerary {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  destinationId String?  @db.ObjectId
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  name        String   // "7-Day Paris Discovery"
+  slug        String
+  description String?
+
+  // Duration
+  durationDays    Int
+  durationNights  Int?
+
+  // Pricing
+  basePrice       Float
+  currency        String   @default("EUR")
+  pricePerPerson  Boolean  @default(true)
+
+  // Difficulty/Type
+  difficulty      TripDifficulty @default(EASY)
+  tripType        TripType       @default(CULTURAL)
+
+  // Inclusions
+  inclusions      String[]  // "Flights", "Hotels", "Breakfast"
+  exclusions      String[]  // "Lunch", "Travel insurance"
+
+  // Images
+  images          String[]
+  thumbnail       String?
+
+  // Days breakdown
+  days            ItineraryDay[]
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  // Relations
+  departures  Departure[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([destinationId])
+  @@index([tripType])
+}
+
+model ItineraryDay {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  itineraryId String   @db.ObjectId
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  dayNumber   Int      // Day 1, 2, 3...
+  title       String   // "Arrival in Paris"
+  description String?
+
+  // Activities
+  activities  Json     // Array of { time, activity, location, notes }
+
+  // Meals included
+  breakfast   Boolean  @default(false)
+  lunch       Boolean  @default(false)
+  dinner      Boolean  @default(false)
+
+  // Accommodation
+  accommodation String? // "Hotel Le Marais 4*"
+
+  // Locations visited
+  locations   String[] // ["Eiffel Tower", "Louvre"]
+
+  // Media
+  image       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([itineraryId, dayNumber])
+  @@index([itineraryId])
+}
+
+model Departure {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  itineraryId String   @db.ObjectId
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+
+  destinationId String?  @db.ObjectId
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  // Departure info
+  departureDate DateTime
+  returnDate    DateTime
+  departureCity String   // "Paris CDG"
+
+  // Capacity
+  maxParticipants Int
+  currentBookings Int      @default(0)
+  minParticipants Int      @default(1)
+
+  // Pricing
+  price           Float
+  earlyBirdPrice  Float?   // Discount for early booking
+  earlyBirdUntil  DateTime?
+
+  // Status
+  status          DepartureStatus @default(OPEN)
+  isSoldOut       Boolean  @default(false)
+  isGuaranteed    Boolean  @default(false) // Departure guaranteed
+
+  // Guide
+  guideName       String?
+  guideLanguages  String[] // ["en", "fr"]
+
+  // Notes
+  notes           String?
+
+  // Relations
+  vouchers        TravelVoucher[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([itineraryId])
+  @@index([departureDate])
+  @@index([status])
+}
+
+model TravelVoucher {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  departureId String?  @db.ObjectId
+  departure   Departure? @relation(fields: [departureId], references: [id])
+
+  bookingId   String?  @db.ObjectId // Link to Booking
+
+  // Voucher info
+  voucherNumber String   @unique // "VCH-2025-0001"
+  type          VoucherType
+
+  // Validity
+  validFrom     DateTime
+  validUntil    DateTime
+
+  // Passenger info
+  passengerName String
+  passengerEmail String?
+
+  // Details (varies by type)
+  details       Json     // Hotel name, flight details, etc.
+
+  // QR Code
+  qrCode        String?
+
+  // Status
+  status        VoucherStatus @default(ISSUED)
+  usedAt        DateTime?
+
+  // PDF
+  pdfUrl        String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([departureId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+model TravelContract {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  // Supplier info
+  supplierName    String
+  supplierType    SupplierType
+  supplierContact String?
+  supplierEmail   String?
+  supplierPhone   String?
+
+  // Contract details
+  contractNumber  String
+  title           String
+  description     String?
+
+  // Validity
+  startDate       DateTime
+  endDate         DateTime
+
+  // Rates
+  rates           Json?    // Negotiated rates
+
+  // Commission
+  commissionRate  Float?   // Percentage
+
+  // Documents
+  documentUrls    String[]
+
+  // Status
+  status          ContractStatus @default(ACTIVE)
+
+  // Notes
+  notes           String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([supplierType])
+  @@index([status])
+}
+
+enum TripDifficulty {
+  EASY
+  MODERATE
+  CHALLENGING
+  EXPERT
+}
+
+enum TripType {
+  CULTURAL
+  ADVENTURE
+  BEACH
+  CITY_BREAK
+  CRUISE
+  SAFARI
+  SKIING
+  WELLNESS
+  FAMILY
+  HONEYMOON
+  GROUP
+}
+
+enum DepartureStatus {
+  OPEN        // Accepting bookings
+  ALMOST_FULL // Few spots left
+  SOLD_OUT    // No more spots
+  CANCELLED   // Cancelled
+  COMPLETED   // Trip completed
+}
+
+enum VoucherType {
+  FLIGHT
+  HOTEL
+  TRANSFER
+  ACTIVITY
+  INSURANCE
+  FULL_PACKAGE
+}
+
+enum VoucherStatus {
+  ISSUED
+  SENT
+  USED
+  EXPIRED
+  CANCELLED
+}
+
+enum SupplierType {
+  AIRLINE
+  HOTEL
+  CAR_RENTAL
+  TRANSFER
+  TOUR_OPERATOR
+  ACTIVITY_PROVIDER
+  INSURANCE
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+// ============================================
+// DIGITAL - Licenses & Downloads
+// ============================================
+
+model SoftwareLicense {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  productId   String   @db.ObjectId
+
+  // License info
+  name        String   // "Single License", "Team License"
+  description String?
+
+  // License type
+  licenseType LicenseType @default(SINGLE)
+
+  // Limits
+  maxActivations  Int?     // null = unlimited
+  maxUsers        Int?     // For team licenses
+  validDays       Int?     // null = perpetual
+
+  // Features
+  features        String[] // "Updates for 1 year", "Priority support"
+
+  // Pricing tier
+  priceModifier   Float    @default(0) // +/- from product price
+
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  // Relations
+  keys        LicenseKey[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([productId])
+}
+
+model LicenseKey {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  licenseId   String   @db.ObjectId
+  license     SoftwareLicense @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  orderId     String?  @db.ObjectId
+  customerId  String?  @db.ObjectId
+
+  // Key info
+  key         String   @unique // "XXXX-XXXX-XXXX-XXXX"
+  keyHash     String?  // For secure verification
+
+  // Activation tracking
+  activationCount Int      @default(0)
+  maxActivations  Int?     // Inherited or custom
+  activations     LicenseActivation[]
+
+  // Validity
+  validFrom       DateTime @default(now())
+  validUntil      DateTime?
+  isRevoked       Boolean  @default(false)
+  revokedAt       DateTime?
+  revokedReason   String?
+
+  // Status
+  status          LicenseKeyStatus @default(UNUSED)
+
+  // Metadata
+  metadata        Json?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([licenseId])
+  @@index([orderId])
+  @@index([customerId])
+  @@index([status])
+}
+
+model LicenseActivation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  keyId       String   @db.ObjectId
+  key         LicenseKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+
+  // Device info
+  machineId   String?  // Hardware fingerprint
+  machineName String?  // "John's MacBook Pro"
+  platform    String?  // "Windows", "macOS", "Linux"
+
+  // Network info
+  ipAddress   String?
+  country     String?
+
+  // Status
+  isActive    Boolean  @default(true)
+  deactivatedAt DateTime?
+
+  activatedAt DateTime @default(now())
+
+  @@index([keyId])
+  @@index([machineId])
+}
+
+enum LicenseType {
+  SINGLE      // Single user
+  TEAM        // Multiple users
+  ENTERPRISE  // Unlimited users
+  SITE        // Single site/domain
+  OEM         // Bundled with hardware
+  TRIAL       // Time-limited trial
+  SUBSCRIPTION // Recurring
+}
+
+enum LicenseKeyStatus {
+  UNUSED      // Generated but not yet used
+  ACTIVE      // In use
+  EXPIRED     // Validity period ended
+  REVOKED     // Manually revoked
+  SUSPENDED   // Temporarily suspended
+}
+
+// ============================================
+// RECREATION - Activities & Events
+// ============================================
+
+model ActivitySchedule {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  productId   String?  @db.ObjectId // Link to activity product
+
+  name        String   // "Morning Yoga", "Surf Lesson"
+  description String?
+
+  // Schedule type
+  scheduleType ScheduleType @default(WEEKLY)
+
+  // Weekly schedule (if WEEKLY)
+  dayOfWeek    Int?     // 0-6
+
+  // Specific date (if ONE_TIME)
+  specificDate DateTime?
+
+  // Time
+  startTime    String   // "09:00"
+  endTime      String   // "10:30"
+  duration     Int      // Minutes
+
+  // Capacity
+  capacity     Int      @default(10)
+  minParticipants Int   @default(1)
+
+  // Pricing
+  pricePerPerson Float?
+  pricePerGroup  Float?
+
+  // Location
+  location     String?
+  locationAddress String?
+  locationCoords Json?  // { lat, lng }
+
+  // Instructor
+  instructorName String?
+  instructorId   String? @db.ObjectId
+
+  // Validity
+  validFrom    DateTime?
+  validUntil   DateTime?
+
+  isActive     Boolean  @default(true)
+
+  // Relations
+  sessions     ActivitySession[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([dayOfWeek])
+}
+
+model ActivitySession {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  scheduleId  String   @db.ObjectId
+  schedule    ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  // Session date/time (specific instance)
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+
+  // Capacity for this session
+  capacity    Int
+  bookedCount Int      @default(0)
+  waitlistCount Int    @default(0)
+
+  // Status
+  status      SessionStatus @default(SCHEDULED)
+
+  // Override instructor
+  instructorName String?
+
+  // Notes
+  notes       String?
+
+  // Attendees
+  attendees   SessionAttendee[]
+
+  // Cancellation
+  cancelledAt    DateTime?
+  cancellationReason String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([scheduleId])
+  @@index([date])
+  @@index([status])
+}
+
+model SessionAttendee {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String   @db.ObjectId
+  session     ActivitySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  bookingId   String?  @db.ObjectId
+  customerId  String?  @db.ObjectId
+
+  // Attendee info
+  name        String
+  email       String?
+  phone       String?
+
+  // Status
+  status      AttendeeStatus @default(REGISTERED)
+
+  // Check-in
+  checkedInAt DateTime?
+  checkedInBy String?
+
+  // Waitlist position
+  waitlistPosition Int?
+
+  // Notes
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([customerId])
+  @@index([status])
+}
+
+enum ScheduleType {
+  ONE_TIME    // Single occurrence
+  WEEKLY      // Repeats weekly
+  DAILY       // Every day
+  CUSTOM      // Custom pattern
+}
+
+enum SessionStatus {
+  SCHEDULED   // Upcoming
+  IN_PROGRESS // Currently running
+  COMPLETED   // Finished
+  CANCELLED   // Cancelled
+  POSTPONED   // Moved to another date
+}
+
+enum AttendeeStatus {
+  REGISTERED  // Confirmed registration
+  WAITLIST    // On waitlist
+  CHECKED_IN  // Attended
+  NO_SHOW     // Did not attend
+  CANCELLED   // Cancelled registration
+}
+
+// ============================================
+// ALCOHOL - Wine & Spirits
+// ============================================
+
+model Vintage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  productId   String   @db.ObjectId
+
+  year        Int      // 2019, 2020, etc.
+
+  // Availability
+  quantity    Int      @default(0)
+  price       Float?   // Override price for this vintage
+
+  // Tasting notes
+  tastingNotes String?
+  sommelierNotes String?
+
+  // Ratings
+  rating      Float?   // 0-100 (Parker scale)
+  ratingSource String? // "Wine Spectator", "Robert Parker"
+
+  // Drinking window
+  drinkFrom   Int?     // Year to start drinking
+  drinkUntil  Int?     // Year to finish drinking
+  peakYear    Int?     // Optimal year
+
+  // Storage
+  cellarTemp  Float?   // Ideal temperature in Celsius
+  humidity    Float?   // Ideal humidity percentage
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, productId, year])
+  @@index([storeId])
+  @@index([productId])
+  @@index([year])
+}
+
+model AgeVerificationLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+
+  // Customer/Order
+  orderId     String?  @db.ObjectId
+  customerId  String?  @db.ObjectId
+
+  // Verification details
+  verificationMethod AgeVerificationMethod
+  dateOfBirth    DateTime?
+  verifiedAge    Int?     // Calculated age at time of verification
+
+  // Document info (if document verification)
+  documentType   String?  // "ID Card", "Passport", "Driver's License"
+  documentNumber String?  // Last 4 digits only for privacy
+  documentExpiry DateTime?
+  documentCountry String?
+
+  // Result
+  status         VerificationStatus @default(PENDING)
+  isApproved     Boolean  @default(false)
+  rejectionReason String?
+
+  // Verifier
+  verifiedBy     String?  // Staff member who verified
+  verifiedAt     DateTime?
+
+  // IP/Device tracking
+  ipAddress      String?
+  userAgent      String?
+
+  // Notes
+  notes          String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([orderId])
+  @@index([customerId])
+  @@index([status])
+}
+
+model AlcoholComplianceSettings {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @unique @db.ObjectId
+
+  // Age requirements
+  minimumAge     Int      @default(18)
+  requireVerification Boolean @default(true)
+
+  // Verification settings
+  verificationMethods AgeVerificationMethod[] @default([SELF_DECLARATION])
+
+  // Order limits
+  maxQuantityPerOrder Int?   // Max bottles per order
+  maxAlcoholPerOrder  Float? // Max liters of pure alcohol
+
+  // Delivery restrictions
+  deliveryRestrictions Json? // Countries/regions where delivery is restricted
+
+  // Warning messages
+  ageWarningMessage  String?
+  legalDisclaimer    String?
+
+  // Shipping
+  requireSignature   Boolean @default(true)
+  requireAdultSignature Boolean @default(true)
+
+  // Reporting
+  enableSalesReporting Boolean @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum AgeVerificationMethod {
+  SELF_DECLARATION  // "I confirm I am 18+"
+  DATE_OF_BIRTH     // Enter DOB
+  DOCUMENT_UPLOAD   // Upload ID
+  THIRD_PARTY       // External verification service
+  IN_PERSON         // Verified at delivery
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
