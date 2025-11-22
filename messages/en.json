@@ -1242,14 +1242,88 @@
         "infoTitle": "How it works",
         "infoDescription": "Slots define when your customers can order. Capacity limits the number of orders per slot to ensure quality of service."
       },
+      "loyalty": {
+        "title": "Loyalty Program",
+        "subtitle": "Manage your loyalty program and members",
+        "stats": {
+          "totalMembers": "Total Members",
+          "totalPoints": "Points in Circulation",
+          "goldMembers": "Gold Members",
+          "silverMembers": "Silver Members"
+        },
+        "settings": {
+          "title": "Program Settings",
+          "pointsPerEuro": "Points per Euro",
+          "pointsPerEuroDesc": "Points earned for each euro spent",
+          "signupBonus": "Signup Bonus",
+          "signupBonusDesc": "Points awarded on signup",
+          "pointsExpiry": "Points Expiry",
+          "pointsExpiryDesc": "How long points remain valid",
+          "months": "months",
+          "tiers": "Loyalty Tiers"
+        },
+        "members": {
+          "title": "Program Members",
+          "customer": "Customer",
+          "tier": "Tier",
+          "points": "Points",
+          "totalEarned": "Total Earned",
+          "actions": "Actions",
+          "allTiers": "All Tiers",
+          "search": "Search member...",
+          "addPoints": "Add points",
+          "removePoints": "Remove points",
+          "noMembers": "No members",
+          "noMembersDesc": "Customers will automatically join the program"
+        },
+        "adjust": {
+          "title": "Adjust Points",
+          "currentBalance": "Current balance",
+          "points": "Points to add/remove",
+          "pointsPlaceholder": "e.g.: 100 or -50",
+          "pointsHint": "Use a negative number to remove points",
+          "reason": "Adjustment reason",
+          "reasonPlaceholder": "e.g.: Goodwill gesture, Error correction...",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
       "hours": {
-        "title": "Opening hours",
-        "dayOfWeek": "Day",
-        "openTime": "Opening",
-        "closeTime": "Closing",
+        "title": "Opening Hours",
+        "subtitle": "Set your opening hours and holidays",
+        "weeklySchedule": "Weekly Schedule",
+        "open": "Open",
         "closed": "Closed",
-        "lastOrder": "Last order",
-        "specialDates": "Special dates"
+        "today": "Today",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Saved!",
+        "cancel": "Cancel",
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        },
+        "specialDates": {
+          "title": "Special Dates",
+          "description": "Set exceptional hours for holidays or events",
+          "add": "Add",
+          "addTitle": "Add Special Date",
+          "addButton": "Add date",
+          "date": "Date",
+          "name": "Event name",
+          "namePlaceholder": "e.g.: Christmas, New Year, Annual closure...",
+          "openOnDate": "Open on this day",
+          "openOnDateDesc": "The establishment will be open with special hours",
+          "openTime": "Opening time",
+          "closeTime": "Closing time",
+          "empty": "No special dates",
+          "emptyDesc": "Add holidays or special events"
+        }
       }
     },
     "travel": {

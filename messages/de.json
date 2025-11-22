@@ -1175,14 +1175,88 @@
         "infoTitle": "Wie es funktioniert",
         "infoDescription": "Zeitfenster definieren, wann Ihre Kunden bestellen können. Die Kapazität begrenzt die Anzahl der Bestellungen pro Zeitfenster, um die Servicequalität zu gewährleisten."
       },
+      "loyalty": {
+        "title": "Treueprogramm",
+        "subtitle": "Verwalten Sie Ihr Treueprogramm und Ihre Mitglieder",
+        "stats": {
+          "totalMembers": "Mitglieder gesamt",
+          "totalPoints": "Punkte im Umlauf",
+          "goldMembers": "Gold-Mitglieder",
+          "silverMembers": "Silber-Mitglieder"
+        },
+        "settings": {
+          "title": "Programmkonfiguration",
+          "pointsPerEuro": "Punkte pro Euro",
+          "pointsPerEuroDesc": "Punkte pro ausgegebenem Euro",
+          "signupBonus": "Anmeldebonus",
+          "signupBonusDesc": "Punkte bei der Anmeldung",
+          "pointsExpiry": "Punkteverfall",
+          "pointsExpiryDesc": "Gültigkeitsdauer der Punkte",
+          "months": "Monate",
+          "tiers": "Treuestufen"
+        },
+        "members": {
+          "title": "Programm-Mitglieder",
+          "customer": "Kunde",
+          "tier": "Stufe",
+          "points": "Punkte",
+          "totalEarned": "Gesamt verdient",
+          "actions": "Aktionen",
+          "allTiers": "Alle Stufen",
+          "search": "Mitglied suchen...",
+          "addPoints": "Punkte hinzufügen",
+          "removePoints": "Punkte entfernen",
+          "noMembers": "Keine Mitglieder",
+          "noMembersDesc": "Kunden werden automatisch am Programm teilnehmen"
+        },
+        "adjust": {
+          "title": "Punkte anpassen",
+          "currentBalance": "Aktueller Kontostand",
+          "points": "Punkte hinzufügen/entfernen",
+          "pointsPlaceholder": "z.B.: 100 oder -50",
+          "pointsHint": "Negative Zahl zum Entfernen von Punkten verwenden",
+          "reason": "Anpassungsgrund",
+          "reasonPlaceholder": "z.B.: Kulanzgeste, Fehlerbehebung...",
+          "cancel": "Abbrechen",
+          "confirm": "Bestätigen"
+        }
+      },
       "hours": {
-        "title": "Opening hours",
-        "dayOfWeek": "Day",
-        "openTime": "Opening",
-        "closeTime": "Closing",
-        "closed": "Closed",
-        "lastOrder": "Last order",
-        "specialDates": "Special dates"
+        "title": "Öffnungszeiten",
+        "subtitle": "Legen Sie Ihre Öffnungszeiten und Feiertage fest",
+        "weeklySchedule": "Wochenplan",
+        "open": "Geöffnet",
+        "closed": "Geschlossen",
+        "today": "Heute",
+        "save": "Speichern",
+        "saving": "Speichern...",
+        "saved": "Gespeichert!",
+        "cancel": "Abbrechen",
+        "days": {
+          "monday": "Montag",
+          "tuesday": "Dienstag",
+          "wednesday": "Mittwoch",
+          "thursday": "Donnerstag",
+          "friday": "Freitag",
+          "saturday": "Samstag",
+          "sunday": "Sonntag"
+        },
+        "specialDates": {
+          "title": "Besondere Termine",
+          "description": "Festlegen von Sonderöffnungszeiten für Feiertage oder Veranstaltungen",
+          "add": "Hinzufügen",
+          "addTitle": "Besonderen Termin hinzufügen",
+          "addButton": "Termin hinzufügen",
+          "date": "Datum",
+          "name": "Veranstaltungsname",
+          "namePlaceholder": "z.B.: Weihnachten, Neujahr, Betriebsferien...",
+          "openOnDate": "An diesem Tag geöffnet",
+          "openOnDateDesc": "Das Geschäft wird mit Sonderzeiten geöffnet sein",
+          "openTime": "Öffnungszeit",
+          "closeTime": "Schließzeit",
+          "empty": "Keine besonderen Termine",
+          "emptyDesc": "Feiertage oder besondere Veranstaltungen hinzufügen"
+        }
       }
     },
     "travel": {
