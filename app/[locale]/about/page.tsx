@@ -2,9 +2,11 @@
 
 import { Heart, Package, Shield, Users } from 'lucide-react'
 import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
+import { useTranslations } from 'next-intl'
 
 export default function AboutPage() {
   const { settings } = usePlatformSettings()
+  const t = useTranslations('about')
   return (
     <div style={{ fontFamily: 'var(--theme-font-body)' }}>
       <div className="mx-auto px-6 lg:px-8 py-16" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
@@ -14,7 +16,7 @@ export default function AboutPage() {
             className="text-5xl md:text-6xl font-bold text-theme-text mb-6"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.03em' }}
           >
-            À propos de{' '}
+            {t('title')}{' '}
             <span className="relative inline-block">
               <span className="absolute inset-0 bg-gradient-to-r from-theme-primary to-theme-accent blur-xl opacity-30" />
               <span className="relative bg-gradient-to-r from-theme-primary to-theme-accent bg-clip-text text-transparent">
@@ -23,7 +25,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-xl text-theme-text-secondary leading-relaxed">
-            La plateforme e-commerce 100% gratuite et open source qui redéfinit le commerce en ligne.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -35,12 +37,10 @@ export default function AboutPage() {
               className="text-3xl md:text-4xl font-bold text-theme-text mb-4"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Notre Mission
+              {t('mission.title')}
             </h2>
             <p className="text-lg text-theme-text-secondary leading-relaxed">
-              Démocratiser le commerce en ligne en offrant une alternative gratuite, puissante et
-              accessible à tous. Nous croyons que chaque entrepreneur mérite les meilleurs outils
-              pour réussir, sans barrières financières.
+              {t('mission.description')}
             </p>
           </div>
         </div>
@@ -58,10 +58,10 @@ export default function AboutPage() {
               className="font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Open Source
+              {t('values.openSource.title')}
             </h3>
             <p className="text-sm text-theme-text-secondary">
-              Code 100% ouvert et transparent sous licence MIT
+              {t('values.openSource.description')}
             </p>
           </div>
 
@@ -76,10 +76,10 @@ export default function AboutPage() {
               className="font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Gratuit
+              {t('values.free.title')}
             </h3>
             <p className="text-sm text-theme-text-secondary">
-              Vraiment gratuit, sans frais cachés ni commissions
+              {t('values.free.description')}
             </p>
           </div>
 
@@ -94,10 +94,10 @@ export default function AboutPage() {
               className="font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Sécurisé
+              {t('values.secure.title')}
             </h3>
             <p className="text-sm text-theme-text-secondary">
-              Protection maximale de vos données et transactions
+              {t('values.secure.description')}
             </p>
           </div>
 
@@ -112,10 +112,10 @@ export default function AboutPage() {
               className="font-bold text-theme-text mb-2"
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Communauté
+              {t('values.community.title')}
             </h3>
             <p className="text-sm text-theme-text-secondary">
-              Soutenue par une communauté active de développeurs
+              {t('values.community.description')}
             </p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function AboutPage() {
             className="text-3xl md:text-4xl font-bold text-theme-text mb-8 text-center"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
           >
-            Technologies Modernes
+            {t('tech.title')}
           </h2>
           <div className="p-8 bg-theme-surface border border-theme-border rounded-2xl">
             <div className="grid md:grid-cols-2 gap-8">
@@ -138,10 +138,10 @@ export default function AboutPage() {
                   Frontend
                 </h3>
                 <ul className="space-y-2 text-theme-text-secondary">
-                  <li>• Next.js 14+ avec App Router</li>
-                  <li>• React 18+ avec TypeScript</li>
-                  <li>• Tailwind CSS pour le design</li>
-                  <li>• Zustand pour l'état global</li>
+                  <li>• Next.js 14+ {t('tech.withAppRouter')}</li>
+                  <li>• React 18+ {t('tech.withTypeScript')}</li>
+                  <li>• Tailwind CSS {t('tech.forDesign')}</li>
+                  <li>• Zustand {t('tech.forState')}</li>
                 </ul>
               </div>
               <div>
@@ -152,10 +152,10 @@ export default function AboutPage() {
                   Backend
                 </h3>
                 <ul className="space-y-2 text-theme-text-secondary">
-                  <li>• tRPC pour APIs type-safe</li>
-                  <li>• Prisma ORM avec MongoDB</li>
-                  <li>• NextAuth.js pour l'authentification</li>
-                  <li>• Support multi-tenant natif</li>
+                  <li>• tRPC {t('tech.forAPIs')}</li>
+                  <li>• Prisma ORM {t('tech.withMongoDB')}</li>
+                  <li>• NextAuth.js {t('tech.forAuth')}</li>
+                  <li>• {t('tech.multiTenant')}</li>
                 </ul>
               </div>
             </div>
@@ -171,20 +171,20 @@ export default function AboutPage() {
               className="text-4xl md:text-5xl font-bold mb-4"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Rejoignez la Révolution E-commerce
+              {t('cta.title')}
             </h2>
             <p className="text-xl mb-8 opacity-90">
-              Créez votre boutique en ligne gratuitement, dès maintenant
+              {t('cta.subtitle')}
             </p>
             <div className="flex items-center justify-center gap-4">
               <a
-                href="https://github.com/StudioCavalli/FoxCard"
+                href="https://github.com/Foxcase/GoldenEra"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Voir sur GitHub
+                {t('cta.viewOnGithub')}
               </a>
             </div>
           </div>

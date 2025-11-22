@@ -518,7 +518,73 @@
     "paymentMethods": "Métodos de pago",
     "shippingZones": "Zonas de envío",
     "taxSettings": "Configuración de impuestos",
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "noStoreSelected": "Ninguna tienda seleccionada",
+    "selectStoreDescription": "Selecciona una tienda para acceder a tu panel de control y gestionar tus productos, pedidos y clientes.",
+    "overviewOf": "Vista general de {storeName}",
+    "last7Days": "Últimos 7 días",
+    "totalRevenue": "Ingresos Totales",
+    "revenueEvolution": "Evolución en los últimos 7 días",
+    "orderStatus": "Estado de pedidos",
+    "currentDistribution": "Distribución actual",
+    "noOrders": "Sin pedidos",
+    "orderVolume": "Volumen de pedidos",
+    "ordersPerDay": "Pedidos por día",
+    "viewAll": "Ver todo",
+    "viewAllFeminine": "Ver todas",
+    "last5Orders": "Últimos 5 pedidos",
+    "noOrdersYet": "Sin pedidos por el momento",
+    "ordersWillAppearHere": "Los pedidos aparecerán aquí",
+    "orderNumber": "N° Pedido",
+    "client": "Cliente",
+    "date": "Fecha",
+    "total": "Total",
+    "status": "Estado",
+    "statusPending": "Pendiente",
+    "statusProcessing": "En proceso",
+    "statusCompleted": "Completado",
+    "statusCancelled": "Cancelado",
+    "addProduct": "Añadir Producto",
+    "createNewProduct": "Crea un nuevo producto",
+    "manageOrders": "Gestionar Pedidos",
+    "processOrders": "Procesa tus pedidos",
+    "customerBase": "Base de Clientes",
+    "manageCustomers": "Gestiona tus clientes",
+    "configureSpace": "Configura tu espacio de vendedor",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "notificationSettings": "Notificaciones por email",
+    "newOrder": "Nuevo pedido",
+    "newOrderDesc": "Recibe un email con cada nuevo pedido",
+    "lowStockAlert": "Stock bajo",
+    "lowStockAlertDesc": "Alerta cuando un producto alcanza el umbral de stock bajo",
+    "customerMessage": "Mensaje de cliente",
+    "customerMessageDesc": "Notificación cuando un cliente te contacta",
+    "reports": "Informes",
+    "weeklyReport": "Informe semanal",
+    "weeklyReportDesc": "Resumen de tus ventas cada semana",
+    "monthlyReport": "Informe mensual",
+    "monthlyReportDesc": "Análisis completo de tu rendimiento",
+    "languageAndLocalization": "Idioma y localización",
+    "interfaceLanguage": "Idioma de la interfaz",
+    "currency": "Moneda",
+    "timezone": "Zona horaria",
+    "accountSecurity": "Seguridad de la cuenta",
+    "password": "Contraseña",
+    "lastModified": "Última modificación hace {days} días",
+    "modify": "Modificar",
+    "twoFactorAuth": "Autenticación de dos factores",
+    "addSecurityLayer": "Añade una capa extra de seguridad",
+    "enable": "Activar",
+    "activeSessions": "Sesiones activas",
+    "manageConnections": "Gestiona tus conexiones activas",
+    "view": "Ver",
+    "dangerZone": "Zona de peligro",
+    "deleteAccount": "Eliminar mi cuenta",
+    "deleteAccountWarning": "Esta acción es irreversible",
+    "delete": "Eliminar",
+    "languageCurrency": "Idioma y moneda",
+    "security": "Seguridad"
   },
   "superadmin": {
     "dashboard": "Panel de control",
@@ -547,6 +613,48 @@
     "suspendUser": "Suspender usuario",
     "activateUser": "Activar usuario",
     "deleteUser": "Eliminar usuario"
+  },
+  "about": {
+    "title": "Acerca de",
+    "subtitle": "Descubre nuestra plataforma de comercio electrónico de código abierto, diseñada para emprendedores y desarrolladores de todo el mundo.",
+    "mission": {
+      "title": "Nuestra Misión",
+      "description": "Democratizar el comercio electrónico ofreciendo una solución potente, gratuita y accesible para todos. Creemos que cada emprendedor merece las mejores herramientas para tener éxito en línea."
+    },
+    "values": {
+      "openSource": {
+        "title": "Código Abierto",
+        "description": "Código fuente abierto y transparente, desarrollado por la comunidad para la comunidad."
+      },
+      "free": {
+        "title": "100% Gratis",
+        "description": "Sin tarifas ocultas, sin comisiones. Tu éxito te pertenece completamente."
+      },
+      "secure": {
+        "title": "Seguro",
+        "description": "Seguridad de nivel empresarial con las mejores prácticas de la industria."
+      },
+      "community": {
+        "title": "Comunidad",
+        "description": "Una comunidad activa de desarrolladores y emprendedores que se ayudan mutuamente."
+      }
+    },
+    "tech": {
+      "title": "Tecnologías Utilizadas",
+      "withAppRouter": "con App Router",
+      "withTypeScript": "con TypeScript",
+      "forDesign": "para diseño",
+      "forState": "para gestión de estado",
+      "forAPIs": "para APIs con tipos",
+      "withMongoDB": "con MongoDB",
+      "forAuth": "para autenticación",
+      "multiTenant": "Arquitectura multi-tenant"
+    },
+    "cta": {
+      "title": "¿Listo para empezar?",
+      "subtitle": "Únete a miles de comerciantes que confían en nuestra plataforma.",
+      "viewOnGithub": "Ver en GitHub"
+    }
   },
   "seo": {
     "home": {

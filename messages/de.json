@@ -518,7 +518,73 @@
     "paymentMethods": "Zahlungsmethoden",
     "shippingZones": "Versandzonen",
     "taxSettings": "Steuereinstellungen",
-    "notifications": "Benachrichtigungen"
+    "notifications": "Benachrichtigungen",
+    "noStoreSelected": "Kein Geschäft ausgewählt",
+    "selectStoreDescription": "Wählen Sie ein Geschäft aus, um auf Ihr Dashboard zuzugreifen und Ihre Produkte, Bestellungen und Kunden zu verwalten.",
+    "overviewOf": "Übersicht von {storeName}",
+    "last7Days": "Letzte 7 Tage",
+    "totalRevenue": "Gesamtumsatz",
+    "revenueEvolution": "Entwicklung über die letzten 7 Tage",
+    "orderStatus": "Bestellstatus",
+    "currentDistribution": "Aktuelle Verteilung",
+    "noOrders": "Keine Bestellungen",
+    "orderVolume": "Bestellvolumen",
+    "ordersPerDay": "Bestellungen pro Tag",
+    "viewAll": "Alle anzeigen",
+    "viewAllFeminine": "Alle anzeigen",
+    "last5Orders": "Letzte 5 Bestellungen",
+    "noOrdersYet": "Noch keine Bestellungen",
+    "ordersWillAppearHere": "Bestellungen werden hier angezeigt",
+    "orderNumber": "Bestellnr.",
+    "client": "Kunde",
+    "date": "Datum",
+    "total": "Gesamt",
+    "status": "Status",
+    "statusPending": "Ausstehend",
+    "statusProcessing": "In Bearbeitung",
+    "statusCompleted": "Abgeschlossen",
+    "statusCancelled": "Storniert",
+    "addProduct": "Produkt hinzufügen",
+    "createNewProduct": "Neues Produkt erstellen",
+    "manageOrders": "Bestellungen verwalten",
+    "processOrders": "Ihre Bestellungen bearbeiten",
+    "customerBase": "Kundenbasis",
+    "manageCustomers": "Ihre Kunden verwalten",
+    "configureSpace": "Händlerbereich konfigurieren",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "notificationSettings": "E-Mail-Benachrichtigungen",
+    "newOrder": "Neue Bestellung",
+    "newOrderDesc": "Erhalten Sie bei jeder neuen Bestellung eine E-Mail",
+    "lowStockAlert": "Niedriger Lagerbestand",
+    "lowStockAlertDesc": "Warnung, wenn ein Produkt den niedrigen Lagerbestand erreicht",
+    "customerMessage": "Kundennachricht",
+    "customerMessageDesc": "Benachrichtigung, wenn ein Kunde Sie kontaktiert",
+    "reports": "Berichte",
+    "weeklyReport": "Wochenbericht",
+    "weeklyReportDesc": "Zusammenfassung Ihrer Verkäufe jede Woche",
+    "monthlyReport": "Monatsbericht",
+    "monthlyReportDesc": "Vollständige Analyse Ihrer Leistung",
+    "languageAndLocalization": "Sprache und Lokalisierung",
+    "interfaceLanguage": "Sprache der Benutzeroberfläche",
+    "currency": "Währung",
+    "timezone": "Zeitzone",
+    "accountSecurity": "Kontosicherheit",
+    "password": "Passwort",
+    "lastModified": "Zuletzt geändert vor {days} Tagen",
+    "modify": "Ändern",
+    "twoFactorAuth": "Zwei-Faktor-Authentifizierung",
+    "addSecurityLayer": "Zusätzliche Sicherheitsebene hinzufügen",
+    "enable": "Aktivieren",
+    "activeSessions": "Aktive Sitzungen",
+    "manageConnections": "Aktive Verbindungen verwalten",
+    "view": "Anzeigen",
+    "dangerZone": "Gefahrenzone",
+    "deleteAccount": "Mein Konto löschen",
+    "deleteAccountWarning": "Diese Aktion ist unwiderruflich",
+    "delete": "Löschen",
+    "languageCurrency": "Sprache & Währung",
+    "security": "Sicherheit"
   },
   "superadmin": {
     "dashboard": "Dashboard",
@@ -547,6 +613,48 @@
     "suspendUser": "Benutzer sperren",
     "activateUser": "Benutzer aktivieren",
     "deleteUser": "Benutzer löschen"
+  },
+  "about": {
+    "title": "Über",
+    "subtitle": "Entdecken Sie unsere Open-Source E-Commerce-Plattform, entwickelt für Unternehmer und Entwickler weltweit.",
+    "mission": {
+      "title": "Unsere Mission",
+      "description": "E-Commerce demokratisieren, indem wir eine leistungsstarke, kostenlose und für alle zugängliche Lösung anbieten. Wir glauben, dass jeder Unternehmer die besten Werkzeuge verdient, um online erfolgreich zu sein."
+    },
+    "values": {
+      "openSource": {
+        "title": "Open Source",
+        "description": "Offener und transparenter Quellcode, von der Community für die Community entwickelt."
+      },
+      "free": {
+        "title": "100% Kostenlos",
+        "description": "Keine versteckten Gebühren, keine Provisionen. Ihr Erfolg gehört ganz Ihnen."
+      },
+      "secure": {
+        "title": "Sicher",
+        "description": "Unternehmensklasse-Sicherheit mit den besten Praktiken der Branche."
+      },
+      "community": {
+        "title": "Community",
+        "description": "Eine aktive Gemeinschaft von Entwicklern und Unternehmern, die sich gegenseitig helfen."
+      }
+    },
+    "tech": {
+      "title": "Verwendete Technologien",
+      "withAppRouter": "mit App Router",
+      "withTypeScript": "mit TypeScript",
+      "forDesign": "für Design",
+      "forState": "für Zustandsverwaltung",
+      "forAPIs": "für typsichere APIs",
+      "withMongoDB": "mit MongoDB",
+      "forAuth": "für Authentifizierung",
+      "multiTenant": "Multi-Tenant-Architektur"
+    },
+    "cta": {
+      "title": "Bereit anzufangen?",
+      "subtitle": "Schließen Sie sich Tausenden von Händlern an, die unserer Plattform vertrauen.",
+      "viewOnGithub": "Auf GitHub ansehen"
+    }
   },
   "seo": {
     "home": {

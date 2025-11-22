@@ -518,7 +518,73 @@
     "paymentMethods": "Platobné metódy",
     "shippingZones": "Dodacie zóny",
     "taxSettings": "Nastavenia daní",
-    "notifications": "Notifikácie"
+    "notifications": "Notifikácie",
+    "noStoreSelected": "Žiadny obchod nie je vybraný",
+    "selectStoreDescription": "Vyberte obchod pre prístup k vášmu prehľadu a správe produktov, objednávok a zákazníkov.",
+    "overviewOf": "Prehľad {storeName}",
+    "last7Days": "Posledných 7 dní",
+    "totalRevenue": "Celkové príjmy",
+    "revenueEvolution": "Vývoj za posledných 7 dní",
+    "orderStatus": "Stav objednávok",
+    "currentDistribution": "Aktuálne rozdelenie",
+    "noOrders": "Žiadne objednávky",
+    "orderVolume": "Objem objednávok",
+    "ordersPerDay": "Objednávky za deň",
+    "viewAll": "Zobraziť všetko",
+    "viewAllFeminine": "Zobraziť všetky",
+    "last5Orders": "Posledných 5 objednávok",
+    "noOrdersYet": "Zatiaľ žiadne objednávky",
+    "ordersWillAppearHere": "Objednávky sa zobrazia tu",
+    "orderNumber": "Č. objednávky",
+    "client": "Zákazník",
+    "date": "Dátum",
+    "total": "Celkom",
+    "status": "Stav",
+    "statusPending": "Čakajúca",
+    "statusProcessing": "Spracováva sa",
+    "statusCompleted": "Dokončená",
+    "statusCancelled": "Zrušená",
+    "addProduct": "Pridať produkt",
+    "createNewProduct": "Vytvoriť nový produkt",
+    "manageOrders": "Spravovať objednávky",
+    "processOrders": "Spracujte svoje objednávky",
+    "customerBase": "Zákaznícka základňa",
+    "manageCustomers": "Spravujte svojich zákazníkov",
+    "configureSpace": "Nakonfigurujte svoj obchodný priestor",
+    "save": "Uložiť",
+    "saving": "Ukladá sa...",
+    "notificationSettings": "E-mailové notifikácie",
+    "newOrder": "Nová objednávka",
+    "newOrderDesc": "Dostávajte email pri každej novej objednávke",
+    "lowStockAlert": "Nízky stav",
+    "lowStockAlertDesc": "Upozornenie, keď produkt dosiahne hranicu nízkeho stavu",
+    "customerMessage": "Správa od zákazníka",
+    "customerMessageDesc": "Notifikácia, keď vás zákazník kontaktuje",
+    "reports": "Správy",
+    "weeklyReport": "Týždenná správa",
+    "weeklyReportDesc": "Súhrn vašich predajov každý týždeň",
+    "monthlyReport": "Mesačná správa",
+    "monthlyReportDesc": "Kompletná analýza vášho výkonu",
+    "languageAndLocalization": "Jazyk a lokalizácia",
+    "interfaceLanguage": "Jazyk rozhrania",
+    "currency": "Mena",
+    "timezone": "Časové pásmo",
+    "accountSecurity": "Bezpečnosť účtu",
+    "password": "Heslo",
+    "lastModified": "Naposledy zmenené pred {days} dňami",
+    "modify": "Zmeniť",
+    "twoFactorAuth": "Dvojfaktorové overenie",
+    "addSecurityLayer": "Pridajte ďalšiu vrstvu zabezpečenia",
+    "enable": "Aktivovať",
+    "activeSessions": "Aktívne relácie",
+    "manageConnections": "Spravujte svoje aktívne pripojenia",
+    "view": "Zobraziť",
+    "dangerZone": "Nebezpečná zóna",
+    "deleteAccount": "Odstrániť môj účet",
+    "deleteAccountWarning": "Táto akcia je nevratná",
+    "delete": "Odstrániť",
+    "languageCurrency": "Jazyk a mena",
+    "security": "Bezpečnosť"
   },
   "superadmin": {
     "dashboard": "Prehľad",
@@ -547,6 +613,48 @@
     "suspendUser": "Pozastaviť používateľa",
     "activateUser": "Aktivovať používateľa",
     "deleteUser": "Odstrániť používateľa"
+  },
+  "about": {
+    "title": "O nás",
+    "subtitle": "Objavte našu open-source e-commerce platformu, navrhnutú pre podnikateľov a vývojárov z celého sveta.",
+    "mission": {
+      "title": "Naša Misia",
+      "description": "Demokratizovať e-commerce ponukou výkonného, bezplatného a pre všetkých dostupného riešenia. Veríme, že každý podnikateľ si zaslúži najlepšie nástroje na úspech online."
+    },
+    "values": {
+      "openSource": {
+        "title": "Open Source",
+        "description": "Otvorený a transparentný zdrojový kód, vyvíjaný komunitou pre komunitu."
+      },
+      "free": {
+        "title": "100% Zadarmo",
+        "description": "Žiadne skryté poplatky, žiadne provízie. Váš úspech patrí výlučne vám."
+      },
+      "secure": {
+        "title": "Bezpečné",
+        "description": "Bezpečnosť podnikovej triedy s najlepšími postupmi v odvetví."
+      },
+      "community": {
+        "title": "Komunita",
+        "description": "Aktívna komunita vývojárov a podnikateľov, ktorí si navzájom pomáhajú."
+      }
+    },
+    "tech": {
+      "title": "Použité Technológie",
+      "withAppRouter": "s App Router",
+      "withTypeScript": "s TypeScript",
+      "forDesign": "pre dizajn",
+      "forState": "pre správu stavu",
+      "forAPIs": "pre typovo bezpečné API",
+      "withMongoDB": "s MongoDB",
+      "forAuth": "pre autentifikáciu",
+      "multiTenant": "Multi-tenant architektúra"
+    },
+    "cta": {
+      "title": "Pripravení začať?",
+      "subtitle": "Pridajte sa k tisícom obchodníkov, ktorí dôverujú našej platforme.",
+      "viewOnGithub": "Zobraziť na GitHub"
+    }
   },
   "seo": {
     "home": {

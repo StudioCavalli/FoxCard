@@ -518,7 +518,73 @@
     "paymentMethods": "Méthodes de paiement",
     "shippingZones": "Zones de livraison",
     "taxSettings": "Paramètres de taxes",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "noStoreSelected": "Aucune boutique sélectionnée",
+    "selectStoreDescription": "Sélectionnez une boutique pour accéder à votre tableau de bord et gérer vos produits, commandes et clients.",
+    "overviewOf": "Vue d'ensemble de {storeName}",
+    "last7Days": "7 derniers jours",
+    "totalRevenue": "Revenu Total",
+    "revenueEvolution": "Évolution sur les 7 derniers jours",
+    "orderStatus": "Statut des commandes",
+    "currentDistribution": "Répartition actuelle",
+    "noOrders": "Aucune commande",
+    "orderVolume": "Volume de commandes",
+    "ordersPerDay": "Nombre de commandes par jour",
+    "viewAll": "Voir tout",
+    "viewAllFeminine": "Voir toutes",
+    "last5Orders": "Les 5 dernières commandes",
+    "noOrdersYet": "Aucune commande pour le moment",
+    "ordersWillAppearHere": "Les commandes apparaîtront ici",
+    "orderNumber": "N° Commande",
+    "client": "Client",
+    "date": "Date",
+    "total": "Total",
+    "status": "Statut",
+    "statusPending": "En attente",
+    "statusProcessing": "En cours",
+    "statusCompleted": "Complétée",
+    "statusCancelled": "Annulée",
+    "addProduct": "Ajouter un Produit",
+    "createNewProduct": "Créez un nouveau produit",
+    "manageOrders": "Gérer les Commandes",
+    "processOrders": "Traitez vos commandes",
+    "customerBase": "Base Clients",
+    "manageCustomers": "Gérez vos clients",
+    "configureSpace": "Configurez votre espace marchand",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "notificationSettings": "Notifications par email",
+    "newOrder": "Nouvelle commande",
+    "newOrderDesc": "Recevez un email à chaque nouvelle commande",
+    "lowStockAlert": "Stock faible",
+    "lowStockAlertDesc": "Alerte quand un produit atteint le seuil de stock faible",
+    "customerMessage": "Message client",
+    "customerMessageDesc": "Notification quand un client vous contacte",
+    "reports": "Rapports",
+    "weeklyReport": "Rapport hebdomadaire",
+    "weeklyReportDesc": "Résumé de vos ventes chaque semaine",
+    "monthlyReport": "Rapport mensuel",
+    "monthlyReportDesc": "Analyse complète de vos performances",
+    "languageAndLocalization": "Langue et régionalisation",
+    "interfaceLanguage": "Langue de l'interface",
+    "currency": "Devise",
+    "timezone": "Fuseau horaire",
+    "accountSecurity": "Sécurité du compte",
+    "password": "Mot de passe",
+    "lastModified": "Dernière modification il y a {days} jours",
+    "modify": "Modifier",
+    "twoFactorAuth": "Authentification à deux facteurs",
+    "addSecurityLayer": "Ajoutez une couche de sécurité supplémentaire",
+    "enable": "Activer",
+    "activeSessions": "Sessions actives",
+    "manageConnections": "Gérez vos connexions actives",
+    "view": "Voir",
+    "dangerZone": "Zone de danger",
+    "deleteAccount": "Supprimer mon compte",
+    "deleteAccountWarning": "Cette action est irréversible",
+    "delete": "Supprimer",
+    "languageCurrency": "Langue & devise",
+    "security": "Sécurité"
   },
   "superadmin": {
     "dashboard": "Tableau de bord",
@@ -547,6 +613,48 @@
     "suspendUser": "Suspendre l'utilisateur",
     "activateUser": "Activer l'utilisateur",
     "deleteUser": "Supprimer l'utilisateur"
+  },
+  "about": {
+    "title": "À propos de",
+    "subtitle": "Découvrez notre plateforme e-commerce open source, conçue pour les entrepreneurs et les développeurs du monde entier.",
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Démocratiser l'e-commerce en offrant une solution puissante, gratuite et accessible à tous. Nous croyons que chaque entrepreneur mérite les meilleurs outils pour réussir en ligne."
+    },
+    "values": {
+      "openSource": {
+        "title": "Open Source",
+        "description": "Code source ouvert et transparent, développé par la communauté pour la communauté."
+      },
+      "free": {
+        "title": "100% Gratuit",
+        "description": "Aucun frais caché, aucune commission. Votre succès vous appartient entièrement."
+      },
+      "secure": {
+        "title": "Sécurisé",
+        "description": "Sécurité de niveau entreprise avec les meilleures pratiques de l'industrie."
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Une communauté active de développeurs et d'entrepreneurs qui s'entraident."
+      }
+    },
+    "tech": {
+      "title": "Technologies Utilisées",
+      "withAppRouter": "avec App Router",
+      "withTypeScript": "avec TypeScript",
+      "forDesign": "pour le design",
+      "forState": "pour la gestion d'état",
+      "forAPIs": "pour les APIs type-safe",
+      "withMongoDB": "avec MongoDB",
+      "forAuth": "pour l'authentification",
+      "multiTenant": "Architecture multi-tenant"
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "subtitle": "Rejoignez des milliers de marchands qui font confiance à notre plateforme.",
+      "viewOnGithub": "Voir sur GitHub"
+    }
   },
   "seo": {
     "home": {

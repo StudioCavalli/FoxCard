@@ -21,12 +21,14 @@ import {
 } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function MerchantDashboard() {
   const { storeId, storeName } = useStoreContext()
   const params = useParams()
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
+  const t = useTranslations('merchant')
 
   const { data: products, isLoading: loadingProducts } = trpc.product.getAll.useQuery(
     {
@@ -113,12 +115,12 @@ export default function MerchantDashboard() {
     const cancelled = orders.filter((o) => o.status === 'CANCELLED').length
 
     return [
-      { name: 'En attente', value: pending, color: '#f59e0b' },
-      { name: 'En cours', value: processing, color: '#3b82f6' },
-      { name: 'Complétées', value: completed, color: '#10b981' },
-      { name: 'Annulées', value: cancelled, color: '#ef4444' },
+      { name: t('statusPending'), value: pending, color: '#f59e0b' },
+      { name: t('statusProcessing'), value: processing, color: '#3b82f6' },
+      { name: t('statusCompleted'), value: completed, color: '#10b981' },
+      { name: t('statusCancelled'), value: cancelled, color: '#ef4444' },
     ].filter((item) => item.value > 0)
-  }, [ordersData?.orders])
+  }, [ordersData?.orders, t])
 
   const isLoading = loadingProducts || loadingOrders || loadingCustomers
 
@@ -129,9 +131,9 @@ export default function MerchantDashboard() {
         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
           <Store className="w-10 h-10 text-gray-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Aucune boutique sélectionnée</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('noStoreSelected')}</h2>
         <p className="text-gray-500 mb-6 max-w-md">
-          Sélectionnez une boutique pour accéder à votre tableau de bord et gérer vos produits, commandes et clients.
+          {t('selectStoreDescription')}
         </p>
       </div>
     )
@@ -142,13 +144,13 @@ export default function MerchantDashboard() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-          <p className="text-gray-500 mt-1">Vue d'ensemble de {storeName || 'votre boutique'}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('dashboard')}</h1>
+          <p className="text-gray-500 mt-1">{t('overviewOf', { storeName: storeName || t('store') })}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm text-gray-600">
             <Calendar className="w-4 h-4" />
-            <span>7 derniers jours</span>
+            <span>{t('last7Days')}</span>
           </div>
         </div>
       </div>
@@ -156,7 +158,7 @@ export default function MerchantDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <EnhancedStatCard
-          title="Revenu Total"
+          title={t('totalRevenue')}
           value={formatPrice(totalRevenue)}
           change={12.5}
           icon={DollarSign}
@@ -165,7 +167,7 @@ export default function MerchantDashboard() {
           loading={isLoading}
         />
         <EnhancedStatCard
-          title="Commandes"
+          title={t('orders')}
           value={totalOrders}
           change={8.2}
           icon={ShoppingCart}
@@ -174,7 +176,7 @@ export default function MerchantDashboard() {
           loading={isLoading}
         />
         <EnhancedStatCard
-          title="Produits"
+          title={t('products')}
           value={totalProducts}
           icon={Package}
           color="amber"
@@ -182,7 +184,7 @@ export default function MerchantDashboard() {
           loading={isLoading}
         />
         <EnhancedStatCard
-          title="Clients"
+          title={t('customers')}
           value={totalCustomers}
           change={5.4}
           icon={Users}
@@ -198,8 +200,8 @@ export default function MerchantDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Revenus</h3>
-              <p className="text-sm text-gray-500">Évolution sur les 7 derniers jours</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t('revenue')}</h3>
+              <p className="text-sm text-gray-500">{t('revenueEvolution')}</p>
             </div>
             <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full">
               <TrendingUp className="w-4 h-4" />
@@ -216,8 +218,8 @@ export default function MerchantDashboard() {
         {/* Order Status Chart */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Statut des commandes</h3>
-            <p className="text-sm text-gray-500">Répartition actuelle</p>
+            <h3 className="text-lg font-semibold text-gray-900">{t('orderStatus')}</h3>
+            <p className="text-sm text-gray-500">{t('currentDistribution')}</p>
           </div>
           {isLoading ? (
             <div className="h-[250px] animate-pulse bg-gray-100 rounded-lg" />
@@ -225,7 +227,7 @@ export default function MerchantDashboard() {
             <OrderStatusChart data={orderStatusData} />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">
-              Aucune commande
+              {t('noOrders')}
             </div>
           )}
         </div>
@@ -235,14 +237,14 @@ export default function MerchantDashboard() {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Volume de commandes</h3>
-            <p className="text-sm text-gray-500">Nombre de commandes par jour</p>
+            <h3 className="text-lg font-semibold text-gray-900">{t('orderVolume')}</h3>
+            <p className="text-sm text-gray-500">{t('ordersPerDay')}</p>
           </div>
           <Link
             href={`${basePath}/orders`}
             className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
           >
-            Voir tout
+            {t('viewAll')}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -258,14 +260,14 @@ export default function MerchantDashboard() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Commandes récentes</h3>
-              <p className="text-sm text-gray-500">Les 5 dernières commandes</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t('recentOrders')}</h3>
+              <p className="text-sm text-gray-500">{t('last5Orders')}</p>
             </div>
             <Link
               href={`${basePath}/orders`}
               className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
             >
-              Voir toutes
+              {t('viewAllFeminine')}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -285,19 +287,19 @@ export default function MerchantDashboard() {
         ) : recentOrders.length === 0 ? (
           <div className="p-12 text-center">
             <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucune commande pour le moment</p>
-            <p className="text-sm text-gray-400 mt-1">Les commandes apparaîtront ici</p>
+            <p className="text-gray-500">{t('noOrdersYet')}</p>
+            <p className="text-sm text-gray-400 mt-1">{t('ordersWillAppearHere')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">N° Commande</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Date</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('orderNumber')}</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('client')}</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">{t('date')}</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('total')}</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -326,10 +328,10 @@ export default function MerchantDashboard() {
                         order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {order.status === 'PENDING' && 'En attente'}
-                        {order.status === 'PROCESSING' && 'En cours'}
-                        {order.status === 'COMPLETED' && 'Complétée'}
-                        {order.status === 'CANCELLED' && 'Annulée'}
+                        {order.status === 'PENDING' && t('statusPending')}
+                        {order.status === 'PROCESSING' && t('statusProcessing')}
+                        {order.status === 'COMPLETED' && t('statusCompleted')}
+                        {order.status === 'CANCELLED' && t('statusCancelled')}
                       </span>
                     </td>
                   </tr>
@@ -347,8 +349,8 @@ export default function MerchantDashboard() {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
               <Plus className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-lg mb-1">Ajouter un Produit</h3>
-            <p className="text-indigo-100 text-sm">Créez un nouveau produit</p>
+            <h3 className="font-semibold text-lg mb-1">{t('addProduct')}</h3>
+            <p className="text-indigo-100 text-sm">{t('createNewProduct')}</p>
           </div>
         </Link>
 
@@ -357,8 +359,8 @@ export default function MerchantDashboard() {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
               <ShoppingCart className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-lg mb-1">Gérer les Commandes</h3>
-            <p className="text-green-100 text-sm">Traitez vos commandes</p>
+            <h3 className="font-semibold text-lg mb-1">{t('manageOrders')}</h3>
+            <p className="text-green-100 text-sm">{t('processOrders')}</p>
           </div>
         </Link>
 
@@ -367,8 +369,8 @@ export default function MerchantDashboard() {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-lg mb-1">Base Clients</h3>
-            <p className="text-amber-100 text-sm">Gérez vos clients</p>
+            <h3 className="font-semibold text-lg mb-1">{t('customerBase')}</h3>
+            <p className="text-amber-100 text-sm">{t('manageCustomers')}</p>
           </div>
         </Link>
       </div>
