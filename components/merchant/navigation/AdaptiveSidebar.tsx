@@ -21,8 +21,8 @@ import { commerceTypeConfigs, type CommerceType } from '@/lib/commerce-types'
 
 export function AdaptiveSidebar() {
   const { isOpen, close } = useSidebar()
-  const { currentStoreId } = useStoreContext()
-  const { type: commerceType, isLoading } = useStoreCommerceType(currentStoreId || undefined)
+  const { storeId } = useStoreContext()
+  const { type: commerceType, isLoading } = useStoreCommerceType(storeId || undefined)
   const params = useParams()
   const pathname = usePathname()
   const t = useTranslations()

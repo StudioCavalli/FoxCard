@@ -97,7 +97,7 @@ function EcommerceWidgets({ storeId }: { storeId: string }) {
     .reduce((sum, o) => sum + o.total, 0) || 0
 
   const pendingOrders = ordersData?.orders.filter((o) => o.status === 'PENDING').length || 0
-  const lowStockProducts = products?.products.filter((p) => (p.stock || 0) < 10).length || 0
+  const lowStockProducts = products?.products.filter((p) => (p.quantity || 0) < 10).length || 0
 
   return (
     <StatGrid columns={4}>
@@ -384,7 +384,7 @@ function AlcoholWidgets({ storeId }: { storeId: string }) {
       />
       <StatWidget
         title="Stock faible"
-        value={products?.products.filter((p) => (p.stock || 0) < 5).length || 0}
+        value={products?.products.filter((p) => (p.quantity || 0) < 5).length || 0}
         icon={AlertTriangle}
         iconColor="danger"
         loading={isLoading}
