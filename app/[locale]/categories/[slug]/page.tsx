@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/products/ProductCard'
 import { trpc } from '@/lib/trpc/client'
 import { Filter, X, Search, ArrowLeft, Sparkles } from 'lucide-react'
+import { usePublicStore } from '@/lib/context/public-store-context'
 
 export default function CategoryPage({
   params,
@@ -12,7 +13,10 @@ export default function CategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = use(params)
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { selectedStore, stores } = usePublicStore()
+
+  // Use selected store or first available store
+  const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
 
   const [showFilters, setShowFilters] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,13 +26,15 @@ export default function CategoryPage({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const { data: category, isLoading: categoryLoading } = trpc.category.getBySlug.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: currentStoreId,
     slug,
+  }, {
+    enabled: !!currentStoreId,
   })
 
   const { data, isLoading, fetchNextPage, hasNextPage } = trpc.product.getAll.useInfiniteQuery(
     {
-      storeId: DEMO_STORE_ID,
+      storeId: currentStoreId,
       status: 'ACTIVE',
       categoryId: category?.id,
       search: searchQuery || undefined,
@@ -40,7 +46,7 @@ export default function CategoryPage({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!category,
+      enabled: !!category && !!currentStoreId,
     }
   )
 
@@ -318,7 +324,7 @@ export default function CategoryPage({
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} storeSlug="demo" />
+                    <ProductCard key={product.id} product={product} storeSlug={stores.find(s => s.id === currentStoreId)?.slug || 'store'} />
                   ))}
                 </div>
 

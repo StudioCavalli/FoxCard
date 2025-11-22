@@ -33,12 +33,14 @@ import { SidebarLink } from '../admin/SidebarLink'
 import { useSidebar } from '@/lib/context/sidebar-context'
 import { useStoreContext } from '@/lib/context/store-context'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 export function MerchantSidebar() {
   const { isOpen, close } = useSidebar()
   const { storeName } = useStoreContext()
   const params = useParams()
   const locale = params?.locale || 'fr'
+  const t = useTranslations()
 
   const basePath = `/${locale}/merchant`
 
@@ -67,8 +69,8 @@ export function MerchantSidebar() {
                 <Store className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-sm font-bold truncate">{storeName || 'Ma Boutique'}</h1>
-                <p className="text-xs text-slate-400">Espace Marchand</p>
+                <h1 className="text-sm font-bold truncate">{storeName || t('merchant.store')}</h1>
+                <p className="text-xs text-slate-400">{t('merchant.dashboard')}</p>
               </div>
             </Link>
             {/* Mobile Close Button */}
@@ -85,91 +87,91 @@ export function MerchantSidebar() {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {/* Dashboard */}
           <SidebarLink href={basePath} icon={LayoutDashboard} onClick={close}>
-            Tableau de bord
+            {t('merchant.dashboard')}
           </SidebarLink>
 
           {/* Catalogue Group */}
-          <SidebarGroup title="Catalogue" icon={Package}>
+          <SidebarGroup title={t('common.products')} icon={Package}>
             <SidebarLink href={`${basePath}/products`} icon={Box} onClick={close}>
-              Produits
+              {t('merchant.products')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/categories`} icon={FolderTree} onClick={close}>
-              Catégories
+              {t('common.categories')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/warehouses`} icon={Warehouse} onClick={close}>
-              Entrepôts
+              {t('admin.warehouse')}
             </SidebarLink>
           </SidebarGroup>
 
           {/* Ventes Group */}
-          <SidebarGroup title="Ventes" icon={ShoppingCart}>
+          <SidebarGroup title={t('merchant.orders')} icon={ShoppingCart}>
             <SidebarLink href={`${basePath}/orders`} icon={Package} onClick={close}>
-              Commandes
+              {t('merchant.orders')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/customers`} icon={Users} onClick={close}>
-              Clients
+              {t('merchant.customers')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/abandoned-carts`} icon={ShoppingCart} onClick={close}>
-              Paniers abandonnés
+              {t('common.cart')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/discounts`} icon={Percent} onClick={close}>
-              Codes promo
+              {t('admin.discounts')}
             </SidebarLink>
           </SidebarGroup>
 
           {/* Expédition & Taxes Group */}
-          <SidebarGroup title="Expédition" icon={Truck}>
+          <SidebarGroup title={t('admin.shipping')} icon={Truck}>
             <SidebarLink href={`${basePath}/shipping`} icon={MapPin} onClick={close}>
-              Zones de livraison
+              {t('merchant.shippingZones')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/taxes`} icon={Receipt} onClick={close}>
-              Taxes
+              {t('admin.taxes')}
             </SidebarLink>
           </SidebarGroup>
 
           {/* Marketing Group */}
-          <SidebarGroup title="Marketing" icon={Megaphone}>
+          <SidebarGroup title={t('admin.campaigns')} icon={Megaphone}>
             <SidebarLink href={`${basePath}/emails`} icon={Mail} onClick={close}>
-              Campagnes email
+              {t('admin.emails')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/email-templates`} icon={FileText} onClick={close}>
-              Templates
+              {t('admin.reports')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/newsletter`} icon={Send} onClick={close}>
-              Newsletter
+              {t('admin.newsletter')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/ab-testing`} icon={TestTube} onClick={close}>
-              Tests A/B
+              A/B Testing
             </SidebarLink>
           </SidebarGroup>
 
           {/* Analytics Group */}
-          <SidebarGroup title="Analytics" icon={BarChart3}>
+          <SidebarGroup title={t('merchant.analytics')} icon={BarChart3}>
             <SidebarLink href={`${basePath}/analytics`} icon={TrendingUp} onClick={close}>
-              Vue d'ensemble
+              {t('merchant.analytics')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/reports`} icon={FileText} onClick={close}>
-              Rapports
+              {t('admin.reports')}
             </SidebarLink>
           </SidebarGroup>
 
           {/* Paiements Group */}
-          <SidebarGroup title="Paiements" icon={CreditCard}>
+          <SidebarGroup title={t('admin.payments')} icon={CreditCard}>
             <SidebarLink href={`${basePath}/payments`} icon={CreditCard} onClick={close}>
-              Transactions
+              {t('admin.payments')}
             </SidebarLink>
           </SidebarGroup>
 
           {/* Paramètres Group */}
-          <SidebarGroup title="Paramètres" icon={Settings}>
+          <SidebarGroup title={t('merchant.settings')} icon={Settings}>
             <SidebarLink href={`${basePath}/store`} icon={Store} onClick={close}>
-              Ma boutique
+              {t('merchant.store')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/themes`} icon={Palette} onClick={close}>
-              Thème
+              {t('admin.themes')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/settings`} icon={Settings} onClick={close}>
-              Paramètres
+              {t('merchant.settings')}
             </SidebarLink>
           </SidebarGroup>
         </nav>
@@ -182,7 +184,7 @@ export function MerchantSidebar() {
             className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors text-sm"
           >
             <Eye className="w-4 h-4" />
-            <span>Voir ma boutique</span>
+            <span>{t('store.viewStore')}</span>
           </Link>
         </div>
       </aside>

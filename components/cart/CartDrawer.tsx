@@ -8,10 +8,12 @@ import { useCartStore } from '@/lib/store/cart'
 import { Button } from '@/components/ui/Button'
 import { formatPrice } from '@/lib/utils'
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 export function CartDrawer() {
   const { isCartOpen, closeCart } = useUIStore()
   const { items, updateQuantity, removeItem, getTotalPrice, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
+  const t = useTranslations()
 
   // Close cart on escape key
   useEffect(() => {
@@ -42,7 +44,7 @@ export function CartDrawer() {
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">Panier</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('cart.title')}</h2>
           <button
             onClick={closeCart}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -58,9 +60,9 @@ export function CartDrawer() {
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <X className="w-12 h-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Votre panier est vide</h3>
-              <p className="text-gray-600 mb-6">Ajoutez des produits pour commencer</p>
-              <Button onClick={closeCart}>Continuer mes achats</Button>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('cart.empty')}</h3>
+              <p className="text-gray-600 mb-6">{t('product.addToCart')}</p>
+              <Button onClick={closeCart}>{t('cart.continueShopping')}</Button>
             </div>
           ) : (
             <div className="space-y-6">
@@ -70,10 +72,10 @@ export function CartDrawer() {
                   {getUniqueStoresCount() > 1 && (
                     <div className="flex items-center justify-between px-2 pb-2 border-b border-gray-200">
                       <h3 className="font-semibold text-sm text-gray-700">
-                        {storeItems[0]?.storeName || 'Boutique'}
+                        {storeItems[0]?.storeName || t('checkout.store')}
                       </h3>
                       <span className="text-sm font-medium text-gray-600">
-                        Sous-total: {formatPrice(getStoreSubtotal(storeId))}
+                        {t('cart.subtotal')}: {formatPrice(getStoreSubtotal(storeId))}
                       </span>
                     </div>
                   )}
@@ -143,7 +145,7 @@ export function CartDrawer() {
           <div className="border-t p-6 space-y-4">
             {/* Total */}
             <div className="flex items-center justify-between text-xl font-bold">
-              <span>Total</span>
+              <span>{t('cart.total')}</span>
               <span>{formatPrice(getTotalPrice())}</span>
             </div>
 
@@ -151,11 +153,11 @@ export function CartDrawer() {
             <div className="space-y-2">
               <Link href="/checkout" onClick={closeCart} className="block">
                 <Button variant="primary" size="lg" className="w-full">
-                  Passer commande
+                  {t('cart.proceedToCheckout')}
                 </Button>
               </Link>
               <Button variant="outline" size="lg" className="w-full" onClick={closeCart}>
-                Continuer mes achats
+                {t('cart.continueShopping')}
               </Button>
             </div>
           </div>

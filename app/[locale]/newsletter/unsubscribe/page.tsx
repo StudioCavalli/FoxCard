@@ -7,8 +7,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { trpc } from '@/lib/trpc/client'
 import { CheckCircle, XCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function NewsletterUnsubscribePage() {
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
   const storeId = searchParams.get('storeId') || '000000000000000000000001'
@@ -21,7 +23,7 @@ export default function NewsletterUnsubscribePage() {
 
   const handleUnsubscribe = async () => {
     if (!email) {
-      setError('Email invalide')
+      setError(t('newsletter.invalidEmail'))
       return
     }
 
@@ -37,7 +39,7 @@ export default function NewsletterUnsubscribePage() {
           setError('')
         },
         onError: (err) => {
-          setError(err.message || 'Erreur lors du désabonnement')
+          setError(err.message || t('newsletter.unsubscribeError'))
         },
       }
     )
@@ -109,7 +111,7 @@ export default function NewsletterUnsubscribePage() {
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
               rows={4}
-              placeholder="Vos commentaires nous aident à nous améliorer..."
+              placeholder={t('newsletter.feedbackPlaceholder')}
             />
           </div>
 
@@ -120,7 +122,7 @@ export default function NewsletterUnsubscribePage() {
             onClick={handleUnsubscribe}
             disabled={unsubscribeMutation.isPending}
           >
-            {unsubscribeMutation.isPending ? 'Désabonnement...' : 'Me désinscrire'}
+            {unsubscribeMutation.isPending ? t('newsletter.unsubscribing') : t('newsletter.unsubscribe')}
           </Button>
 
           <div className="mt-4 text-center">

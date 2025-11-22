@@ -49,7 +49,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         } else {
           // Fallback to localStorage or default
           const stored = localStorage.getItem(CURRENCY_STORAGE_KEY)
-          if (stored && ['EUR', 'USD', 'GBP', 'CHF'].includes(stored)) {
+          if (stored && ['EUR', 'USD', 'GBP', 'CHF', 'CZK'].includes(stored)) {
             setCurrencyState(stored as Currency)
           }
         }
@@ -57,7 +57,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         console.error('Failed to fetch currency settings:', error)
         // Fallback to localStorage or default
         const stored = localStorage.getItem(CURRENCY_STORAGE_KEY)
-        if (stored && ['EUR', 'USD', 'GBP', 'CHF'].includes(stored)) {
+        if (stored && ['EUR', 'USD', 'GBP', 'CHF', 'CZK'].includes(stored)) {
           setCurrencyState(stored as Currency)
         }
       } finally {

@@ -3,9 +3,9 @@ import { Theme } from './types'
 export const defaultTheme: Theme = {
   id: 'default',
   name: 'Thème par défaut',
-  description: 'Thème moderne et minimaliste de FoxCard',
+  description: 'Thème moderne et minimaliste de GoldenEra',
   version: '1.0.0',
-  author: 'Studio Cavalli',
+  author: 'Foxcase',
   colors: {
     light: {
       primary: '#14b8a6', // Teal-500

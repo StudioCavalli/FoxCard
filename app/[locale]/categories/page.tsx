@@ -4,12 +4,18 @@ import { trpc } from '@/lib/trpc/client'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Folder, ArrowRight } from 'lucide-react'
+import { usePublicStore } from '@/lib/context/public-store-context'
 
 export default function CategoriesPage() {
-  const DEMO_STORE_ID = '000000000000000000000001'
+  const { selectedStore, stores } = usePublicStore()
+
+  // Use selected store or first available store
+  const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
 
   const { data: categories, isLoading } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: currentStoreId,
+  }, {
+    enabled: !!currentStoreId,
   })
 
   return (

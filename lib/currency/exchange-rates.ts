@@ -11,6 +11,7 @@ const DEFAULT_RATES: Record<Currency, number> = {
   USD: 1.09, // Approximate rate
   GBP: 0.86, // Approximate rate
   CHF: 0.96, // Approximate rate
+  CZK: 25.2, // Approximate rate (Czech Koruna)
 }
 
 /**
@@ -38,6 +39,7 @@ async function fetchExchangeRates(): Promise<Record<Currency, number>> {
       USD: data.rates.USD || DEFAULT_RATES.USD,
       GBP: data.rates.GBP || DEFAULT_RATES.GBP,
       CHF: data.rates.CHF || DEFAULT_RATES.CHF,
+      CZK: data.rates.CZK || DEFAULT_RATES.CZK,
     }
   } catch (error) {
     console.error('Error fetching exchange rates:', error)

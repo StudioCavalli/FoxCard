@@ -1,6 +1,10 @@
+'use client'
+
 import { Heart, Package, Shield, Users } from 'lucide-react'
+import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 
 export default function AboutPage() {
+  const { settings } = usePlatformSettings()
   return (
     <div style={{ fontFamily: 'var(--theme-font-body)' }}>
       <div className="mx-auto px-6 lg:px-8 py-16" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
@@ -14,7 +18,7 @@ export default function AboutPage() {
             <span className="relative inline-block">
               <span className="absolute inset-0 bg-gradient-to-r from-theme-primary to-theme-accent blur-xl opacity-30" />
               <span className="relative bg-gradient-to-r from-theme-primary to-theme-accent bg-clip-text text-transparent">
-                FoxCard
+                {settings.platformName}
               </span>
             </span>
           </h1>

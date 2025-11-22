@@ -20,7 +20,7 @@ export interface BaseLayoutProps {
 
 export const BaseLayout = ({
   children,
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
   trackingPixelUrl,
 }: BaseLayoutProps) => {
@@ -55,15 +55,15 @@ export const BaseLayout = ({
               commande sur {storeName}.
             </Text>
             <Text style={footerLinks}>
-              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://foxcard.com'}`} style={link}>
+              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://goldenera.com'}`} style={link}>
                 Visiter le site
               </Link>
               {' | '}
-              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://foxcard.com'}/account`} style={link}>
+              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://goldenera.com'}/account`} style={link}>
                 Mon compte
               </Link>
               {' | '}
-              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://foxcard.com'}/contact`} style={link}>
+              <Link href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://goldenera.com'}/contact`} style={link}>
                 Contact
               </Link>
             </Text>

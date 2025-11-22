@@ -10,9 +10,12 @@ import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, 
 import Link from 'next/link'
 import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 import { analyzeCartForCheckout, type CheckoutFlowConfig } from '@/lib/checkout/checkout-flow'
+import { useSession } from 'next-auth/react'
+import { usePublicStore } from '@/lib/context/public-store-context'
 import { BookingStep, type BookingData } from '@/components/checkout/BookingStep'
 import { AlcoholCheckoutVerification } from '@/components/alcohol'
 import { type CommerceType } from '@/lib/commerce-types'
+import { useTranslations } from 'next-intl'
 
 // Icon mapping for dynamic steps
 const STEP_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -25,7 +28,15 @@ const STEP_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const t = useTranslations()
+  const { data: session } = useSession()
+  const { selectedStore, stores } = usePublicStore()
   const { items, getTotalPrice, clearCart, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
+
+  // Get current store ID from cart items or selected store
+  const currentStoreId = items[0]?.storeId || (selectedStore !== 'all' ? selectedStore : stores[0]?.id)
+  // Get customer ID from session
+  const customerId = session?.user?.id
   const [currentStep, setCurrentStep] = useState(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -116,8 +127,7 @@ export default function CheckoutPage() {
   const [loyaltyPointsInput, setLoyaltyPointsInput] = useState('')
   const [loyaltyError, setLoyaltyError] = useState('')
 
-  // TODO: Get actual customer ID from session
-  const DEMO_CUSTOMER_ID = '000000000000000000000001'
+  // Customer ID is now retrieved from session at component level
 
   const [formData, setFormData] = useState({
     email: '',
@@ -132,7 +142,7 @@ export default function CheckoutPage() {
 
   // Load saved checkout data from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('foxcard-checkout')
+    const saved = localStorage.getItem('goldenera-checkout')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -153,7 +163,7 @@ export default function CheckoutPage() {
       paymentMethod,
       timestamp: new Date().toISOString(),
     }
-    localStorage.setItem('foxcard-checkout', JSON.stringify(saveData))
+    localStorage.setItem('goldenera-checkout', JSON.stringify(saveData))
   }, [formData, currentStep, paymentMethod])
 
   const createOrder = trpc.order.createFromCart.useMutation({
@@ -196,15 +206,15 @@ export default function CheckoutPage() {
           }
         }
         // Clear saved checkout data on success
-        localStorage.removeItem('foxcard-checkout')
+        localStorage.removeItem('goldenera-checkout')
       } catch (err) {
         console.error('Failed to create payment session:', err)
-        setError('Erreur lors de la creation de la session de paiement')
+        setError(t('checkout.errorPaymentSession'))
         setIsProcessing(false)
       }
     },
     onError: (error) => {
-      setError(error.message || 'Une erreur est survenue lors de la creation de la commande')
+      setError(error.message || t('checkout.errorCreateOrder'))
       setIsProcessing(false)
     },
   })
@@ -215,7 +225,7 @@ export default function CheckoutPage() {
 
   const validateDiscount = trpc.discount.validateCode.useQuery(
     {
-      storeId: '000000000000000000000001',
+      storeId: currentStoreId,
       code: discountCode,
       orderAmount: getTotalPrice(),
     },
@@ -229,8 +239,8 @@ export default function CheckoutPage() {
 
   // Loyalty queries
   const { data: loyaltyData } = trpc.loyalty.getBalance.useQuery(
-    { customerId: DEMO_CUSTOMER_ID },
-    { enabled: !!formData.email } // Only fetch if user has entered email
+    { customerId: customerId || '' },
+    { enabled: !!customerId && !!formData.email } // Only fetch if logged in and email entered
   )
   const redeemPoints = trpc.loyalty.redeemPoints.useMutation()
 
@@ -240,7 +250,7 @@ export default function CheckoutPage() {
       const timer = setTimeout(() => {
         // Track after 5 minutes of inactivity on checkout page
         trackAbandonedCart.mutate({
-          storeId: '000000000000000000000001',
+          storeId: currentStoreId,
           email: formData.email,
           customerName: formData.firstName && formData.lastName
             ? `${formData.firstName} ${formData.lastName}`
@@ -256,7 +266,7 @@ export default function CheckoutPage() {
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) {
-      setDiscountError('Veuillez entrer un code promo')
+      setDiscountError(t('checkout.enterPromoCode'))
       return
     }
 
@@ -269,7 +279,7 @@ export default function CheckoutPage() {
         setDiscountCode('')
       }
     } catch (err: any) {
-      setDiscountError(err.message || 'Code promo invalide')
+      setDiscountError(err.message || t('checkout.invalidPromoCode'))
     }
   }
 
@@ -282,19 +292,19 @@ export default function CheckoutPage() {
     const pointsToUse = parseInt(loyaltyPointsInput)
 
     if (!pointsToUse || pointsToUse <= 0) {
-      setLoyaltyError('Veuillez entrer un nombre de points valide')
+      setLoyaltyError(t('checkout.enterValidPoints'))
       return
     }
 
     if (!loyaltyData || pointsToUse > loyaltyData.points) {
-      setLoyaltyError(`Vous n'avez que ${loyaltyData?.points || 0} points disponibles`)
+      setLoyaltyError(t('checkout.onlyHavePoints', { count: loyaltyData?.points || 0 }))
       return
     }
 
     // Calculate max points that can be used (can't exceed order total)
     const maxPointsUsable = Math.floor(subtotal + shipping - discount)
     if (pointsToUse > maxPointsUsable) {
-      setLoyaltyError(`Vous ne pouvez utiliser que ${maxPointsUsable} points maximum pour cette commande`)
+      setLoyaltyError(t('checkout.maxPointsUsable', { count: maxPointsUsable }))
       return
     }
 
@@ -358,10 +368,10 @@ export default function CheckoutPage() {
       }
 
       // Redeem loyalty points if used (apply to first order only)
-      if (loyaltyPointsUsed > 0 && result.orders[0]) {
+      if (loyaltyPointsUsed > 0 && result.orders[0] && customerId) {
         try {
           await redeemPoints.mutateAsync({
-            customerId: DEMO_CUSTOMER_ID,
+            customerId: customerId,
             points: loyaltyPointsUsed,
             orderId: result.orders[0].id,
           })
@@ -423,7 +433,7 @@ export default function CheckoutPage() {
       setCurrentStep(currentStep + 1)
       setError('')
     } else {
-      setError('Veuillez remplir tous les champs requis')
+      setError(t('checkout.fillRequired'))
     }
   }
 
@@ -470,15 +480,15 @@ export default function CheckoutPage() {
                 className="text-3xl md:text-4xl font-bold text-theme-text mb-4"
                 style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
               >
-                Votre panier est vide
+                {t('cart.empty')}
               </h1>
               <p className="text-theme-text-secondary mb-8 text-lg">
-                Ajoutez des produits à votre panier avant de passer commande.
+                {t('product.addToCart')}
               </p>
               <Link href="/products">
                 <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 inline-flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
-                  Découvrir nos produits
+                  {t('cart.continueShopping')}
                 </button>
               </Link>
             </div>
@@ -498,29 +508,29 @@ export default function CheckoutPage() {
               className="text-4xl md:text-5xl font-bold text-theme-text"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Commande
+              {t('checkout.title')}
             </h1>
             {/* Checkout type badge */}
             {checkoutFlow.type === 'digital' && (
               <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm font-semibold flex items-center gap-1.5">
                 <Download className="w-4 h-4" />
-                Produit numérique
+                {t('checkout.digitalProduct')}
               </span>
             )}
             {checkoutFlow.type === 'booking' && (
               <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm font-semibold flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                Réservation
+                {t('checkout.reservation')}
               </span>
             )}
             {checkoutFlow.type === 'mixed' && (
               <span className="px-3 py-1 bg-orange-500/10 text-orange-600 rounded-full text-sm font-semibold">
-                Commande mixte
+                {t('checkout.mixedOrder')}
               </span>
             )}
           </div>
           <p className="text-xl text-theme-text-secondary">
-            Complétez vos informations pour finaliser votre achat
+            {t('checkout.completeInfo')}
           </p>
         </div>
 
@@ -593,7 +603,7 @@ export default function CheckoutPage() {
                     className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Informations de contact
+                    {t('checkout.contactInformation')}
                   </h2>
                 </div>
 
@@ -614,7 +624,7 @@ export default function CheckoutPage() {
                       placeholder="votre@email.com"
                     />
                     <p className="text-xs text-theme-text-muted mt-1.5">
-                      Nous vous enverrons une confirmation de commande
+                      {t('checkout.emailHint')}
                     </p>
                   </div>
 
@@ -623,7 +633,7 @@ export default function CheckoutPage() {
                       className="block text-sm font-semibold text-theme-text mb-2"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Téléphone (optionnel)
+                      {t('checkout.phoneOptional')}
                     </label>
                     <input
                       type="tel"
@@ -660,7 +670,7 @@ export default function CheckoutPage() {
                     className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Adresse de livraison
+                    {t('checkout.shippingAddress')}
                   </h2>
                 </div>
 
@@ -671,7 +681,7 @@ export default function CheckoutPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Prénom *
+                        {t('checkout.firstName')} *
                       </label>
                       <input
                         type="text"
@@ -687,7 +697,7 @@ export default function CheckoutPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Nom *
+                        {t('checkout.lastName')} *
                       </label>
                       <input
                         type="text"
@@ -705,7 +715,7 @@ export default function CheckoutPage() {
                       className="block text-sm font-semibold text-theme-text mb-2"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Adresse *
+                      {t('checkout.address')} *
                     </label>
                     <input
                       type="text"
@@ -723,7 +733,7 @@ export default function CheckoutPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Ville *
+                        {t('checkout.city')} *
                       </label>
                       <input
                         type="text"
@@ -739,7 +749,7 @@ export default function CheckoutPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Code postal *
+                        {t('checkout.postalCode')} *
                       </label>
                       <input
                         type="text"
@@ -757,7 +767,7 @@ export default function CheckoutPage() {
                       className="block text-sm font-semibold text-theme-text mb-2"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Pays *
+                      {t('checkout.country')} *
                     </label>
                     <input
                       type="text"
@@ -794,14 +804,14 @@ export default function CheckoutPage() {
                     className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Mode de paiement
+                    {t('checkout.paymentMethod')}
                   </h2>
                 </div>
 
                 {/* Payment Methods Accepted */}
                 <div className="mb-6 p-4 bg-theme-background border border-theme-border rounded-xl">
                   <p className="text-sm text-theme-text mb-3 font-semibold">
-                    Moyens de paiement acceptés :
+                    {t('checkout.paymentAccepted')}
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="px-3 py-2 bg-theme-surface rounded-lg border border-theme-border flex items-center gap-2">
@@ -841,7 +851,7 @@ export default function CheckoutPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <CreditCard className="w-5 h-5 text-theme-text-secondary" />
-                          <span className="font-semibold text-theme-text">Carte bancaire</span>
+                          <span className="font-semibold text-theme-text">{t('checkout.creditCard')}</span>
                         </div>
                         {paymentMethod === 'card' && (
                           <CheckCircle className="w-5 h-5 text-theme-primary" />
@@ -888,8 +898,8 @@ export default function CheckoutPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                           </svg>
                           <div>
-                            <span className="font-semibold text-theme-text block">Virement bancaire</span>
-                            <span className="text-xs text-theme-text-muted">Paiement sous 2-3 jours</span>
+                            <span className="font-semibold text-theme-text block">{t('checkout.bankTransfer')}</span>
+                            <span className="text-xs text-theme-text-muted">{t('checkout.bankTransferDelay')}</span>
                           </div>
                         </div>
                         {paymentMethod === 'bank_transfer' && (
@@ -904,8 +914,8 @@ export default function CheckoutPage() {
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-red-600">
-                        <p className="font-semibold">Aucune methode de paiement disponible</p>
-                        <p>Veuillez contacter le support pour plus d'informations.</p>
+                        <p className="font-semibold">{t('checkout.noPaymentMethods')}</p>
+                        <p>{t('checkout.contactSupport')}</p>
                       </div>
                     </div>
                   )}
@@ -914,9 +924,9 @@ export default function CheckoutPage() {
                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
                   <Lock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-blue-900">
-                    <p className="font-semibold mb-1">Paiement 100% sécurisé</p>
+                    <p className="font-semibold mb-1">{t('checkout.securePayment')}</p>
                     <p className="text-blue-700">
-                      Vos informations de paiement sont cryptées et sécurisées
+                      {t('checkout.securePaymentDesc')}
                     </p>
                   </div>
                 </div>
@@ -932,13 +942,13 @@ export default function CheckoutPage() {
                   className="px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  Retour
+                  {t('checkout.back')}
                 </button>
               ) : (
                 <Link href="/cart">
                   <button className="px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2">
                     <ArrowLeft className="w-5 h-5" />
-                    Panier
+                    {t('common.cart')}
                   </button>
                 </Link>
               )}
@@ -949,7 +959,7 @@ export default function CheckoutPage() {
                   className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2 ml-auto"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Continuer
+                  {t('checkout.continue')}
                   <ArrowRight className="w-5 h-5" />
                 </button>
               ) : (
@@ -965,11 +975,11 @@ export default function CheckoutPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Traitement...
+                      {t('checkout.processing')}
                     </>
                   ) : (
                     <>
-                      Passer commande
+                      {t('checkout.placeOrder')}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -985,7 +995,7 @@ export default function CheckoutPage() {
                 className="text-2xl font-bold text-theme-text mb-6"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Récapitulatif
+                {t('checkout.orderSummary')}
               </h2>
 
               <div className="space-y-6 mb-6">
@@ -996,7 +1006,7 @@ export default function CheckoutPage() {
                       <div className="pb-2 border-b border-theme-border">
                         <div className="flex items-center justify-between">
                           <h4 className="text-xs font-bold text-theme-text uppercase tracking-wide">
-                            {storeItems[0]?.storeName || 'Boutique'}
+                            {storeItems[0]?.storeName || t('checkout.store')}
                           </h4>
                           <span className="text-xs font-medium text-theme-text-muted">
                             {formatPrice(getStoreSubtotal(storeId))}
@@ -1019,7 +1029,7 @@ export default function CheckoutPage() {
                             <p className="text-xs text-theme-text-muted mt-0.5">{item.variantName}</p>
                           )}
                           <p className="text-sm text-theme-text-secondary mt-1">
-                            Qté: {item.quantity} × {formatPrice(item.price)}
+                            {t('checkout.quantity')}: {item.quantity} × {formatPrice(item.price)}
                           </p>
                         </div>
                       </div>
@@ -1036,7 +1046,7 @@ export default function CheckoutPage() {
                       className="block text-sm font-semibold text-theme-text"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Code promo
+                      {t('checkout.promoCode')}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -1067,7 +1077,7 @@ export default function CheckoutPage() {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
                         ) : (
-                          'Appliquer'
+                          t('checkout.apply')
                         )}
                       </button>
                     </div>
@@ -1089,8 +1099,8 @@ export default function CheckoutPage() {
                           </p>
                           <p className="text-xs text-green-700">
                             {appliedDiscount.type === 'PERCENTAGE'
-                              ? `${appliedDiscount.value}% de réduction`
-                              : `${formatPrice(appliedDiscount.value)} de réduction`}
+                              ? t('checkout.percentOff', { value: appliedDiscount.value })
+                              : t('checkout.amountOff', { value: formatPrice(appliedDiscount.value) })}
                           </p>
                         </div>
                       </div>
@@ -1113,7 +1123,7 @@ export default function CheckoutPage() {
                         className="block text-sm font-semibold text-theme-text"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Points de fidélité
+                        {t('checkout.loyaltyPoints')}
                       </label>
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-full">
                         <Star className="w-3.5 h-3.5" fill="currentColor" />
@@ -1145,14 +1155,14 @@ export default function CheckoutPage() {
                         disabled={!loyaltyPointsInput || parseInt(loyaltyPointsInput) <= 0}
                         className="px-4 py-2.5 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-lg font-semibold text-sm transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                       >
-                        Utiliser
+                        {t('checkout.use')}
                       </button>
                     </div>
                     {loyaltyError && (
                       <p className="text-xs text-red-600 font-medium">{loyaltyError}</p>
                     )}
                     <p className="text-xs text-theme-text-muted">
-                      1 point = 1€ de réduction • Niveau {loyaltyData.tier}
+                      {t('checkout.pointValueHint', { tier: loyaltyData.tier })}
                     </p>
                   </div>
                 )}
@@ -1165,10 +1175,10 @@ export default function CheckoutPage() {
                         <Gift className="w-4 h-4 text-orange-600" />
                         <div>
                           <p className="text-sm font-bold text-orange-900">
-                            {loyaltyPointsUsed} points utilisés
+                            {t('checkout.pointsUsed', { count: loyaltyPointsUsed })}
                           </p>
                           <p className="text-xs text-orange-700">
-                            -{formatPrice(loyaltyPointsUsed)} de réduction
+                            -{formatPrice(loyaltyPointsUsed)} {t('checkout.reduction').toLowerCase()}
                           </p>
                         </div>
                       </div>
@@ -1186,17 +1196,17 @@ export default function CheckoutPage() {
                 {/* Order Summary */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-theme-text-secondary">
-                    <span>Sous-total</span>
+                    <span>{t('cart.subtotal')}</span>
                     <span className="font-semibold text-theme-text">{formatPrice(subtotal)}</span>
                   </div>
                   {/* Shipping breakdown by store */}
                   {multiStoreShipping && getUniqueStoresCount() > 1 ? (
                     <div className="space-y-2">
                       <div className="flex justify-between text-theme-text-secondary">
-                        <span className="font-medium">Livraison</span>
+                        <span className="font-medium">{t('cart.shipping')}</span>
                         <span className="font-semibold text-theme-text">
                           {shipping === 0 ? (
-                            <span className="text-green-600 font-bold">Gratuite</span>
+                            <span className="text-green-600 font-bold">{t('checkout.freeShipping')}</span>
                           ) : (
                             formatPrice(shipping)
                           )}
@@ -1214,7 +1224,7 @@ export default function CheckoutPage() {
                             </span>
                             <span>
                               {storeShipping.cost === 0 ? (
-                                <span className="text-green-600">Gratuite</span>
+                                <span className="text-green-600">{t('checkout.freeShipping')}</span>
                               ) : (
                                 formatPrice(storeShipping.cost)
                               )}
@@ -1226,16 +1236,16 @@ export default function CheckoutPage() {
                   ) : (
                     <div className="flex justify-between text-theme-text-secondary">
                       <div className="flex flex-col">
-                        <span>Livraison</span>
+                        <span>{t('cart.shipping')}</span>
                         {multiStoreShipping?.byStore[0]?.estimatedDays && (
                           <span className="text-xs text-theme-text-muted">
-                            Délai: {multiStoreShipping.byStore[0].estimatedDays} jours
+                            {t('checkout.estimatedDelivery', { days: multiStoreShipping.byStore[0].estimatedDays })}
                           </span>
                         )}
                       </div>
                       <span className="font-semibold">
                         {shipping === 0 ? (
-                          <span className="text-green-600 font-bold">Gratuite</span>
+                          <span className="text-green-600 font-bold">{t('checkout.freeShipping')}</span>
                         ) : (
                           <span className="text-theme-text">{formatPrice(shipping)}</span>
                         )}
@@ -1244,19 +1254,19 @@ export default function CheckoutPage() {
                   )}
                   {appliedDiscount && (
                     <div className="flex justify-between text-green-600">
-                      <span className="font-medium">Réduction</span>
+                      <span className="font-medium">{t('checkout.reduction')}</span>
                       <span className="font-bold">-{formatPrice(discount)}</span>
                     </div>
                   )}
                   {loyaltyPointsUsed > 0 && (
                     <div className="flex justify-between text-orange-600">
-                      <span className="font-medium">Points de fidélité</span>
+                      <span className="font-medium">{t('checkout.loyaltyPoints')}</span>
                       <span className="font-bold">-{formatPrice(loyaltyDiscount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between pt-3 border-t border-theme-border">
                     <span className="text-lg font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-                      Total
+                      {t('cart.total')}
                     </span>
                     <span
                       className="text-3xl font-bold text-theme-text"

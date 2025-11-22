@@ -97,6 +97,11 @@ model Store {
   // Suspension appeals
   suspensionAppeals    SuspensionAppeal[]
 
+  // Booking & Reservations
+  bookings         Booking[]
+  timeSlots        TimeSlot[]
+  blockedDates     BlockedDate[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -218,6 +223,7 @@ model Product {
   variants    ProductVariant[]
   orderItems  OrderItem[]
   warehouseStocks WarehouseStock[]
+  digitalFiles DigitalFile[]  // For digital products
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -246,6 +252,230 @@ model ProductVariant {
   updatedAt   DateTime @updatedAt
 
   @@index([productId])
+}
+
+// ============================================
+// DIGITAL PRODUCTS
+// ============================================
+
+model DigitalFile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String   @db.ObjectId
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // File information
+  name        String   // Display name
+  fileName    String   // Original file name
+  fileUrl     String   // Storage URL (S3, etc.)
+  fileSize    Int      // Size in bytes
+  mimeType    String   // e.g., application/pdf, application/zip
+
+  // Download settings
+  maxDownloads    Int?     // Max downloads per purchase (null = unlimited)
+  expiryDays      Int?     // Days until link expires (null = never)
+
+  // Licensing
+  licenseKey      String?  // For software licenses
+  licenseType     String?  // e.g., "single", "multi", "enterprise"
+
+  // Version control
+  version         String?  // e.g., "1.0.0"
+  releaseNotes    String?
+
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  downloads   DigitalDownload[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model DigitalDownload {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Relations
+  fileId      String   @db.ObjectId
+  file        DigitalFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  orderId     String   @db.ObjectId
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId  String?  @db.ObjectId
+
+  // Download token (secure link)
+  token       String   @unique
+
+  // Limits
+  maxDownloads    Int?     // Inherited from DigitalFile or custom
+  downloadCount   Int      @default(0)
+  expiresAt       DateTime?
+
+  // License
+  licenseKey      String?  // Generated or inherited
+
+  // Tracking
+  lastDownloadAt  DateTime?
+  lastDownloadIp  String?
+
+  // Status
+  status      DigitalDownloadStatus @default(ACTIVE)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([fileId])
+  @@index([orderId])
+  @@index([customerId])
+}
+
+enum DigitalDownloadStatus {
+  ACTIVE
+  EXPIRED
+  EXHAUSTED  // Max downloads reached
+  REVOKED
+}
+
+// ============================================
+// BOOKING & RESERVATIONS
+// ============================================
+
+model Booking {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productId   String   @db.ObjectId
+  customerId  String?  @db.ObjectId
+  orderId     String?  @db.ObjectId
+
+  // Booking reference
+  bookingNumber   String   @unique
+
+  // Customer info
+  customerEmail   String
+  customerName    String
+  customerPhone   String?
+
+  // Booking details
+  date            DateTime     // The date of the booking
+  startTime       DateTime?    // For time-based bookings
+  endTime         DateTime?
+  timeSlotId      String?      @db.ObjectId
+
+  // Guests/participants
+  guestCount      Int          @default(1)
+  guestNames      String[]     // Names of additional guests
+
+  // Pricing
+  basePrice       Float
+  totalPrice      Float
+  currency        String       @default("EUR")
+
+  // Options selected
+  options         Json?        // Selected variant options (room type, class, etc.)
+  specialRequests String?      // Special requests from customer
+
+  // Status
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+
+  // Cancellation
+  cancellationPolicy  CancellationPolicy @default(FREE_24H)
+  cancelledAt         DateTime?
+  cancellationReason  String?
+  refundAmount        Float?
+
+  // Confirmation
+  confirmedAt         DateTime?
+  confirmationCode    String?  // QR code content
+
+  // Reminders
+  reminderSentAt      DateTime?
+
+  // Check-in
+  checkedInAt         DateTime?
+  checkedInBy         String?  // Staff member who checked in
+
+  // Notes
+  internalNotes       String?  // Staff notes
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([customerId])
+  @@index([orderId])
+  @@index([date])
+  @@index([status])
+}
+
+model TimeSlot {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productId   String?  @db.ObjectId  // Can be product-specific or store-wide
+
+  // Time configuration
+  dayOfWeek       Int?         // 0-6 (Sunday-Saturday), null = all days
+  specificDate    DateTime?    // For specific dates only
+  startTime       String       // "09:00"
+  endTime         String       // "17:00"
+  duration        Int          // Duration in minutes
+
+  // Capacity
+  capacity        Int          @default(1)
+  overbookingAllowed Boolean   @default(false)
+  overbookingLimit   Int?      // Max extra bookings allowed
+
+  // Availability
+  isActive        Boolean      @default(true)
+  validFrom       DateTime?
+  validUntil      DateTime?
+
+  // Pricing modifier
+  priceModifier   Float?       // +/- from base price
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([dayOfWeek])
+}
+
+model BlockedDate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productId   String?  @db.ObjectId  // Can be product-specific or store-wide
+
+  date        DateTime
+  reason      String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([date])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum CancellationPolicy {
+  FREE_24H      // Free cancellation until 24h before
+  FREE_48H      // Free cancellation until 48h before
+  FREE_72H      // Free cancellation until 72h before
+  NON_REFUNDABLE
+  PARTIAL_50    // 50% refund
+  PARTIAL_75    // 75% refund
 }
 
 model Category {
@@ -346,6 +576,9 @@ model Order {
   // crsdpay payments
   crsdpayTransactions   CrsdpayTransaction[]
   crsdpayCryptoPayments CrsdpayCryptoPayment[]
+
+  // Digital downloads for this order
+  digitalDownloads DigitalDownload[]
 
   // Notes
   notes           String?
@@ -2670,8 +2903,8 @@ model PlatformSettings {
   // Localization
   defaultCurrency        String   @default("EUR")
   defaultLanguage        String   @default("fr")
-  supportedCurrencies    String[] @default(["EUR", "USD", "GBP", "CHF"])
-  supportedLanguages     String[] @default(["fr", "en", "de"])
+  supportedCurrencies    String[] @default(["EUR", "USD", "GBP", "CHF", "CZK"])
+  supportedLanguages     String[] @default(["fr", "en", "de", "es", "sk"])
 
   // Security
   allowRegistration      Boolean  @default(true)

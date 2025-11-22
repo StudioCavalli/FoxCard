@@ -39,10 +39,12 @@ import { SidebarGroup } from './SidebarGroup'
 import { SidebarLink } from './SidebarLink'
 import { useSidebar } from '@/lib/context/sidebar-context'
 import { cn } from '@/lib/utils'
+import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 
 export function AdminSidebar() {
   const { isOpen, close } = useSidebar()
   const pathname = usePathname()
+  const { settings } = usePlatformSettings()
 
   return (
     <>
@@ -66,7 +68,7 @@ export function AdminSidebar() {
           <Link href="/admin" className="flex items-center space-x-2" onClick={close}>
             <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg"></div>
             <div>
-              <h1 className="text-xl font-bold">FoxCard</h1>
+              <h1 className="text-xl font-bold">{settings.platformName}</h1>
               <p className="text-xs text-gray-400">Admin</p>
             </div>
           </Link>

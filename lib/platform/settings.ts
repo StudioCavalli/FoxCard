@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 // Default platform settings
 const defaultSettings = {
   id: 'default',
-  platformName: 'FoxCard',
+  platformName: 'GoldenEra',
   platformUrl: 'https://foxcard.io',
   supportEmail: 'support@foxcard.io',
   maxStoresPerUser: 5,
@@ -11,8 +11,8 @@ const defaultSettings = {
   maintenanceMessage: null as string | null,
   defaultCurrency: 'EUR',
   defaultLanguage: 'fr',
-  supportedCurrencies: ['EUR', 'USD', 'GBP', 'CHF'],
-  supportedLanguages: ['fr', 'en', 'de'],
+  supportedCurrencies: ['EUR', 'USD', 'GBP', 'CHF', 'CZK'],
+  supportedLanguages: ['fr', 'en', 'de', 'es', 'sk'],
   allowRegistration: true,
   requireEmailVerification: true,
   sessionTimeout: 30,

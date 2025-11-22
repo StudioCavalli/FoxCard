@@ -1,14 +1,16 @@
 import { Text, Heading, Button, Section } from '@react-email/components'
 import * as React from 'react'
 import { BaseLayout } from './layouts/Base'
+import { getAccountEmailTranslations, type Locale } from '../i18n'
 
 interface ResetPasswordProps {
   storeName?: string
   storeLogo?: string
   customerName: string
   resetUrl: string
-  expiresIn?: string
+  expiresInHours?: number
   trackingPixelUrl?: string
+  locale?: Locale
 }
 
 export const ResetPassword = ({
@@ -16,44 +18,45 @@ export const ResetPassword = ({
   storeLogo,
   customerName,
   resetUrl,
-  expiresIn = '1 heure',
+  expiresInHours = 1,
   trackingPixelUrl,
+  locale = 'fr',
 }: ResetPasswordProps) => {
+  const t = getAccountEmailTranslations(locale)
+
   return (
     <BaseLayout
       storeName={storeName}
       storeLogo={storeLogo}
       trackingPixelUrl={trackingPixelUrl}
     >
-      <Heading style={h1}>Réinitialisation de mot de passe</Heading>
+      <Heading style={h1}>{t.resetPassword.title}</Heading>
 
-      <Text style={text}>Bonjour {customerName},</Text>
+      <Text style={text}>{t.common.hello(customerName)}</Text>
 
       <Text style={text}>
-        Vous avez demandé à réinitialiser le mot de passe de votre compte.
-        Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+        {t.resetPassword.intro}
       </Text>
 
       <Section style={buttonContainer}>
         <Button href={resetUrl} style={button}>
-          Réinitialiser mon mot de passe
+          {t.resetPassword.resetButton}
         </Button>
       </Section>
 
       <Text style={warningText}>
-        Ce lien expirera dans <strong>{expiresIn}</strong>.
+        {t.resetPassword.expiry(expiresInHours)}
       </Text>
 
       <Section style={securityBox}>
-        <Text style={securityTitle}>🔒 Sécurité</Text>
+        <Text style={securityTitle}>🔒 Security</Text>
         <Text style={securityText}>
-          Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
-          Votre mot de passe ne sera pas modifié.
+          {t.resetPassword.ignore}
         </Text>
       </Section>
 
       <Text style={helpText}>
-        Des questions ? Contactez notre support client.
+        {t.common.questions}
       </Text>
     </BaseLayout>
   )

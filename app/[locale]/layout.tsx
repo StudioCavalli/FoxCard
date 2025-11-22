@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
-import { locales } from '@/lib/i18n/config'
+import { locales, type Locale } from '@/lib/i18n/config'
+import { getSeoTranslations, getAlternateLinks } from '@/lib/i18n/seo'
 import { TRPCProvider } from '@/lib/trpc/Provider'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -31,27 +32,36 @@ export const viewport: Viewport = {
   ],
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
   const settings = await getPlatformSettings()
-  const platformName = settings.platformName || 'FoxCard'
+  const platformName = settings.platformName || 'GoldenEra'
+  const platformUrl = settings.platformUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+  // Get locale-specific SEO translations
+  const seo = getSeoTranslations(locale as Locale)
 
   return {
     title: {
-      default: `${platformName} - E-commerce Open Source`,
+      default: `${platformName} - ${seo.home.title}`,
       template: `%s | ${platformName}`,
     },
-    description: 'La plateforme e-commerce 100% gratuite et open source. Alternative a Shopify construite avec Next.js, React et TypeScript.',
+    description: seo.home.description,
     applicationName: platformName,
-    keywords: ['e-commerce', 'open source', 'shopify alternative', 'boutique en ligne', 'vente en ligne', 'plateforme e-commerce'],
-    authors: [{ name: 'Studio Cavalli' }],
-    creator: 'Studio Cavalli',
-    publisher: 'Studio Cavalli',
+    keywords: seo.keywords.default.split(', '),
+    authors: [{ name: 'Foxcase' }],
+    creator: 'Foxcase',
+    publisher: 'Foxcase',
     formatDetection: {
       email: false,
       address: false,
       telephone: false,
     },
-    metadataBase: new URL(settings.platformUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+    metadataBase: new URL(platformUrl),
     manifest: '/manifest.json',
     appleWebApp: {
       capable: true,
@@ -61,21 +71,22 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       siteName: platformName,
-      title: `${platformName} - E-commerce Open Source`,
-      description: 'La plateforme e-commerce 100% gratuite et open source',
+      title: `${platformName} - ${seo.home.ogTitle}`,
+      description: seo.home.ogDescription,
+      locale: locale,
       images: [
         {
           url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: `${platformName} - E-commerce Open Source`,
+          alt: `${platformName} - ${seo.home.ogTitle}`,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${platformName} - E-commerce Open Source`,
-      description: 'La plateforme e-commerce 100% gratuite et open source',
+      title: `${platformName} - ${seo.home.ogTitle}`,
+      description: seo.home.ogDescription,
       images: ['/og-image.png'],
     },
     icons: {
@@ -84,6 +95,10 @@ export async function generateMetadata(): Promise<Metadata> {
         { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
       ],
       apple: [{ url: '/icon-152x152.png', sizes: '152x152', type: 'image/png' }],
+    },
+    alternates: {
+      canonical: `${platformUrl}/${locale}`,
+      languages: getAlternateLinks('', platformUrl),
     },
   }
 }

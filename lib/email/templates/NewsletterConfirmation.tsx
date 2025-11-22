@@ -1,59 +1,58 @@
 import React from 'react'
 import {
-  Html,
-  Head,
-  Body,
-  Container,
   Section,
   Text,
   Button,
   Hr,
 } from '@react-email/components'
 import { BaseLayout, BaseLayoutProps } from './layouts/Base'
+import { getNewsletterEmailTranslations, type Locale } from '../i18n'
 
 export interface NewsletterConfirmationProps extends BaseLayoutProps {
   firstName?: string
   confirmUrl: string
+  locale?: Locale
 }
 
 export const NewsletterConfirmation = ({
-  storeName = 'FoxCard',
+  storeName = 'GoldenEra',
   storeLogo,
-  firstName = 'Cher abonné',
+  firstName,
   confirmUrl,
   trackingPixelUrl,
+  locale = 'fr',
 }: NewsletterConfirmationProps) => {
+  const t = getNewsletterEmailTranslations(locale)
+  const displayName = firstName || 'there'
+
   return (
     <BaseLayout
       storeName={storeName}
       storeLogo={storeLogo}
       trackingPixelUrl={trackingPixelUrl}
     >
-      <Text style={heading}>Confirmez votre inscription</Text>
+      <Text style={heading}>{t.confirmation.title}</Text>
 
-      <Text style={paragraph}>Bonjour {firstName},</Text>
+      <Text style={paragraph}>{t.common.hello(displayName)}</Text>
 
       <Text style={paragraph}>
-        Merci de votre inscription à notre newsletter ! Pour confirmer votre inscription
-        et commencer à recevoir nos actualités, veuillez cliquer sur le bouton ci-dessous :
+        {t.confirmation.intro}
       </Text>
 
       <Section style={buttonContainer}>
         <Button style={button} href={confirmUrl}>
-          Confirmer mon inscription
+          {t.confirmation.confirmButton}
         </Button>
       </Section>
 
       <Text style={paragraph}>
-        Si vous n'avez pas demandé à vous inscrire à notre newsletter, vous pouvez
-        ignorer cet email en toute sécurité.
+        {t.confirmation.expiry}
       </Text>
 
       <Hr style={hr} />
 
       <Text style={footer}>
-        Vous recevez cet email car vous (ou quelqu'un) avez demandé à vous inscrire à
-        la newsletter de {storeName}.
+        {t.common.team(storeName)}
       </Text>
     </BaseLayout>
   )

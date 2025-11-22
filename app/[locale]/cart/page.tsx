@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/Button'
 import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { ShoppingBag, Minus, Plus, X, ArrowLeft, ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function CartPage() {
+  const t = useTranslations()
   const router = useRouter()
   const { items, updateQuantity, removeItem, clearCart, getTotalPrice, getTotalItems, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
 
@@ -31,15 +33,15 @@ export default function CartPage() {
                 className="text-3xl md:text-4xl font-bold text-theme-text mb-4"
                 style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
               >
-                Votre panier est vide
+                {t('cart.empty')}
               </h1>
               <p className="text-theme-text-secondary mb-8 text-lg">
-                Découvrez nos produits et ajoutez-les à votre panier pour continuer vos achats.
+                {t('cart.emptyDescription')}
               </p>
               <Link href="/products">
                 <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 inline-flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
-                  Découvrir nos produits
+                  {t('home.discoverProducts')}
                 </button>
               </Link>
             </div>
@@ -58,10 +60,10 @@ export default function CartPage() {
             className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
           >
-            Panier
+            {t('cart.title')}
           </h1>
           <p className="text-xl text-theme-text-secondary">
-            {getTotalItems()} article{getTotalItems() > 1 ? 's' : ''} dans votre panier
+            {t('cart.itemsCount', { count: getTotalItems() })}
           </p>
         </div>
 
@@ -74,10 +76,10 @@ export default function CartPage() {
                 {getUniqueStoresCount() > 1 && (
                   <div className="flex items-center justify-between px-4 py-3 bg-theme-primary/5 border border-theme-primary/20 rounded-xl">
                     <h3 className="font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-                      {storeItems[0]?.storeName || 'Boutique'}
+                      {storeItems[0]?.storeName || t('store.title')}
                     </h3>
                     <span className="text-sm font-medium text-theme-text-secondary">
-                      Sous-total: {formatPrice(getStoreSubtotal(storeId))}
+                      {t('cart.subtotal')}: {formatPrice(getStoreSubtotal(storeId))}
                     </span>
                   </div>
                 )}
@@ -117,7 +119,7 @@ export default function CartPage() {
                       <button
                         onClick={() => removeItem(item.productId)}
                         className="p-2 text-theme-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                        aria-label="Retirer du panier"
+                        aria-label={t('cart.removeItem')}
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -155,7 +157,7 @@ export default function CartPage() {
                         </p>
                         {item.maxQuantity !== undefined && item.maxQuantity < 10 && (
                           <p className="text-xs text-yellow-600 mt-1 font-medium">
-                            Plus que {item.maxQuantity} en stock
+                            {t('product.onlyLeft', { count: item.maxQuantity })}
                           </p>
                         )}
                       </div>
@@ -171,14 +173,14 @@ export default function CartPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => {
-                  if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+                  if (confirm(t('cart.clearCartConfirm'))) {
                     clearCart()
                   }
                 }}
                 className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg font-medium transition-all duration-200 inline-flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
-                Vider le panier
+                {t('cart.clearCart')}
               </button>
             </div>
           </div>
@@ -190,19 +192,19 @@ export default function CartPage() {
                 className="text-2xl font-bold text-theme-text mb-6"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Résumé
+                {t('cart.summary')}
               </h2>
 
               <div className="space-y-4 mb-6">
                 <div className="flex items-center justify-between text-theme-text-secondary">
-                  <span>Sous-total</span>
+                  <span>{t('cart.subtotal')}</span>
                   <span className="font-semibold text-theme-text">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between text-theme-text-secondary">
-                  <span>Livraison</span>
+                  <span>{t('cart.shipping')}</span>
                   <span className="font-semibold">
                     {shipping === 0 ? (
-                      <span className="text-green-600">Gratuite</span>
+                      <span className="text-green-600">{t('cart.free')}</span>
                     ) : (
                       <span className="text-theme-text">{formatPrice(shipping)}</span>
                     )}
@@ -210,13 +212,13 @@ export default function CartPage() {
                 </div>
                 {subtotal > 0 && subtotal < 50 && (
                   <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-600 font-medium">
-                    Plus que {formatPrice(50 - subtotal)} pour la livraison gratuite !
+                    {t('cart.almostFreeShipping', { amount: formatPrice(50 - subtotal) })}
                   </div>
                 )}
                 <div className="border-t border-theme-border pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-                      Total
+                      {t('cart.total')}
                     </span>
                     <span
                       className="text-3xl font-bold text-theme-text"
@@ -233,14 +235,14 @@ export default function CartPage() {
                 className="w-full px-6 py-4 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 mb-3"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Passer la commande
+                {t('cart.proceedToCheckout')}
                 <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
               </button>
 
               <Link href="/products">
                 <button className="w-full px-6 py-3 bg-theme-background hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
                   <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
-                  Continuer mes achats
+                  {t('cart.continueShopping')}
                 </button>
               </Link>
 
@@ -252,7 +254,7 @@ export default function CartPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-sm font-medium">Paiement 100% sécurisé</span>
+                  <span className="text-sm font-medium">{t('cart.securePayment')}</span>
                 </div>
                 <div className="flex items-center gap-3 text-theme-text-secondary">
                   <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -260,7 +262,7 @@ export default function CartPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <span className="text-sm font-medium">Retours sous 30 jours</span>
+                  <span className="text-sm font-medium">{t('product.returns30days')}</span>
                 </div>
                 <div className="flex items-center gap-3 text-theme-text-secondary">
                   <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -268,7 +270,7 @@ export default function CartPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <span className="text-sm font-medium">Livraison rapide</span>
+                  <span className="text-sm font-medium">{t('cart.fastDelivery')}</span>
                 </div>
               </div>
             </div>

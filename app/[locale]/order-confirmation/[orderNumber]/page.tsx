@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { CheckCircle, Package, Mail, MapPin, Home, Loader2, Download, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function OrderConfirmationPage({
   params,
@@ -15,6 +16,7 @@ export default function OrderConfirmationPage({
 }) {
   const { orderNumber } = use(params)
   const searchParams = useSearchParams()
+  const t = useTranslations()
   const [isCapturingPayment, setIsCapturingPayment] = useState(false)
   const [paymentError, setPaymentError] = useState('')
   const [bankTransferDetails, setBankTransferDetails] = useState<any>(null)
@@ -46,7 +48,7 @@ export default function OrderConfirmationPage({
           },
           onError: (error) => {
             setIsCapturingPayment(false)
-            setPaymentError(error.message || 'Erreur lors de la capture du paiement PayPal')
+            setPaymentError(error.message || t('order.paypalCaptureError'))
           },
         }
       )
@@ -68,7 +70,7 @@ export default function OrderConfirmationPage({
             setBankTransferDetails(details)
           },
           onError: (error) => {
-            setPaymentError(error.message || 'Erreur lors de la génération des instructions de virement')
+            setPaymentError(error.message || t('order.bankTransferError'))
           },
         }
       )

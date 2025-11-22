@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { createDigitalDownloadsForOrder } from '@/lib/digital/download-manager'
 
 /**
  * PayPal Webhook Handler
@@ -87,6 +88,15 @@ export async function POST(request: NextRequest) {
               console.error('[Loyalty] Error awarding points:', loyaltyError)
               // Don't fail the webhook if loyalty fails
             }
+          }
+
+          // Create digital downloads for the order
+          try {
+            await createDigitalDownloadsForOrder(orderId, order.customerId || undefined)
+            console.log(`[Digital] Created downloads for order ${orderId}`)
+          } catch (digitalError) {
+            console.error('[Digital] Error creating downloads:', digitalError)
+            // Don't fail the webhook if digital downloads fail
           }
 
           console.log('[PayPal] Payment captured for order:', orderId)

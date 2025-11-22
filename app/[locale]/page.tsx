@@ -4,23 +4,33 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/products/ProductCard'
 import { trpc } from '@/lib/trpc/client'
 import { ArrowRight, Truck, Shield, RefreshCw, Sparkles, TrendingUp } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
+import { usePublicStore } from '@/lib/context/public-store-context'
 
 export default function HomePage() {
-  // For demo, we'll use a default store ID
-  const DEMO_STORE_ID = '000000000000000000000001' // Will be replaced with actual store
+  const t = useTranslations()
+  const { settings } = usePlatformSettings()
+  const { selectedStore, stores } = usePublicStore()
+
+  // Use selected store or first available store
+  const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
 
   const { data: categories } = trpc.category.getAll.useQuery({
-    storeId: DEMO_STORE_ID,
+    storeId: currentStoreId,
+  }, {
+    enabled: !!currentStoreId,
   })
 
   const { data, isLoading, fetchNextPage, hasNextPage } = trpc.product.getAll.useInfiniteQuery(
     {
-      storeId: DEMO_STORE_ID,
+      storeId: currentStoreId,
       status: 'ACTIVE',
       limit: 12,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !!currentStoreId,
     }
   )
 
@@ -51,7 +61,7 @@ export default function HomePage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-theme-surface/80 backdrop-blur-sm border border-theme-border rounded-full text-sm text-theme-text-secondary mb-8 shadow-lg shadow-theme-primary/5 hover:shadow-theme-primary/10 transition-shadow duration-300">
               <Sparkles className="w-4 h-4 text-theme-primary" />
-              <span>E-commerce 100% gratuit & open source</span>
+              <span>{t('home.badge')}</span>
             </div>
 
             {/* Main Heading */}
@@ -59,18 +69,18 @@ export default function HomePage() {
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-theme-text mb-6 leading-tight"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.03em' }}
             >
-              Bienvenue sur{' '}
+              {t('home.welcome')}{' '}
               <span className="relative inline-block">
                 <span className="absolute inset-0 bg-gradient-to-r from-theme-primary to-theme-accent blur-xl opacity-30" />
                 <span className="relative bg-gradient-to-r from-theme-primary to-theme-accent bg-clip-text text-transparent">
-                  FoxCard
+                  {settings.platformName}
                 </span>
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl text-theme-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
-              Découvrez notre sélection de produits exceptionnels, soigneusement choisis pour vous
+              {t('home.subtitle')}
             </p>
 
             {/* CTA Buttons */}
@@ -79,7 +89,7 @@ export default function HomePage() {
                 <button className="group relative px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold text-base shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Découvrir nos produits
+                  {t('home.discoverProducts')}
                   <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" strokeWidth={2.5} />
                 </button>
               </Link>
@@ -87,7 +97,7 @@ export default function HomePage() {
                 <button className="group px-8 py-4 bg-theme-surface/80 hover:bg-theme-surface border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold text-base transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Voir les catégories
+                  {t('home.viewCategories')}
                   <TrendingUp className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" strokeWidth={2.5} />
                 </button>
               </Link>
@@ -107,11 +117,11 @@ export default function HomePage() {
               className="text-3xl md:text-4xl font-bold text-theme-text"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Catégories populaires
+              {t('home.popularCategories')}
             </h2>
             <Link href="/products">
               <button className="group text-theme-text-secondary hover:text-theme-primary text-sm font-medium flex items-center gap-1 transition-colors duration-200">
-                Voir tout
+                {t('common.viewAll')}
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </Link>
@@ -159,7 +169,7 @@ export default function HomePage() {
               className="text-3xl md:text-4xl font-bold text-theme-text"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Produits en vedette
+              {t('home.featuredProducts')}
             </h2>
           </div>
 
@@ -174,8 +184,8 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-theme-surface border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-theme-text-muted" />
               </div>
-              <p className="text-theme-text text-lg font-medium mb-2">Aucun produit disponible pour le moment</p>
-              <p className="text-theme-text-secondary">Revenez bientôt pour découvrir nos nouveautés!</p>
+              <p className="text-theme-text text-lg font-medium mb-2">{t('home.noProducts')}</p>
+              <p className="text-theme-text-secondary">{t('home.comeBackSoon')}</p>
             </div>
           ) : (
             <>
@@ -184,7 +194,7 @@ export default function HomePage() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    storeSlug="demo"
+                    storeSlug={stores.find(s => s.id === currentStoreId)?.slug || 'store'}
                   />
                 ))}
               </div>
@@ -197,7 +207,7 @@ export default function HomePage() {
                     className="px-8 py-3 bg-theme-surface hover:bg-theme-surface/80 border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Voir plus de produits
+                    {t('home.loadMore')}
                   </button>
                 </div>
               )}
@@ -222,10 +232,10 @@ export default function HomePage() {
                 className="font-semibold text-theme-text text-lg mb-2"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Livraison rapide
+                {t('home.fastDelivery')}
               </h3>
               <p className="text-theme-text-secondary">
-                Recevez vos commandes en 24-48h partout en France
+                {t('home.fastDeliveryDesc')}
               </p>
             </div>
 
@@ -241,10 +251,10 @@ export default function HomePage() {
                 className="font-semibold text-theme-text text-lg mb-2"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Paiement sécurisé
+                {t('home.securePayment')}
               </h3>
               <p className="text-theme-text-secondary">
-                Vos données personnelles sont protégées et cryptées
+                {t('home.securePaymentDesc')}
               </p>
             </div>
 
@@ -260,10 +270,10 @@ export default function HomePage() {
                 className="font-semibold text-theme-text text-lg mb-2"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Retours gratuits
+                {t('home.freeReturns')}
               </h3>
               <p className="text-theme-text-secondary">
-                30 jours pour changer d'avis, satisfait ou remboursé
+                {t('home.freeReturnsDesc')}
               </p>
             </div>
           </div>

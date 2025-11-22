@@ -4,14 +4,12 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Menu, X, User, ShoppingBag, Search } from 'lucide-react'
 import { useUIStore } from '@/lib/store/ui'
-import { Button } from '@/components/ui/Button'
 import { CartButton } from './CartButton'
 import { SearchBar } from './SearchBar'
-import { LanguageSelector } from '../i18n/LanguageSelector'
-import { CurrencySelector } from '../currency/CurrencySelector'
 import { PublicStoreSelector } from './PublicStoreSelector'
 import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export function Header() {
   const { isMobileMenuOpen, toggleMobileMenu } = useUIStore()
@@ -19,6 +17,7 @@ export function Header() {
   const platformName = usePlatformName()
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('')
+  const t = useTranslations()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,13 +68,12 @@ export function Header() {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Simplified */}
             <nav className="hidden lg:flex items-center gap-1">
               {[
-                { href: '/products', label: 'Produits' },
-                { href: '/stores', label: 'Boutiques' },
-                { href: '/categories', label: 'Catégories' },
-                { href: '/about', label: 'À propos' },
+                { href: '/', label: t('common.home') },
+                { href: '/stores', label: t('store.title') },
+                { href: '/categories', label: t('common.categories') },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -91,30 +89,16 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
+            {/* Actions - Simplified */}
+            <div className="flex items-center gap-2">
               {/* Search - Desktop */}
-              <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-theme-surface/50 hover:bg-theme-surface border border-theme-border rounded-full text-sm text-theme-text-secondary hover:text-theme-text transition-all duration-200 group">
-                <Search className="w-4 h-4 text-theme-text-muted group-hover:text-theme-primary transition-colors" />
-                <span className="hidden lg:inline">Rechercher...</span>
-                <kbd className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono bg-theme-background/50 border border-theme-border-light rounded">
-                  <span className="text-[10px]">⌘</span>K
-                </kbd>
-              </button>
+              <div className="hidden md:block">
+                <SearchBar />
+              </div>
 
               {/* Store Selector */}
               <div className="hidden md:block">
                 <PublicStoreSelector />
-              </div>
-
-              {/* Language Selector */}
-              <div className="hidden md:block">
-                <LanguageSelector />
-              </div>
-
-              {/* Currency Selector */}
-              <div className="hidden md:block">
-                <CurrencySelector />
               </div>
 
               {/* User */}
@@ -127,7 +111,7 @@ export function Header() {
               ) : (
                 <Link href="/auth/login" className="hidden md:block">
                   <button className="px-4 py-2 text-sm font-medium text-theme-text-secondary hover:text-theme-primary bg-theme-surface/50 hover:bg-theme-surface border border-theme-border rounded-full transition-all duration-200 hover:scale-105 active:scale-95">
-                    Connexion
+                    {t('common.login')}
                   </button>
                 </Link>
               )}
@@ -172,20 +156,19 @@ export function Header() {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-text-muted" />
                   <input
                     type="text"
-                    placeholder="Rechercher..."
+                    placeholder={t('common.searchPlaceholder')}
                     className="w-full pl-12 pr-4 py-3 bg-theme-background border border-theme-border rounded-xl text-theme-text placeholder:text-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-primary/20 focus:border-theme-primary transition-all"
                   />
                 </div>
               </div>
 
-              {/* Navigation */}
+              {/* Navigation - Mobile Simplified */}
               <nav className="flex-1 space-y-1">
                 {[
-                  { href: '/products', label: 'Produits' },
-                  { href: '/stores', label: 'Boutiques' },
-                  { href: '/categories', label: 'Catégories' },
-                  { href: '/about', label: 'À propos' },
-                  session ? { href: '/account', label: 'Mon compte' } : { href: '/auth/login', label: 'Connexion' },
+                  { href: '/', label: t('common.home') },
+                  { href: '/stores', label: t('store.title') },
+                  { href: '/categories', label: t('common.categories') },
+                  session ? { href: '/account', label: t('common.account') } : { href: '/auth/login', label: t('common.login') },
                 ].map((item) => (
                   <Link
                     key={item.href}
@@ -198,17 +181,15 @@ export function Header() {
                 ))}
               </nav>
 
-              {/* Store, Language & Currency Selectors - Mobile */}
+              {/* Store Selector - Mobile */}
               <div className="pb-6 space-y-3">
                 <PublicStoreSelector />
-                <LanguageSelector />
-                <CurrencySelector />
               </div>
 
               {/* Footer */}
               <div className="pt-6 border-t border-theme-border text-sm text-theme-text-muted">
                 <p>© {new Date().getFullYear()} {platformName}</p>
-                <p className="mt-1">E-commerce open source</p>
+                <p className="mt-1">{t('footer.description')}</p>
               </div>
             </div>
           </div>

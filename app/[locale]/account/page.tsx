@@ -7,10 +7,14 @@ import Link from 'next/link'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { User, Package, Settings, LogOut, ShoppingBag, Clock, MapPin, Mail, Phone, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { usePublicStore } from '@/lib/context/public-store-context'
 
 export default function AccountPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const t = useTranslations()
+  const { selectedStore, stores } = usePublicStore()
   const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'settings'>('orders')
 
   // Profile state
@@ -74,14 +78,16 @@ export default function AccountPage() {
     },
   })
 
+  // Use selected store or first available store
+  const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
+
   // Fetch user orders - MUST be before any conditional returns
-  const DEMO_STORE_ID = '000000000000000000000001'
   const { data: ordersData } = trpc.order.getAll.useQuery(
     {
-      storeId: DEMO_STORE_ID,
+      storeId: currentStoreId,
     },
     {
-      enabled: status === 'authenticated',
+      enabled: status === 'authenticated' && !!currentStoreId,
     }
   )
 
@@ -92,7 +98,7 @@ export default function AccountPage() {
     setProfileSuccess(false)
 
     if (!profileData.name || profileData.name.length < 2) {
-      setProfileError('Le nom doit contenir au moins 2 caractères')
+      setProfileError(t('account.nameMinLength'))
       return
     }
 
@@ -107,17 +113,17 @@ export default function AccountPage() {
     setPasswordSuccess(false)
 
     if (!passwordData.currentPassword) {
-      setPasswordError('Veuillez entrer votre mot de passe actuel')
+      setPasswordError(t('account.enterCurrentPassword'))
       return
     }
 
     if (passwordData.newPassword.length < 6) {
-      setPasswordError('Le nouveau mot de passe doit contenir au moins 6 caractères')
+      setPasswordError(t('account.newPasswordMinLength'))
       return
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('Les mots de passe ne correspondent pas')
+      setPasswordError(t('account.passwordsMismatch'))
       return
     }
 
@@ -134,7 +140,7 @@ export default function AccountPage() {
         <div className="mx-auto px-6 lg:px-8 py-16" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-theme-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-theme-text-secondary text-lg">Chargement...</p>
+            <p className="text-theme-text-secondary text-lg">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -161,10 +167,10 @@ export default function AccountPage() {
             className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
           >
-            Mon Compte
+            {t('account.title')}
           </h1>
           <p className="text-xl text-theme-text-secondary">
-            Gérez vos informations et commandes
+            {t('account.dashboard')}
           </p>
         </div>
 
@@ -184,7 +190,7 @@ export default function AccountPage() {
                   className="font-bold text-theme-text text-lg mb-1"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  {userProfile?.name || session?.user?.name || 'Utilisateur'}
+                  {userProfile?.name || session?.user?.name || t('account.user')}
                 </h3>
                 <p className="text-sm text-theme-text-secondary">
                   {userProfile?.email || session?.user?.email}
@@ -202,7 +208,7 @@ export default function AccountPage() {
                   }`}
                 >
                   <Package className="w-5 h-5" />
-                  Mes Commandes
+                  {t('account.orders')}
                 </button>
 
                 <button
@@ -214,7 +220,7 @@ export default function AccountPage() {
                   }`}
                 >
                   <User className="w-5 h-5" />
-                  Mon Profil
+                  {t('account.profile')}
                 </button>
 
                 <button
@@ -226,7 +232,7 @@ export default function AccountPage() {
                   }`}
                 >
                   <Settings className="w-5 h-5" />
-                  Paramètres
+                  {t('account.settings')}
                 </button>
 
                 <button
@@ -234,7 +240,7 @@ export default function AccountPage() {
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-600 transition-all duration-200"
                 >
                   <LogOut className="w-5 h-5" />
-                  Déconnexion
+                  {t('common.logout')}
                 </button>
               </nav>
             </div>
@@ -250,7 +256,7 @@ export default function AccountPage() {
                     className="text-3xl font-bold text-theme-text mb-6"
                     style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
                   >
-                    Mes Commandes
+                    {t('account.orders')}
                   </h2>
 
                   {orders.length === 0 ? (
@@ -262,14 +268,14 @@ export default function AccountPage() {
                         className="text-2xl font-bold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Aucune commande
+                        {t('account.noOrders')}
                       </h3>
                       <p className="text-theme-text-secondary mb-8 text-lg">
-                        Vous n'avez pas encore passé de commande
+                        {t('cart.continueShopping')}
                       </p>
                       <Link href="/products">
                         <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200">
-                          Découvrir nos produits
+                          {t('common.products')}
                         </button>
                       </Link>
                     </div>
@@ -311,11 +317,11 @@ export default function AccountPage() {
                                     : 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
                                 }`}
                               >
-                                {order.status === 'PENDING' && 'En attente'}
-                                {order.status === 'PROCESSING' && 'En cours'}
-                                {order.status === 'COMPLETED' && 'Livrée'}
-                                {order.status === 'CANCELLED' && 'Annulée'}
-                                {order.status === 'REFUNDED' && 'Remboursée'}
+                                {order.status === 'PENDING' && t('status.pending')}
+                                {order.status === 'PROCESSING' && t('status.processing')}
+                                {order.status === 'COMPLETED' && t('status.delivered')}
+                                {order.status === 'CANCELLED' && t('status.cancelled')}
+                                {order.status === 'REFUNDED' && t('status.refunded')}
                               </span>
                             </div>
                           </div>
@@ -326,7 +332,7 @@ export default function AccountPage() {
                               <div className="flex items-start gap-3 text-sm text-theme-text-secondary border-t border-theme-border pt-4">
                                 <MapPin className="w-5 h-5 mt-0.5 text-theme-primary" />
                                 <div>
-                                  <p className="font-semibold text-theme-text mb-1">Adresse de livraison</p>
+                                  <p className="font-semibold text-theme-text mb-1">{t('account.shippingAddress')}</p>
                                   <p>{address.address}</p>
                                   <p>{address.postalCode} {address.city}</p>
                                 </div>
@@ -337,7 +343,7 @@ export default function AccountPage() {
                           <div className="mt-4 flex justify-end">
                             <Link href={`/order-confirmation/${order.orderNumber}`}>
                               <button className="px-6 py-2.5 bg-theme-surface hover:bg-theme-background border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200">
-                                Voir les détails
+                                {t('account.viewDetails')}
                               </button>
                             </Link>
                           </div>
@@ -432,7 +438,7 @@ export default function AccountPage() {
                           Enregistrement...
                         </>
                       ) : (
-                        'Enregistrer les modifications'
+                        t('account.saveChanges')
                       )}
                     </button>
                   </div>
@@ -459,7 +465,7 @@ export default function AccountPage() {
                         </svg>
                       </div>
                       <p className="text-sm text-green-600 font-medium">
-                        Mot de passe changé avec succès !
+                        {t('account.passwordSuccess')}
                       </p>
                     </div>
                   )}
@@ -477,7 +483,7 @@ export default function AccountPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Mot de passe actuel
+                        {t('account.currentPassword')}
                       </label>
                       <input
                         type="password"
@@ -494,7 +500,7 @@ export default function AccountPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Nouveau mot de passe
+                        {t('account.newPassword')}
                       </label>
                       <input
                         type="password"
@@ -505,7 +511,7 @@ export default function AccountPage() {
                         required
                       />
                       <p className="text-xs text-theme-text-muted mt-1.5">
-                        Minimum 6 caractères
+                        {t('account.minChars', { count: 6 })}
                       </p>
                     </div>
 
@@ -514,7 +520,7 @@ export default function AccountPage() {
                         className="block text-sm font-semibold text-theme-text mb-2"
                         style={{ fontFamily: 'var(--theme-font-heading)' }}
                       >
-                        Confirmer le nouveau mot de passe
+                        {t('account.confirmPassword')}
                       </label>
                       <input
                         type="password"
@@ -539,10 +545,10 @@ export default function AccountPage() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            Changement en cours...
+                            {t('account.changingPassword')}
                           </>
                         ) : (
-                          'Changer le mot de passe'
+                          t('account.changePassword')
                         )}
                       </button>
                     </div>
@@ -554,7 +560,7 @@ export default function AccountPage() {
                     className="text-3xl font-bold text-theme-text mb-6"
                     style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
                   >
-                    Préférences
+                    {t('account.preferences')}
                   </h2>
 
                   <div className="space-y-4">
@@ -567,7 +573,7 @@ export default function AccountPage() {
                           Newsletter
                         </h3>
                         <p className="text-sm text-theme-text-secondary">
-                          Recevoir les offres et nouveautés par email
+                          {t('account.receiveEmailOffers')}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -585,7 +591,7 @@ export default function AccountPage() {
                           Notifications SMS
                         </h3>
                         <p className="text-sm text-theme-text-secondary">
-                          Recevoir des alertes par SMS pour vos commandes
+                          {t('account.receiveSmsAlerts')}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">

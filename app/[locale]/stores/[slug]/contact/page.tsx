@@ -7,6 +7,7 @@ import { Store, ArrowLeft, Mail, Phone, MapPin, Send, CheckCircle } from 'lucide
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { useTranslations } from 'next-intl'
 
 interface PageProps {
   params: Promise<{
@@ -17,6 +18,7 @@ interface PageProps {
 
 export default function StoreContactPage({ params }: PageProps) {
   const { slug } = use(params)
+  const t = useTranslations()
 
   const { data: store, isLoading } = trpc.store.getBySlug.useQuery({ slug })
   const sendMessageMutation = trpc.store.sendContactMessage.useMutation()
@@ -75,10 +77,10 @@ export default function StoreContactPage({ params }: PageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Boutique introuvable</h1>
-          <p className="text-gray-600 mb-6">La boutique que vous recherchez n'existe pas</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('store.notFound')}</h1>
+          <p className="text-gray-600 mb-6">{t('store.notFoundDescription')}</p>
           <Link href="/stores">
-            <Button>Retour aux boutiques</Button>
+            <Button>{t('store.backToStores')}</Button>
           </Link>
         </div>
       </div>
@@ -95,14 +97,14 @@ export default function StoreContactPage({ params }: PageProps) {
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link href="/stores" className="hover:text-indigo-600">
-              Boutiques
+              {t('store.breadcrumbStores')}
             </Link>
             <span>/</span>
             <Link href={`/stores/${slug}`} className="hover:text-indigo-600">
               {store.name}
             </Link>
             <span>/</span>
-            <span className="text-gray-900 font-medium">Contact</span>
+            <span className="text-gray-900 font-medium">{t('store.breadcrumbContact')}</span>
           </nav>
 
           {/* Store Header */}
@@ -119,14 +121,14 @@ export default function StoreContactPage({ params }: PageProps) {
               )}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
-                <p className="text-gray-600">Contactez-nous</p>
+                <p className="text-gray-600">{t('store.contactTitle')}</p>
               </div>
             </div>
 
             <Link href={`/stores/${slug}`}>
               <Button variant="outline" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour à la boutique
+                {t('store.backToStore')}
               </Button>
             </Link>
           </div>
@@ -139,15 +141,15 @@ export default function StoreContactPage({ params }: PageProps) {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Envoyez-nous un message</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('store.sendUsMessage')}</h2>
 
               {submitted ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6 flex items-start gap-4">
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-green-900 mb-1">Message envoyé avec succès!</h3>
+                    <h3 className="font-semibold text-green-900 mb-1">{t('store.messageSentTitle')}</h3>
                     <p className="text-green-700">
-                      Votre message a été transmis à {store.name}. Nous vous répondrons dans les plus brefs délais.
+                      {t('store.messageSentDescription', { storeName: store.name })}
                     </p>
                   </div>
                 </div>
@@ -156,7 +158,7 @@ export default function StoreContactPage({ params }: PageProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nom complet *
+                        {t('store.fullName')} *
                       </label>
                       <Input
                         id="name"
@@ -164,13 +166,13 @@ export default function StoreContactPage({ params }: PageProps) {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Jean Dupont"
+                        placeholder={t('store.namePlaceholder')}
                       />
                     </div>
 
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email *
+                        {t('store.email')} *
                       </label>
                       <Input
                         id="email"
@@ -178,14 +180,14 @@ export default function StoreContactPage({ params }: PageProps) {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="jean.dupont@example.com"
+                        placeholder="email@example.com"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                      Sujet *
+                      {t('store.subjectLabel')} *
                     </label>
                     <Input
                       id="subject"
@@ -193,13 +195,13 @@ export default function StoreContactPage({ params }: PageProps) {
                       required
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="À propos de..."
+                      placeholder={t('store.subjectPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
+                      {t('store.messageLabel')} *
                     </label>
                     <textarea
                       id="message"
@@ -207,11 +209,11 @@ export default function StoreContactPage({ params }: PageProps) {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Votre message..."
+                      placeholder={t('store.messagePlaceholder')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                       minLength={10}
                     />
-                    <p className="mt-2 text-sm text-gray-500">Minimum 10 caractères</p>
+                    <p className="mt-2 text-sm text-gray-500">{t('store.minChars', { count: 10 })}</p>
                   </div>
 
                   <Button
@@ -220,18 +222,18 @@ export default function StoreContactPage({ params }: PageProps) {
                     className="w-full"
                   >
                     {sendMessageMutation.isPending ? (
-                      'Envoi en cours...'
+                      t('store.sending')
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />
-                        Envoyer le message
+                        {t('store.sendMessage')}
                       </>
                     )}
                   </Button>
 
                   {sendMessageMutation.isError && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                      Erreur lors de l'envoi du message. Veuillez réessayer.
+                      {t('store.sendError')}
                     </div>
                   )}
                 </form>
@@ -243,7 +245,7 @@ export default function StoreContactPage({ params }: PageProps) {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Informations de contact</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t('store.contactInfo')}</h3>
 
                 <div className="space-y-4">
                   {store.publicEmail && (
@@ -252,7 +254,7 @@ export default function StoreContactPage({ params }: PageProps) {
                         <Mail className="w-5 h-5 text-indigo-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 mb-1">Email</p>
+                        <p className="text-sm font-medium text-gray-900 mb-1">{t('store.email')}</p>
                         <a
                           href={`mailto:${store.publicEmail}`}
                           className="text-sm text-indigo-600 hover:underline break-all"
@@ -269,7 +271,7 @@ export default function StoreContactPage({ params }: PageProps) {
                         <Phone className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 mb-1">Téléphone</p>
+                        <p className="text-sm font-medium text-gray-900 mb-1">{t('store.phone')}</p>
                         <a
                           href={`tel:${store.publicPhone}`}
                           className="text-sm text-indigo-600 hover:underline"
@@ -286,7 +288,7 @@ export default function StoreContactPage({ params }: PageProps) {
                         <MapPin className="w-5 h-5 text-purple-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 mb-1">Adresse</p>
+                        <p className="text-sm font-medium text-gray-900 mb-1">{t('store.addressLabel')}</p>
                         <div className="text-sm text-gray-600">
                           {publicAddress.street && <div>{publicAddress.street}</div>}
                           {(publicAddress.city || publicAddress.postalCode) && (
@@ -304,7 +306,7 @@ export default function StoreContactPage({ params }: PageProps) {
 
               <div className="pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
-                  <strong className="text-gray-900">Temps de réponse:</strong> Nous répondons généralement sous 24 heures ouvrables.
+                  <strong className="text-gray-900">{t('store.responseTime')}</strong> {t('store.responseTimeDesc')}
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-export const currencies = ['EUR', 'USD', 'GBP', 'CHF'] as const
+export const currencies = ['EUR', 'USD', 'GBP', 'CHF', 'CZK'] as const
 export type Currency = (typeof currencies)[number]
 
 export const defaultCurrency: Currency = 'EUR'
@@ -8,6 +8,7 @@ export const currencySymbols: Record<Currency, string> = {
   USD: '$',
   GBP: '£',
   CHF: 'CHF',
+  CZK: 'Kč',
 }
 
 export const currencyNames: Record<Currency, string> = {
@@ -15,6 +16,7 @@ export const currencyNames: Record<Currency, string> = {
   USD: 'US Dollar',
   GBP: 'British Pound',
   CHF: 'Swiss Franc',
+  CZK: 'Czech Koruna',
 }
 
 export const currencyFlags: Record<Currency, string> = {
@@ -22,6 +24,7 @@ export const currencyFlags: Record<Currency, string> = {
   USD: '🇺🇸',
   GBP: '🇬🇧',
   CHF: '🇨🇭',
+  CZK: '🇨🇿',
 }
 
 // Format currency value

@@ -8,6 +8,7 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 import { BaseLayout } from './layouts/Base'
+import { getOrderEmailTranslations, type Locale } from '../i18n'
 
 interface OrderItem {
   name: string
@@ -37,6 +38,7 @@ interface OrderConfirmationProps {
   }
   trackingUrl?: string
   trackingPixelUrl?: string
+  locale?: Locale
 }
 
 export const OrderConfirmation = ({
@@ -54,7 +56,10 @@ export const OrderConfirmation = ({
   shippingAddress,
   trackingUrl,
   trackingPixelUrl,
+  locale = 'fr',
 }: OrderConfirmationProps) => {
+  const t = getOrderEmailTranslations(locale)
+
   return (
     <BaseLayout
       storeName={storeName}
@@ -62,21 +67,20 @@ export const OrderConfirmation = ({
       trackingPixelUrl={trackingPixelUrl}
     >
       {/* Greeting */}
-      <Heading style={h1}>Merci pour votre commande !</Heading>
+      <Heading style={h1}>{t.confirmation.title}</Heading>
 
       <Text style={text}>
-        Bonjour {customerName},
+        {t.common.hello(customerName)}
       </Text>
 
       <Text style={text}>
-        Nous avons bien reçu votre commande <strong>#{orderNumber}</strong> passée le {orderDate}.
-        Nous vous enverrons une notification lorsque votre commande sera expédiée.
+        {t.confirmation.intro(orderNumber, orderDate)}
       </Text>
 
       {/* Order Summary */}
       <Section style={orderBox}>
         <Heading as="h2" style={h2}>
-          Résumé de commande
+          {t.confirmation.orderSummary}
         </Heading>
 
         {/* Order Items */}
@@ -89,10 +93,10 @@ export const OrderConfirmation = ({
                   <span style={variantName}> - {item.variantName}</span>
                 )}
               </Text>
-              <Text style={itemQuantity}>Quantité : {item.quantity}</Text>
+              <Text style={itemQuantity}>{t.confirmation.quantity(item.quantity)}</Text>
             </Column>
             <Column align="right" style={itemPrice}>
-              <Text style={priceText}>{formatPrice(item.total)}</Text>
+              <Text style={priceText}>{t.formatCurrency(item.total)}</Text>
             </Column>
           </Row>
         ))}
@@ -102,20 +106,20 @@ export const OrderConfirmation = ({
 
         <Row style={totalRow}>
           <Column>
-            <Text style={totalLabel}>Sous-total</Text>
+            <Text style={totalLabel}>{t.confirmation.subtotal}</Text>
           </Column>
           <Column align="right">
-            <Text style={totalValue}>{formatPrice(subtotal)}</Text>
+            <Text style={totalValue}>{t.formatCurrency(subtotal)}</Text>
           </Column>
         </Row>
 
         {shipping > 0 && (
           <Row style={totalRow}>
             <Column>
-              <Text style={totalLabel}>Livraison</Text>
+              <Text style={totalLabel}>{t.confirmation.shipping}</Text>
             </Column>
             <Column align="right">
-              <Text style={totalValue}>{formatPrice(shipping)}</Text>
+              <Text style={totalValue}>{t.formatCurrency(shipping)}</Text>
             </Column>
           </Row>
         )}
@@ -123,10 +127,10 @@ export const OrderConfirmation = ({
         {tax > 0 && (
           <Row style={totalRow}>
             <Column>
-              <Text style={totalLabel}>TVA</Text>
+              <Text style={totalLabel}>{t.confirmation.tax}</Text>
             </Column>
             <Column align="right">
-              <Text style={totalValue}>{formatPrice(tax)}</Text>
+              <Text style={totalValue}>{t.formatCurrency(tax)}</Text>
             </Column>
           </Row>
         )}
@@ -134,10 +138,10 @@ export const OrderConfirmation = ({
         {discount > 0 && (
           <Row style={totalRow}>
             <Column>
-              <Text style={totalLabel}>Remise</Text>
+              <Text style={totalLabel}>{t.confirmation.discount}</Text>
             </Column>
             <Column align="right">
-              <Text style={discountValue}>-{formatPrice(discount)}</Text>
+              <Text style={discountValue}>-{t.formatCurrency(discount)}</Text>
             </Column>
           </Row>
         )}
@@ -146,10 +150,10 @@ export const OrderConfirmation = ({
 
         <Row style={totalRow}>
           <Column>
-            <Text style={totalLabelFinal}>Total</Text>
+            <Text style={totalLabelFinal}>{t.confirmation.total}</Text>
           </Column>
           <Column align="right">
-            <Text style={totalValueFinal}>{formatPrice(total)}</Text>
+            <Text style={totalValueFinal}>{t.formatCurrency(total)}</Text>
           </Column>
         </Row>
       </Section>
@@ -158,7 +162,7 @@ export const OrderConfirmation = ({
       {shippingAddress && (
         <Section style={addressBox}>
           <Heading as="h3" style={h3}>
-            Adresse de livraison
+            {t.confirmation.shippingAddress}
           </Heading>
           <Text style={addressText}>
             {shippingAddress.address}
@@ -174,25 +178,17 @@ export const OrderConfirmation = ({
       {trackingUrl && (
         <Section style={buttonContainer}>
           <Button href={trackingUrl} style={button}>
-            Suivre ma commande
+            {t.confirmation.trackOrder}
           </Button>
         </Section>
       )}
 
       {/* Help Text */}
       <Text style={helpText}>
-        Des questions ? Répondez à cet email ou contactez notre support client.
+        {t.common.questions}
       </Text>
     </BaseLayout>
   )
-}
-
-// Helper function to format price
-function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount)
 }
 
 // Styles
