@@ -3,18 +3,21 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard, AdminCardHeader } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { AdminBadge } from '@/components/admin/ui/AdminBadge'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
-import { Eye, RefreshCw, Search, Filter, ShoppingCart, Package, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { Eye, RefreshCw, Search, ShoppingCart, Package, Clock, CheckCircle, XCircle, X } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
+import { useTranslations } from 'next-intl'
 
 export default function MerchantOrdersPage() {
   const { storeId } = useStoreContext()
   const params = useParams()
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
+  const t = useTranslations('merchant')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -94,8 +97,8 @@ export default function MerchantOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Commandes</h1>
-          <p className="text-gray-500 mt-1">Gérez et suivez vos commandes</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('orders')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Gérez et suivez vos commandes</p>
         </div>
       </div>
 
@@ -103,106 +106,129 @@ export default function MerchantOrdersPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={() => setStatusFilter(statusFilter === 'PENDING' ? '' : 'PENDING')}
-          className={`bg-white rounded-xl border p-4 text-left transition-all ${statusFilter === 'PENDING' ? 'border-yellow-500 ring-2 ring-yellow-100' : 'border-gray-200 hover:border-gray-300'}`}
+          className="text-left"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-yellow-600" />
+          <AdminCard
+            padding="md"
+            className={`transition-all ${statusFilter === 'PENDING' ? 'ring-2 ring-amber-500 dark:ring-amber-400' : ''}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 dark:from-amber-500/30 dark:to-yellow-500/30 rounded-xl flex items-center justify-center">
+                <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('statusPending')}</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">En attente</p>
-              <p className="text-xl font-bold text-gray-900">{pendingCount}</p>
-            </div>
-          </div>
+          </AdminCard>
         </button>
         <button
           onClick={() => setStatusFilter(statusFilter === 'PROCESSING' ? '' : 'PROCESSING')}
-          className={`bg-white rounded-xl border p-4 text-left transition-all ${statusFilter === 'PROCESSING' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'}`}
+          className="text-left"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Package className="w-5 h-5 text-blue-600" />
+          <AdminCard
+            padding="md"
+            className={`transition-all ${statusFilter === 'PROCESSING' ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 dark:from-blue-500/30 dark:to-indigo-500/30 rounded-xl flex items-center justify-center">
+                <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('statusProcessing')}</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{processingCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">En cours</p>
-              <p className="text-xl font-bold text-gray-900">{processingCount}</p>
-            </div>
-          </div>
+          </AdminCard>
         </button>
         <button
           onClick={() => setStatusFilter(statusFilter === 'COMPLETED' ? '' : 'COMPLETED')}
-          className={`bg-white rounded-xl border p-4 text-left transition-all ${statusFilter === 'COMPLETED' ? 'border-green-500 ring-2 ring-green-100' : 'border-gray-200 hover:border-gray-300'}`}
+          className="text-left"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+          <AdminCard
+            padding="md"
+            className={`transition-all ${statusFilter === 'COMPLETED' ? 'ring-2 ring-emerald-500 dark:ring-emerald-400' : ''}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-green-500/20 dark:from-emerald-500/30 dark:to-green-500/30 rounded-xl flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('statusCompleted')}</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{completedCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Complétées</p>
-              <p className="text-xl font-bold text-gray-900">{completedCount}</p>
-            </div>
-          </div>
+          </AdminCard>
         </button>
         <button
           onClick={() => setStatusFilter(statusFilter === 'CANCELLED' ? '' : 'CANCELLED')}
-          className={`bg-white rounded-xl border p-4 text-left transition-all ${statusFilter === 'CANCELLED' ? 'border-red-500 ring-2 ring-red-100' : 'border-gray-200 hover:border-gray-300'}`}
+          className="text-left"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-red-600" />
+          <AdminCard
+            padding="md"
+            className={`transition-all ${statusFilter === 'CANCELLED' ? 'ring-2 ring-red-500 dark:ring-red-400' : ''}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500/20 to-rose-500/20 dark:from-red-500/30 dark:to-rose-500/30 rounded-xl flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('statusCancelled')}</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{cancelledCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Annulées</p>
-              <p className="text-xl font-bold text-gray-900">{cancelledCount}</p>
-            </div>
-          </div>
+          </AdminCard>
         </button>
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <AdminCard padding="md">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
               placeholder="Rechercher par n° commande, client..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             />
           </div>
           {statusFilter && (
-            <Button variant="outline" onClick={() => setStatusFilter('')}>
+            <AdminButton variant="secondary" onClick={() => setStatusFilter('')}>
               Effacer le filtre
-            </Button>
+            </AdminButton>
           )}
         </div>
-      </div>
+      </AdminCard>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <AdminCard padding="none">
         {isLoading ? (
-          <div className="p-8 text-center">
+          <div className="p-8">
             <div className="animate-pulse space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <div className="w-24 h-4 bg-gray-200 rounded" />
-                  <div className="flex-1 h-4 bg-gray-200 rounded" />
-                  <div className="w-20 h-4 bg-gray-200 rounded" />
-                  <div className="w-20 h-6 bg-gray-200 rounded-full" />
+                  <div className="w-24 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="flex-1 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="w-20 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="w-20 h-6 bg-slate-200 dark:bg-slate-700 rounded-full" />
                 </div>
               ))}
             </div>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="p-12 text-center">
-            <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
-              {orders.length === 0 ? 'Aucune commande' : 'Aucun résultat'}
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShoppingCart className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+              {orders.length === 0 ? t('noOrdersYet') : 'Aucun résultat'}
             </h3>
-            <p className="text-gray-500">
+            <p className="text-slate-500 dark:text-slate-400">
               {orders.length === 0
-                ? 'Les commandes de vos clients apparaîtront ici'
+                ? t('ordersWillAppearHere')
                 : 'Essayez de modifier vos filtres de recherche'
               }
             </p>
@@ -210,71 +236,74 @@ export default function MerchantOrdersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">N° Commande</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Date</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Articles</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('orderNumber')}</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('client')}</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">{t('date')}</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden sm:table-cell">Articles</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('total')}</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('status')}</th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-4">
                       <Link
                         href={`${basePath}/orders/${order.id}`}
-                        className="font-medium text-indigo-600 hover:text-indigo-700"
+                        className="font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
                       >
                         #{order.orderNumber}
                       </Link>
                     </td>
                     <td className="py-3 px-4">
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{order.customerName || 'Client'}</p>
-                        <p className="text-xs text-gray-500 truncate">{order.customerEmail}</p>
+                        <p className="font-medium text-slate-900 dark:text-white truncate">{order.customerName || 'Client'}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{order.customerEmail}</p>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-500 hidden md:table-cell">
+                    <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400 hidden md:table-cell">
                       {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
                       })}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 hidden sm:table-cell">
+                    <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-300 hidden sm:table-cell">
                       {order.items.length} article{order.items.length > 1 ? 's' : ''}
                     </td>
-                    <td className="py-3 px-4 text-sm font-semibold text-gray-900">
+                    <td className="py-3 px-4 text-sm font-semibold text-slate-900 dark:text-white">
                       {formatPrice(order.total)}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                        order.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                        order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-700' :
-                        order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                        order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {order.status === 'PENDING' && 'En attente'}
-                        {order.status === 'PROCESSING' && 'En cours'}
-                        {order.status === 'COMPLETED' && 'Complétée'}
-                        {order.status === 'CANCELLED' && 'Annulée'}
+                      <AdminBadge
+                        variant={
+                          order.status === 'COMPLETED' ? 'success' :
+                          order.status === 'PROCESSING' ? 'info' :
+                          order.status === 'PENDING' ? 'warning' :
+                          order.status === 'CANCELLED' ? 'danger' :
+                          'default'
+                        }
+                        dot
+                      >
+                        {order.status === 'PENDING' && t('statusPending')}
+                        {order.status === 'PROCESSING' && t('statusProcessing')}
+                        {order.status === 'COMPLETED' && t('statusCompleted')}
+                        {order.status === 'CANCELLED' && t('statusCancelled')}
                         {order.status === 'REFUNDED' && 'Remboursée'}
-                      </span>
+                      </AdminBadge>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/${locale}/order-confirmation/${order.orderNumber}`} target="_blank">
-                          <Button variant="ghost" size="sm">
+                          <AdminButton variant="ghost" size="sm">
                             <Eye className="w-4 h-4" />
-                          </Button>
+                          </AdminButton>
                         </Link>
                         {order.paymentStatus === 'PAID' && (order.paymentMethod === 'card' || order.paymentMethod === 'paypal') && (
-                          <Button
+                          <AdminButton
                             variant="ghost"
                             size="sm"
                             onClick={() => {
@@ -284,7 +313,7 @@ export default function MerchantOrdersPage() {
                             title="Rembourser"
                           >
                             <RefreshCw className="w-4 h-4" />
-                          </Button>
+                          </AdminButton>
                         )}
                       </div>
                     </td>
@@ -294,101 +323,112 @@ export default function MerchantOrdersPage() {
             </table>
           </div>
         )}
-      </div>
+      </AdminCard>
 
       {/* Refund Modal */}
       {refundModalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
-            <div className="p-6 space-y-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                Rembourser la commande #{selectedOrder.orderNumber}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Rembourser #{selectedOrder.orderNumber}
               </h2>
+              <button
+                onClick={() => {
+                  setRefundModalOpen(false)
+                  setSelectedOrder(null)
+                  setRefundAmount('')
+                  setRefundReason('')
+                }}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type de remboursement
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="refundType"
-                        checked={!refundAmount}
-                        onChange={() => setRefundAmount('')}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-900">
-                        Remboursement total ({formatPrice(selectedOrder.total)})
-                      </span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="refundType"
-                        checked={!!refundAmount}
-                        onChange={() => setRefundAmount('0')}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-900">Remboursement partiel</span>
-                    </label>
-                  </div>
-                </div>
-
-                {refundAmount !== '' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Montant du remboursement (€)
-                    </label>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Type de remboursement
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <input
-                      type="number"
-                      min="0"
-                      max={selectedOrder.total}
-                      step="0.01"
-                      value={refundAmount}
-                      onChange={(e) => setRefundAmount(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20 outline-none"
-                      placeholder="0.00"
+                      type="radio"
+                      name="refundType"
+                      checked={!refundAmount}
+                      onChange={() => setRefundAmount('')}
+                      className="mr-3 text-violet-600 focus:ring-violet-500"
                     />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Raison du remboursement (optionnel)
+                    <span className="text-sm text-slate-900 dark:text-white">
+                      Remboursement total ({formatPrice(selectedOrder.total)})
+                    </span>
                   </label>
-                  <textarea
-                    value={refundReason}
-                    onChange={(e) => setRefundReason(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20 outline-none resize-none"
-                    placeholder="Ex: Produit défectueux, demande du client..."
+                  <label className="flex items-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    <input
+                      type="radio"
+                      name="refundType"
+                      checked={!!refundAmount}
+                      onChange={() => setRefundAmount('0')}
+                      className="mr-3 text-violet-600 focus:ring-violet-500"
+                    />
+                    <span className="text-sm text-slate-900 dark:text-white">Remboursement partiel</span>
+                  </label>
+                </div>
+              </div>
+
+              {refundAmount !== '' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Montant du remboursement (€)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={selectedOrder.total}
+                    step="0.01"
+                    value={refundAmount}
+                    onChange={(e) => setRefundAmount(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    placeholder="0.00"
                   />
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center gap-3 pt-4">
-                <Button
-                  onClick={() => {
-                    setRefundModalOpen(false)
-                    setSelectedOrder(null)
-                    setRefundAmount('')
-                    setRefundReason('')
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onClick={handleRefund}
-                  disabled={refundMutation.isPending}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white"
-                >
-                  {refundMutation.isPending ? 'Traitement...' : 'Rembourser'}
-                </Button>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Raison du remboursement (optionnel)
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
+                  placeholder="Ex: Produit défectueux, demande du client..."
+                />
               </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3">
+              <AdminButton
+                onClick={() => {
+                  setRefundModalOpen(false)
+                  setSelectedOrder(null)
+                  setRefundAmount('')
+                  setRefundReason('')
+                }}
+                variant="secondary"
+                className="flex-1"
+              >
+                Annuler
+              </AdminButton>
+              <AdminButton
+                onClick={handleRefund}
+                disabled={refundMutation.isPending}
+                className="flex-1 bg-red-500 hover:bg-red-600"
+              >
+                {refundMutation.isPending ? 'Traitement...' : 'Rembourser'}
+              </AdminButton>
             </div>
           </div>
         </div>

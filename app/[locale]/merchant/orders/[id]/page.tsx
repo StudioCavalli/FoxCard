@@ -4,7 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
@@ -90,7 +91,7 @@ export default function OrderDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     )
   }
@@ -98,12 +99,12 @@ export default function OrderDetailPage() {
   if (!order) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900">Commande introuvable</h2>
-        <p className="text-gray-500 mt-2">Cette commande n'existe pas ou a été supprimée.</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Commande introuvable</h2>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">Cette commande n'existe pas ou a été supprimée.</p>
         <Link href={`${basePath}/orders`}>
-          <Button variant="primary" className="mt-4">
+          <AdminButton className="mt-4">
             Retour aux commandes
-          </Button>
+          </AdminButton>
         </Link>
       </div>
     )
@@ -118,26 +119,26 @@ export default function OrderDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={`${basePath}/orders`}>
-            <Button variant="ghost" size="sm">
+            <AdminButton variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4" />
-            </Button>
+            </AdminButton>
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 Commande #{order.orderNumber}
               </h1>
               <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${
-                order.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-700' :
-                order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
-                'bg-gray-100 text-gray-700'
+                order.status === 'COMPLETED' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                order.status === 'PROCESSING' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' :
+                order.status === 'PENDING' ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
+                order.status === 'CANCELLED' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' :
+                'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}>
                 {statusLabels[order.status]}
               </span>
             </div>
-            <p className="text-gray-500 mt-1">
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
               {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                 weekday: 'long',
                 day: 'numeric',
@@ -150,14 +151,12 @@ export default function OrderDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Printer className="w-4 h-4 mr-2" />
+          <AdminButton variant="secondary" size="sm" icon={<Printer className="w-4 h-4" />}>
             Imprimer
-          </Button>
-          <Button variant="outline" size="sm">
-            <FileText className="w-4 h-4 mr-2" />
+          </AdminButton>
+          <AdminButton variant="secondary" size="sm" icon={<FileText className="w-4 h-4" />}>
             Facture
-          </Button>
+          </AdminButton>
         </div>
       </div>
 
@@ -165,17 +164,17 @@ export default function OrderDetailPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Order Items */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+          <AdminCard padding="none" className="overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+              <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Package className="w-5 h-5" />
                 Articles ({order.items.length})
               </h2>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
               {order.items.map((item) => (
                 <div key={item.id} className="p-4 flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden flex-shrink-0">
                     {item.product?.thumbnail || item.product?.images?.[0] ? (
                       <Image
                         src={item.product.thumbnail || item.product.images[0]}
@@ -185,22 +184,22 @@ export default function OrderDetailPage() {
                         className="object-cover w-full h-full"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
                         <Package className="w-6 h-6" />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900">{item.name}</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
                     {item.variantName && (
-                      <p className="text-sm text-gray-500">{item.variantName}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{item.variantName}</p>
                     )}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {formatPrice(item.price)} × {item.quantity}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-slate-900 dark:text-white">
                       {formatPrice(item.total)}
                     </p>
                   </div>
@@ -208,69 +207,69 @@ export default function OrderDetailPage() {
               ))}
             </div>
             {/* Totals */}
-            <div className="bg-gray-50 p-4 space-y-2">
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Sous-total</span>
-                <span className="text-gray-900">{formatPrice((order as any).subtotal || order.total)}</span>
+                <span className="text-slate-500 dark:text-slate-400">Sous-total</span>
+                <span className="text-slate-900 dark:text-white">{formatPrice((order as any).subtotal || order.total)}</span>
               </div>
               {(order as any).shippingAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Livraison</span>
-                  <span className="text-gray-900">{formatPrice((order as any).shippingAmount)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Livraison</span>
+                  <span className="text-slate-900 dark:text-white">{formatPrice((order as any).shippingAmount)}</span>
                 </div>
               )}
               {(order as any).taxAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Taxes</span>
-                  <span className="text-gray-900">{formatPrice((order as any).taxAmount)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Taxes</span>
+                  <span className="text-slate-900 dark:text-white">{formatPrice((order as any).taxAmount)}</span>
                 </div>
               )}
               {(order as any).discountAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Réduction</span>
-                  <span className="text-green-600">-{formatPrice((order as any).discountAmount)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Réduction</span>
+                  <span className="text-green-600 dark:text-green-400">-{formatPrice((order as any).discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+              <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                 <span>Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
             </div>
-          </div>
+          </AdminCard>
 
           {/* Customer Info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <AdminCard padding="lg">
+            <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
               <User className="w-5 h-5" />
               Client
             </h2>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/20">
+                  <User className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{order.customerName || 'Client'}</p>
-                  <p className="text-sm text-gray-500">{order.customerEmail}</p>
+                  <p className="font-medium text-slate-900 dark:text-white">{order.customerName || 'Client'}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{order.customerEmail}</p>
                 </div>
               </div>
               {(order as any).customerPhone && (
-                <p className="text-sm text-gray-600">Tél: {(order as any).customerPhone}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Tél: {(order as any).customerPhone}</p>
               )}
             </div>
-          </div>
+          </AdminCard>
 
           {/* Addresses */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Shipping Address */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <AdminCard padding="lg">
+              <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
                 <Truck className="w-5 h-5" />
                 Adresse de livraison
               </h2>
               {shippingAddress ? (
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p className="font-medium text-gray-900">
+                <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                  <p className="font-medium text-slate-900 dark:text-white">
                     {shippingAddress.firstName} {shippingAddress.lastName}
                   </p>
                   <p>{shippingAddress.address}</p>
@@ -282,19 +281,19 @@ export default function OrderDetailPage() {
                   {shippingAddress.phone && <p>Tél: {shippingAddress.phone}</p>}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Non renseignée</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Non renseignée</p>
               )}
-            </div>
+            </AdminCard>
 
             {/* Billing Address */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <AdminCard padding="lg">
+              <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
                 <MapPin className="w-5 h-5" />
                 Adresse de facturation
               </h2>
               {billingAddress ? (
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p className="font-medium text-gray-900">
+                <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                  <p className="font-medium text-slate-900 dark:text-white">
                     {billingAddress.firstName} {billingAddress.lastName}
                   </p>
                   <p>{billingAddress.address}</p>
@@ -305,35 +304,35 @@ export default function OrderDetailPage() {
                   <p>{billingAddress.country}</p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Identique à l'adresse de livraison</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Identique à l'adresse de livraison</p>
               )}
-            </div>
+            </AdminCard>
           </div>
 
           {/* Notes */}
           {order.notes && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="font-semibold text-gray-900 mb-4">Notes du client</h2>
-              <p className="text-gray-600">{order.notes}</p>
-            </div>
+            <AdminCard padding="lg">
+              <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Notes du client</h2>
+              <p className="text-slate-600 dark:text-slate-400">{order.notes}</p>
+            </AdminCard>
           )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status Management */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">Gestion du statut</h2>
+          <AdminCard padding="lg">
+            <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Gestion du statut</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Statut de la commande
                 </label>
                 <select
                   value={order.status}
                   onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
                   disabled={isUpdating}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all disabled:opacity-50"
                 >
                   <option value="PENDING">En attente</option>
                   <option value="PROCESSING">En cours</option>
@@ -342,14 +341,14 @@ export default function OrderDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Statut d'expédition
                 </label>
                 <select
                   value={(order as any).fulfillmentStatus || 'UNFULFILLED'}
                   onChange={(e) => handleFulfillmentChange(e.target.value as FulfillmentStatus)}
                   disabled={isUpdating}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all disabled:opacity-50"
                 >
                   <option value="UNFULFILLED">Non expédié</option>
                   <option value="PARTIALLY_FULFILLED">Partiellement expédié</option>
@@ -358,18 +357,18 @@ export default function OrderDetailPage() {
                 </select>
               </div>
             </div>
-          </div>
+          </AdminCard>
 
           {/* Payment Info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <AdminCard padding="lg">
+            <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
               <CreditCard className="w-5 h-5" />
               Paiement
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-500">Méthode</span>
-                <span className="font-medium text-gray-900 capitalize">
+                <span className="text-slate-500 dark:text-slate-400">Méthode</span>
+                <span className="font-medium text-slate-900 dark:text-white capitalize">
                   {(order as any).paymentMethod === 'card' ? 'Carte bancaire' :
                    (order as any).paymentMethod === 'paypal' ? 'PayPal' :
                    (order as any).paymentMethod === 'bank_transfer' ? 'Virement' :
@@ -377,59 +376,59 @@ export default function OrderDetailPage() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">Statut</span>
+                <span className="text-slate-500 dark:text-slate-400">Statut</span>
                 <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                  (order as any).paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
-                  (order as any).paymentStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                  (order as any).paymentStatus === 'REFUNDED' ? 'bg-purple-100 text-purple-700' :
-                  'bg-red-100 text-red-700'
+                  (order as any).paymentStatus === 'PAID' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                  (order as any).paymentStatus === 'PENDING' ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
+                  (order as any).paymentStatus === 'REFUNDED' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400' :
+                  'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400'
                 }`}>
                   {paymentStatusLabels[(order as any).paymentStatus] || 'Inconnu'}
                 </span>
               </div>
               {(order as any).paymentIntentId && (
-                <div className="pt-2 border-t border-gray-200">
-                  <p className="text-xs text-gray-500">ID Transaction</p>
-                  <p className="text-sm font-mono text-gray-700 truncate">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">ID Transaction</p>
+                  <p className="text-sm font-mono text-slate-700 dark:text-slate-300 truncate">
                     {(order as any).paymentIntentId}
                   </p>
                 </div>
               )}
             </div>
-          </div>
+          </AdminCard>
 
           {/* Fulfillment Info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <AdminCard padding="lg">
+            <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
               <Truck className="w-5 h-5" />
               Expédition
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">Statut</span>
+                <span className="text-slate-500 dark:text-slate-400">Statut</span>
                 <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                  (order as any).fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-700' :
-                  (order as any).fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'bg-blue-100 text-blue-700' :
-                  (order as any).fulfillmentStatus === 'RETURNED' ? 'bg-red-100 text-red-700' :
-                  'bg-gray-100 text-gray-700'
+                  (order as any).fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                  (order as any).fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' :
+                  (order as any).fulfillmentStatus === 'RETURNED' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' :
+                  'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}>
                   {fulfillmentStatusLabels[(order as any).fulfillmentStatus] || 'Non expédié'}
                 </span>
               </div>
               {(order as any).trackingNumber && (
-                <div className="pt-2 border-t border-gray-200">
-                  <p className="text-xs text-gray-500">N° de suivi</p>
-                  <p className="text-sm font-mono text-gray-700">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">N° de suivi</p>
+                  <p className="text-sm font-mono text-slate-700 dark:text-slate-300">
                     {(order as any).trackingNumber}
                   </p>
                 </div>
               )}
             </div>
-          </div>
+          </AdminCard>
 
           {/* Timeline */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <AdminCard padding="lg">
+            <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5" />
               Historique
             </h2>
@@ -437,8 +436,8 @@ export default function OrderDetailPage() {
               <div className="flex gap-3">
                 <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Commande créée</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Commande créée</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                       day: 'numeric',
                       month: 'short',
@@ -452,8 +451,8 @@ export default function OrderDetailPage() {
                 <div className="flex gap-3">
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Paiement reçu</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Paiement reçu</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {new Date(order.updatedAt).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
@@ -468,8 +467,8 @@ export default function OrderDetailPage() {
                 <div className="flex gap-3">
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Commande expédiée</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Commande expédiée</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {new Date(order.updatedAt).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
@@ -481,7 +480,7 @@ export default function OrderDetailPage() {
                 </div>
               )}
             </div>
-          </div>
+          </AdminCard>
         </div>
       </div>
     </div>

@@ -37,11 +37,11 @@ export default async function MerchantLayout({
     <StoreProvider>
       <SidebarProvider>
         {/* Full-screen overlay to isolate from parent layout (hide navbar/footer) */}
-        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-slate-50 dark:bg-slate-900">
           <ImpersonationBanner />
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 min-h-0">
             <AdaptiveSidebar />
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0 min-h-0">
               <MerchantHeader />
               <main className="flex-1 p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
                 <MerchantContent>

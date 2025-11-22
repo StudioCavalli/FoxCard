@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import {
   Store,
   Palette,
@@ -39,7 +38,7 @@ import { cn } from '@/lib/utils'
 
 // Commerce types with icons and descriptions
 const COMMERCE_TYPES = [
-  { id: 'GENERAL', icon: ShoppingCart, color: 'bg-gray-500', category: 'physical' },
+  { id: 'GENERAL', icon: ShoppingCart, color: 'bg-slate-50 dark:bg-slate-800/500', category: 'physical' },
   { id: 'ELECTRONICS', icon: Laptop, color: 'bg-blue-500', category: 'physical' },
   { id: 'FASHION', icon: Shirt, color: 'bg-pink-500', category: 'physical' },
   { id: 'BEAUTY', icon: Sparkle, color: 'bg-purple-500', category: 'physical' },
@@ -240,11 +239,11 @@ export default function MerchantOnboardingPage() {
   const configFields = selectedCommerceType ? TYPE_CONFIGS[selectedCommerceType]?.fields || [] : []
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
       {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-700 z-50">
         <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+          className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -252,14 +251,14 @@ export default function MerchantOnboardingPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 rounded-full text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
             Configuration de votre boutique
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
             {currentStepData.label}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-slate-600 dark:text-slate-400">
             Étape {currentStep + 1} sur {STEPS.length}
           </p>
         </div>
@@ -273,10 +272,10 @@ export default function MerchantOnboardingPage() {
                   className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0',
                     index < currentStep
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-emerald-500 text-white'
                       : index === currentStep
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-200 text-gray-500'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                   )}
                 >
                   {index < currentStep ? (
@@ -289,7 +288,7 @@ export default function MerchantOnboardingPage() {
                   <div
                     className={cn(
                       'w-8 md:w-12 h-1 mx-1 rounded transition-all',
-                      index < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                      index < currentStep ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
                     )}
                   />
                 )}
@@ -299,22 +298,22 @@ export default function MerchantOnboardingPage() {
         </div>
 
         {/* Step Content */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8">
           {/* Step 0: Commerce Type Selection */}
           {currentStep === 0 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Quel type de commerce souhaitez-vous créer ?
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-slate-600 dark:text-slate-400 mt-1">
                   Cela déterminera les fonctionnalités et l'affichage de vos produits
                 </p>
               </div>
 
               {/* Physical Products */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
                   Produits Physiques
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -325,14 +324,14 @@ export default function MerchantOnboardingPage() {
                       className={cn(
                         'p-4 rounded-xl border-2 text-center transition-all hover:scale-105',
                         selectedCommerceType === type.id
-                          ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 shadow-lg'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       )}
                     >
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2', type.color)}>
                         <type.icon className="w-6 h-6 text-white" />
                       </div>
-                      <p className="font-medium text-gray-900 text-sm">{type.id}</p>
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">{type.id}</p>
                     </button>
                   ))}
                 </div>
@@ -340,7 +339,7 @@ export default function MerchantOnboardingPage() {
 
               {/* Digital Products */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
                   Produits Numériques
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -351,14 +350,14 @@ export default function MerchantOnboardingPage() {
                       className={cn(
                         'p-4 rounded-xl border-2 text-center transition-all hover:scale-105',
                         selectedCommerceType === type.id
-                          ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 shadow-lg'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       )}
                     >
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2', type.color)}>
                         <type.icon className="w-6 h-6 text-white" />
                       </div>
-                      <p className="font-medium text-gray-900 text-sm">{type.id}</p>
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">{type.id}</p>
                     </button>
                   ))}
                 </div>
@@ -366,7 +365,7 @@ export default function MerchantOnboardingPage() {
 
               {/* Services */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
                   Services & Réservations
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -377,21 +376,21 @@ export default function MerchantOnboardingPage() {
                       className={cn(
                         'p-4 rounded-xl border-2 text-center transition-all hover:scale-105',
                         selectedCommerceType === type.id
-                          ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 shadow-lg'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       )}
                     >
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2', type.color)}>
                         <type.icon className="w-6 h-6 text-white" />
                       </div>
-                      <p className="font-medium text-gray-900 text-sm">{type.id}</p>
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">{type.id}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               {selectedCommerceType && (
-                <div className="mt-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+                <div className="mt-6 p-4 bg-violet-50 dark:bg-violet-500/10 rounded-xl border border-violet-200 dark:border-violet-500/20">
                   <div className="flex items-center gap-3">
                     {selectedType && (
                       <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', selectedType.color)}>
@@ -399,8 +398,8 @@ export default function MerchantOnboardingPage() {
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold text-gray-900">{selectedCommerceType} sélectionné</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-semibold text-slate-900 dark:text-white">{selectedCommerceType} sélectionné</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         {selectedType?.category === 'services'
                           ? 'Système de réservation et calendrier inclus'
                           : selectedType?.category === 'digital'
@@ -418,46 +417,47 @@ export default function MerchantOnboardingPage() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Store className="w-8 h-8 text-indigo-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Store className="w-8 h-8 text-violet-600 dark:text-violet-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Informations de votre boutique
                 </h2>
               </div>
 
               <div className="max-w-md mx-auto space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Nom de la boutique *
                   </label>
-                  <Input
+                  <input
                     type="text"
                     placeholder="Ma Super Boutique"
                     value={storeData.name}
                     onChange={(e) => handleNameChange(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     URL de la boutique
                   </label>
                   <div className="flex items-center">
-                    <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-500 text-sm">
+                    <span className="px-3 py-2.5 bg-slate-100 dark:bg-slate-700 border border-transparent border-r-slate-200 dark:border-r-slate-600 rounded-l-xl text-slate-500 dark:text-slate-400 text-sm">
                       foxcard.app/stores/
                     </span>
-                    <Input
+                    <input
                       type="text"
                       value={storeData.slug}
                       onChange={(e) => setStoreData({ ...storeData, slug: e.target.value })}
-                      className="rounded-l-none"
+                      className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-r-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Description
                   </label>
                   <textarea
@@ -465,31 +465,33 @@ export default function MerchantOnboardingPage() {
                     value={storeData.description}
                     onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Email public
                     </label>
-                    <Input
+                    <input
                       type="email"
                       placeholder="contact@maboutique.com"
                       value={storeData.publicEmail}
                       onChange={(e) => setStoreData({ ...storeData, publicEmail: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Téléphone
                     </label>
-                    <Input
+                    <input
                       type="tel"
                       placeholder="+33 1 23 45 67 89"
                       value={storeData.publicPhone}
                       onChange={(e) => setStoreData({ ...storeData, publicPhone: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                     />
                   </div>
                 </div>
@@ -501,13 +503,13 @@ export default function MerchantOnboardingPage() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Settings className="w-8 h-8 text-purple-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-violet-500/20 dark:from-purple-500/30 dark:to-violet-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Settings className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Configuration {selectedCommerceType}
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-slate-600 dark:text-slate-400 mt-1">
                   Paramètres spécifiques à votre type de commerce
                 </p>
               </div>
@@ -516,14 +518,14 @@ export default function MerchantOnboardingPage() {
                 {configFields.length > 0 ? (
                   configFields.map((field) => (
                     <div key={field.key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                         {field.label}
                       </label>
                       {field.type === 'select' ? (
                         <select
                           value={typeConfig[field.key] as string || ''}
                           onChange={(e) => setTypeConfig({ ...typeConfig, [field.key]: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                         >
                           <option value="">Sélectionner...</option>
                           {field.options?.map((opt) => (
@@ -536,22 +538,23 @@ export default function MerchantOnboardingPage() {
                             type="checkbox"
                             checked={typeConfig[field.key] as boolean || false}
                             onChange={(e) => setTypeConfig({ ...typeConfig, [field.key]: e.target.checked })}
-                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            className="w-4 h-4 text-violet-600 border-slate-300 dark:border-slate-600 rounded focus:ring-violet-500"
                           />
-                          <span className="text-sm text-gray-600">Activer</span>
+                          <span className="text-sm text-slate-600 dark:text-slate-400">Activer</span>
                         </label>
                       ) : (
-                        <Input
+                        <input
                           type={field.type}
                           placeholder={field.placeholder}
                           value={typeConfig[field.key] as string || ''}
                           onChange={(e) => setTypeConfig({ ...typeConfig, [field.key]: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                         />
                       )}
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                     <Settings className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p>Aucune configuration spécifique requise pour ce type.</p>
                     <p className="text-sm">Vous pourrez personnaliser davantage dans les paramètres.</p>
@@ -565,13 +568,13 @@ export default function MerchantOnboardingPage() {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Palette className="w-8 h-8 text-pink-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500/20 to-rose-500/20 dark:from-pink-500/30 dark:to-rose-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Palette className="w-8 h-8 text-pink-600 dark:text-pink-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Choisissez votre thème
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-slate-600 dark:text-slate-400 mt-1">
                   Vous pourrez le personnaliser plus tard
                 </p>
               </div>
@@ -584,8 +587,8 @@ export default function MerchantOnboardingPage() {
                     className={cn(
                       'p-4 rounded-xl border-2 text-left transition-all hover:scale-105',
                       selectedTheme === theme.id
-                        ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 shadow-lg'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     )}
                   >
                     <div
@@ -594,7 +597,7 @@ export default function MerchantOnboardingPage() {
                         background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
                       }}
                     />
-                    <p className="font-medium text-gray-900 capitalize">{theme.id}</p>
+                    <p className="font-medium text-slate-900 dark:text-white capitalize">{theme.id}</p>
                   </button>
                 ))}
               </div>
@@ -604,22 +607,22 @@ export default function MerchantOnboardingPage() {
           {/* Step 4: Complete */}
           {currentStep === 4 && (
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-green-500/20 dark:from-emerald-500/30 dark:to-green-500/30 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                   Votre boutique est prête !
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-slate-600 dark:text-slate-400">
                   Commencez à ajouter vos produits et personnalisez votre boutique
                 </p>
               </div>
 
               {/* Summary */}
-              <div className="bg-gray-50 rounded-xl p-6 text-left max-w-md mx-auto">
-                <h3 className="font-semibold text-gray-900 mb-4">Récapitulatif</h3>
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 text-left max-w-md mx-auto">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Récapitulatif</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     {selectedType && (
@@ -628,23 +631,23 @@ export default function MerchantOnboardingPage() {
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-gray-500">Type de commerce</p>
-                      <p className="font-medium text-gray-900">{selectedCommerceType}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Type de commerce</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{selectedCommerceType}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Store className="w-8 h-8 text-gray-400 p-1.5 bg-gray-100 rounded-lg" />
+                    <Store className="w-8 h-8 text-slate-400 p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg" />
                     <div>
-                      <p className="text-sm text-gray-500">Boutique</p>
-                      <p className="font-medium text-gray-900">{storeData.name}</p>
-                      <p className="text-xs text-gray-500">foxcard.app/stores/{storeData.slug}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Boutique</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{storeData.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">foxcard.app/stores/{storeData.slug}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Palette className="w-8 h-8 text-gray-400 p-1.5 bg-gray-100 rounded-lg" />
+                    <Palette className="w-8 h-8 text-slate-400 p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg" />
                     <div>
-                      <p className="text-sm text-gray-500">Thème</p>
-                      <p className="font-medium text-gray-900 capitalize">{selectedTheme}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Thème</p>
+                      <p className="font-medium text-slate-900 dark:text-white capitalize">{selectedTheme}</p>
                     </div>
                   </div>
                 </div>
@@ -653,19 +656,19 @@ export default function MerchantOnboardingPage() {
           )}
 
           {/* Navigation */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-            <Button
-              variant="outline"
+          <div className="flex justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+            <AdminButton
+              variant="secondary"
               onClick={handleBack}
               disabled={currentStep === 0}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Retour
-            </Button>
+            </AdminButton>
 
             {currentStep < STEPS.length - 1 ? (
-              <Button
+              <AdminButton
                 variant="primary"
                 onClick={handleNext}
                 disabled={
@@ -676,9 +679,9 @@ export default function MerchantOnboardingPage() {
               >
                 Suivant
                 <ArrowRight className="w-4 h-4" />
-              </Button>
+              </AdminButton>
             ) : (
-              <Button
+              <AdminButton
                 variant="primary"
                 onClick={handleComplete}
                 disabled={isSubmitting}
@@ -695,7 +698,7 @@ export default function MerchantOnboardingPage() {
                     Créer ma boutique
                   </>
                 )}
-              </Button>
+              </AdminButton>
             )}
           </div>
         </div>

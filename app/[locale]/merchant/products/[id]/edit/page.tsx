@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { AdminCheckbox } from '@/components/admin/ui/AdminCheckbox'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import { ProductStatus, ProductType } from '@prisma/client'
@@ -197,7 +198,7 @@ export default function EditProductPage() {
   if (productLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     )
   }
@@ -205,12 +206,12 @@ export default function EditProductPage() {
   if (!product) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900">Produit introuvable</h2>
-        <p className="text-gray-500 mt-2">Ce produit n'existe pas ou a été supprimé.</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Produit introuvable</h2>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">Ce produit n'existe pas ou a été supprimé.</p>
         <Link href={`${basePath}/products`}>
-          <Button variant="primary" className="mt-4">
+          <AdminButton className="mt-4">
             Retour aux produits
-          </Button>
+          </AdminButton>
         </Link>
       </div>
     )
@@ -222,28 +223,28 @@ export default function EditProductPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href={`${basePath}/products`}>
-            <Button variant="ghost" size="sm">
+            <AdminButton variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4" />
-            </Button>
+            </AdminButton>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Modifier le produit</h1>
-            <p className="text-gray-500 mt-1">{product.name}</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Modifier le produit</h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">{product.name}</p>
           </div>
         </div>
-        <Button
-          variant="outline"
+        <AdminButton
+          variant="secondary"
           onClick={handleDelete}
           disabled={deleteProduct.isPending}
-          className="text-red-600 border-red-200 hover:bg-red-50"
+          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Supprimer
-        </Button>
+        </AdminButton>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl">
           {error}
         </div>
       )}
@@ -252,32 +253,36 @@ export default function EditProductPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Basic Info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Informations générales</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Nom du produit *
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Ex: T-shirt Premium"
                   required
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Slug (URL)
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="t-shirt-premium"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -285,46 +290,50 @@ export default function EditProductPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Décrivez votre produit..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
             </div>
-          </div>
+          </AdminCard>
 
           {/* Media */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Images</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Images</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Image principale (URL)
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.thumbnail}
                   onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
                   placeholder="https://..."
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Galerie d'images
                 </label>
                 <div className="flex gap-2">
-                  <Input
+                  <input
+                    type="text"
                     value={imageInput}
                     onChange={(e) => setImageInput(e.target.value)}
                     placeholder="URL de l'image"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
+                    className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
-                  <Button type="button" variant="outline" onClick={handleAddImage}>
+                  <AdminButton type="button" variant="secondary" onClick={handleAddImage}>
                     <Plus className="w-4 h-4" />
-                  </Button>
+                  </AdminButton>
                 </div>
                 {formData.images.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {formData.images.map((image, idx) => (
                       <div key={idx} className="relative group">
-                        <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden">
                           <img src={image} alt="" className="w-full h-full object-cover" />
                         </div>
                         <button
@@ -340,150 +349,152 @@ export default function EditProductPage() {
                 )}
               </div>
             </div>
-          </div>
+          </AdminCard>
 
           {/* Pricing */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Tarification</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tarification</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Prix de vente *
                 </label>
                 <div className="relative">
-                  <Input
+                  <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="0.00"
-                    className="pr-8"
                     required
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Prix barré
                 </label>
                 <div className="relative">
-                  <Input
+                  <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.compareAtPrice}
                     onChange={(e) => setFormData({ ...formData, compareAtPrice: e.target.value })}
                     placeholder="0.00"
-                    className="pr-8"
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Coût d'achat
                 </label>
                 <div className="relative">
-                  <Input
+                  <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.cost}
                     onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
                     placeholder="0.00"
-                    className="pr-8"
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
                 </div>
               </div>
             </div>
-          </div>
+          </AdminCard>
 
           {/* Inventory */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Inventaire</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Inventaire</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     SKU
                   </label>
-                  <Input
+                  <input
+                    type="text"
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                     placeholder="SKU-001"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Code-barres
                   </label>
-                  <Input
+                  <input
+                    type="text"
                     value={formData.barcode}
                     onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                     placeholder="123456789"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="trackInventory"
-                  checked={formData.trackInventory}
-                  onChange={(e) => setFormData({ ...formData, trackInventory: e.target.checked })}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="trackInventory" className="text-sm text-gray-700">
-                  Suivre l'inventaire
-                </label>
-              </div>
+              <AdminCheckbox
+                id="trackInventory"
+                checked={formData.trackInventory}
+                onChange={(e) => setFormData({ ...formData, trackInventory: e.target.checked })}
+                label="Suivre l'inventaire"
+              />
               {formData.trackInventory && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Quantité en stock
                     </label>
-                    <Input
+                    <input
                       type="number"
                       min="0"
                       value={formData.quantity}
                       onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Seuil d'alerte stock faible
                     </label>
-                    <Input
+                    <input
                       type="number"
                       min="0"
                       value={formData.lowStockThreshold}
                       onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                     />
                   </div>
                 </div>
               )}
             </div>
-          </div>
+          </AdminCard>
 
           {/* SEO */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">SEO</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">SEO</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Titre SEO
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.metaTitle}
                   onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
                   placeholder="Titre pour les moteurs de recherche"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Description SEO
                 </label>
                 <textarea
@@ -491,104 +502,100 @@ export default function EditProductPage() {
                   onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
                   placeholder="Description pour les moteurs de recherche"
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
             </div>
-          </div>
+          </AdminCard>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Statut</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Statut</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Visibilité
                 </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as ProductStatus })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 >
                   <option value={ProductStatus.DRAFT}>Brouillon</option>
                   <option value={ProductStatus.ACTIVE}>Actif</option>
                   <option value={ProductStatus.ARCHIVED}>Archivé</option>
                 </select>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="featured"
-                  checked={formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="featured" className="text-sm text-gray-700">
-                  Produit mis en avant
-                </label>
-              </div>
+              <AdminCheckbox
+                id="featured"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                label="Produit mis en avant"
+              />
             </div>
-          </div>
+          </AdminCard>
 
           {/* Type */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Type de produit</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Type de produit</h2>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as ProductType })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             >
               <option value={ProductType.SIMPLE}>Simple</option>
               <option value={ProductType.VARIABLE}>Variable</option>
               <option value={ProductType.DIGITAL}>Digital</option>
             </select>
-          </div>
+          </AdminCard>
 
           {/* Category */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Catégorie</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Catégorie</h2>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             >
               <option value="">Sans catégorie</option>
               {categoriesData?.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
-          </div>
+          </AdminCard>
 
           {/* Tags */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Tags</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tags</h2>
             <div className="space-y-3">
               <div className="flex gap-2">
-                <Input
+                <input
+                  type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   placeholder="Ajouter un tag"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
-                <Button type="button" variant="outline" onClick={handleAddTag}>
+                <AdminButton type="button" variant="secondary" onClick={handleAddTag}>
                   <Plus className="w-4 h-4" />
-                </Button>
+                </AdminButton>
               </div>
               {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-full"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -597,29 +604,19 @@ export default function EditProductPage() {
                 </div>
               )}
             </div>
-          </div>
+          </AdminCard>
 
           {/* Actions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <Button
+          <AdminCard padding="lg">
+            <AdminButton
               type="submit"
-              variant="primary"
               className="w-full"
               disabled={updateProduct.isPending}
+              icon={updateProduct.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             >
-              {updateProduct.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Enregistrement...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Enregistrer les modifications
-                </>
-              )}
-            </Button>
-          </div>
+              {updateProduct.isPending ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </AdminButton>
+          </AdminCard>
         </div>
       </form>
     </div>

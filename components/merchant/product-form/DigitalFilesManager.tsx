@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { trpc } from '@/lib/trpc/client'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/Label'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import {
   Download,
   Upload,
@@ -182,7 +180,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
           </h2>
         </div>
         {!isAddingFile && (
-          <Button
+          <AdminButton
             type="button"
             variant="outline"
             size="sm"
@@ -190,7 +188,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
           >
             <Plus className="w-4 h-4 mr-1" />
             Ajouter un fichier
-          </Button>
+          </AdminButton>
         )}
       </div>
 
@@ -259,7 +257,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
+                    <AdminButton
                       type="button"
                       variant="ghost"
                       size="sm"
@@ -267,8 +265,8 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                       title={file.isActive ? 'Désactiver' : 'Activer'}
                     >
                       <RefreshCw className="w-4 h-4" />
-                    </Button>
-                    <Button
+                    </AdminButton>
+                    <AdminButton
                       type="button"
                       variant="ghost"
                       size="sm"
@@ -276,7 +274,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </Button>
+                    </AdminButton>
                   </div>
                 </div>
               </div>
@@ -289,14 +287,14 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
           <p className="text-gray-500 dark:text-gray-400 mb-3">
             Aucun fichier téléchargeable
           </p>
-          <Button
+          <AdminButton
             type="button"
             variant="outline"
             onClick={() => setIsAddingFile(true)}
           >
             <Plus className="w-4 h-4 mr-1" />
             Ajouter un fichier
-          </Button>
+          </AdminButton>
         </div>
       ) : null}
 
@@ -321,23 +319,25 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Label>Nom du fichier *</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nom du fichier *</label>
+              <input
                 value={newFile.name}
                 onChange={(e) => setNewFile({ ...newFile, name: e.target.value })}
                 placeholder="Ex: Guide complet PDF"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Nom du fichier (pour téléchargement) *</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nom du fichier (pour téléchargement) *</label>
+              <input
                 value={newFile.fileName}
                 onChange={(e) => setNewFile({ ...newFile, fileName: e.target.value })}
                 placeholder="guide-complet.pdf"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Type MIME</Label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Type MIME</label>
               <select
                 value={newFile.mimeType}
                 onChange={(e) => setNewFile({ ...newFile, mimeType: e.target.value })}
@@ -354,61 +354,67 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
               </select>
             </div>
             <div className="sm:col-span-2">
-              <Label>URL du fichier *</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">URL du fichier *</label>
+              <input
                 value={newFile.fileUrl}
                 onChange={(e) => setNewFile({ ...newFile, fileUrl: e.target.value })}
                 placeholder="https://storage.example.com/files/guide.pdf"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
               <p className="text-xs text-gray-500 mt-1">
                 URL sécurisée vers le fichier (S3, CloudFlare R2, etc.)
               </p>
             </div>
             <div>
-              <Label>Taille du fichier (bytes)</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Taille du fichier (bytes)</label>
+              <input
                 type="number"
                 value={newFile.fileSize || ''}
                 onChange={(e) => setNewFile({ ...newFile, fileSize: parseInt(e.target.value) || 0 })}
                 placeholder="1048576"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Version</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Version</label>
+              <input
                 value={newFile.version}
                 onChange={(e) => setNewFile({ ...newFile, version: e.target.value })}
                 placeholder="1.0.0"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Limite de téléchargements</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Limite de téléchargements</label>
+              <input
                 type="number"
                 value={newFile.maxDownloads}
                 onChange={(e) => setNewFile({ ...newFile, maxDownloads: e.target.value })}
                 placeholder="Illimité si vide"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Expiration (jours après achat)</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Expiration (jours après achat)</label>
+              <input
                 type="number"
                 value={newFile.expiryDays}
                 onChange={(e) => setNewFile({ ...newFile, expiryDays: e.target.value })}
                 placeholder="Jamais si vide"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Clé de licence (optionnel)</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Clé de licence (optionnel)</label>
+              <input
                 value={newFile.licenseKey}
                 onChange={(e) => setNewFile({ ...newFile, licenseKey: e.target.value })}
                 placeholder="XXXX-XXXX-XXXX-XXXX"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
               />
             </div>
             <div>
-              <Label>Type de licence</Label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Type de licence</label>
               <select
                 value={newFile.licenseType}
                 onChange={(e) => setNewFile({ ...newFile, licenseType: e.target.value })}
@@ -421,7 +427,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
               </select>
             </div>
             <div className="sm:col-span-2">
-              <Label>Notes de version</Label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Notes de version</label>
               <textarea
                 value={newFile.releaseNotes}
                 onChange={(e) => setNewFile({ ...newFile, releaseNotes: e.target.value })}
@@ -433,7 +439,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button
+            <AdminButton
               type="button"
               variant="ghost"
               onClick={() => {
@@ -442,8 +448,8 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
               }}
             >
               Annuler
-            </Button>
-            <Button
+            </AdminButton>
+            <AdminButton
               type="button"
               variant="primary"
               onClick={handleCreateFile}
@@ -460,7 +466,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                   Ajouter le fichier
                 </>
               )}
-            </Button>
+            </AdminButton>
           </div>
         </div>
       )}

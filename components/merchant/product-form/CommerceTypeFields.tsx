@@ -1,9 +1,6 @@
 'use client'
 
 import { CommerceType } from '@/lib/commerce-types'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/Label'
-import { Switch } from '@/components/ui/Switch'
 import { AlertTriangle, Wine, Utensils, Shirt, Cpu, Sparkles, Download, CalendarCheck, Building2, Plane, Ticket, ChefHat } from 'lucide-react'
 
 // Types for commerce-specific attributes
@@ -23,33 +20,36 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Marque</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Marque</label>
+          <input
             value={(attributes.brand as string) || ''}
             onChange={(e) => onChange({ ...attributes, brand: e.target.value })}
             placeholder="Ex: Apple, Samsung..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Modèle</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Modèle</label>
+          <input
             value={(attributes.model as string) || ''}
             onChange={(e) => onChange({ ...attributes, model: e.target.value })}
             placeholder="Ex: iPhone 15 Pro"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Garantie (mois)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Garantie (mois)</label>
+          <input
             type="number"
             value={(attributes.warrantyMonths as number) || ''}
             onChange={(e) => onChange({ ...attributes, warrantyMonths: parseInt(e.target.value) || 0 })}
             placeholder="24"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Indice de réparabilité (/10)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Indice de réparabilité (/10)</label>
+          <input
             type="number"
             min="0"
             max="10"
@@ -57,11 +57,12 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
             value={(attributes.repairabilityIndex as number) || ''}
             onChange={(e) => onChange({ ...attributes, repairabilityIndex: parseFloat(e.target.value) || 0 })}
             placeholder="7.5"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Spécifications techniques</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Spécifications techniques</label>
         <textarea
           value={(attributes.technicalSpecs as string) || ''}
           onChange={(e) => onChange({ ...attributes, technicalSpecs: e.target.value })}
@@ -88,32 +89,35 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Tailles disponibles</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tailles disponibles</label>
+          <input
             value={sizes.join(', ')}
             onChange={(e) => onChange({ ...attributes, sizes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="XS, S, M, L, XL"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
-          <p className="text-xs text-gray-500 mt-1">Séparez par des virgules</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Séparez par des virgules</p>
         </div>
         <div>
-          <Label>Couleurs</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Couleurs</label>
+          <input
             value={colors.join(', ')}
             onChange={(e) => onChange({ ...attributes, colors: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="Noir, Blanc, Rouge"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Matières</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Matières</label>
+          <input
             value={materials.join(', ')}
             onChange={(e) => onChange({ ...attributes, materials: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="Coton, Polyester, Lin"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Genre</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Genre</label>
           <select
             value={(attributes.gender as string) || ''}
             onChange={(e) => onChange({ ...attributes, gender: e.target.value })}
@@ -128,11 +132,12 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
         </div>
       </div>
       <div>
-        <Label>Guide des tailles (URL ou texte)</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Guide des tailles (URL ou texte)</label>
+        <input
           value={(attributes.sizeGuide as string) || ''}
           onChange={(e) => onChange({ ...attributes, sizeGuide: e.target.value })}
           placeholder="Lien vers le guide des tailles ou instructions"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
     </div>
@@ -151,28 +156,31 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Poids / Volume</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Poids / Volume</label>
+          <input
             value={(attributes.weight as string) || ''}
             onChange={(e) => onChange({ ...attributes, weight: e.target.value })}
             placeholder="500g, 1L..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Date limite de consommation</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Date limite de consommation</label>
+          <input
             type="date"
             value={(attributes.expirationDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, expirationDate: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Allergènes</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Allergènes</label>
+        <input
           value={allergens.join(', ')}
           onChange={(e) => onChange({ ...attributes, allergens: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Gluten, Lait, Œufs, Fruits à coque..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
         <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
           <AlertTriangle className="w-3 h-3" />
@@ -180,32 +188,36 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
         </p>
       </div>
       <div>
-        <Label>Valeurs nutritionnelles (pour 100g)</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Valeurs nutritionnelles (pour 100g)</label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <Input
+          <input
             placeholder="Calories (kcal)"
             value={(attributes.calories as string) || ''}
             onChange={(e) => onChange({ ...attributes, calories: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
-          <Input
+          <input
             placeholder="Protéines (g)"
             value={(attributes.proteins as string) || ''}
             onChange={(e) => onChange({ ...attributes, proteins: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
-          <Input
+          <input
             placeholder="Glucides (g)"
             value={(attributes.carbs as string) || ''}
             onChange={(e) => onChange({ ...attributes, carbs: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
-          <Input
+          <input
             placeholder="Lipides (g)"
             value={(attributes.fat as string) || ''}
             onChange={(e) => onChange({ ...attributes, fat: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Ingrédients</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ingrédients</label>
         <textarea
           value={(attributes.ingredients as string) || ''}
           onChange={(e) => onChange({ ...attributes, ingredients: e.target.value })}
@@ -234,62 +246,68 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <Label>Degré d'alcool (%)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Degré d'alcool (%)</label>
+          <input
             type="number"
             step="0.1"
             value={(attributes.alcoholDegree as number) || ''}
             onChange={(e) => onChange({ ...attributes, alcoholDegree: parseFloat(e.target.value) || 0 })}
             placeholder="12.5"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Volume (ml)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Volume (ml)</label>
+          <input
             type="number"
             value={(attributes.volume as number) || ''}
             onChange={(e) => onChange({ ...attributes, volume: parseInt(e.target.value) || 0 })}
             placeholder="750"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Millésime</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Millésime</label>
+          <input
             type="number"
             value={(attributes.vintage as number) || ''}
             onChange={(e) => onChange({ ...attributes, vintage: parseInt(e.target.value) || 0 })}
             placeholder="2021"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Cépage</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Cépage</label>
+          <input
             value={(attributes.grapeVariety as string) || ''}
             onChange={(e) => onChange({ ...attributes, grapeVariety: e.target.value })}
             placeholder="Cabernet Sauvignon, Merlot..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Région / Appellation</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Région / Appellation</label>
+          <input
             value={(attributes.region as string) || ''}
             onChange={(e) => onChange({ ...attributes, region: e.target.value })}
             placeholder="Bordeaux, Champagne..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Accords mets-vins</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Accords mets-vins</label>
+        <input
           value={(attributes.foodPairing as string) || ''}
           onChange={(e) => onChange({ ...attributes, foodPairing: e.target.value })}
           placeholder="Viandes rouges, fromages affinés..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
       <div>
-        <Label>Notes de dégustation</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Notes de dégustation</label>
         <textarea
           value={(attributes.tastingNotes as string) || ''}
           onChange={(e) => onChange({ ...attributes, tastingNotes: e.target.value })}
@@ -312,46 +330,50 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Format du fichier</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Format du fichier</label>
+          <input
             value={(attributes.fileFormat as string) || ''}
             onChange={(e) => onChange({ ...attributes, fileFormat: e.target.value })}
             placeholder="PDF, MP3, ZIP..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Taille du fichier</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Taille du fichier</label>
+          <input
             value={(attributes.fileSize as string) || ''}
             onChange={(e) => onChange({ ...attributes, fileSize: e.target.value })}
             placeholder="15 MB, 2.5 GB..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Limite de téléchargements</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Limite de téléchargements</label>
+          <input
             type="number"
             value={(attributes.downloadLimit as number) || ''}
             onChange={(e) => onChange({ ...attributes, downloadLimit: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Durée de validité (jours)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Durée de validité (jours)</label>
+          <input
             type="number"
             value={(attributes.validityDays as number) || ''}
             onChange={(e) => onChange({ ...attributes, validityDays: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Type de licence</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Type de licence</label>
         <select
           value={(attributes.licenseType as string) || ''}
           onChange={(e) => onChange({ ...attributes, licenseType: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         >
           <option value="">Non spécifié</option>
           <option value="personal">Usage personnel</option>
@@ -360,13 +382,14 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
         </select>
       </div>
       <div>
-        <Label>URL du fichier (après achat)</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">URL du fichier (après achat)</label>
+        <input
           value={(attributes.downloadUrl as string) || ''}
           onChange={(e) => onChange({ ...attributes, downloadUrl: e.target.value })}
           placeholder="https://..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
-        <p className="text-xs text-gray-500 mt-1">Le lien sera accessible uniquement après l'achat</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Le lien sera accessible uniquement après l'achat</p>
       </div>
     </div>
   )
@@ -382,19 +405,20 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Durée de la prestation</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Durée de la prestation</label>
+          <input
             value={(attributes.duration as string) || ''}
             onChange={(e) => onChange({ ...attributes, duration: e.target.value })}
             placeholder="1h, 2h30, 1 journée..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Lieu</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Lieu</label>
           <select
             value={(attributes.locationType as string) || ''}
             onChange={(e) => onChange({ ...attributes, locationType: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           >
             <option value="">Non spécifié</option>
             <option value="onsite">Sur place</option>
@@ -404,15 +428,17 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
           </select>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <Switch
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input
+          type="checkbox"
           checked={(attributes.requiresBooking as boolean) || false}
-          onCheckedChange={(checked) => onChange({ ...attributes, requiresBooking: checked })}
+          onChange={(e) => onChange({ ...attributes, requiresBooking: e.target.checked })}
+          className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500/20"
         />
-        <Label>Nécessite une réservation</Label>
-      </div>
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Nécessite une réservation</span>
+      </label>
       <div>
-        <Label>Instructions de préparation</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Instructions de préparation</label>
         <textarea
           value={(attributes.preparationInstructions as string) || ''}
           onChange={(e) => onChange({ ...attributes, preparationInstructions: e.target.value })}
@@ -437,11 +463,11 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Type de chambre</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Type de chambre</label>
           <select
             value={(attributes.roomType as string) || ''}
             onChange={(e) => onChange({ ...attributes, roomType: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           >
             <option value="">Sélectionner</option>
             <option value="single">Simple</option>
@@ -452,41 +478,45 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
           </select>
         </div>
         <div>
-          <Label>Capacité (personnes)</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Capacité (personnes)</label>
+          <input
             type="number"
             value={(attributes.capacity as number) || ''}
             onChange={(e) => onChange({ ...attributes, capacity: parseInt(e.target.value) || 0 })}
             placeholder="2"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Check-in</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Check-in</label>
+          <input
             type="time"
             value={(attributes.checkInTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, checkInTime: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Check-out</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Check-out</label>
+          <input
             type="time"
             value={(attributes.checkOutTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, checkOutTime: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Équipements</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Équipements</label>
+        <input
           value={amenities.join(', ')}
           onChange={(e) => onChange({ ...attributes, amenities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="WiFi, Climatisation, Piscine, Parking..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
       <div>
-        <Label>Politique d'annulation</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Politique d'annulation</label>
         <textarea
           value={(attributes.cancellationPolicy as string) || ''}
           onChange={(e) => onChange({ ...attributes, cancellationPolicy: e.target.value })}
@@ -509,40 +539,44 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Destination</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Destination</label>
+          <input
             value={(attributes.destination as string) || ''}
             onChange={(e) => onChange({ ...attributes, destination: e.target.value })}
             placeholder="Paris, Bali, New York..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Durée</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Durée</label>
+          <input
             value={(attributes.tripDuration as string) || ''}
             onChange={(e) => onChange({ ...attributes, tripDuration: e.target.value })}
             placeholder="7 jours / 6 nuits"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Date de départ</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Date de départ</label>
+          <input
             type="date"
             value={(attributes.departureDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, departureDate: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Date de retour</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Date de retour</label>
+          <input
             type="date"
             value={(attributes.returnDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, returnDate: e.target.value })}
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Itinéraire</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Itinéraire</label>
         <textarea
           value={(attributes.itinerary as string) || ''}
           onChange={(e) => onChange({ ...attributes, itinerary: e.target.value })}
@@ -553,7 +587,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Inclus dans le prix</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Inclus dans le prix</label>
           <textarea
             value={(attributes.inclusions as string) || ''}
             onChange={(e) => onChange({ ...attributes, inclusions: e.target.value })}
@@ -563,7 +597,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
           />
         </div>
         <div>
-          <Label>Non inclus</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Non inclus</label>
           <textarea
             value={(attributes.exclusions as string) || ''}
             onChange={(e) => onChange({ ...attributes, exclusions: e.target.value })}
@@ -589,11 +623,11 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Catégorie de plat</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Catégorie de plat</label>
           <select
             value={(attributes.dishCategory as string) || ''}
             onChange={(e) => onChange({ ...attributes, dishCategory: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           >
             <option value="">Sélectionner</option>
             <option value="starter">Entrée</option>
@@ -604,20 +638,22 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           </select>
         </div>
         <div>
-          <Label>Temps de préparation</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Temps de préparation</label>
+          <input
             value={(attributes.prepTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, prepTime: e.target.value })}
             placeholder="15-20 min"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Allergènes</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Allergènes</label>
+        <input
           value={allergens.join(', ')}
           onChange={(e) => onChange({ ...attributes, allergens: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Gluten, Lait, Œufs..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
       <div className="flex flex-wrap gap-4">
@@ -672,28 +708,30 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Durée de l'activité</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Durée de l'activité</label>
+          <input
             value={(attributes.activityDuration as string) || ''}
             onChange={(e) => onChange({ ...attributes, activityDuration: e.target.value })}
             placeholder="2h, Demi-journée..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Âge minimum</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Âge minimum</label>
+          <input
             type="number"
             value={(attributes.minAge as number) || ''}
             onChange={(e) => onChange({ ...attributes, minAge: parseInt(e.target.value) || 0 })}
             placeholder="Aucun si vide"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Difficulté</Label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Difficulté</label>
           <select
             value={(attributes.difficulty as string) || ''}
             onChange={(e) => onChange({ ...attributes, difficulty: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           >
             <option value="">Non spécifié</option>
             <option value="easy">Facile</option>
@@ -702,29 +740,32 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           </select>
         </div>
         <div>
-          <Label>Groupe max.</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Groupe max.</label>
+          <input
             type="number"
             value={(attributes.maxGroupSize as number) || ''}
             onChange={(e) => onChange({ ...attributes, maxGroupSize: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Équipement fourni</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Équipement fourni</label>
+        <input
           value={(attributes.equipmentProvided as string) || ''}
           onChange={(e) => onChange({ ...attributes, equipmentProvided: e.target.value })}
           placeholder="Casque, Vélo, Gilet..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
       <div>
-        <Label>Ce qu'il faut apporter</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ce qu'il faut apporter</label>
+        <input
           value={(attributes.toBring as string) || ''}
           onChange={(e) => onChange({ ...attributes, toBring: e.target.value })}
           placeholder="Chaussures fermées, Bouteille d'eau..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
     </div>
@@ -743,28 +784,31 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Type de peau</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Type de peau</label>
+          <input
             value={(attributes.skinType as string) || ''}
             onChange={(e) => onChange({ ...attributes, skinType: e.target.value })}
             placeholder="Tous types, Peau sèche, Peau grasse..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
         <div>
-          <Label>Contenance</Label>
-          <Input
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Contenance</label>
+          <input
             value={(attributes.volume as string) || ''}
             onChange={(e) => onChange({ ...attributes, volume: e.target.value })}
             placeholder="50ml, 100ml..."
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
         </div>
       </div>
       <div>
-        <Label>Ingrédients clés</Label>
-        <Input
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ingrédients clés</label>
+        <input
           value={ingredients.join(', ')}
           onChange={(e) => onChange({ ...attributes, ingredients: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Acide hyaluronique, Vitamine C, Rétinol..."
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
         />
       </div>
       <div className="flex flex-wrap gap-4">
@@ -797,7 +841,7 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
         </label>
       </div>
       <div>
-        <Label>Mode d'emploi</Label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Mode d'emploi</label>
         <textarea
           value={(attributes.howToUse as string) || ''}
           onChange={(e) => onChange({ ...attributes, howToUse: e.target.value })}

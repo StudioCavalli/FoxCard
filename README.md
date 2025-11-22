@@ -1208,6 +1208,69 @@ Après le seed, utilisez ces credentials :
   - Edge cases (user sans stores, suspended stores)
   - Middleware (path classification, locale extraction, API protection)
 
+### ✅ M14: Commerce-Type Specific Pages & Backend (IN PROGRESS)
+
+#### 🏨 Hotel Management
+- [x] **Room Management** (`/merchant/rooms`) :
+  - Liste des chambres avec statut disponibilité
+  - Création/édition de chambre avec capacité, lits, équipements
+  - Types de chambres (Standard, Suite, Deluxe, etc.)
+  - Gestion des équipements (WiFi, TV, Minibar, etc.)
+- [x] **Room Types** (`/merchant/room-types`) :
+  - CRUD complet des types de chambres
+  - Prix de base par type
+- [x] **Amenities** (`/merchant/amenities`) :
+  - Gestion des équipements hôteliers
+  - Icônes et catégories
+- [x] **Reservations** (`/merchant/reservations`) :
+  - Calendrier des réservations
+  - Détails de réservation avec timeline
+  - Gestion check-in/check-out
+- [x] **Guests** (`/merchant/guests`) :
+  - Répertoire des clients avec historique
+  - Profil détaillé par client
+- [x] **Check-in Dashboard** (`/merchant/check-in`) :
+  - Vue des arrivées/départs du jour
+  - Actions rapides check-in/check-out
+- [x] **Occupancy Analytics** (`/merchant/analytics/occupancy`) :
+  - Taux d'occupation par période
+  - Graphiques avec code couleur (vert >80%, jaune 50-79%, orange 30-49%, rouge <30%)
+  - KPIs : occupation moyenne, pic, creux
+  - Statut temps réel des chambres
+- [x] **Revenue Analytics** (`/merchant/analytics/revenue`) :
+  - RevPAR (Revenue Per Available Room)
+  - ADR (Average Daily Rate)
+  - Graphiques de revenus par période
+  - Comparaisons temporelles
+
+#### 🎨 Admin Design System (COMPLETE)
+- [x] **AdminCard** (`components/admin/ui/AdminCard.tsx`) :
+  - Container card avec variantes de padding (none, sm, md, lg)
+  - Support dark mode complet
+  - Coins arrondis 2xl, bordure slate
+- [x] **AdminButton** (`components/admin/ui/AdminButton.tsx`) :
+  - Variantes : primary (violet), secondary (slate), ghost
+  - Tailles : sm, md, lg
+  - Support icône, loading state, disabled
+- [x] **AdminBadge** (`components/admin/ui/AdminBadge.tsx`) :
+  - Variantes : default, success, warning, error, info
+  - Support icône
+  - Tailles : sm, md
+- [x] **AdminCheckbox** (`components/admin/ui/AdminCheckbox.tsx`) :
+  - Checkbox personnalisé avec icône check
+  - Support label et description
+  - Couleur violet, dark mode complet
+- [x] **AdminToggle** (`components/admin/ui/AdminToggle.tsx`) :
+  - Toggle switch style iOS
+  - Label + description à gauche, toggle à droite
+  - Animation fluide, couleur violet
+  - Idéal pour paramètres on/off
+- [x] **Design Tokens** :
+  - Couleurs : slate (grays), violet (accent)
+  - Bordures : rounded-xl pour inputs, rounded-2xl pour cards
+  - Focus : ring-violet-500/20
+  - Dark mode : dark:bg-slate-800, dark:text-white
+
 #### 📋 Roadmap Future
 - [ ] Tests E2E avec Playwright
 - [ ] Apps mobiles iOS/Android (React Native)

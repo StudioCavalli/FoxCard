@@ -2,17 +2,15 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { AdminToggle } from '@/components/admin/ui/AdminToggle'
 import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import {
-  Settings,
   Bell,
   Globe,
   Shield,
-  Palette,
-  Mail,
   Save,
   Loader2
 } from 'lucide-react'
@@ -58,37 +56,27 @@ export default function MerchantSettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('settings')}</h1>
-          <p className="text-gray-500 mt-1">{t('configureSpace')}</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('settings')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">{t('configureSpace')}</p>
         </div>
-        <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t('saving')}
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              {t('save')}
-            </>
-          )}
-        </Button>
+        <AdminButton variant="primary" onClick={handleSave} disabled={isSaving} icon={isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}>
+          {isSaving ? t('saving') : t('save')}
+        </AdminButton>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <nav className="p-2">
+          <AdminCard padding="sm">
+            <nav className="space-y-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   <tab.icon className="w-5 h-5" />
@@ -96,108 +84,90 @@ export default function MerchantSettingsPage() {
                 </button>
               ))}
             </nav>
-          </div>
+          </AdminCard>
         </div>
 
         {/* Content */}
         <div className="lg:col-span-3">
           {activeTab === 'notifications' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('notificationSettings')}</h2>
-              <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-900">{t('newOrder')}</p>
-                    <p className="text-sm text-gray-500">{t('newOrderDesc')}</p>
-                  </div>
-                  <input
-                    type="checkbox"
+            <AdminCard>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">{t('notificationSettings')}</h2>
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                  <AdminToggle
+                    label={t('newOrder')}
+                    description={t('newOrderDesc')}
                     checked={notificationSettings.newOrderEmail}
                     onChange={(e) => setNotificationSettings({
                       ...notificationSettings,
                       newOrderEmail: e.target.checked
                     })}
-                    className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
                   />
-                </label>
+                </div>
 
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-900">{t('lowStockAlert')}</p>
-                    <p className="text-sm text-gray-500">{t('lowStockAlertDesc')}</p>
-                  </div>
-                  <input
-                    type="checkbox"
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                  <AdminToggle
+                    label={t('lowStockAlert')}
+                    description={t('lowStockAlertDesc')}
                     checked={notificationSettings.lowStockEmail}
                     onChange={(e) => setNotificationSettings({
                       ...notificationSettings,
                       lowStockEmail: e.target.checked
                     })}
-                    className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
                   />
-                </label>
+                </div>
 
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-900">{t('customerMessage')}</p>
-                    <p className="text-sm text-gray-500">{t('customerMessageDesc')}</p>
-                  </div>
-                  <input
-                    type="checkbox"
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                  <AdminToggle
+                    label={t('customerMessage')}
+                    description={t('customerMessageDesc')}
                     checked={notificationSettings.customerMessageEmail}
                     onChange={(e) => setNotificationSettings({
                       ...notificationSettings,
                       customerMessageEmail: e.target.checked
                     })}
-                    className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
                   />
-                </label>
+                </div>
 
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="font-medium text-gray-900 mb-4">{t('reports')}</h3>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                  <h3 className="font-medium text-slate-900 dark:text-white mb-4">{t('reports')}</h3>
 
-                  <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors mb-2">
-                    <div>
-                      <p className="font-medium text-gray-900">{t('weeklyReport')}</p>
-                      <p className="text-sm text-gray-500">{t('weeklyReportDesc')}</p>
+                  <div className="space-y-3">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                      <AdminToggle
+                        label={t('weeklyReport')}
+                        description={t('weeklyReportDesc')}
+                        checked={notificationSettings.weeklyReport}
+                        onChange={(e) => setNotificationSettings({
+                          ...notificationSettings,
+                          weeklyReport: e.target.checked
+                        })}
+                      />
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.weeklyReport}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        weeklyReport: e.target.checked
-                      })}
-                      className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                    />
-                  </label>
 
-                  <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                    <div>
-                      <p className="font-medium text-gray-900">{t('monthlyReport')}</p>
-                      <p className="text-sm text-gray-500">{t('monthlyReportDesc')}</p>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                      <AdminToggle
+                        label={t('monthlyReport')}
+                        description={t('monthlyReportDesc')}
+                        checked={notificationSettings.monthlyReport}
+                        onChange={(e) => setNotificationSettings({
+                          ...notificationSettings,
+                          monthlyReport: e.target.checked
+                        })}
+                      />
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.monthlyReport}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        monthlyReport: e.target.checked
-                      })}
-                      className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                    />
-                  </label>
+                  </div>
                 </div>
               </div>
-            </div>
+            </AdminCard>
           )}
 
           {activeTab === 'locale' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('languageAndLocalization')}</h2>
+            <AdminCard>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">{t('languageAndLocalization')}</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     {t('interfaceLanguage')}
                   </label>
                   <select
@@ -206,7 +176,7 @@ export default function MerchantSettingsPage() {
                       ...localeSettings,
                       language: e.target.value
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                   >
                     <option value="fr">Français</option>
                     <option value="en">English</option>
@@ -217,7 +187,7 @@ export default function MerchantSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     {t('currency')}
                   </label>
                   <select
@@ -226,7 +196,7 @@ export default function MerchantSettingsPage() {
                       ...localeSettings,
                       currency: e.target.value
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                   >
                     <option value="EUR">Euro (€)</option>
                     <option value="USD">US Dollar ($)</option>
@@ -237,7 +207,7 @@ export default function MerchantSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     {t('timezone')}
                   </label>
                   <select
@@ -246,7 +216,7 @@ export default function MerchantSettingsPage() {
                       ...localeSettings,
                       timezone: e.target.value
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                   >
                     <option value="Europe/Paris">Paris (UTC+1)</option>
                     <option value="Europe/London">London (UTC+0)</option>
@@ -256,65 +226,65 @@ export default function MerchantSettingsPage() {
                   </select>
                 </div>
               </div>
-            </div>
+            </AdminCard>
           )}
 
           {activeTab === 'security' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('accountSecurity')}</h2>
-              <div className="space-y-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{t('password')}</p>
-                      <p className="text-sm text-gray-500">{t('lastModified', { days: 30 })}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      {t('modify')}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{t('twoFactorAuth')}</p>
-                      <p className="text-sm text-gray-500">{t('addSecurityLayer')}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      {t('enable')}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
+            <AdminCard>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">{t('accountSecurity')}</h2>
+              <div className="space-y-4">
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">{t('activeSessions')}</p>
-                      <p className="text-sm text-gray-500">{t('manageConnections')}</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{t('password')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('lastModified', { days: 30 })}</p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      {t('view')}
-                    </Button>
+                    <AdminButton variant="secondary" size="sm">
+                      {t('modify')}
+                    </AdminButton>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-6">
-                  <h3 className="font-medium text-red-600 mb-4">{t('dangerZone')}</h3>
-                  <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">{t('twoFactorAuth')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('addSecurityLayer')}</p>
+                    </div>
+                    <AdminButton variant="secondary" size="sm">
+                      {t('enable')}
+                    </AdminButton>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">{t('activeSessions')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('manageConnections')}</p>
+                    </div>
+                    <AdminButton variant="secondary" size="sm">
+                      {t('view')}
+                    </AdminButton>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+                  <h3 className="font-medium text-red-600 dark:text-red-400 mb-4">{t('dangerZone')}</h3>
+                  <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-red-900">{t('deleteAccount')}</p>
-                        <p className="text-sm text-red-700">{t('deleteAccountWarning')}</p>
+                        <p className="font-medium text-red-900 dark:text-red-400">{t('deleteAccount')}</p>
+                        <p className="text-sm text-red-700 dark:text-red-400/80">{t('deleteAccountWarning')}</p>
                       </div>
-                      <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-100">
+                      <AdminButton variant="secondary" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-500/20">
                         {t('delete')}
-                      </Button>
+                      </AdminButton>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </AdminCard>
           )}
         </div>
       </div>

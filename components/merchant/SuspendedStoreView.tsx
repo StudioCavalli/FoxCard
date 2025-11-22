@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AlertTriangle, Send, Clock, CheckCircle, XCircle, MessageSquare } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
-import { Button } from '@/components/ui/Button'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -202,7 +202,7 @@ export function SuspendedStoreView({
                 </div>
               )}
 
-              <Button
+              <AdminButton
                 type="submit"
                 disabled={isSubmitting || appealMessage.length < 50}
                 className="w-full flex items-center justify-center gap-2"
@@ -218,7 +218,7 @@ export function SuspendedStoreView({
                     Soumettre mon appel
                   </>
                 )}
-              </Button>
+              </AdminButton>
             </form>
           )}
 

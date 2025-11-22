@@ -894,6 +894,19 @@
       "pendingOrders": "Ausstehende Bestellungen",
       "vsLastMonth": "vs letzter Monat"
     },
+    "header": {
+      "myStore": "Mein Geschäft",
+      "search": "Produkte, Bestellungen suchen...",
+      "viewStore": "Geschäft anzeigen",
+      "notifications": "Benachrichtigungen",
+      "noNotifications": "Keine neuen Benachrichtigungen",
+      "viewAllNotifications": "Alle Benachrichtigungen anzeigen",
+      "merchant": "Händler",
+      "myAccount": "Mein Konto",
+      "settings": "Einstellungen",
+      "help": "Hilfe",
+      "logout": "Abmelden"
+    },
     "hotel": {
       "rooms": {
         "title": "Rooms",

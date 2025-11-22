@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import {
@@ -16,7 +16,6 @@ import {
   Mail,
   Phone,
   CreditCard,
-  CheckCircle,
   XCircle,
   LogIn,
   LogOut,
@@ -27,12 +26,12 @@ import {
 import Link from 'next/link'
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-blue-100 text-blue-800',
-  CHECKED_IN: 'bg-green-100 text-green-800',
-  CHECKED_OUT: 'bg-gray-100 text-gray-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-  NO_SHOW: 'bg-orange-100 text-orange-800',
+  PENDING: 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-800 dark:text-yellow-400',
+  CONFIRMED: 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400',
+  CHECKED_IN: 'bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-400',
+  CHECKED_OUT: 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-400',
+  CANCELLED: 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-400',
+  NO_SHOW: 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-400',
 }
 
 export default function ReservationDetailPage() {
@@ -93,7 +92,7 @@ export default function ReservationDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     )
   }
@@ -101,11 +100,11 @@ export default function ReservationDetailPage() {
   if (!reservation) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Réservation introuvable</p>
+        <p className="text-slate-500 dark:text-slate-400">Réservation introuvable</p>
         <Link href={`${basePath}/reservations`}>
-          <Button variant="primary" className="mt-4">
+          <AdminButton variant="primary" className="mt-4">
             Retour aux réservations
-          </Button>
+          </AdminButton>
         </Link>
       </div>
     )
@@ -120,15 +119,13 @@ export default function ReservationDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href={`${basePath}/reservations`}>
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
+            <AdminButton variant="ghost" size="sm" icon={<ArrowLeft className="w-4 h-4" />} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               Réservation #{reservation.id.slice(-6).toUpperCase()}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-slate-500 dark:text-slate-400">
               {reservation.guestName} - Chambre {reservation.room?.roomNumber}
             </p>
           </div>
@@ -142,236 +139,226 @@ export default function ReservationDetailPage() {
         {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Guest Info */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-gray-400" />
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <User className="w-5 h-5 text-slate-400" />
               Informations client
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Nom</p>
-                <p className="font-medium">{reservation.guestName}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Nom</p>
+                <p className="font-medium text-slate-900 dark:text-white">{reservation.guestName}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
+                <p className="text-sm text-slate-500 dark:text-slate-400">Email</p>
+                <p className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-slate-400" />
                   {reservation.guestEmail}
                 </p>
               </div>
               {reservation.guestPhone && (
                 <div>
-                  <p className="text-sm text-gray-500">Téléphone</p>
-                  <p className="font-medium flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-gray-400" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Téléphone</p>
+                  <p className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-slate-400" />
                     {reservation.guestPhone}
                   </p>
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-500">Voyageurs</p>
-                <p className="font-medium">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Voyageurs</p>
+                <p className="font-medium text-slate-900 dark:text-white">
                   {reservation.adultCount} adulte{reservation.adultCount > 1 ? 's' : ''}
                   {reservation.childCount > 0 && `, ${reservation.childCount} enfant${reservation.childCount > 1 ? 's' : ''}`}
                 </p>
               </div>
             </div>
-          </Card>
+          </AdminCard>
 
           {/* Stay Info */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-gray-400" />
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-slate-400" />
               Détails du séjour
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Arrivée</p>
-                <p className="font-medium">{checkInDate.toLocaleDateString(locale)}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Arrivée</p>
+                <p className="font-medium text-slate-900 dark:text-white">{checkInDate.toLocaleDateString(locale as string)}</p>
                 {reservation.actualCheckIn && (
-                  <p className="text-xs text-green-600">
-                    Arrivé le {new Date(reservation.actualCheckIn).toLocaleDateString(locale)}
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                    Arrivé le {new Date(reservation.actualCheckIn).toLocaleDateString(locale as string)}
                   </p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-500">Départ</p>
-                <p className="font-medium">{checkOutDate.toLocaleDateString(locale)}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Départ</p>
+                <p className="font-medium text-slate-900 dark:text-white">{checkOutDate.toLocaleDateString(locale as string)}</p>
                 {reservation.actualCheckOut && (
-                  <p className="text-xs text-green-600">
-                    Parti le {new Date(reservation.actualCheckOut).toLocaleDateString(locale)}
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                    Parti le {new Date(reservation.actualCheckOut).toLocaleDateString(locale as string)}
                   </p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-500">Durée</p>
-                <p className="font-medium">{reservation.nights} nuit{reservation.nights > 1 ? 's' : ''}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Durée</p>
+                <p className="font-medium text-slate-900 dark:text-white">{reservation.nights} nuit{reservation.nights > 1 ? 's' : ''}</p>
               </div>
             </div>
 
             {/* Room */}
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Bed className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center">
+                  <Bed className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </div>
                 <div>
-                  <p className="font-medium">Chambre {reservation.room?.roomNumber}</p>
-                  <p className="text-sm text-gray-500">{reservation.room?.roomType?.name}</p>
+                  <p className="font-medium text-slate-900 dark:text-white">Chambre {reservation.room?.roomNumber}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{reservation.room?.roomType?.name}</p>
                 </div>
               </div>
             </div>
-          </Card>
+          </AdminCard>
 
           {/* Special Requests */}
           {reservation.specialRequests && (
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-gray-400" />
+            <AdminCard padding="lg">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-slate-400" />
                 Demandes spéciales
               </h2>
-              <p className="text-gray-600">{reservation.specialRequests}</p>
-            </Card>
+              <p className="text-slate-600 dark:text-slate-400">{reservation.specialRequests}</p>
+            </AdminCard>
           )}
 
           {/* Internal Notes */}
           {reservation.internalNotes && (
-            <Card className="p-6 border-orange-200 bg-orange-50">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Notes internes</h2>
-              <p className="text-gray-600">{reservation.internalNotes}</p>
-            </Card>
+            <AdminCard padding="lg" className="border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Notes internes</h2>
+              <p className="text-slate-600 dark:text-slate-400">{reservation.internalNotes}</p>
+            </AdminCard>
           )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Actions */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Actions</h2>
             <div className="space-y-3">
               {reservation.status === 'CONFIRMED' && (
-                <Button
+                <AdminButton
                   variant="primary"
                   className="w-full"
                   onClick={handleCheckIn}
                   disabled={isCheckingIn}
+                  icon={isCheckingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
                 >
-                  {isCheckingIn ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <LogIn className="w-4 h-4 mr-2" />
-                  )}
                   Enregistrer l'arrivée
-                </Button>
+                </AdminButton>
               )}
               {reservation.status === 'CHECKED_IN' && (
-                <Button
+                <AdminButton
                   variant="primary"
                   className="w-full"
                   onClick={handleCheckOut}
                   disabled={isCheckingOut}
+                  icon={isCheckingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
                 >
-                  {isCheckingOut ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <LogOut className="w-4 h-4 mr-2" />
-                  )}
                   Enregistrer le départ
-                </Button>
+                </AdminButton>
               )}
-              <Button variant="secondary" className="w-full">
-                <Edit className="w-4 h-4 mr-2" />
+              <AdminButton variant="secondary" className="w-full" icon={<Edit className="w-4 h-4" />}>
                 Modifier
-              </Button>
+              </AdminButton>
               {reservation.status !== 'CANCELLED' && reservation.status !== 'CHECKED_OUT' && (
-                <Button variant="secondary" className="w-full text-red-600 hover:bg-red-50">
-                  <XCircle className="w-4 h-4 mr-2" />
+                <AdminButton variant="secondary" className="w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10" icon={<XCircle className="w-4 h-4" />}>
                   Annuler
-                </Button>
+                </AdminButton>
               )}
             </div>
-          </Card>
+          </AdminCard>
 
           {/* Payment */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-gray-400" />
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-slate-400" />
               Paiement
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-500">Tarif/nuit</span>
-                <span className="font-medium">{reservation.roomRate}€</span>
+                <span className="text-slate-500 dark:text-slate-400">Tarif/nuit</span>
+                <span className="font-medium text-slate-900 dark:text-white">{reservation.roomRate}€</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">{reservation.nights} nuit{reservation.nights > 1 ? 's' : ''}</span>
-                <span className="font-medium">{(reservation.roomRate * reservation.nights).toFixed(2)}€</span>
+                <span className="text-slate-500 dark:text-slate-400">{reservation.nights} nuit{reservation.nights > 1 ? 's' : ''}</span>
+                <span className="font-medium text-slate-900 dark:text-white">{(reservation.roomRate * reservation.nights).toFixed(2)}€</span>
               </div>
-              <div className="border-t pt-3 flex justify-between">
-                <span className="font-semibold">Total</span>
-                <span className="font-bold text-lg">{reservation.totalAmount}€</span>
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between">
+                <span className="font-semibold text-slate-900 dark:text-white">Total</span>
+                <span className="font-bold text-lg text-slate-900 dark:text-white">{reservation.totalAmount}€</span>
               </div>
               {reservation.depositPaid > 0 && (
                 <>
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                     <span>Acompte reçu</span>
                     <span>-{reservation.depositPaid}€</span>
                   </div>
-                  <div className="flex justify-between font-semibold">
+                  <div className="flex justify-between font-semibold text-slate-900 dark:text-white">
                     <span>Reste à payer</span>
                     <span>{(reservation.totalAmount - reservation.depositPaid).toFixed(2)}€</span>
                   </div>
                 </>
               )}
             </div>
-          </Card>
+          </AdminCard>
 
           {/* Timeline */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-400" />
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-slate-400" />
               Historique
             </h2>
             <div className="space-y-4">
               <div className="flex gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Réservation créée</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(reservation.createdAt).toLocaleDateString(locale)}
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Réservation créée</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {new Date(reservation.createdAt).toLocaleDateString(locale as string)}
                   </p>
                 </div>
               </div>
               {reservation.actualCheckIn && (
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <LogIn className="w-4 h-4 text-green-600" />
+                  <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center">
+                    <LogIn className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Check-in effectué</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(reservation.actualCheckIn).toLocaleDateString(locale)}
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Check-in effectué</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {new Date(reservation.actualCheckIn).toLocaleDateString(locale as string)}
                     </p>
                   </div>
                 </div>
               )}
               {reservation.actualCheckOut && (
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <LogOut className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <LogOut className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Check-out effectué</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(reservation.actualCheckOut).toLocaleDateString(locale)}
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Check-out effectué</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {new Date(reservation.actualCheckOut).toLocaleDateString(locale as string)}
                     </p>
                   </div>
                 </div>
               )}
             </div>
-          </Card>
+          </AdminCard>
         </div>
       </div>
     </div>
