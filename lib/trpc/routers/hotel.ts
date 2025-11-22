@@ -128,9 +128,9 @@ export const hotelRouter = router({
   }),
 
   /**
-   * Get room type labels
+   * Get room type labels (enum-based)
    */
-  getRoomTypes: publicProcedure.query(() => {
+  getRoomTypeLabels: publicProcedure.query(() => {
     return Object.entries(ROOM_TYPE_LABELS).map(([value, label]) => ({
       value,
       label,
@@ -445,5 +445,294 @@ export const hotelRouter = router({
       })
 
       return { success: true }
+    }),
+
+  // ============ ROOM TYPES (Prisma) ============
+
+  /**
+   * Get all room types for a store
+   */
+  getStoreRoomTypes: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.roomType.findMany({
+        where: { storeId: input.storeId, isActive: true },
+        orderBy: { sortOrder: 'asc' },
+      })
+    }),
+
+  /**
+   * Create room type
+   */
+  createRoomType: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      name: z.string(),
+      basePrice: z.number(),
+      maxOccupancy: z.number().default(2),
+      maxAdults: z.number().default(2),
+      maxChildren: z.number().default(0),
+      bedConfiguration: z.string().optional(),
+      sizeSqm: z.number().optional(),
+      description: z.string().optional(),
+      images: z.array(z.string()).default([]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const slug = input.name.toLowerCase().replace(/\s+/g, '-')
+      return ctx.prisma.roomType.create({
+        data: {
+          storeId: input.storeId,
+          name: input.name,
+          slug,
+          description: input.description,
+          basePrice: input.basePrice,
+          maxOccupancy: input.maxOccupancy,
+          maxAdults: input.maxAdults,
+          maxChildren: input.maxChildren,
+          bedConfiguration: input.bedConfiguration,
+          sizeSqm: input.sizeSqm,
+          images: input.images,
+        },
+      })
+    }),
+
+  /**
+   * Update room type
+   */
+  updateRoomType: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomTypeId: z.string(),
+      name: z.string().optional(),
+      basePrice: z.number().optional(),
+      maxOccupancy: z.number().optional(),
+      maxAdults: z.number().optional(),
+      maxChildren: z.number().optional(),
+      bedConfiguration: z.string().optional(),
+      sizeSqm: z.number().optional(),
+      description: z.string().optional(),
+      images: z.array(z.string()).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { storeId, roomTypeId, ...data } = input
+      return ctx.prisma.roomType.update({
+        where: { id: roomTypeId },
+        data: {
+          ...data,
+          ...(data.name && { slug: data.name.toLowerCase().replace(/\s+/g, '-') }),
+        },
+      })
+    }),
+
+  /**
+   * Delete room type
+   */
+  deleteRoomType: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomTypeId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.prisma.roomType.delete({
+        where: { id: input.roomTypeId },
+      })
+    }),
+
+  // ============ HOTEL ROOMS (Prisma) ============
+
+  /**
+   * Get all hotel rooms with room type
+   */
+  getHotelRooms: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomTypeId: z.string().optional(),
+      status: z.string().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.hotelRoom.findMany({
+        where: {
+          storeId: input.storeId,
+          isActive: true,
+          ...(input.roomTypeId && { roomTypeId: input.roomTypeId }),
+          ...(input.status && { status: input.status as any }),
+        },
+        include: { roomType: true },
+        orderBy: { roomNumber: 'asc' },
+      })
+    }),
+
+  /**
+   * Get single hotel room
+   */
+  getHotelRoom: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomId: z.string(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.hotelRoom.findFirst({
+        where: {
+          id: input.roomId,
+          storeId: input.storeId,
+        },
+        include: { roomType: true },
+      })
+    }),
+
+  /**
+   * Create hotel room
+   */
+  createHotelRoom: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomTypeId: z.string(),
+      roomNumber: z.string(),
+      floor: z.number().optional(),
+      building: z.string().optional(),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.prisma.hotelRoom.create({
+        data: {
+          storeId: input.storeId,
+          roomTypeId: input.roomTypeId,
+          roomNumber: input.roomNumber,
+          floor: input.floor,
+          building: input.building,
+          notes: input.notes,
+        },
+        include: { roomType: true },
+      })
+    }),
+
+  /**
+   * Update hotel room
+   */
+  updateHotelRoom: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomId: z.string(),
+      roomNumber: z.string().optional(),
+      roomTypeId: z.string().optional(),
+      floor: z.number().optional(),
+      building: z.string().optional(),
+      status: z.enum(['AVAILABLE', 'OCCUPIED', 'CLEANING', 'MAINTENANCE', 'OUT_OF_ORDER']).optional(),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { storeId, roomId, ...data } = input
+      return ctx.prisma.hotelRoom.update({
+        where: { id: roomId },
+        data,
+        include: { roomType: true },
+      })
+    }),
+
+  /**
+   * Delete hotel room
+   */
+  deleteHotelRoom: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.prisma.hotelRoom.delete({
+        where: { id: input.roomId },
+      })
+    }),
+
+  // ============ AMENITIES (Prisma) ============
+
+  /**
+   * Get all amenities
+   */
+  getStoreAmenities: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      category: z.string().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.amenity.findMany({
+        where: {
+          storeId: input.storeId,
+          ...(input.category && { category: input.category as any }),
+        },
+        orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
+      })
+    }),
+
+  /**
+   * Create amenity
+   */
+  createAmenity: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      name: z.string(),
+      category: z.enum([
+        'GENERAL', 'BATHROOM', 'BEDROOM', 'OUTDOOR',
+        'WELLNESS', 'DINING', 'BUSINESS', 'FAMILY', 'ACCESSIBILITY'
+      ]).default('GENERAL'),
+      description: z.string().optional(),
+      icon: z.string().optional(),
+      isHighlighted: z.boolean().default(false),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const slug = input.name.toLowerCase().replace(/\s+/g, '-')
+      return ctx.prisma.amenity.create({
+        data: {
+          storeId: input.storeId,
+          name: input.name,
+          slug,
+          description: input.description,
+          icon: input.icon,
+          category: input.category,
+          isHighlighted: input.isHighlighted,
+        },
+      })
+    }),
+
+  /**
+   * Update amenity
+   */
+  updateAmenity: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      amenityId: z.string(),
+      name: z.string().optional(),
+      category: z.enum([
+        'GENERAL', 'BATHROOM', 'BEDROOM', 'OUTDOOR',
+        'WELLNESS', 'DINING', 'BUSINESS', 'FAMILY', 'ACCESSIBILITY'
+      ]).optional(),
+      description: z.string().optional(),
+      icon: z.string().optional(),
+      isHighlighted: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { storeId, amenityId, ...data } = input
+      return ctx.prisma.amenity.update({
+        where: { id: amenityId },
+        data: {
+          ...data,
+          ...(data.name && { slug: data.name.toLowerCase().replace(/\s+/g, '-') }),
+        },
+      })
+    }),
+
+  /**
+   * Delete amenity
+   */
+  deleteAmenity: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      amenityId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.prisma.amenity.delete({
+        where: { id: input.amenityId },
+      })
     }),
 })
