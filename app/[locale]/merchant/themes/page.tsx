@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
-import { Button } from '@/components/ui/Button'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { AdminBadge } from '@/components/admin/ui/AdminBadge'
 import {
   Palette,
   Check,
@@ -229,7 +231,7 @@ export default function MerchantThemesPage() {
   if (!storeId) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-500">{t('noStoreSelected')}</p>
+        <p className="text-slate-500 dark:text-slate-400">{t('noStoreSelected')}</p>
       </div>
     )
   }
@@ -239,13 +241,13 @@ export default function MerchantThemesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Thèmes</h1>
-          <p className="text-gray-500 mt-1">Personnalisez l'apparence de votre boutique</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Thèmes</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Personnalisez l'apparence de votre boutique</p>
         </div>
         <div className="flex gap-2">
           {themes?.length === 0 && (
-            <Button
-              variant="outline"
+            <AdminButton
+              variant="secondary"
               onClick={handleSeedThemes}
               disabled={seedThemes.isPending}
               className="gap-2"
@@ -256,36 +258,38 @@ export default function MerchantThemesPage() {
                 <RefreshCw className="w-4 h-4" />
               )}
               Charger les thèmes par défaut
-            </Button>
+            </AdminButton>
           )}
-          <Button variant="primary" onClick={handleCreateTheme} className="gap-2">
+          <AdminButton variant="primary" onClick={handleCreateTheme} className="gap-2">
             <Plus className="w-4 h-4" />
             Nouveau thème
-          </Button>
+          </AdminButton>
         </div>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
         </div>
       ) : themes?.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <Palette className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">Aucun thème</h3>
-          <p className="text-gray-500 mb-4">
+        <AdminCard padding="lg" className="text-center py-12">
+          <div className="w-16 h-16 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Palette className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+          </div>
+          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">Aucun thème</h3>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">
             Créez un thème ou chargez les thèmes par défaut
           </p>
-          <Button variant="primary" onClick={handleSeedThemes} className="gap-2">
+          <AdminButton variant="primary" onClick={handleSeedThemes} className="gap-2">
             <Palette className="w-4 h-4" />
             Charger les thèmes par défaut
-          </Button>
-        </div>
+          </AdminButton>
+        </AdminCard>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Theme List */}
           <div className="lg:col-span-1 space-y-3">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Vos thèmes
             </h3>
             <div className="space-y-2">
@@ -294,10 +298,10 @@ export default function MerchantThemesPage() {
                   key={theme.id}
                   onClick={() => setSelectedThemeId(theme.id)}
                   className={cn(
-                    'p-4 bg-white rounded-xl border cursor-pointer transition-all',
+                    'p-4 bg-white dark:bg-slate-800 rounded-xl border cursor-pointer transition-all',
                     selectedThemeId === theme.id
-                      ? 'border-indigo-500 ring-2 ring-indigo-500/20'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-violet-500 ring-2 ring-violet-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -309,17 +313,16 @@ export default function MerchantThemesPage() {
                         }}
                       />
                       <div>
-                        <p className="font-medium text-gray-900">{theme.name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="font-medium text-slate-900 dark:text-white">{theme.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           {theme.isSystem ? 'Système' : 'Personnalisé'}
                         </p>
                       </div>
                     </div>
                     {theme.isActive && (
-                      <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                        <Check className="w-3 h-3" />
+                      <AdminBadge variant="success" icon={Check} size="sm">
                         Actif
-                      </span>
+                      </AdminBadge>
                     )}
                   </div>
                 </div>
@@ -332,16 +335,16 @@ export default function MerchantThemesPage() {
             {selectedTheme && (
               <>
                 {/* Theme Actions */}
-                <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-4">
+                <AdminCard padding="sm" className="flex items-center justify-between p-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{selectedTheme.name}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{selectedTheme.name}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {selectedTheme.description || 'Aucune description'}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {!selectedTheme.isActive && (
-                      <Button
+                      <AdminButton
                         variant="primary"
                         size="sm"
                         onClick={() => handleActivate(selectedTheme.id)}
@@ -350,32 +353,32 @@ export default function MerchantThemesPage() {
                       >
                         <Check className="w-4 h-4" />
                         Activer
-                      </Button>
+                      </AdminButton>
                     )}
-                    <Button
-                      variant="outline"
+                    <AdminButton
+                      variant="secondary"
                       size="sm"
                       onClick={() => handleDuplicate(selectedTheme.id)}
                       className="gap-1"
                     >
                       <Copy className="w-4 h-4" />
-                    </Button>
+                    </AdminButton>
                     {!selectedTheme.isActive && !selectedTheme.isSystem && (
-                      <Button
-                        variant="outline"
+                      <AdminButton
+                        variant="secondary"
                         size="sm"
                         onClick={() => handleDelete(selectedTheme.id)}
-                        className="gap-1 text-red-600 hover:bg-red-50"
+                        className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-500/10"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </Button>
+                      </AdminButton>
                     )}
                   </div>
-                </div>
+                </AdminCard>
 
                 {/* Editor Tabs */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="flex border-b border-gray-200">
+                <AdminCard padding="none" className="overflow-hidden">
+                  <div className="flex border-b border-slate-200 dark:border-slate-700">
                     {[
                       { id: 'colors', label: 'Couleurs', icon: Palette },
                       { id: 'fonts', label: 'Polices', icon: Type },
@@ -386,8 +389,8 @@ export default function MerchantThemesPage() {
                         className={cn(
                           'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors',
                           activeTab === tab.id
-                            ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 bg-violet-50/50 dark:bg-violet-500/10'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
                         )}
                       >
                         <tab.icon className="w-4 h-4" />
@@ -401,7 +404,7 @@ export default function MerchantThemesPage() {
                       <div className="space-y-6">
                         {/* Quick Presets */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
                             Presets rapides
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -412,15 +415,15 @@ export default function MerchantThemesPage() {
                                   handleConfigChange('colors.primary', preset.primary)
                                   handleConfigChange('colors.secondary', preset.secondary)
                                 }}
-                                className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
                               >
                                 <div
-                                  className="w-5 h-5 rounded"
+                                  className="w-5 h-5 rounded-md"
                                   style={{
                                     background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})`,
                                   }}
                                 />
-                                <span className="text-sm text-gray-700">{preset.name}</span>
+                                <span className="text-sm text-slate-700 dark:text-slate-300">{preset.name}</span>
                               </button>
                             ))}
                           </div>
@@ -439,7 +442,7 @@ export default function MerchantThemesPage() {
                             { key: 'border', label: 'Bordure' },
                           ].map((color) => (
                             <div key={color.key}>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                 {color.label}
                               </label>
                               <div className="flex items-center gap-2">
@@ -449,7 +452,7 @@ export default function MerchantThemesPage() {
                                   onChange={(e) =>
                                     handleConfigChange(`colors.${color.key}`, e.target.value)
                                   }
-                                  className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                                  className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
                                 />
                                 <input
                                   type="text"
@@ -457,7 +460,7 @@ export default function MerchantThemesPage() {
                                   onChange={(e) =>
                                     handleConfigChange(`colors.${color.key}`, e.target.value)
                                   }
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+                                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                                 />
                               </div>
                             </div>
@@ -470,7 +473,7 @@ export default function MerchantThemesPage() {
                       <div className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                               Police des titres
                             </label>
                             <select
@@ -478,7 +481,7 @@ export default function MerchantThemesPage() {
                               onChange={(e) =>
                                 handleConfigChange('fonts.heading', e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                             >
                               {FONT_OPTIONS.map((font) => (
                                 <option key={font.value} value={font.value}>
@@ -488,13 +491,13 @@ export default function MerchantThemesPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                               Police du corps
                             </label>
                             <select
                               value={localConfig.fonts.body}
                               onChange={(e) => handleConfigChange('fonts.body', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
                             >
                               {FONT_OPTIONS.map((font) => (
                                 <option key={font.value} value={font.value}>
@@ -506,7 +509,7 @@ export default function MerchantThemesPage() {
                         </div>
 
                         {/* Font Preview */}
-                        <div className="p-6 bg-gray-50 rounded-xl">
+                        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                           <h4
                             className="text-2xl font-bold mb-2"
                             style={{ fontFamily: localConfig.fonts.heading }}
@@ -524,8 +527,8 @@ export default function MerchantThemesPage() {
 
                   {/* Save Button */}
                   {hasChanges && (
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      <Button
+                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+                      <AdminButton
                         variant="primary"
                         onClick={handleSave}
                         disabled={updateTheme.isPending}
@@ -537,21 +540,21 @@ export default function MerchantThemesPage() {
                           <Check className="w-4 h-4" />
                         )}
                         Enregistrer les modifications
-                      </Button>
+                      </AdminButton>
                     </div>
                   )}
-                </div>
+                </AdminCard>
 
                 {/* Live Preview */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                    <h3 className="font-medium text-gray-900 flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
+                <AdminCard padding="none" className="overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                    <h3 className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-violet-500" />
                       Aperçu en direct
                     </h3>
                     <button
                       onClick={() => setIsDarkPreview(!isDarkPreview)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-600 dark:text-slate-400"
                     >
                       {isDarkPreview ? (
                         <Sun className="w-4 h-4" />
@@ -611,7 +614,7 @@ export default function MerchantThemesPage() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </AdminCard>
               </>
             )}
           </div>

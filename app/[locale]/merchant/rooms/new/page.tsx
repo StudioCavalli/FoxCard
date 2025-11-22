@@ -1,184 +1,628 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { AdminCheckbox } from '@/components/admin/ui/AdminCheckbox'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
-import Link from 'next/link'
+import { ProductStatus, ProductType } from '@prisma/client'
+import {
+  ArrowLeft,
+  Save,
+  X,
+  Plus,
+  Loader2,
+  Bed,
+  Users,
+  Maximize,
+  Wifi,
+  Check,
+} from 'lucide-react'
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
+}
+
+interface Amenity {
+  id: string
+  name: string
+  category: string
+  isHighlighted: boolean
+}
 
 export default function NewRoomPage() {
-  const t = useTranslations('merchant.hotel.rooms')
-  const tTypes = useTranslations('merchant.hotel.roomTypes')
   const router = useRouter()
   const params = useParams()
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
   const { storeId } = useStoreContext()
+  const t = useTranslations('merchant.hotel.rooms')
 
   const [formData, setFormData] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    price: '',
+    compareAtPrice: '',
+    images: [] as string[],
+    thumbnail: '',
+    status: ProductStatus.DRAFT as ProductStatus,
+    featured: false,
+    categoryId: '', // Room Type
+    // Hotel-specific attributes
+    maxGuests: '2',
+    maxAdults: '2',
+    maxChildren: '0',
+    bedType: '',
+    bedCount: '1',
+    sizeSqm: '',
+    floorNumber: '',
     roomNumber: '',
-    roomTypeId: '',
-    floor: '',
-    building: '',
-    notes: '',
+    hasBalcony: false,
+    hasSeaView: false,
+    hasMountainView: false,
+    isSmoking: false,
+    isPetFriendly: false,
+    selectedAmenities: [] as string[],
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [imageInput, setImageInput] = useState('')
+  const [error, setError] = useState('')
+  const [amenities, setAmenities] = useState<Amenity[]>([])
 
-  // Get room types for dropdown
-  const { data: roomTypes } = trpc.hotel.getStoreRoomTypes?.useQuery(
+  // Fetch categories (room types)
+  const { data: categoriesData } = trpc.category.getAll.useQuery(
     { storeId: storeId! },
     { enabled: !!storeId }
   )
 
-  const createRoom = trpc.hotel.createHotelRoom?.useMutation({
+  // Fetch store commerce config for amenities
+  const { data: storeTypeData } = trpc.commerceType.getStoreType.useQuery(
+    { storeId: storeId! },
+    { enabled: !!storeId }
+  )
+
+  useEffect(() => {
+    if (storeTypeData?.storeConfig) {
+      const config = storeTypeData.storeConfig as any
+      setAmenities(config.amenities || [])
+    }
+  }, [storeTypeData])
+
+  const createProduct = trpc.product.create.useMutation({
     onSuccess: () => {
       router.push(`${basePath}/rooms`)
     },
+    onError: (err) => {
+      setError(err.message)
+    },
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!storeId || !formData.roomNumber || !formData.roomTypeId) return
+  const handleNameChange = (value: string) => {
+    setFormData({
+      ...formData,
+      name: value,
+      slug: slugify(value),
+    })
+  }
 
-    setIsSubmitting(true)
-    try {
-      await createRoom?.mutateAsync({
-        storeId,
-        roomNumber: formData.roomNumber,
-        roomTypeId: formData.roomTypeId,
-        floor: formData.floor ? parseInt(formData.floor) : undefined,
-        building: formData.building || undefined,
-        notes: formData.notes || undefined,
+  const handleAddImage = () => {
+    if (imageInput.trim() && !formData.images.includes(imageInput.trim())) {
+      setFormData({
+        ...formData,
+        images: [...formData.images, imageInput.trim()],
       })
-    } catch (error) {
-      console.error('Error creating room:', error)
-    } finally {
-      setIsSubmitting(false)
+      setImageInput('')
     }
   }
+
+  const handleRemoveImage = (image: string) => {
+    setFormData({
+      ...formData,
+      images: formData.images.filter(i => i !== image),
+    })
+  }
+
+  const toggleAmenity = (amenityId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedAmenities: prev.selectedAmenities.includes(amenityId)
+        ? prev.selectedAmenities.filter(id => id !== amenityId)
+        : [...prev.selectedAmenities, amenityId]
+    }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!storeId) return
+
+    setError('')
+    createProduct.mutate({
+      storeId,
+      name: formData.name,
+      slug: formData.slug,
+      description: formData.description || undefined,
+      price: parseFloat(formData.price) || 0,
+      compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
+      type: ProductType.SIMPLE,
+      trackInventory: false,
+      quantity: 1,
+      images: formData.images,
+      thumbnail: formData.thumbnail || undefined,
+      status: formData.status,
+      featured: formData.featured,
+      categoryId: formData.categoryId || undefined,
+      attributes: {
+        // Hotel-specific attributes
+        maxGuests: parseInt(formData.maxGuests) || 2,
+        maxAdults: parseInt(formData.maxAdults) || 2,
+        maxChildren: parseInt(formData.maxChildren) || 0,
+        bedType: formData.bedType || undefined,
+        bedCount: parseInt(formData.bedCount) || 1,
+        sizeSqm: formData.sizeSqm ? parseFloat(formData.sizeSqm) : undefined,
+        floorNumber: formData.floorNumber ? parseInt(formData.floorNumber) : undefined,
+        roomNumber: formData.roomNumber || undefined,
+        hasBalcony: formData.hasBalcony,
+        hasSeaView: formData.hasSeaView,
+        hasMountainView: formData.hasMountainView,
+        isSmoking: formData.isSmoking,
+        isPetFriendly: formData.isPetFriendly,
+        amenities: formData.selectedAmenities,
+      },
+    })
+  }
+
+  const bedTypes = [
+    { value: '', label: 'Sélectionner...' },
+    { value: 'single', label: 'Lit simple' },
+    { value: 'double', label: 'Lit double' },
+    { value: 'queen', label: 'Lit Queen' },
+    { value: 'king', label: 'Lit King' },
+    { value: 'twin', label: 'Lits jumeaux' },
+    { value: 'bunk', label: 'Lits superposés' },
+    { value: 'sofa', label: 'Canapé-lit' },
+  ]
+
+  // Group amenities by category
+  const groupedAmenities = amenities.reduce((acc: Record<string, Amenity[]>, amenity) => {
+    const cat = amenity.category
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(amenity)
+    return acc
+  }, {})
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href={`${basePath}/rooms`}>
-          <Button variant="ghost" size="sm">
+          <AdminButton variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4" />
-          </Button>
+          </AdminButton>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('create')}</h1>
-          <p className="text-gray-500 mt-1">Ajouter une nouvelle chambre</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('create')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Ajoutez une nouvelle chambre à votre établissement</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card className="p-6 space-y-6">
-          {/* Room Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('roomNumber')} *
-            </label>
-            <Input
-              value={formData.roomNumber}
-              onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
-              placeholder="101, 201A..."
-              required
-            />
-          </div>
+      {error && (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Basic Info */}
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Informations générales</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Nom de la chambre *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="Ex: Chambre Deluxe Vue Mer"
+                  required
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Slug (URL)
+                </label>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder="chambre-deluxe-vue-mer"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Décrivez cette chambre..."
+                  rows={4}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+            </div>
+          </AdminCard>
+
+          {/* Capacity & Beds */}
+          <AdminCard padding="lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-violet-500" />
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Capacité & Literie</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Capacité max
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={formData.maxGuests}
+                  onChange={(e) => setFormData({ ...formData, maxGuests: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Adultes max
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={formData.maxAdults}
+                  onChange={(e) => setFormData({ ...formData, maxAdults: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Enfants max
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={formData.maxChildren}
+                  onChange={(e) => setFormData({ ...formData, maxChildren: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Nombre de lits
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={formData.bedCount}
+                  onChange={(e) => setFormData({ ...formData, bedCount: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Type de lit
+                </label>
+                <select
+                  value={formData.bedType}
+                  onChange={(e) => setFormData({ ...formData, bedType: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                >
+                  {bedTypes.map((type) => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Surface (m²)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.sizeSqm}
+                    onChange={(e) => setFormData({ ...formData, sizeSqm: e.target.value })}
+                    placeholder="25"
+                    className="w-full px-4 py-2.5 pr-10 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                  <Maximize className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                </div>
+              </div>
+            </div>
+          </AdminCard>
+
+          {/* Room Details */}
+          <AdminCard padding="lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Bed className="w-5 h-5 text-violet-500" />
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Détails de la chambre</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Numéro de chambre
+                </label>
+                <input
+                  type="text"
+                  value={formData.roomNumber}
+                  onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
+                  placeholder="101"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Étage
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.floorNumber}
+                  onChange={(e) => setFormData({ ...formData, floorNumber: e.target.value })}
+                  placeholder="1"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <AdminCheckbox
+                checked={formData.hasBalcony}
+                onChange={(e) => setFormData({ ...formData, hasBalcony: e.target.checked })}
+                label="Balcon"
+              />
+              <AdminCheckbox
+                checked={formData.hasSeaView}
+                onChange={(e) => setFormData({ ...formData, hasSeaView: e.target.checked })}
+                label="Vue mer"
+              />
+              <AdminCheckbox
+                checked={formData.hasMountainView}
+                onChange={(e) => setFormData({ ...formData, hasMountainView: e.target.checked })}
+                label="Vue montagne"
+              />
+              <AdminCheckbox
+                checked={formData.isSmoking}
+                onChange={(e) => setFormData({ ...formData, isSmoking: e.target.checked })}
+                label="Fumeur"
+              />
+              <AdminCheckbox
+                checked={formData.isPetFriendly}
+                onChange={(e) => setFormData({ ...formData, isPetFriendly: e.target.checked })}
+                label="Animaux acceptés"
+              />
+            </div>
+          </AdminCard>
+
+          {/* Amenities */}
+          {amenities.length > 0 && (
+            <AdminCard padding="lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Wifi className="w-5 h-5 text-violet-500" />
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Équipements</h2>
+              </div>
+              <div className="space-y-4">
+                {Object.entries(groupedAmenities).map(([category, items]) => (
+                  <div key={category}>
+                    <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 capitalize">
+                      {category.toLowerCase()}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {items.map((amenity) => {
+                        const isSelected = formData.selectedAmenities.includes(amenity.id)
+                        return (
+                          <button
+                            key={amenity.id}
+                            type="button"
+                            onClick={() => toggleAmenity(amenity.id)}
+                            className={`
+                              inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                              ${isSelected
+                                ? 'bg-violet-500 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                              }
+                            `}
+                          >
+                            {isSelected && <Check className="w-3.5 h-3.5" />}
+                            {amenity.name}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AdminCard>
+          )}
+
+          {/* Media */}
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Photos</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Photo principale (URL)
+                </label>
+                <input
+                  type="text"
+                  value={formData.thumbnail}
+                  onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Galerie de photos
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={imageInput}
+                    onChange={(e) => setImageInput(e.target.value)}
+                    placeholder="URL de l'image"
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
+                    className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                  <AdminButton type="button" variant="secondary" onClick={handleAddImage}>
+                    <Plus className="w-4 h-4" />
+                  </AdminButton>
+                </div>
+                {formData.images.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {formData.images.map((image, idx) => (
+                      <div key={idx} className="relative group">
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden">
+                          <img src={image} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(image)}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </AdminCard>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Pricing */}
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tarification</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Prix par nuit *
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="0.00"
+                    required
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Prix barré (optionnel)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.compareAtPrice}
+                    onChange={(e) => setFormData({ ...formData, compareAtPrice: e.target.value })}
+                    placeholder="0.00"
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
+                </div>
+              </div>
+            </div>
+          </AdminCard>
+
+          {/* Status */}
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Statut</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Visibilité
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as ProductStatus })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                >
+                  <option value={ProductStatus.DRAFT}>Brouillon</option>
+                  <option value={ProductStatus.ACTIVE}>Active</option>
+                  <option value={ProductStatus.ARCHIVED}>Archivée</option>
+                </select>
+              </div>
+              <AdminCheckbox
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                label="Chambre mise en avant"
+              />
+            </div>
+          </AdminCard>
 
           {/* Room Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {tTypes('title')} *
-            </label>
+          <AdminCard padding="lg">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Type de chambre</h2>
             <select
-              value={formData.roomTypeId}
-              onChange={(e) => setFormData({ ...formData, roomTypeId: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white"
-              required
+              value={formData.categoryId}
+              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             >
-              <option value="">Sélectionner un type</option>
-              {roomTypes?.map((type: any) => (
-                <option key={type.id} value={type.id}>
-                  {type.name} - {type.basePrice}€/nuit
-                </option>
+              <option value="">Sans type</option>
+              {categoriesData?.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
-            {(!roomTypes || roomTypes.length === 0) && (
-              <p className="text-sm text-orange-600 mt-2">
-                <Link href={`${basePath}/room-types`} className="underline">
-                  Créez d'abord des types de chambres
-                </Link>
-              </p>
-            )}
-          </div>
-
-          {/* Floor */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('floor')}
-              </label>
-              <Input
-                type="number"
-                value={formData.floor}
-                onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
-                placeholder="1, 2, 3..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('building')}
-              </label>
-              <Input
-                value={formData.building}
-                onChange={(e) => setFormData({ ...formData, building: e.target.value })}
-                placeholder="Bâtiment A..."
-              />
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('notes')}
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg resize-none"
-              rows={3}
-              placeholder="Notes internes..."
-            />
-          </div>
+            <Link href={`${basePath}/room-types`} className="block mt-2">
+              <span className="text-sm text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300">
+                + Gérer les types de chambre
+              </span>
+            </Link>
+          </AdminCard>
 
           {/* Actions */}
-          <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href={`${basePath}/rooms`}>
-              <Button variant="secondary" type="button">
-                Annuler
-              </Button>
-            </Link>
-            <Button
-              variant="primary"
+          <AdminCard padding="lg">
+            <AdminButton
               type="submit"
-              disabled={isSubmitting || !formData.roomNumber || !formData.roomTypeId}
+              className="w-full"
+              disabled={createProduct.isPending}
+              icon={createProduct.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              Créer la chambre
-            </Button>
-          </div>
-        </Card>
+              {createProduct.isPending ? 'Création...' : 'Créer la chambre'}
+            </AdminButton>
+          </AdminCard>
+        </div>
       </form>
     </div>
   )

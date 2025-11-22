@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import {
@@ -120,14 +120,14 @@ export default function MerchantStorePage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 animate-pulse" />
+        <AdminCard padding="lg">
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded animate-pulse" />
+              <div key={i} className="h-12 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
             ))}
           </div>
-        </div>
+        </AdminCard>
       </div>
     )
   }
@@ -137,43 +137,43 @@ export default function MerchantStorePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ma boutique</h1>
-          <p className="text-gray-500 mt-1">Gérez les informations et le type de votre boutique</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Ma boutique</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Gérez les informations et le type de votre boutique</p>
         </div>
         {!isEditing ? (
-          <Button variant="primary" onClick={handleEdit}>
+          <AdminButton onClick={handleEdit}>
             Modifier les infos
-          </Button>
+          </AdminButton>
         ) : (
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
+            <AdminButton variant="secondary" onClick={() => setIsEditing(false)}>
               Annuler
-            </Button>
-            <Button variant="primary" onClick={handleSave} isLoading={updateStore.isPending}>
+            </AdminButton>
+            <AdminButton onClick={handleSave} disabled={updateStore.isPending}>
               <Save className="w-4 h-4 mr-2" />
-              Enregistrer
-            </Button>
+              {updateStore.isPending ? 'Enregistrement...' : 'Enregistrer'}
+            </AdminButton>
           </div>
         )}
       </div>
 
       {/* Commerce Type Card */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
+      <AdminCard className="overflow-hidden" padding="none">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Type de commerce</h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Type de commerce</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Définit les fonctionnalités et champs disponibles pour vos produits
               </p>
             </div>
-            <Button
-              variant="outline"
+            <AdminButton
+              variant="secondary"
               size="sm"
               onClick={() => setShowTypeSelector(!showTypeSelector)}
             >
               {showTypeSelector ? 'Fermer' : 'Changer le type'}
-            </Button>
+            </AdminButton>
           </div>
         </div>
 
@@ -181,65 +181,65 @@ export default function MerchantStorePage() {
         {currentConfig && !showTypeSelector && (
           <div className="p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
                 {(() => {
                   const Icon = iconMap[selectedType!]
-                  return <Icon className="w-6 h-6 text-indigo-600" />
+                  return <Icon className="w-6 h-6 text-violet-600 dark:text-violet-400" />
                 })()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-900">{currentConfig.name}</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">{currentConfig.name}</h3>
                   <span className="text-xl">{currentConfig.emoji}</span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{currentConfig.description}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{currentConfig.description}</p>
 
                 {/* Features */}
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
                   {currentConfig.features.hasPhysicalProducts && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Produits physiques</span>
                     </div>
                   )}
                   {currentConfig.features.hasDigitalProducts && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Produits digitaux</span>
                     </div>
                   )}
                   {currentConfig.features.hasBookings && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Réservations</span>
                     </div>
                   )}
                   {currentConfig.features.hasSubscriptions && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Abonnements</span>
                     </div>
                   )}
                   {currentConfig.features.requiresShipping && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Livraison</span>
                     </div>
                   )}
                   {currentConfig.features.hasVariants && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Variantes produit</span>
                     </div>
                   )}
                   {currentConfig.features.hasTimeslots && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Créneaux horaires</span>
                     </div>
                   )}
                   {currentConfig.features.requiresAgeVerification && (
-                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                    <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                       <AlertTriangle className="w-4 h-4" />
                       <span>Vérification âge ({currentConfig.minAge}+)</span>
                     </div>
@@ -247,23 +247,23 @@ export default function MerchantStorePage() {
                 </div>
 
                 {/* Default Categories */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Catégories par défaut</span>
-                    <Button
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Catégories par défaut</span>
+                    <AdminButton
                       variant="ghost"
                       size="sm"
                       onClick={handleCreateCategories}
-                      isLoading={createDefaultCategories.isPending}
+                      disabled={createDefaultCategories.isPending}
                     >
-                      Créer les catégories
-                    </Button>
+                      {createDefaultCategories.isPending ? 'Création...' : 'Créer les catégories'}
+                    </AdminButton>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {currentConfig.defaultCategories.map((cat) => (
                       <span
                         key={cat}
-                        className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                        className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg"
                       >
                         {cat}
                       </span>
@@ -273,12 +273,12 @@ export default function MerchantStorePage() {
 
                 {/* Regulations */}
                 {currentConfig.regulations && currentConfig.regulations.length > 0 && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl">
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-amber-800">Réglementations obligatoires</p>
-                        <ul className="mt-1 text-sm text-amber-700 space-y-1">
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-400">Réglementations obligatoires</p>
+                        <ul className="mt-1 text-sm text-amber-700 dark:text-amber-300 space-y-1">
                           {currentConfig.regulations.map((reg, i) => (
                             <li key={i}>&bull; {reg}</li>
                           ))}
@@ -306,25 +306,27 @@ export default function MerchantStorePage() {
                     disabled={updateCommerceType.isPending}
                     className={`p-4 rounded-xl border-2 text-left transition-all ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        isSelected ? 'bg-indigo-100' : 'bg-gray-100'
+                        isSelected
+                          ? 'bg-violet-100 dark:bg-violet-500/20'
+                          : 'bg-slate-100 dark:bg-slate-700'
                       }`}>
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-indigo-600' : 'text-gray-500'}`} />
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-violet-600 dark:text-violet-400' : 'text-slate-500 dark:text-slate-400'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>
+                          <span className={`font-medium ${isSelected ? 'text-violet-900 dark:text-violet-100' : 'text-slate-900 dark:text-white'}`}>
                             {config.name}
                           </span>
                           <span>{config.emoji}</span>
-                          {isSelected && <Check className="w-4 h-4 text-indigo-500" />}
+                          {isSelected && <Check className="w-4 h-4 text-violet-500" />}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5 truncate">{config.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{config.description}</p>
                       </div>
                     </div>
                   </button>
@@ -333,21 +335,21 @@ export default function MerchantStorePage() {
             </div>
           </div>
         )}
-      </div>
+      </AdminCard>
 
       {/* Store Info Card */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <AdminCard className="overflow-hidden" padding="none">
         {/* Banner */}
-        <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
+        <div className="h-32 bg-gradient-to-r from-violet-500 to-purple-600 relative">
           {store?.bannerImage && (
             <img src={store.bannerImage} alt="" className="w-full h-full object-cover" />
           )}
           <div className="absolute -bottom-10 left-6">
-            <div className="w-20 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-white dark:border-slate-800">
               {store?.logo ? (
                 <img src={store.logo} alt="" className="w-full h-full object-cover" />
               ) : (
-                <Store className="w-8 h-8 text-gray-400" />
+                <Store className="w-8 h-8 text-slate-400" />
               )}
             </div>
           </div>
@@ -357,72 +359,95 @@ export default function MerchantStorePage() {
         <div className="pt-14 p-6">
           {isEditing ? (
             <div className="space-y-4">
-              <Input
-                label="Nom de la boutique"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-              <Input
-                label="Slogan"
-                value={formData.tagline}
-                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                placeholder="Une phrase accrocheuse pour votre boutique"
-              />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Nom de la boutique
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Slogan
+                </label>
+                <input
+                  type="text"
+                  value={formData.tagline}
+                  onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                  placeholder="Une phrase accrocheuse pour votre boutique"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   Description
                 </label>
                 <textarea
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20 outline-none transition-all resize-none"
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Décrivez votre boutique..."
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Email de contact"
-                  type="email"
-                  value={formData.publicEmail}
-                  onChange={(e) => setFormData({ ...formData, publicEmail: e.target.value })}
-                  placeholder="contact@maboutique.com"
-                />
-                <Input
-                  label="Téléphone"
-                  value={formData.publicPhone}
-                  onChange={(e) => setFormData({ ...formData, publicPhone: e.target.value })}
-                  placeholder="+33 1 23 45 67 89"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Email de contact
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.publicEmail}
+                    onChange={(e) => setFormData({ ...formData, publicEmail: e.target.value })}
+                    placeholder="contact@maboutique.com"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Téléphone
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.publicPhone}
+                    onChange={(e) => setFormData({ ...formData, publicPhone: e.target.value })}
+                    placeholder="+33 1 23 45 67 89"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  />
+                </div>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{store?.name}</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{store?.name}</h2>
                 {store?.tagline && (
-                  <p className="text-gray-600 mt-1">{store.tagline}</p>
+                  <p className="text-slate-600 dark:text-slate-400 mt-1">{store.tagline}</p>
                 )}
               </div>
 
               {store?.description && (
-                <p className="text-gray-600">{store.description}</p>
+                <p className="text-slate-600 dark:text-slate-400">{store.description}</p>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Globe className="w-5 h-5 text-gray-400" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <Globe className="w-5 h-5 text-slate-400" />
                   <span className="text-sm">{store?.slug}.foxcard.io</span>
                 </div>
                 {store?.publicEmail && (
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Mail className="w-5 h-5 text-gray-400" />
+                  <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                    <Mail className="w-5 h-5 text-slate-400" />
                     <span className="text-sm">{store.publicEmail}</span>
                   </div>
                 )}
                 {store?.publicPhone && (
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Phone className="w-5 h-5 text-gray-400" />
+                  <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                    <Phone className="w-5 h-5 text-slate-400" />
                     <span className="text-sm">{store.publicPhone}</span>
                   </div>
                 )}
@@ -430,28 +455,28 @@ export default function MerchantStorePage() {
             </div>
           )}
         </div>
-      </div>
+      </AdminCard>
 
       {/* Checkout Steps Preview */}
       {currentConfig && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Étapes du checkout</h2>
-          <p className="text-sm text-gray-500 mb-4">
+        <AdminCard padding="lg">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Étapes du checkout</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             Les étapes de paiement sont automatiquement adaptées selon votre type de commerce
           </p>
           <div className="flex items-center gap-2 flex-wrap">
             {currentConfig.checkoutSteps.map((step, i) => (
               <div key={step} className="flex items-center gap-2">
-                <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg capitalize">
+                <span className="px-3 py-1.5 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium rounded-lg capitalize">
                   {step.replace(/-/g, ' ')}
                 </span>
                 {i < currentConfig.checkoutSteps.length - 1 && (
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </AdminCard>
       )}
     </div>
   )

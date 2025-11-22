@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { trpc } from '@/lib/trpc/client'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/Label'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { CommerceType } from '@/lib/commerce-types'
 import {
   getVariantConfigForCommerceType,
@@ -98,21 +96,21 @@ function VariantOptionSelector({
         </div>
         {config.allowCustom && (
           <div className="flex gap-2">
-            <Input
+            <input
               type="color"
               value={customValue || '#000000'}
               onChange={(e) => setCustomValue(e.target.value)}
-              className="w-12 h-8 p-0 cursor-pointer"
+              className="w-12 h-8 p-0 cursor-pointer rounded-lg"
             />
-            <Input
+            <input
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
               placeholder="Couleur personnalisée (#hex)"
-              className="flex-1"
+              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             />
-            <Button type="button" variant="outline" size="sm" onClick={addCustomValue}>
+            <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
               <Plus className="w-4 h-4" />
-            </Button>
+            </AdminButton>
           </div>
         )}
       </div>
@@ -140,15 +138,15 @@ function VariantOptionSelector({
         </div>
         {config.allowCustom && (
           <div className="flex gap-2">
-            <Input
+            <input
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
               placeholder="Taille personnalisée (ex: 48, 3XL...)"
-              className="flex-1"
+              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
             />
-            <Button type="button" variant="outline" size="sm" onClick={addCustomValue}>
+            <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
               <Plus className="w-4 h-4" />
-            </Button>
+            </AdminButton>
           </div>
         )}
       </div>
@@ -182,15 +180,15 @@ function VariantOptionSelector({
       </div>
       {config.allowCustom && (
         <div className="flex gap-2">
-          <Input
+          <input
             value={customValue}
             onChange={(e) => setCustomValue(e.target.value)}
             placeholder="Valeur personnalisée"
-            className="flex-1"
+            className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
           />
-          <Button type="button" variant="outline" size="sm" onClick={addCustomValue}>
+          <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
             <Plus className="w-4 h-4" />
-          </Button>
+          </AdminButton>
         </div>
       )}
     </div>
@@ -300,14 +298,14 @@ export function VariantsManager({
           {/* Variant Type Selectors */}
           {variantConfig.variantTypes.map((typeConfig) => (
             <div key={typeConfig.type} className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <label className="flex items-center gap-2">
                 {typeConfig.inputType === 'color' && <Palette className="w-4 h-4" />}
                 {typeConfig.inputType === 'size' && <Ruler className="w-4 h-4" />}
                 {typeConfig.inputType === 'select' && <Package className="w-4 h-4" />}
                 {typeConfig.inputType === 'custom' && <Settings className="w-4 h-4" />}
                 {typeConfig.name}
                 {typeConfig.required && <span className="text-red-500">*</span>}
-              </Label>
+              </label>
               <VariantOptionSelector
                 config={typeConfig}
                 selectedValues={selectedOptions[typeConfig.type] || []}
@@ -333,7 +331,7 @@ export function VariantsManager({
                   </div>
                 )}
               </div>
-              <Button
+              <AdminButton
                 type="button"
                 variant="primary"
                 onClick={generateVariants}
@@ -350,7 +348,7 @@ export function VariantsManager({
                     Générer les variantes
                   </>
                 )}
-              </Button>
+              </AdminButton>
             </div>
           )}
 
@@ -390,42 +388,42 @@ export function VariantsManager({
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Input
+                          <input
                             value={variant.sku || ''}
                             onChange={(e) => updateVariant(index, { sku: e.target.value })}
                             placeholder="SKU"
-                            className="w-32 h-8 text-sm"
+                            className="w-32 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                           />
                         </td>
                         <td className="px-4 py-3">
                           <div className="relative w-24">
-                            <Input
+                            <input
                               type="number"
                               step="0.01"
                               value={variant.price ?? basePrice}
                               onChange={(e) =>
                                 updateVariant(index, { price: parseFloat(e.target.value) || 0 })
                               }
-                              className="h-8 text-sm pr-6"
+                              className="w-full h-8 px-3 pr-6 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                             />
-                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm">
                               €
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <Input
+                          <input
                             type="number"
                             min="0"
                             value={variant.quantity}
                             onChange={(e) =>
                               updateVariant(index, { quantity: parseInt(e.target.value) || 0 })
                             }
-                            className="w-20 h-8 text-sm"
+                            className="w-20 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                           />
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Button
+                          <AdminButton
                             type="button"
                             variant="ghost"
                             size="sm"
@@ -433,7 +431,7 @@ export function VariantsManager({
                             className="text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </Button>
+                          </AdminButton>
                         </td>
                       </tr>
                     ))}
@@ -448,7 +446,7 @@ export function VariantsManager({
                     {variants.reduce((sum, v) => sum + v.quantity, 0)}
                   </span>
                 </span>
-                <Button
+                <AdminButton
                   type="button"
                   variant="ghost"
                   size="sm"
@@ -460,7 +458,7 @@ export function VariantsManager({
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
                   Supprimer toutes les variantes
-                </Button>
+                </AdminButton>
               </div>
             </div>
           )}

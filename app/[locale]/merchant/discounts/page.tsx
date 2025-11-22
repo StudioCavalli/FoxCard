@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import {
@@ -149,49 +149,48 @@ export default function MerchantDiscountsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Codes promo</h1>
-          <p className="text-gray-500 mt-1">Gérez vos promotions et codes de réduction</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Codes promo</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Gérez vos promotions et codes de réduction</p>
         </div>
-        <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
+        <AdminButton onClick={() => { resetForm(); setShowModal(true); }} icon={<Plus className="w-4 h-4" />}>
           Nouveau code
-        </Button>
+        </AdminButton>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <Tag className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-indigo-500/20 dark:from-violet-500/30 dark:to-indigo-500/30 rounded-lg flex items-center justify-center">
+              <Tag className="w-5 h-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total codes</p>
-              <p className="text-xl font-bold text-gray-900">{discounts?.length || 0}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total codes</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-white">{discounts?.length || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <Check className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-green-500/20 dark:from-emerald-500/30 dark:to-green-500/30 rounded-lg flex items-center justify-center">
+              <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Codes actifs</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Codes actifs</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-white">
                 {discounts?.filter(d => d.isActive && !isExpired(d.expiresAt)).length || 0}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-violet-500/20 dark:from-purple-500/30 dark:to-violet-500/30 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Utilisations totales</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Utilisations totales</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-white">
                 {discounts?.reduce((sum, d) => sum + d.usageCount, 0) || 0}
               </p>
             </div>
@@ -200,80 +199,82 @@ export default function MerchantDiscountsPage() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <Input
-          type="text"
-          placeholder="Rechercher un code..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      <AdminCard padding="md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Rechercher un code..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          />
+        </div>
+      </AdminCard>
 
       {/* Discounts List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
         </div>
       ) : filteredDiscounts && filteredDiscounts.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Code</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Réduction</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Utilisations</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Validité</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Statut</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
+                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Code</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Réduction</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Utilisations</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Validité</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Statut</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {filteredDiscounts.map((discount) => (
-                  <tr key={discount.id} className="hover:bg-gray-50">
+                  <tr key={discount.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
-                        <code className="px-2 py-1 bg-gray-100 rounded text-sm font-mono font-medium">
+                        <code className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm font-mono font-medium">
                           {discount.code}
                         </code>
                         <button
                           onClick={() => copyCode(discount.code, discount.id)}
-                          className="p-1 hover:bg-gray-200 rounded"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded"
                         >
                           {copiedId === discount.id ? (
                             <Check className="w-4 h-4 text-green-600" />
                           ) : (
-                            <Copy className="w-4 h-4 text-gray-400" />
+                            <Copy className="w-4 h-4 text-slate-400" />
                           )}
                         </button>
                       </div>
                       {discount.description && (
-                        <p className="text-sm text-gray-500 mt-1">{discount.description}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{discount.description}</p>
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-slate-900 dark:text-white">
                         {discount.type === 'PERCENTAGE'
                           ? `${discount.value}%`
                           : `${discount.value} €`}
                       </span>
                       {discount.minOrderAmount && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           Min. {discount.minOrderAmount} €
                         </p>
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-gray-900">{discount.usageCount}</span>
+                      <span className="text-slate-900 dark:text-white">{discount.usageCount}</span>
                       {discount.usageLimit && (
-                        <span className="text-gray-400"> / {discount.usageLimit}</span>
+                        <span className="text-slate-400"> / {discount.usageLimit}</span>
                       )}
                     </td>
                     <td className="px-4 py-4 text-sm">
                       {discount.startsAt || discount.expiresAt ? (
-                        <div className="flex items-center gap-1 text-gray-500">
+                        <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                           <Calendar className="w-4 h-4" />
                           <span>
                             {discount.startsAt && new Date(discount.startsAt).toLocaleDateString('fr-FR')}
@@ -282,24 +283,24 @@ export default function MerchantDiscountsPage() {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-gray-400">Illimité</span>
+                        <span className="text-slate-400">Illimité</span>
                       )}
                     </td>
                     <td className="px-4 py-4">
                       {!discount.isActive ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
                           Inactif
                         </span>
                       ) : isExpired(discount.expiresAt) ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400">
                           Expiré
                         </span>
                       ) : isUpcoming(discount.startsAt) ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
                           À venir
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400">
                           Actif
                         </span>
                       )}
@@ -308,15 +309,15 @@ export default function MerchantDiscountsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(discount)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                         >
-                          <Edit className="w-4 h-4 text-gray-500" />
+                          <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                         </button>
                         <button
                           onClick={() => handleDelete(discount.id)}
-                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400" />
                         </button>
                       </div>
                     </td>
@@ -327,78 +328,78 @@ export default function MerchantDiscountsPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <Percent className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">Aucun code promo</h3>
-          <p className="text-gray-500 mb-4">Créez votre premier code de réduction</p>
-          <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }}>
-            <Plus className="w-4 h-4 mr-2" />
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
+          <Percent className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">Aucun code promo</h3>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">Créez votre premier code de réduction</p>
+          <AdminButton onClick={() => { resetForm(); setShowModal(true); }} icon={<Plus className="w-4 h-4" />}>
             Créer un code
-          </Button>
+          </AdminButton>
         </div>
       )}
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {editingDiscount ? 'Modifier le code' : 'Nouveau code promo'}
               </h2>
               <button
                 onClick={() => { resetForm(); setShowModal(false); }}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-slate-100 dark:bg-slate-700 rounded-lg"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Code *
                 </label>
-                <Input
+                <input
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                   placeholder="ex: PROMO20"
                   required
-                  className="uppercase"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Description
                 </label>
-                <Input
+                <input
                   type="text"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="ex: 20% de réduction pour les nouveaux clients"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Type *
                   </label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value as 'PERCENTAGE' | 'FIXED' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   >
                     <option value="PERCENTAGE">Pourcentage (%)</option>
                     <option value="FIXED">Montant fixe (€)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Valeur *
                   </label>
-                  <Input
+                  <input
                     type="number"
                     value={formData.value}
                     onChange={(e) => setFormData({ ...formData, value: e.target.value })}
@@ -406,97 +407,96 @@ export default function MerchantDiscountsPage() {
                     min="0"
                     step={formData.type === 'PERCENTAGE' ? '1' : '0.01'}
                     required
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Limite d'utilisation
                   </label>
-                  <Input
+                  <input
                     type="number"
                     value={formData.usageLimit}
                     onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
                     placeholder="Illimité"
                     min="1"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Montant minimum
                   </label>
-                  <Input
+                  <input
                     type="number"
                     value={formData.minOrderAmount}
                     onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
                     placeholder="Aucun"
                     min="0"
                     step="0.01"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Date de début
                   </label>
-                  <Input
+                  <input
                     type="date"
                     value={formData.startsAt}
                     onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Date d'expiration
                   </label>
-                  <Input
+                  <input
                     type="date"
                     value={formData.expiresAt}
                     onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   />
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer">
+              <label className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-5 h-5 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                  className="w-5 h-5 rounded text-violet-600 border-slate-300 dark:border-slate-600 focus:ring-violet-500"
                 />
                 <div>
-                  <p className="font-medium text-gray-900">Code actif</p>
-                  <p className="text-sm text-gray-500">Les clients peuvent utiliser ce code</p>
+                  <p className="font-medium text-slate-900 dark:text-white">Code actif</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Les clients peuvent utiliser ce code</p>
                 </div>
               </label>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <Button
+              <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <AdminButton
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => { resetForm(); setShowModal(false); }}
                   className="flex-1"
                 >
                   Annuler
-                </Button>
-                <Button
+                </AdminButton>
+                <AdminButton
                   type="submit"
-                  variant="primary"
                   disabled={createDiscount.isPending || updateDiscount.isPending}
                   className="flex-1"
+                  icon={(createDiscount.isPending || updateDiscount.isPending) ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
                 >
-                  {(createDiscount.isPending || updateDiscount.isPending) ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : editingDiscount ? (
-                    'Mettre à jour'
-                  ) : (
-                    'Créer le code'
-                  )}
-                </Button>
+                  {(createDiscount.isPending || updateDiscount.isPending) ? '' : editingDiscount ? 'Mettre à jour' : 'Créer le code'}
+                </AdminButton>
               </div>
             </form>
           </div>

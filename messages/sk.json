@@ -894,6 +894,19 @@
       "pendingOrders": "Čakajúce objednávky",
       "vsLastMonth": "vs minulý mesiac"
     },
+    "header": {
+      "myStore": "Môj obchod",
+      "search": "Hľadať produkty, objednávky...",
+      "viewStore": "Zobraziť obchod",
+      "notifications": "Notifikácie",
+      "noNotifications": "Žiadne nové notifikácie",
+      "viewAllNotifications": "Zobraziť všetky notifikácie",
+      "merchant": "Obchodník",
+      "myAccount": "Môj účet",
+      "settings": "Nastavenia",
+      "help": "Pomoc",
+      "logout": "Odhlásiť sa"
+    },
     "hotel": {
       "rooms": {
         "title": "Rooms",

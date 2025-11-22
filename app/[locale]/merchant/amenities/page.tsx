@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { AdminCard } from '@/components/admin/ui/AdminCard'
+import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import {
@@ -49,12 +48,22 @@ const categories = [
   'ACCESSIBILITY',
 ]
 
+interface Amenity {
+  id: string
+  name: string
+  category: string
+  description?: string
+  icon?: string
+  isHighlighted: boolean
+}
+
 export default function AmenitiesPage() {
   const t = useTranslations('merchant.hotel.amenities')
   const { storeId } = useStoreContext()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [amenities, setAmenities] = useState<Amenity[]>([])
   const [formData, setFormData] = useState({
     name: '',
     category: 'GENERAL',
@@ -63,30 +72,38 @@ export default function AmenitiesPage() {
     isHighlighted: false,
   })
 
-  const { data: amenities, isLoading, refetch } = trpc.hotel.getStoreAmenities?.useQuery(
+  // Fetch store commerceConfig which contains amenities
+  const { data: storeTypeData, isLoading, refetch } = trpc.commerceType.getStoreType.useQuery(
     { storeId: storeId! },
     { enabled: !!storeId }
   )
 
-  const createAmenity = trpc.hotel.createAmenity?.useMutation({
-    onSuccess: () => {
-      refetch()
-      setIsCreating(false)
-      resetForm()
-    },
-  })
-
-  const updateAmenity = trpc.hotel.updateAmenity?.useMutation({
-    onSuccess: () => {
-      refetch()
-      setEditingId(null)
-      resetForm()
-    },
-  })
-
-  const deleteAmenity = trpc.hotel.deleteAmenity?.useMutation({
+  const updateStoreType = trpc.commerceType.updateStoreType.useMutation({
     onSuccess: () => refetch(),
   })
+
+  // Extract amenities from commerceConfig
+  useEffect(() => {
+    if (storeTypeData?.storeConfig) {
+      const config = storeTypeData.storeConfig as any
+      setAmenities(config.amenities || [])
+    }
+  }, [storeTypeData])
+
+  const saveAmenities = async (newAmenities: Amenity[]) => {
+    if (!storeId || !storeTypeData) return
+
+    const currentConfig = (storeTypeData.storeConfig as any) || {}
+    await updateStoreType.mutateAsync({
+      storeId,
+      commerceType: storeTypeData.type as any,
+      commerceConfig: {
+        ...currentConfig,
+        amenities: newAmenities,
+      },
+    })
+    setAmenities(newAmenities)
+  }
 
   const resetForm = () => {
     setFormData({
@@ -102,23 +119,35 @@ export default function AmenitiesPage() {
     e.preventDefault()
     if (!storeId || !formData.name) return
 
-    const data = {
-      storeId,
+    const newAmenity: Amenity = {
+      id: editingId || crypto.randomUUID(),
       name: formData.name,
-      category: formData.category as 'GENERAL' | 'BATHROOM' | 'BEDROOM' | 'OUTDOOR' | 'WELLNESS' | 'DINING' | 'BUSINESS' | 'FAMILY' | 'ACCESSIBILITY',
+      category: formData.category,
       description: formData.description || undefined,
       icon: formData.icon || undefined,
       isHighlighted: formData.isHighlighted,
     }
 
+    let newAmenities: Amenity[]
     if (editingId) {
-      await updateAmenity?.mutateAsync({ ...data, amenityId: editingId })
+      newAmenities = amenities.map(a => a.id === editingId ? newAmenity : a)
     } else {
-      await createAmenity?.mutateAsync(data)
+      newAmenities = [...amenities, newAmenity]
     }
+
+    await saveAmenities(newAmenities)
+    setIsCreating(false)
+    setEditingId(null)
+    resetForm()
   }
 
-  const startEdit = (amenity: any) => {
+  const handleDelete = async (amenityId: string) => {
+    if (!confirm('Supprimer ?')) return
+    const newAmenities = amenities.filter(a => a.id !== amenityId)
+    await saveAmenities(newAmenities)
+  }
+
+  const startEdit = (amenity: Amenity) => {
     setEditingId(amenity.id)
     setIsCreating(false)
     setFormData({
@@ -130,12 +159,12 @@ export default function AmenitiesPage() {
     })
   }
 
-  const filteredAmenities = amenities?.filter((a: any) =>
+  const filteredAmenities = amenities.filter(a =>
     selectedCategory === 'all' || a.category === selectedCategory
-  ) || []
+  )
 
   // Group by category
-  const groupedAmenities = filteredAmenities.reduce((acc: any, amenity: any) => {
+  const groupedAmenities = filteredAmenities.reduce((acc: Record<string, Amenity[]>, amenity) => {
     const cat = amenity.category
     if (!acc[cat]) acc[cat] = []
     acc[cat].push(amenity)
@@ -147,51 +176,52 @@ export default function AmenitiesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-gray-500 mt-1">Gérez les équipements de votre établissement</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Gérez les équipements de votre établissement</p>
         </div>
         {!isCreating && !editingId && (
-          <Button variant="primary" onClick={() => setIsCreating(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+          <AdminButton icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreating(true)}>
             {t('create')}
-          </Button>
+          </AdminButton>
         )}
       </div>
 
       {/* Category Filter */}
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={selectedCategory === 'all' ? 'primary' : 'secondary'}
-          size="sm"
-          onClick={() => setSelectedCategory('all')}
-        >
-          Tous
-        </Button>
-        {categories.map((cat) => {
-          const Icon = categoryIcons[cat] || Wifi
-          return (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setSelectedCategory(cat)}
-            >
-              <Icon className="w-4 h-4 mr-1" />
-              {t(`categories.${cat.toLowerCase()}`)}
-            </Button>
-          )
-        })}
-      </div>
+      <AdminCard padding="md">
+        <div className="flex flex-wrap gap-2">
+          <AdminButton
+            variant={selectedCategory === 'all' ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => setSelectedCategory('all')}
+          >
+            Tous
+          </AdminButton>
+          {categories.map((cat) => {
+            const Icon = categoryIcons[cat] || Wifi
+            return (
+              <AdminButton
+                key={cat}
+                variant={selectedCategory === cat ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+              >
+                <Icon className="w-4 h-4 mr-1" />
+                {t(`categories.${cat.toLowerCase()}`)}
+              </AdminButton>
+            )
+          })}
+        </div>
+      </AdminCard>
 
       {/* Create/Edit Form */}
       {(isCreating || editingId) && (
-        <Card className="p-6">
+        <AdminCard padding="lg">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-slate-900 dark:text-white">
                 {editingId ? 'Modifier l\'équipement' : t('create')}
               </h3>
-              <Button
+              <AdminButton
                 variant="ghost"
                 size="sm"
                 type="button"
@@ -202,30 +232,32 @@ export default function AmenitiesPage() {
                 }}
               >
                 <X className="w-4 h-4" />
-              </Button>
+              </AdminButton>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Nom *
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="WiFi, Piscine, Spa..."
                   required
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Catégorie
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
@@ -236,13 +268,15 @@ export default function AmenitiesPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Description
                 </label>
-                <Input
+                <input
+                  type="text"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Description optionnelle..."
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                 />
               </div>
 
@@ -252,15 +286,15 @@ export default function AmenitiesPage() {
                     type="checkbox"
                     checked={formData.isHighlighted}
                     onChange={(e) => setFormData({ ...formData, isHighlighted: e.target.checked })}
-                    className="rounded border-gray-300"
+                    className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
                   />
-                  <span className="text-sm text-gray-700">Mettre en avant cet équipement</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Mettre en avant cet équipement</span>
                 </label>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button
+              <AdminButton
                 variant="secondary"
                 type="button"
                 onClick={() => {
@@ -270,73 +304,72 @@ export default function AmenitiesPage() {
                 }}
               >
                 Annuler
-              </Button>
-              <Button variant="primary" type="submit">
-                <Save className="w-4 h-4 mr-2" />
+              </AdminButton>
+              <AdminButton type="submit" icon={<Save className="w-4 h-4" />}>
                 {editingId ? 'Enregistrer' : 'Créer'}
-              </Button>
+              </AdminButton>
             </div>
           </form>
-        </Card>
+        </AdminCard>
       )}
 
       {/* Amenities List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
         </div>
       ) : filteredAmenities.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Wifi className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun équipement</h3>
-          <p className="text-gray-500 mb-6">Ajoutez les équipements de votre établissement</p>
-          <Button variant="primary" onClick={() => setIsCreating(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            {t('create')}
-          </Button>
-        </Card>
+        <AdminCard padding="lg">
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Wifi className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Aucun équipement</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">Ajoutez les équipements de votre établissement</p>
+            <AdminButton icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreating(true)}>
+              {t('create')}
+            </AdminButton>
+          </div>
+        </AdminCard>
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedAmenities).map(([category, items]: [string, any]) => {
             const Icon = categoryIcons[category] || Wifi
             return (
               <div key={category}>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-3">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">
                   <Icon className="w-4 h-4" />
                   {t(`categories.${category.toLowerCase()}`)}
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                   {items.map((amenity: any) => (
-                    <Card
+                    <AdminCard
                       key={amenity.id}
-                      className={`p-3 ${amenity.isHighlighted ? 'ring-2 ring-orange-500' : ''}`}
+                      padding="sm"
+                      className={amenity.isHighlighted ? 'ring-2 ring-violet-500' : ''}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">{amenity.name}</p>
+                          <p className="font-medium text-slate-900 dark:text-white truncate">{amenity.name}</p>
                           {amenity.description && (
-                            <p className="text-xs text-gray-500 truncate">{amenity.description}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{amenity.description}</p>
                           )}
                         </div>
                         <div className="flex items-center gap-0.5 ml-2">
-                          <Button variant="ghost" size="sm" onClick={() => startEdit(amenity)} className="p-1">
+                          <AdminButton variant="ghost" size="sm" onClick={() => startEdit(amenity)} className="p-1">
                             <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button
+                          </AdminButton>
+                          <AdminButton
                             variant="ghost"
                             size="sm"
-                            className="p-1 text-red-600 hover:bg-red-50"
-                            onClick={() => {
-                              if (confirm('Supprimer ?')) {
-                                deleteAmenity?.mutate({ storeId: storeId!, amenityId: amenity.id })
-                              }
-                            }}
+                            className="p-1 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                            onClick={() => handleDelete(amenity.id)}
                           >
                             <Trash2 className="w-3 h-3" />
-                          </Button>
+                          </AdminButton>
                         </div>
                       </div>
-                    </Card>
+                    </AdminCard>
                   ))}
                 </div>
               </div>

@@ -1068,7 +1068,8 @@
         "selectRoom": "Sélectionner chambre"
       },
       "rates": {
-        "title": "Tarifs",
+        "title": "Règles tarifaires",
+        "create": "Nouvelle règle",
         "grid": "Grille tarifaire",
         "perNight": "Par nuit",
         "weekday": "Semaine",
