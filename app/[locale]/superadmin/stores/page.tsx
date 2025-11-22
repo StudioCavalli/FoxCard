@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useParams } from 'next/navigation'
+import { useStoreContext } from '@/lib/context/store-context'
 import { AdminCard, AdminCardHeader } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminInput } from '@/components/admin/ui/AdminInput'
@@ -46,6 +48,11 @@ const statusConfig: Record<string, { label: string; variant: 'success' | 'danger
 }
 
 export default function SuperAdminStoresPage() {
+  const router = useRouter()
+  const params = useParams()
+  const locale = params?.locale || 'fr'
+  const { startImpersonation } = useStoreContext()
+
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StoreStatus>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -53,6 +60,11 @@ export default function SuperAdminStoresPage() {
   const [selectedStore, setSelectedStore] = useState<any>(null)
   const [suspendReason, setSuspendReason] = useState('')
   const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' as CommerceType })
+
+  const handleImpersonate = (storeId: string) => {
+    startImpersonation(storeId)
+    router.push(`/${locale}/merchant`)
+  }
 
   const { data, isLoading, refetch } = trpc.superadmin.getAllStores.useQuery({
     limit: 50, offset: 0, search: search || undefined, status: statusFilter,
@@ -231,6 +243,14 @@ export default function SuperAdminStoresPage() {
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
+                      <AdminButton
+                        variant="primary"
+                        size="sm"
+                        icon={<ExternalLink className="w-4 h-4" />}
+                        onClick={() => handleImpersonate(store.id)}
+                      >
+                        Accéder
+                      </AdminButton>
                       <Link href={`/superadmin/stores/${store.id}`}>
                         <AdminButton variant="outline" size="sm" icon={<Eye className="w-4 h-4" />}>Détails</AdminButton>
                       </Link>

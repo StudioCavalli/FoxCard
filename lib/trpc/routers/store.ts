@@ -223,12 +223,54 @@ export const storeRouter = router({
         })
       }
 
-      return ctx.prisma.store.create({
-        data: {
-          ...input,
-          ownerId: ctx.session.user.id,
-        },
+      // Create store, owner role, and StoreUser in a transaction
+      const store = await ctx.prisma.$transaction(async (tx) => {
+        // 1. Create the store
+        const newStore = await tx.store.create({
+          data: {
+            ...input,
+            ownerId: ctx.session.user.id,
+          },
+        })
+
+        // 2. Create the Owner role with all permissions
+        const ownerRole = await tx.role.create({
+          data: {
+            storeId: newStore.id,
+            name: 'Owner',
+            isSystem: true,
+            permissions: [
+              'store:manage',
+              'products:create',
+              'products:read',
+              'products:update',
+              'products:delete',
+              'orders:read',
+              'orders:update',
+              'orders:refund',
+              'customers:read',
+              'customers:update',
+              'analytics:read',
+              'team:manage',
+              'settings:manage',
+            ],
+          },
+        })
+
+        // 3. Create StoreUser linking the owner to the store
+        await tx.storeUser.create({
+          data: {
+            userId: ctx.session.user.id,
+            storeId: newStore.id,
+            roleId: ownerRole.id,
+            status: 'ACTIVE',
+          },
+        })
+
+        return newStore
       })
+
+      return store
     }),
 
   update: requireStoreAccess

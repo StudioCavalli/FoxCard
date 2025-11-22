@@ -34,6 +34,11 @@ interface StoreContextType {
     reviewedAt: Date | null
   } | null
   refetchStoreStatus: () => void
+  // Impersonation (SuperAdmin only)
+  isImpersonating: boolean
+  impersonatedStore: Store | null
+  startImpersonation: (storeId: string) => void
+  endImpersonation: () => void
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -44,6 +49,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [storeName, setStoreName] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Impersonation state (SuperAdmin only)
+  const [isImpersonating, setIsImpersonating] = useState(false)
+  const [impersonatedStore, setImpersonatedStore] = useState<Store | null>(null)
 
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN'
 
@@ -121,6 +130,62 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Impersonation methods (SuperAdmin only)
+  const startImpersonation = (targetStoreId: string) => {
+    if (!isSuperAdmin) return
+
+    const store = stores?.find(s => s.id === targetStoreId)
+    if (store) {
+      setIsImpersonating(true)
+      setImpersonatedStore({
+        id: store.id,
+        name: store.name,
+        slug: 'slug' in store ? store.slug : undefined,
+        status: 'status' in store ? store.status : undefined,
+      })
+      setStoreId(store.id)
+      setStoreName(store.name)
+      localStorage.setItem('impersonatingStoreId', store.id)
+    }
+  }
+
+  const endImpersonation = () => {
+    setIsImpersonating(false)
+    setImpersonatedStore(null)
+    localStorage.removeItem('impersonatingStoreId')
+
+    // Reset to first store or no store
+    if (stores && stores.length > 0) {
+      const savedStoreId = localStorage.getItem('selectedStoreId')
+      const store = savedStoreId
+        ? stores.find(s => s.id === savedStoreId) || stores[0]
+        : stores[0]
+      setStoreId(store.id)
+      setStoreName(store.name)
+    }
+  }
+
+  // Restore impersonation on mount
+  useEffect(() => {
+    if (isSuperAdmin && stores && stores.length > 0) {
+      const impersonatingId = localStorage.getItem('impersonatingStoreId')
+      if (impersonatingId) {
+        const store = stores.find(s => s.id === impersonatingId)
+        if (store) {
+          setIsImpersonating(true)
+          setImpersonatedStore({
+            id: store.id,
+            name: store.name,
+            slug: 'slug' in store ? store.slug : undefined,
+            status: 'status' in store ? store.status : undefined,
+          })
+          setStoreId(store.id)
+          setStoreName(store.name)
+        }
+      }
+    }
+  }, [isSuperAdmin, stores])
+
   // Map stores to simple format
   const storesList: Store[] = stores?.map(s => ({
     id: s.id,
@@ -151,6 +216,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         hasPendingAppeal,
         lastAppeal,
         refetchStoreStatus: () => refetchStoreStatus(),
+        // Impersonation
+        isImpersonating,
+        impersonatedStore,
+        startImpersonation,
+        endImpersonation,
       }}
     >
       {children}

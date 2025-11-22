@@ -1130,6 +1130,84 @@ Après le seed, utilisez ces credentials :
 - [x] **Multi-devise** (EUR, USD, GBP, CHF, CZK)
 - [x] **Plugins extensibles**
 
+### ✅ M13: User Routing & Store Ownership (COMPLETE)
+
+#### 🔐 Role-Based Login Redirection
+- [x] **Redirection Automatique après Login** :
+  - SUPER_ADMIN → `/superadmin`
+  - ADMIN (Merchant) → `/merchant`
+  - USER (Customer) → `/account`
+  - Support du paramètre `from` pour deep linking
+  - Support multi-locales
+
+#### 🏪 Store Ownership & Team Management
+- [x] **Association Automatique Store-Owner** :
+  - Transaction atomique à la création de store
+  - Création automatique du rôle Owner
+  - Association StoreUser avec le créateur
+- [x] **Store Selector** (`components/merchant/StoreSelector.tsx`) :
+  - Sélecteur dropdown pour marchands multi-stores
+  - Affichage badge pour single-store
+  - Persistance localStorage du store sélectionné
+- [x] **Team Router** (`lib/trpc/routers/team.ts`) :
+  - `getMembers` : Liste des membres et invitations
+  - `getRoles` : Rôles disponibles (Owner, Admin, Editor, Viewer)
+  - `sendInvitation` : Envoi d'invitation par email
+  - `acceptInvitation` : Acceptation d'invitation
+  - `revokeInvitation` / `resendInvitation`
+  - `removeMember` / `updateMemberRole`
+- [x] **Page Team Management** (`/merchant/team`) :
+  - Liste des membres actifs avec rôles
+  - Liste des invitations en attente
+  - Modal d'invitation avec sélection de rôle
+  - Actions : supprimer membre, révoquer/renvoyer invitation
+
+#### 🎨 Merchant Theme Customization
+- [x] **Page Themes** (`/merchant/themes`) :
+  - Éditeur visuel complet
+  - Color pickers pour toutes les couleurs
+  - Sélection de fonts (Google Fonts)
+  - Preview en temps réel
+  - Duplication de thèmes
+  - Activation/désactivation
+
+#### 🚀 Merchant Onboarding Flow
+- [x] **Wizard 4 Étapes** (`/merchant/onboarding`) :
+  - Étape 1 : Création de boutique (nom, slug, description)
+  - Étape 2 : Sélection de thème (6 presets)
+  - Étape 3 : Premier produit (optionnel)
+  - Étape 4 : Récapitulatif et confirmation
+- [x] **UI/UX** :
+  - Progress bar animée
+  - Step indicators visuels
+  - Validation par étape
+  - Traductions i18n complètes (5 langues)
+
+#### 👁️ SuperAdmin Store Impersonation
+- [x] **Impersonation Context** (`lib/context/store-context.tsx`) :
+  - `startImpersonation(storeId)` : Démarrer l'impersonation
+  - `endImpersonation()` : Quitter le mode impersonation
+  - Persistance localStorage
+  - Restauration automatique au refresh
+- [x] **Impersonation Banner** (`components/merchant/ImpersonationBanner.tsx`) :
+  - Bannière visible en mode impersonation
+  - Affichage du nom de la boutique
+  - Bouton "Quitter le mode visualisation"
+- [x] **Bouton Accéder** dans SuperAdmin stores page
+- [x] **Navigation automatique** vers `/merchant` après impersonation
+
+#### 🧪 Tests Complets
+- [x] **61 Tests Unitaires** :
+  - `tests/auth/user-routing.test.ts` (29 tests)
+  - `tests/auth/middleware.test.ts` (32 tests)
+- [x] **Couverture** :
+  - Login redirection par rôle
+  - Route protection
+  - Store access control
+  - Impersonation state
+  - Edge cases (user sans stores, suspended stores)
+  - Middleware (path classification, locale extraction, API protection)
+
 #### 📋 Roadmap Future
 - [ ] Tests E2E avec Playwright
 - [ ] Apps mobiles iOS/Android (React Native)

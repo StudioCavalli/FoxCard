@@ -126,6 +126,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   storeUsers    StoreUser[]
+  invitedStoreUsers StoreUser[] @relation("InvitedStoreUsers")
   auditLogs     AuditLog[]
   suspensionAppeals SuspensionAppeal[]
   supportTickets SupportTicket[]
@@ -1095,9 +1096,13 @@ model StoreUser {
   role      Role     @relation(fields: [roleId], references: [id])
 
   // Invitation tracking
-  invitedBy String?  @db.ObjectId
-  invitedAt DateTime @default(now())
-  acceptedAt DateTime?
+  invitedBy       String?   @db.ObjectId
+  invitedByUser   User?     @relation("InvitedStoreUsers", fields: [invitedBy], references: [id])
+  invitedAt       DateTime  @default(now())
+  acceptedAt      DateTime?
+  invitationEmail String?   // Email the invitation was sent to
+  invitationToken String?   // Token for accepting the invitation
+  invitationExpires DateTime? // When the invitation expires
 
   // Status
   status    StoreUserStatus @default(PENDING)
@@ -1109,6 +1114,7 @@ model StoreUser {
   @@index([storeId])
   @@index([userId])
   @@index([roleId])
+  @@index([invitationToken])
 }
 
 enum StoreUserStatus {

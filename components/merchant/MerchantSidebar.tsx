@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { SidebarGroup } from '../admin/SidebarGroup'
 import { SidebarLink } from '../admin/SidebarLink'
+import { StoreSelector } from './StoreSelector'
 import { useSidebar } from '@/lib/context/sidebar-context'
 import { useStoreContext } from '@/lib/context/store-context'
 import { cn } from '@/lib/utils'
@@ -61,18 +62,12 @@ export function MerchantSidebar() {
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        {/* Logo & Store Name */}
-        <div className="p-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-          <div className="flex items-center justify-between">
-            <Link href={basePath} className="flex items-center space-x-3" onClick={close}>
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Store className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-sm font-bold truncate">{storeName || t('merchant.store')}</h1>
-                <p className="text-xs text-slate-400">{t('merchant.dashboard')}</p>
-              </div>
-            </Link>
+        {/* Store Selector */}
+        <div className="p-3 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <StoreSelector onSelect={close} />
+            </div>
             {/* Mobile Close Button */}
             <button
               onClick={close}
@@ -166,6 +161,9 @@ export function MerchantSidebar() {
           <SidebarGroup title={t('merchant.settings')} icon={Settings}>
             <SidebarLink href={`${basePath}/store`} icon={Store} onClick={close}>
               {t('merchant.store')}
+            </SidebarLink>
+            <SidebarLink href={`${basePath}/team`} icon={Users} onClick={close}>
+              {t('merchant.team')}
             </SidebarLink>
             <SidebarLink href={`${basePath}/themes`} icon={Palette} onClick={close}>
               {t('admin.themes')}
