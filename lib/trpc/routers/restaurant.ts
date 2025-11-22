@@ -24,6 +24,7 @@ import {
 const TableStatusEnum = z.enum(['AVAILABLE', 'OCCUPIED', 'RESERVED', 'CLEANING'])
 const OrderTypeEnum = z.enum(['DINE_IN', 'TAKEAWAY', 'DELIVERY'])
 const KitchenStatusEnum = z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED', 'COMPLETED', 'CANCELLED'])
+const ModifierSelectionTypeEnum = z.enum(['SINGLE', 'MULTIPLE', 'QUANTITY'])
 
 export const restaurantRouter = router({
   // ============ PUBLIC PROCEDURES ============
@@ -348,6 +349,460 @@ export const restaurantRouter = router({
       )
 
       return { success: true, updated: input.items.length }
+    }),
+
+  // ============ MODIFIER GROUP PROCEDURES ============
+
+  /**
+   * Get all modifier groups for a store
+   */
+  getModifierGroups: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      includeInactive: z.boolean().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      return ctx.prisma.modifierGroup.findMany({
+        where: {
+          storeId: input.storeId,
+          ...(input.includeInactive ? {} : { isActive: true }),
+        },
+        include: {
+          modifiers: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+        orderBy: { sortOrder: 'asc' },
+      })
+    }),
+
+  /**
+   * Get a single modifier group by ID
+   */
+  getModifierGroup: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+    }))
+    .query(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const group = await ctx.prisma.modifierGroup.findFirst({
+        where: {
+          id: input.groupId,
+          storeId: input.storeId,
+        },
+        include: {
+          modifiers: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      })
+
+      if (!group) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      return group
+    }),
+
+  /**
+   * Create a new modifier group
+   */
+  createModifierGroup: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      name: z.string().min(1).max(100),
+      description: z.string().optional(),
+      selectionType: ModifierSelectionTypeEnum.optional(),
+      minSelections: z.number().min(0).optional(),
+      maxSelections: z.number().min(1).optional().nullable(),
+      isRequired: z.boolean().optional(),
+      productIds: z.array(z.string()).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      // Generate slug from name
+      const baseSlug = input.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+
+      // Check for existing slug and make unique
+      const existingCount = await ctx.prisma.modifierGroup.count({
+        where: {
+          storeId: input.storeId,
+          slug: { startsWith: baseSlug },
+        },
+      })
+
+      const slug = existingCount > 0 ? `${baseSlug}-${existingCount + 1}` : baseSlug
+
+      // Get next sort order
+      const lastGroup = await ctx.prisma.modifierGroup.findFirst({
+        where: { storeId: input.storeId },
+        orderBy: { sortOrder: 'desc' },
+        select: { sortOrder: true },
+      })
+
+      return ctx.prisma.modifierGroup.create({
+        data: {
+          storeId: input.storeId,
+          name: input.name,
+          slug,
+          description: input.description,
+          selectionType: input.selectionType || 'SINGLE',
+          minSelections: input.minSelections || 0,
+          maxSelections: input.maxSelections,
+          isRequired: input.isRequired || false,
+          productIds: input.productIds || [],
+          sortOrder: (lastGroup?.sortOrder || 0) + 1,
+        },
+        include: {
+          modifiers: true,
+        },
+      })
+    }),
+
+  /**
+   * Update a modifier group
+   */
+  updateModifierGroup: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+      name: z.string().min(1).max(100).optional(),
+      description: z.string().optional().nullable(),
+      selectionType: ModifierSelectionTypeEnum.optional(),
+      minSelections: z.number().min(0).optional(),
+      maxSelections: z.number().min(1).optional().nullable(),
+      isRequired: z.boolean().optional(),
+      isActive: z.boolean().optional(),
+      productIds: z.array(z.string()).optional(),
+      sortOrder: z.number().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const existingGroup = await ctx.prisma.modifierGroup.findFirst({
+        where: { id: input.groupId, storeId: input.storeId },
+      })
+
+      if (!existingGroup) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      const { storeId, groupId, ...updateData } = input
+
+      return ctx.prisma.modifierGroup.update({
+        where: { id: groupId },
+        data: updateData,
+        include: {
+          modifiers: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      })
+    }),
+
+  /**
+   * Delete a modifier group
+   */
+  deleteModifierGroup: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const existingGroup = await ctx.prisma.modifierGroup.findFirst({
+        where: { id: input.groupId, storeId: input.storeId },
+      })
+
+      if (!existingGroup) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      // Delete group (modifiers are cascade deleted)
+      await ctx.prisma.modifierGroup.delete({
+        where: { id: input.groupId },
+      })
+
+      return { success: true }
+    }),
+
+  // ============ MODIFIER PROCEDURES ============
+
+  /**
+   * Create a modifier in a group
+   */
+  createModifier: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+      name: z.string().min(1).max(100),
+      description: z.string().optional(),
+      priceAdjustment: z.number().optional(),
+      isDefault: z.boolean().optional(),
+      isAvailable: z.boolean().optional(),
+      calories: z.number().optional().nullable(),
+      allergens: z.array(z.string()).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      // Verify group exists
+      const group = await ctx.prisma.modifierGroup.findFirst({
+        where: { id: input.groupId, storeId: input.storeId },
+      })
+
+      if (!group) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      // Get next sort order
+      const lastModifier = await ctx.prisma.modifier.findFirst({
+        where: { groupId: input.groupId },
+        orderBy: { sortOrder: 'desc' },
+        select: { sortOrder: true },
+      })
+
+      return ctx.prisma.modifier.create({
+        data: {
+          storeId: input.storeId,
+          groupId: input.groupId,
+          name: input.name,
+          description: input.description,
+          priceAdjustment: input.priceAdjustment || 0,
+          isDefault: input.isDefault || false,
+          isAvailable: input.isAvailable !== false,
+          calories: input.calories,
+          allergens: input.allergens || [],
+          sortOrder: (lastModifier?.sortOrder || 0) + 1,
+        },
+      })
+    }),
+
+  /**
+   * Update a modifier
+   */
+  updateModifier: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      modifierId: z.string(),
+      name: z.string().min(1).max(100).optional(),
+      description: z.string().optional().nullable(),
+      priceAdjustment: z.number().optional(),
+      isDefault: z.boolean().optional(),
+      isAvailable: z.boolean().optional(),
+      calories: z.number().optional().nullable(),
+      allergens: z.array(z.string()).optional(),
+      sortOrder: z.number().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const existingModifier = await ctx.prisma.modifier.findFirst({
+        where: { id: input.modifierId, storeId: input.storeId },
+      })
+
+      if (!existingModifier) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier not found' })
+      }
+
+      const { storeId, modifierId, ...updateData } = input
+
+      return ctx.prisma.modifier.update({
+        where: { id: modifierId },
+        data: updateData,
+      })
+    }),
+
+  /**
+   * Delete a modifier
+   */
+  deleteModifier: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      modifierId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const existingModifier = await ctx.prisma.modifier.findFirst({
+        where: { id: input.modifierId, storeId: input.storeId },
+      })
+
+      if (!existingModifier) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier not found' })
+      }
+
+      await ctx.prisma.modifier.delete({
+        where: { id: input.modifierId },
+      })
+
+      return { success: true }
+    }),
+
+  /**
+   * Reorder modifier groups
+   */
+  reorderModifierGroups: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupIds: z.array(z.string()),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      // Update sort order for each group
+      await Promise.all(
+        input.groupIds.map((groupId, index) =>
+          ctx.prisma.modifierGroup.updateMany({
+            where: { id: groupId, storeId: input.storeId },
+            data: { sortOrder: index },
+          })
+        )
+      )
+
+      return { success: true }
+    }),
+
+  /**
+   * Reorder modifiers within a group
+   */
+  reorderModifiers: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+      modifierIds: z.array(z.string()),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      // Verify group exists
+      const group = await ctx.prisma.modifierGroup.findFirst({
+        where: { id: input.groupId, storeId: input.storeId },
+      })
+
+      if (!group) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      // Update sort order for each modifier
+      await Promise.all(
+        input.modifierIds.map((modifierId, index) =>
+          ctx.prisma.modifier.updateMany({
+            where: { id: modifierId, groupId: input.groupId, storeId: input.storeId },
+            data: { sortOrder: index },
+          })
+        )
+      )
+
+      return { success: true }
+    }),
+
+  /**
+   * Assign modifier group to products
+   */
+  assignModifierGroupToProducts: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      groupId: z.string(),
+      productIds: z.array(z.string()),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const store = await ctx.prisma.store.findFirst({
+        where: { id: input.storeId, ownerId: ctx.session.user.id },
+      })
+
+      if (!store) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Store not found' })
+      }
+
+      const group = await ctx.prisma.modifierGroup.findFirst({
+        where: { id: input.groupId, storeId: input.storeId },
+      })
+
+      if (!group) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Modifier group not found' })
+      }
+
+      return ctx.prisma.modifierGroup.update({
+        where: { id: input.groupId },
+        data: { productIds: input.productIds },
+        include: {
+          modifiers: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      })
     }),
 
   /**
