@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
+import { trpc } from '@/lib/trpc/client'
 import {
   ArrowLeft, UtensilsCrossed, Clock, MapPin, Flame, Leaf, AlertCircle,
-  Plus, Minus, ShoppingBag, Star, ChevronDown
+  Plus, Minus, ShoppingBag, Star, ChevronDown, Loader2
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -23,8 +24,33 @@ interface MenuOption {
   required?: boolean
 }
 
+interface ModifierFromDB {
+  id: string
+  name: string
+  description?: string | null
+  priceAdjustment: number
+  isDefault: boolean
+  isAvailable: boolean
+  calories?: number | null
+  allergens: string[]
+}
+
+interface ModifierGroupFromDB {
+  id: string
+  name: string
+  description?: string | null
+  selectionType: 'SINGLE' | 'MULTIPLE' | 'QUANTITY'
+  minSelections: number
+  maxSelections?: number | null
+  isRequired: boolean
+  isActive: boolean
+  modifiers: ModifierFromDB[]
+}
+
 export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
   const t = useTranslations()
   const addItem = useCartStore((state) => state.addItem)
 
@@ -40,47 +66,75 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
     : ['/placeholder-food.png']
   const mainImage = images[0] || '/placeholder-food.png'
 
-  // Mock menu data - would come from product metadata
-  const isSpicy = product.metadata?.isSpicy || false
-  const isVegetarian = product.metadata?.isVegetarian || false
-  const allergens = product.metadata?.allergens || []
-  const prepTime = product.metadata?.prepTime || '15-20'
-  const calories = product.metadata?.calories || null
+  // Get product attributes (stored restaurant-specific data)
+  const attributes = (product.attributes as Record<string, unknown>) || {}
+  const modifierGroupIds = (attributes.modifierGroupIds as string[]) || []
 
-  // Options groups (extras, sides, sauces, etc.)
-  const optionGroups = product.metadata?.optionGroups || [
-    {
-      id: 'size',
-      name: t('product.restaurant.size'),
-      required: true,
-      options: [
-        { id: 'regular', name: t('product.restaurant.regular'), price: 0 },
-        { id: 'large', name: t('product.restaurant.large'), price: 3 },
-      ],
-    },
-    {
-      id: 'extras',
-      name: t('product.restaurant.extras'),
-      required: false,
-      multiple: true,
-      options: [
-        { id: 'cheese', name: t('product.restaurant.extraCheese'), price: 1.5 },
-        { id: 'bacon', name: t('product.restaurant.bacon'), price: 2 },
-        { id: 'avocado', name: t('product.restaurant.avocado'), price: 2.5 },
-      ],
-    },
-    {
-      id: 'sauce',
-      name: t('product.restaurant.sauce'),
-      required: false,
-      options: [
-        { id: 'none', name: t('product.restaurant.noSauce'), price: 0 },
-        { id: 'bbq', name: 'BBQ', price: 0 },
-        { id: 'mayo', name: t('product.restaurant.mayonnaise'), price: 0 },
-        { id: 'spicy', name: t('product.restaurant.spicySauce'), price: 0 },
-      ],
-    },
-  ]
+  // Restaurant-specific attributes from product
+  const isSpicy = attributes.spicyLevel ? (attributes.spicyLevel as number) > 0 : false
+  const isVegetarian = attributes.vegetarian as boolean || false
+  const productAllergens = (attributes.allergens as string[]) || []
+  const prepTime = attributes.prepTime as number || 15
+  const productCalories = attributes.calories as number || null
+
+  // Fetch real modifier groups from database
+  const { data: allModifierGroups, isLoading: isLoadingModifiers } = trpc.restaurant.getModifierGroups.useQuery(
+    { storeId: product.storeId },
+    { enabled: !!product.storeId && modifierGroupIds.length > 0 }
+  )
+
+  // Filter and transform modifier groups for this product
+  const optionGroups = useMemo(() => {
+    if (!allModifierGroups || modifierGroupIds.length === 0) {
+      return []
+    }
+
+    // Filter groups that are assigned to this product
+    const assignedGroups = allModifierGroups.filter((group: ModifierGroupFromDB) =>
+      modifierGroupIds.includes(group.id) && group.isActive
+    )
+
+    // Transform to the format expected by the UI
+    return assignedGroups.map((group: ModifierGroupFromDB) => ({
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      required: group.isRequired,
+      multiple: group.selectionType === 'MULTIPLE',
+      minSelections: group.minSelections,
+      maxSelections: group.maxSelections,
+      options: group.modifiers
+        .filter((mod: ModifierFromDB) => mod.isAvailable)
+        .map((mod: ModifierFromDB) => ({
+          id: mod.id,
+          name: mod.name,
+          price: mod.priceAdjustment,
+          calories: mod.calories,
+          allergens: mod.allergens,
+          isDefault: mod.isDefault,
+        })),
+    }))
+  }, [allModifierGroups, modifierGroupIds])
+
+  // Collect all allergens (from product + selected modifiers)
+  const allergens = useMemo(() => {
+    const allAllergens = new Set<string>(productAllergens)
+
+    // Add allergens from selected modifiers
+    Object.entries(selectedOptions).forEach(([groupId, optionIds]) => {
+      const group = optionGroups.find((g: any) => g.id === groupId)
+      if (group) {
+        optionIds.forEach(optId => {
+          const option = group.options.find((o: any) => o.id === optId)
+          if (option?.allergens) {
+            option.allergens.forEach((a: string) => allAllergens.add(a))
+          }
+        })
+      }
+    })
+
+    return Array.from(allAllergens)
+  }, [productAllergens, selectedOptions, optionGroups])
 
   // Calculate extras price
   const extrasPrice = Object.entries(selectedOptions).reduce((total, [groupId, optionIds]) => {
@@ -143,7 +197,7 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
         specialInstructions,
       },
     })
-    router.push('/cart')
+    router.push(`/${locale}/cart`)
   }
 
   return (
@@ -151,7 +205,7 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
       <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
         {/* Back Button */}
         <Link
-          href="/products"
+          href={`/${locale}/products`}
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-8 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
@@ -199,10 +253,10 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
                 <Clock className="w-5 h-5 text-theme-primary" />
                 <span>{prepTime} min</span>
               </div>
-              {calories && (
+              {productCalories && (
                 <div className="flex items-center gap-2 text-theme-text-secondary">
                   <Flame className="w-5 h-5 text-orange-500" />
-                  <span>{calories} kcal</span>
+                  <span>{productCalories} kcal</span>
                 </div>
               )}
               {product.store && (
@@ -254,62 +308,83 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
               </div>
             )}
 
-            {/* Option Groups */}
-            <div className="space-y-6">
-              {optionGroups.map((group: any) => (
-                <div key={group.id} className="border border-theme-border rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-theme-text">{group.name}</h3>
-                    {group.required && (
-                      <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full">
-                        {t('product.restaurant.required')}
-                      </span>
-                    )}
-                    {group.multiple && (
-                      <span className="text-xs text-theme-text-muted">
-                        {t('product.restaurant.selectMultiple')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {group.options.map((option: MenuOption) => {
-                      const isSelected = selectedOptions[group.id]?.includes(option.id)
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => toggleOption(group.id, option.id, group.multiple)}
-                          className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${
-                            isSelected
-                              ? 'border-theme-primary bg-theme-primary/5'
-                              : 'border-theme-border hover:border-theme-border-light'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-5 h-5 rounded-${group.multiple ? 'md' : 'full'} border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? 'border-theme-primary bg-theme-primary'
-                                  : 'border-theme-border'
-                              }`}
-                            >
-                              {isSelected && (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
-                                  <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
-                                </svg>
-                              )}
+            {/* Option Groups / Modifiers */}
+            {isLoadingModifiers && modifierGroupIds.length > 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-theme-primary" />
+                <span className="ml-2 text-theme-text-secondary">{t('common.loading')}</span>
+              </div>
+            ) : optionGroups.length > 0 ? (
+              <div className="space-y-6">
+                {optionGroups.map((group: any) => (
+                  <div key={group.id} className="border border-theme-border rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-theme-text">{group.name}</h3>
+                        {group.description && (
+                          <p className="text-sm text-theme-text-secondary">{group.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {group.required && (
+                          <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full">
+                            {t('product.restaurant.required')}
+                          </span>
+                        )}
+                        {group.multiple && (
+                          <span className="text-xs text-theme-text-muted">
+                            {t('product.restaurant.selectMultiple')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {group.options.map((option: any) => {
+                        const isSelected = selectedOptions[group.id]?.includes(option.id)
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => toggleOption(group.id, option.id, group.multiple)}
+                            className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${
+                              isSelected
+                                ? 'border-theme-primary bg-theme-primary/5'
+                                : 'border-theme-border hover:border-theme-border-light'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-5 h-5 rounded-${group.multiple ? 'md' : 'full'} border-2 flex items-center justify-center ${
+                                  isSelected
+                                    ? 'border-theme-primary bg-theme-primary'
+                                    : 'border-theme-border'
+                                }`}
+                              >
+                                {isSelected && (
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
+                                    <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="text-left">
+                                <span className="text-theme-text">{option.name}</span>
+                                {option.calories && (
+                                  <span className="ml-2 text-xs text-theme-text-muted">
+                                    ({option.calories} kcal)
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <span className="text-theme-text">{option.name}</span>
-                          </div>
-                          {option.price > 0 && (
-                            <span className="text-theme-text-secondary">+{formatPrice(option.price)}</span>
-                          )}
-                        </button>
-                      )
-                    })}
+                            {option.price > 0 && (
+                              <span className="text-theme-text-secondary">+{formatPrice(option.price)}</span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : null}
 
             {/* Special Instructions */}
             <div>

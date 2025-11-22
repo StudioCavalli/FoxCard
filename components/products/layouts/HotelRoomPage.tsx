@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/lib/store/cart'
@@ -27,6 +27,8 @@ const amenityIcons: Record<string, any> = {
 
 export function HotelRoomPage({ product }: HotelRoomPageProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
   const t = useTranslations()
   const addItem = useCartStore((state) => state.addItem)
 
@@ -44,9 +46,16 @@ export function HotelRoomPage({ product }: HotelRoomPageProps) {
     : ['/placeholder-hotel.png']
   const currentImage = images[selectedImage] || '/placeholder-hotel.png'
 
-  // Mock amenities - in production, these would come from product metadata
-  const amenities = ['wifi', 'breakfast', 'parking', 'tv', 'bathroom', 'aircon']
-  const maxGuests = product.metadata?.maxGuests || 4
+  // Get product attributes (stored hotel-specific data)
+  const attributes = (product.attributes as Record<string, unknown>) || {}
+
+  // Real amenities from product attributes
+  const amenities = (attributes.amenities as string[]) || []
+  const roomType = (attributes.roomType as string) || 'double'
+  const maxGuests = (attributes.capacity as number) || 4
+  const checkInTime = (attributes.checkInTime as string) || '15:00'
+  const checkOutTime = (attributes.checkOutTime as string) || '11:00'
+  const cancellationPolicy = (attributes.cancellationPolicy as string) || ''
   const basePrice = product.price
 
   // Calculate number of nights
@@ -123,7 +132,7 @@ export function HotelRoomPage({ product }: HotelRoomPageProps) {
         options: selectedOptions,
       },
     })
-    router.push('/cart')
+    router.push(`/${locale}/cart`)
   }
 
   const toggleOption = (optionId: string) => {
@@ -149,7 +158,7 @@ export function HotelRoomPage({ product }: HotelRoomPageProps) {
       <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
         {/* Back Button */}
         <Link
-          href="/products"
+          href={`/${locale}/products`}
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-8 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
@@ -217,29 +226,49 @@ export function HotelRoomPage({ product }: HotelRoomPageProps) {
               <div className="flex flex-wrap gap-4 mb-6">
                 <div className="flex items-center gap-2 text-theme-text">
                   <BedDouble className="w-5 h-5 text-theme-primary" />
-                  <span>{product.metadata?.bedType || t('product.hotel.kingBed')}</span>
+                  <span>{t(`product.hotel.roomType.${roomType}`)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-theme-text">
                   <Users className="w-5 h-5 text-theme-primary" />
                   <span>{t('product.hotel.maxGuests', { count: maxGuests })}</span>
                 </div>
+                <div className="flex items-center gap-2 text-theme-text">
+                  <Calendar className="w-5 h-5 text-theme-primary" />
+                  <span>{t('product.hotel.checkInTime')}: {checkInTime}</span>
+                </div>
+                <div className="flex items-center gap-2 text-theme-text">
+                  <Calendar className="w-5 h-5 text-theme-primary" />
+                  <span>{t('product.hotel.checkOutTime')}: {checkOutTime}</span>
+                </div>
               </div>
 
               {/* Amenities */}
-              <div className="border-t border-theme-border pt-4">
-                <h3 className="font-semibold text-theme-text mb-3">{t('product.hotel.amenities')}</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {amenities.map((amenity) => {
-                    const Icon = amenityIcons[amenity] || Check
-                    return (
-                      <div key={amenity} className="flex items-center gap-2 text-theme-text-secondary">
-                        <Icon className="w-4 h-4 text-green-600" />
-                        <span className="text-sm capitalize">{t(`product.hotel.amenity.${amenity}`)}</span>
-                      </div>
-                    )
-                  })}
+              {amenities.length > 0 && (
+                <div className="border-t border-theme-border pt-4">
+                  <h3 className="font-semibold text-theme-text mb-3">{t('product.hotel.amenities')}</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {amenities.map((amenity) => {
+                      // Try to match known amenity icons, otherwise use Check icon
+                      const amenityKey = amenity.toLowerCase().replace(/\s+/g, '')
+                      const Icon = amenityIcons[amenityKey] || Check
+                      return (
+                        <div key={amenity} className="flex items-center gap-2 text-theme-text-secondary">
+                          <Icon className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          <span className="text-sm">{amenity}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Cancellation Policy */}
+              {cancellationPolicy && (
+                <div className="border-t border-theme-border pt-4 mt-4">
+                  <h3 className="font-semibold text-theme-text mb-3">{t('product.hotel.cancellationPolicy')}</h3>
+                  <p className="text-theme-text-secondary text-sm leading-relaxed">{cancellationPolicy}</p>
+                </div>
+              )}
 
               {/* Description */}
               {product.description && (

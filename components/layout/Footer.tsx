@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Facebook, Twitter, Instagram, Github, Mail, Phone, MapPin, ArrowUpRight, Heart } from 'lucide-react'
 import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
 import { useTranslations } from 'next-intl'
@@ -11,6 +12,8 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
   const platformName = usePlatformName()
   const t = useTranslations()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   return (
     <footer className="relative bg-gradient-to-b from-theme-background to-theme-surface border-t border-theme-border" style={{ fontFamily: 'var(--theme-font-body)' }}>
@@ -23,7 +26,7 @@ export function Footer() {
 
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-3 group mb-6">
+            <Link href={`/${locale}`} className="inline-flex items-center gap-3 group mb-6">
               <div className="relative w-10 h-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl blur-md opacity-50 group-hover:opacity-100 transition-opacity" />
                 <div className="relative w-full h-full bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl flex items-center justify-center">
@@ -69,10 +72,10 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { label: t('common.viewAll'), href: '/products' },
-                { label: t('header.newArrivals'), href: '/products?sort=newest' },
-                { label: t('header.bestSellers'), href: '/products?sort=popular' },
-                { label: t('header.deals'), href: '/products?filter=sale' },
+                { label: t('common.viewAll'), href: `/${locale}/products` },
+                { label: t('header.newArrivals'), href: `/${locale}/products?sort=newest` },
+                { label: t('header.bestSellers'), href: `/${locale}/products?sort=popular` },
+                { label: t('header.deals'), href: `/${locale}/products?filter=sale` },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -94,10 +97,10 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { label: t('footer.about'), href: '/about' },
-                { label: t('footer.blog'), href: '/blog' },
-                { label: t('footer.careers'), href: '/careers' },
-                { label: t('footer.contact'), href: '/contact' },
+                { label: t('footer.about'), href: `/${locale}/about` },
+                { label: t('footer.blog'), href: `/${locale}/blog` },
+                { label: t('footer.careers'), href: `/${locale}/careers` },
+                { label: t('footer.contact'), href: `/${locale}/contact` },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -119,10 +122,10 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { label: t('footer.helpCenter'), href: '/help' },
-                { label: t('footer.documentation'), href: '/docs' },
-                { label: t('footer.myAccount'), href: '/account' },
-                { label: t('footer.orderTracking'), href: '/orders' },
+                { label: t('footer.helpCenter'), href: `/${locale}/help` },
+                { label: t('footer.documentation'), href: `/${locale}/docs` },
+                { label: t('footer.myAccount'), href: `/${locale}/account` },
+                { label: t('footer.orderTracking'), href: `/${locale}/orders` },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -159,9 +162,9 @@ export function Footer() {
             {/* Legal Links */}
             <div className="flex items-center gap-6">
               {[
-                { label: t('footer.privacyPolicy'), href: '/privacy' },
-                { label: t('footer.termsOfService'), href: '/terms' },
-                { label: t('footer.legal'), href: '/legal' },
+                { label: t('footer.privacyPolicy'), href: `/${locale}/privacy` },
+                { label: t('footer.termsOfService'), href: `/${locale}/terms` },
+                { label: t('footer.legal'), href: `/${locale}/legal` },
               ].map((link, index) => (
                 <Link
                   key={link.href}

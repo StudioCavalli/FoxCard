@@ -5,6 +5,38 @@ Toutes les modifications notables de FoxCard seront documentées dans ce fichier
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.14.0] - 2025-11-23 🏨 Commerce-Type Specific Features (M14)
+
+### ✨ Ajouté
+- **Gestion des Tables Restaurant** (`/merchant/tables`)
+  - Grille visuelle avec statut couleur (libre, occupé, réservé, nettoyage)
+  - Statistiques en temps réel (tables libres, occupées, revenue)
+  - CRUD complet avec capacité et emplacement
+  - Changement de statut rapide via dropdown
+- **Paramètres de Livraison** (`/merchant/delivery`)
+  - Configuration zone de livraison
+  - Frais de livraison et minimum de commande
+  - Créneaux horaires personnalisables
+  - Modes de livraison multiples (livraison, click & collect, dine-in)
+- **Améliorations Storefront**
+  - Page Hôtel avec attributs dynamiques (roomType, capacity, amenities, cancellationPolicy)
+  - Page Restaurant avec modificateurs depuis la base de données
+  - Support complet des options produit pour tous les types de commerce
+
+### 🔧 Corrigé
+- **Fix persistance de langue (i18n)** - IMPORTANT
+  - Correction des liens sans préfixe locale dans tous les composants
+  - Header, Footer, CartDrawer, PublicStoreSelector, BookingConfirmation
+  - Toutes les pages produit (Standard, Restaurant, Hotel, Digital, Travel, Service)
+  - Ajout du sélecteur de langue dans MerchantHeader et SuperAdminHeader
+  - La langue persiste maintenant correctement lors de la navigation
+
+### 📚 Documentation
+- Traductions i18n ajoutées pour tables et livraison (5 langues)
+- Traductions hôtel complètes (roomType, checkIn/Out, cancellationPolicy)
+
+---
+
 ## [1.0.0] - 2025-01-11 🎉 Production Ready
 
 ### ✨ Ajouté

@@ -3,6 +3,7 @@
 import { X, Minus, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useUIStore } from '@/lib/store/ui'
 import { useCartStore } from '@/lib/store/cart'
 import { Button } from '@/components/ui/Button'
@@ -14,6 +15,8 @@ export function CartDrawer() {
   const { isCartOpen, closeCart } = useUIStore()
   const { items, updateQuantity, removeItem, getTotalPrice, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
   const t = useTranslations()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   // Close cart on escape key
   useEffect(() => {
@@ -151,7 +154,7 @@ export function CartDrawer() {
 
             {/* Actions */}
             <div className="space-y-2">
-              <Link href="/checkout" onClick={closeCart} className="block">
+              <Link href={`/${locale}/checkout`} onClick={closeCart} className="block">
                 <Button variant="primary" size="lg" className="w-full">
                   {t('cart.proceedToCheckout')}
                 </Button>

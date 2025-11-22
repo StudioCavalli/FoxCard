@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/lib/store/cart'
@@ -31,6 +31,8 @@ interface TimeSlot {
 
 export function ServiceBookingPage({ product }: ServiceBookingPageProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
   const t = useTranslations()
   const addItem = useCartStore((state) => state.addItem)
 
@@ -126,7 +128,7 @@ export function ServiceBookingPage({ product }: ServiceBookingPageProps) {
         duration,
       },
     })
-    router.push('/cart')
+    router.push(`/${locale}/cart`)
   }
 
   const formatDuration = (minutes: number) => {
@@ -141,7 +143,7 @@ export function ServiceBookingPage({ product }: ServiceBookingPageProps) {
       <div className="mx-auto px-6 lg:px-8 py-12" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
         {/* Back Button */}
         <Link
-          href="/products"
+          href={`/${locale}/products`}
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-8 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />

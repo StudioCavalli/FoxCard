@@ -1,9 +1,10 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Bell, Search, ChevronRight, Home, ExternalLink } from 'lucide-react'
+import { LanguageSelector } from '@/components/i18n/LanguageSelector'
 
 // Map paths to readable names
 const pathNames: Record<string, string> = {
@@ -33,6 +34,8 @@ const isIdSegment = (segment: string): boolean => {
 export function SuperAdminHeader() {
   const { data: session } = useSession()
   const pathname = usePathname()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   // Generate breadcrumbs
   const getBreadcrumbs = () => {
@@ -82,7 +85,7 @@ export function SuperAdminHeader() {
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 mb-0.5">
           <Link
-            href="/superadmin"
+            href={`/${locale}/superadmin`}
             className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           >
             <Home className="w-3.5 h-3.5" />
@@ -129,13 +132,18 @@ export function SuperAdminHeader() {
       <div className="flex items-center gap-2">
         {/* View Site Link */}
         <Link
-          href="/"
+          href={`/${locale}`}
           target="_blank"
           className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
           <span>Voir le site</span>
         </Link>
+
+        {/* Language Selector */}
+        <div className="hidden sm:block">
+          <LanguageSelector variant="compact" />
+        </div>
 
         {/* Notifications */}
         <button className="relative p-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">
