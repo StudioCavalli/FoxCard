@@ -36,6 +36,10 @@ model Store {
   settings    Json?    // Flexible settings object
   theme       Json?    // Theme customization
 
+  // Restaurant/Business hours
+  openingHours Json?   // Weekly schedule { monday: { open, close, closed }, ... }
+  specialDates Json?   // Special dates/holidays [{ date, name, closed, hours }]
+
   // Storefront content (for public pages)
   tagline       String?   // Short tagline for hero section
   bannerImage   String?   // Banner/hero image URL
