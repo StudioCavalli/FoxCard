@@ -45,6 +45,8 @@ import { hotelRouter } from './hotel'
 import { travelRouter } from './travel'
 import { subscriptionRouter } from './subscription'
 import { legalRouter } from './legal'
+import { recreationRouter } from './recreation'
+import { alcoholRouter } from './alcohol'
 
 export const appRouter = router({
   product: productRouter,
@@ -93,6 +95,8 @@ export const appRouter = router({
   travel: travelRouter,
   subscription: subscriptionRouter,
   legal: legalRouter,
+  recreation: recreationRouter,
+  alcohol: alcoholRouter,
 })
 
 export type AppRouter = typeof appRouter
