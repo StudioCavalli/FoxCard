@@ -1242,14 +1242,88 @@
         "infoTitle": "Comment ça fonctionne",
         "infoDescription": "Les créneaux définissent les heures auxquelles vos clients peuvent commander. La capacité limite le nombre de commandes par créneau pour garantir la qualité de service."
       },
+      "loyalty": {
+        "title": "Programme de fidélité",
+        "subtitle": "Gérez votre programme de fidélité et vos membres",
+        "stats": {
+          "totalMembers": "Membres total",
+          "totalPoints": "Points en circulation",
+          "goldMembers": "Membres Gold",
+          "silverMembers": "Membres Silver"
+        },
+        "settings": {
+          "title": "Configuration du programme",
+          "pointsPerEuro": "Points par euro",
+          "pointsPerEuroDesc": "Points gagnés pour chaque euro dépensé",
+          "signupBonus": "Bonus inscription",
+          "signupBonusDesc": "Points offerts à l'inscription",
+          "pointsExpiry": "Expiration des points",
+          "pointsExpiryDesc": "Durée de validité des points",
+          "months": "mois",
+          "tiers": "Niveaux de fidélité"
+        },
+        "members": {
+          "title": "Membres du programme",
+          "customer": "Client",
+          "tier": "Niveau",
+          "points": "Points",
+          "totalEarned": "Total gagné",
+          "actions": "Actions",
+          "allTiers": "Tous les niveaux",
+          "search": "Rechercher un membre...",
+          "addPoints": "Ajouter des points",
+          "removePoints": "Retirer des points",
+          "noMembers": "Aucun membre",
+          "noMembersDesc": "Les clients s'inscriront automatiquement au programme"
+        },
+        "adjust": {
+          "title": "Ajuster les points",
+          "currentBalance": "Solde actuel",
+          "points": "Points à ajouter/retirer",
+          "pointsPlaceholder": "ex: 100 ou -50",
+          "pointsHint": "Utilisez un nombre négatif pour retirer des points",
+          "reason": "Raison de l'ajustement",
+          "reasonPlaceholder": "ex: Geste commercial, Erreur...",
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
+        }
+      },
       "hours": {
         "title": "Horaires d'ouverture",
-        "dayOfWeek": "Jour",
-        "openTime": "Ouverture",
-        "closeTime": "Fermeture",
+        "subtitle": "Définissez vos heures d'ouverture et jours fériés",
+        "weeklySchedule": "Horaires hebdomadaires",
+        "open": "Ouvert",
         "closed": "Fermé",
-        "lastOrder": "Dernière commande",
-        "specialDates": "Dates spéciales"
+        "today": "Aujourd'hui",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Enregistré !",
+        "cancel": "Annuler",
+        "days": {
+          "monday": "Lundi",
+          "tuesday": "Mardi",
+          "wednesday": "Mercredi",
+          "thursday": "Jeudi",
+          "friday": "Vendredi",
+          "saturday": "Samedi",
+          "sunday": "Dimanche"
+        },
+        "specialDates": {
+          "title": "Dates spéciales",
+          "description": "Définissez des horaires exceptionnels pour les jours fériés ou événements",
+          "add": "Ajouter",
+          "addTitle": "Ajouter une date spéciale",
+          "addButton": "Ajouter la date",
+          "date": "Date",
+          "name": "Nom de l'événement",
+          "namePlaceholder": "ex: Noël, Jour de l'an, Fermeture annuelle...",
+          "openOnDate": "Ouvert ce jour",
+          "openOnDateDesc": "L'établissement sera ouvert avec des horaires spéciaux",
+          "openTime": "Heure d'ouverture",
+          "closeTime": "Heure de fermeture",
+          "empty": "Aucune date spéciale",
+          "emptyDesc": "Ajoutez des jours fériés ou événements spéciaux"
+        }
       }
     },
     "travel": {

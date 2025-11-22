@@ -1175,14 +1175,88 @@
         "infoTitle": "Ako to funguje",
         "infoDescription": "Časové okná definujú, kedy môžu vaši zákazníci objednávať. Kapacita obmedzuje počet objednávok na časové okno pre zabezpečenie kvality služieb."
       },
+      "loyalty": {
+        "title": "Vernostný program",
+        "subtitle": "Spravujte svoj vernostný program a členov",
+        "stats": {
+          "totalMembers": "Celkom členov",
+          "totalPoints": "Body v obehu",
+          "goldMembers": "Gold členovia",
+          "silverMembers": "Silver členovia"
+        },
+        "settings": {
+          "title": "Nastavenia programu",
+          "pointsPerEuro": "Body za euro",
+          "pointsPerEuroDesc": "Body získané za každé minuté euro",
+          "signupBonus": "Bonus za registráciu",
+          "signupBonusDesc": "Body udelené pri registrácii",
+          "pointsExpiry": "Expirácia bodov",
+          "pointsExpiryDesc": "Doba platnosti bodov",
+          "months": "mesiacov",
+          "tiers": "Úrovne vernosti"
+        },
+        "members": {
+          "title": "Členovia programu",
+          "customer": "Zákazník",
+          "tier": "Úroveň",
+          "points": "Body",
+          "totalEarned": "Celkom získaných",
+          "actions": "Akcie",
+          "allTiers": "Všetky úrovne",
+          "search": "Hľadať člena...",
+          "addPoints": "Pridať body",
+          "removePoints": "Odobrať body",
+          "noMembers": "Žiadni členovia",
+          "noMembersDesc": "Zákazníci sa automaticky pridajú do programu"
+        },
+        "adjust": {
+          "title": "Upraviť body",
+          "currentBalance": "Aktuálny zostatok",
+          "points": "Body na pridanie/odobratie",
+          "pointsPlaceholder": "napr.: 100 alebo -50",
+          "pointsHint": "Použite záporné číslo na odobratie bodov",
+          "reason": "Dôvod úpravy",
+          "reasonPlaceholder": "napr.: Dobrá vôľa, Oprava chyby...",
+          "cancel": "Zrušiť",
+          "confirm": "Potvrdiť"
+        }
+      },
       "hours": {
-        "title": "Opening hours",
-        "dayOfWeek": "Day",
-        "openTime": "Opening",
-        "closeTime": "Closing",
-        "closed": "Closed",
-        "lastOrder": "Last order",
-        "specialDates": "Special dates"
+        "title": "Otváracie hodiny",
+        "subtitle": "Nastavte otváracie hodiny a sviatky",
+        "weeklySchedule": "Týždenný rozvrh",
+        "open": "Otvorené",
+        "closed": "Zatvorené",
+        "today": "Dnes",
+        "save": "Uložiť",
+        "saving": "Ukladám...",
+        "saved": "Uložené!",
+        "cancel": "Zrušiť",
+        "days": {
+          "monday": "Pondelok",
+          "tuesday": "Utorok",
+          "wednesday": "Streda",
+          "thursday": "Štvrtok",
+          "friday": "Piatok",
+          "saturday": "Sobota",
+          "sunday": "Nedeľa"
+        },
+        "specialDates": {
+          "title": "Špeciálne dátumy",
+          "description": "Nastavte výnimočné hodiny pre sviatky alebo udalosti",
+          "add": "Pridať",
+          "addTitle": "Pridať špeciálny dátum",
+          "addButton": "Pridať dátum",
+          "date": "Dátum",
+          "name": "Názov udalosti",
+          "namePlaceholder": "napr.: Vianoce, Nový rok, Ročná dovolenka...",
+          "openOnDate": "Otvorené v tento deň",
+          "openOnDateDesc": "Prevádzka bude otvorená so špeciálnymi hodinami",
+          "openTime": "Čas otvorenia",
+          "closeTime": "Čas zatvorenia",
+          "empty": "Žiadne špeciálne dátumy",
+          "emptyDesc": "Pridajte sviatky alebo špeciálne udalosti"
+        }
       }
     },
     "travel": {

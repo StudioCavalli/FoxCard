@@ -1175,14 +1175,88 @@
         "infoTitle": "Cómo funciona",
         "infoDescription": "Las franjas definen cuándo pueden pedir tus clientes. La capacidad limita el número de pedidos por franja para garantizar la calidad del servicio."
       },
+      "loyalty": {
+        "title": "Programa de Fidelidad",
+        "subtitle": "Gestione su programa de fidelidad y miembros",
+        "stats": {
+          "totalMembers": "Miembros totales",
+          "totalPoints": "Puntos en circulación",
+          "goldMembers": "Miembros Gold",
+          "silverMembers": "Miembros Silver"
+        },
+        "settings": {
+          "title": "Configuración del programa",
+          "pointsPerEuro": "Puntos por euro",
+          "pointsPerEuroDesc": "Puntos ganados por cada euro gastado",
+          "signupBonus": "Bonus de registro",
+          "signupBonusDesc": "Puntos ofrecidos al registrarse",
+          "pointsExpiry": "Caducidad de puntos",
+          "pointsExpiryDesc": "Duración de validez de los puntos",
+          "months": "meses",
+          "tiers": "Niveles de fidelidad"
+        },
+        "members": {
+          "title": "Miembros del programa",
+          "customer": "Cliente",
+          "tier": "Nivel",
+          "points": "Puntos",
+          "totalEarned": "Total ganado",
+          "actions": "Acciones",
+          "allTiers": "Todos los niveles",
+          "search": "Buscar miembro...",
+          "addPoints": "Añadir puntos",
+          "removePoints": "Quitar puntos",
+          "noMembers": "Sin miembros",
+          "noMembersDesc": "Los clientes se unirán automáticamente al programa"
+        },
+        "adjust": {
+          "title": "Ajustar puntos",
+          "currentBalance": "Saldo actual",
+          "points": "Puntos a añadir/quitar",
+          "pointsPlaceholder": "ej.: 100 o -50",
+          "pointsHint": "Use un número negativo para quitar puntos",
+          "reason": "Razón del ajuste",
+          "reasonPlaceholder": "ej.: Gesto comercial, Error...",
+          "cancel": "Cancelar",
+          "confirm": "Confirmar"
+        }
+      },
       "hours": {
-        "title": "Opening hours",
-        "dayOfWeek": "Day",
-        "openTime": "Opening",
-        "closeTime": "Closing",
-        "closed": "Closed",
-        "lastOrder": "Last order",
-        "specialDates": "Special dates"
+        "title": "Horario de apertura",
+        "subtitle": "Defina sus horarios de apertura y festivos",
+        "weeklySchedule": "Horario semanal",
+        "open": "Abierto",
+        "closed": "Cerrado",
+        "today": "Hoy",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "saved": "¡Guardado!",
+        "cancel": "Cancelar",
+        "days": {
+          "monday": "Lunes",
+          "tuesday": "Martes",
+          "wednesday": "Miércoles",
+          "thursday": "Jueves",
+          "friday": "Viernes",
+          "saturday": "Sábado",
+          "sunday": "Domingo"
+        },
+        "specialDates": {
+          "title": "Fechas especiales",
+          "description": "Defina horarios excepcionales para festivos o eventos",
+          "add": "Añadir",
+          "addTitle": "Añadir fecha especial",
+          "addButton": "Añadir fecha",
+          "date": "Fecha",
+          "name": "Nombre del evento",
+          "namePlaceholder": "ej.: Navidad, Año Nuevo, Cierre anual...",
+          "openOnDate": "Abierto este día",
+          "openOnDateDesc": "El establecimiento estará abierto con horario especial",
+          "openTime": "Hora de apertura",
+          "closeTime": "Hora de cierre",
+          "empty": "Sin fechas especiales",
+          "emptyDesc": "Añada festivos o eventos especiales"
+        }
       }
     },
     "travel": {
