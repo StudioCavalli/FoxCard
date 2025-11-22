@@ -745,6 +745,30 @@
       "vintages": "Jahrgänge",
       "inventory": "Inventar",
       "compliance": "Compliance"
+    },
+    "dashboard": {
+      "occupancyRate": "Auslastung",
+      "todayCheckIns": "Check-ins heute",
+      "todayCheckOuts": "Check-outs heute",
+      "availableRooms": "Verfügbare Zimmer",
+      "todayRevenue": "Umsatz heute",
+      "ordersToday": "Bestellungen heute",
+      "inPreparation": "In Vorbereitung",
+      "avgTime": "Durchschnittszeit",
+      "monthlyBookings": "Buchungen diesen Monat",
+      "weeklyDepartures": "Abfahrten diese Woche",
+      "travelingPassengers": "Reisende Passagiere",
+      "monthlyRevenue": "Monatsumsatz",
+      "downloads": "Downloads",
+      "activeProducts": "Aktive Produkte",
+      "conversionRate": "Konversionsrate",
+      "todayReservations": "Reservierungen heute",
+      "expectedParticipants": "Erwartete Teilnehmer",
+      "activeEvents": "Aktive Events",
+      "dailyRevenue": "Tagesumsatz",
+      "cellarReferences": "Kellerreferenzen",
+      "pendingOrders": "Ausstehende Bestellungen",
+      "vsLastMonth": "vs letzter Monat"
     }
   },
   "superadmin": {

@@ -746,6 +746,30 @@
       "vintages": "Vintages",
       "inventory": "Inventory",
       "compliance": "Compliance"
+    },
+    "dashboard": {
+      "occupancyRate": "Occupancy rate",
+      "todayCheckIns": "Today's check-ins",
+      "todayCheckOuts": "Today's check-outs",
+      "availableRooms": "Available rooms",
+      "todayRevenue": "Today's revenue",
+      "ordersToday": "Today's orders",
+      "inPreparation": "In preparation",
+      "avgTime": "Average time",
+      "monthlyBookings": "Monthly bookings",
+      "weeklyDepartures": "Weekly departures",
+      "travelingPassengers": "Traveling passengers",
+      "monthlyRevenue": "Monthly revenue",
+      "downloads": "Downloads",
+      "activeProducts": "Active products",
+      "conversionRate": "Conversion rate",
+      "todayReservations": "Today's reservations",
+      "expectedParticipants": "Expected participants",
+      "activeEvents": "Active events",
+      "dailyRevenue": "Daily revenue",
+      "cellarReferences": "Cellar references",
+      "pendingOrders": "Pending orders",
+      "vsLastMonth": "vs last month"
     }
   },
   "superadmin": {

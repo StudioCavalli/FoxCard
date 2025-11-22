@@ -745,6 +745,30 @@
       "vintages": "Ročníky",
       "inventory": "Inventár",
       "compliance": "Súlad"
+    },
+    "dashboard": {
+      "occupancyRate": "Obsadenosť",
+      "todayCheckIns": "Príchody dnes",
+      "todayCheckOuts": "Odchody dnes",
+      "availableRooms": "Dostupné izby",
+      "todayRevenue": "Dnešné tržby",
+      "ordersToday": "Dnešné objednávky",
+      "inPreparation": "V príprave",
+      "avgTime": "Priemerný čas",
+      "monthlyBookings": "Mesačné rezervácie",
+      "weeklyDepartures": "Týždenné odchody",
+      "travelingPassengers": "Cestujúci pasažieri",
+      "monthlyRevenue": "Mesačné tržby",
+      "downloads": "Stiahnutia",
+      "activeProducts": "Aktívne produkty",
+      "conversionRate": "Miera konverzie",
+      "todayReservations": "Dnešné rezervácie",
+      "expectedParticipants": "Očakávaní účastníci",
+      "activeEvents": "Aktívne udalosti",
+      "dailyRevenue": "Denné tržby",
+      "cellarReferences": "Referencie v pivnici",
+      "pendingOrders": "Čakajúce objednávky",
+      "vsLastMonth": "vs minulý mesiac"
     }
   },
   "superadmin": {
