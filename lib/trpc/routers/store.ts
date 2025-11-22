@@ -300,6 +300,9 @@ export const storeRouter = router({
         domain: z.string().optional(),
         settings: z.any().optional(),
         theme: z.any().optional(),
+        // Restaurant/Business hours
+        openingHours: z.any().optional(),
+        specialDates: z.any().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

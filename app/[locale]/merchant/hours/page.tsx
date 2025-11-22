@@ -120,7 +120,7 @@ export default function MerchantHoursPage() {
     setIsSaving(true)
 
     updateStore.mutate({
-      id: storeId,
+      storeId: storeId,
       openingHours: JSON.stringify({ schedule, specialDates })
     })
   }
@@ -211,7 +211,7 @@ export default function MerchantHoursPage() {
                   {t(`days.${key}`)}
                 </span>
                 {isToday(key) && (
-                  <AdminBadge variant="primary" size="sm">{t('today')}</AdminBadge>
+                  <AdminBadge variant="purple" size="sm">{t('today')}</AdminBadge>
                 )}
               </div>
 
@@ -303,7 +303,7 @@ export default function MerchantHoursPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <AdminBadge variant={specialDate.isOpen ? 'success' : 'error'}>
+                  <AdminBadge variant={specialDate.isOpen ? 'success' : 'danger'}>
                     {specialDate.isOpen ? t('open') : t('closed')}
                   </AdminBadge>
                   <button

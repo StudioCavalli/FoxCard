@@ -195,14 +195,14 @@ export function RestaurantMenuPage({ product }: RestaurantMenuPageProps) {
       if (!group) return
 
       optionIds.forEach(optionId => {
-        const modifier = group.modifiers.find(m => m.id === optionId)
+        const modifier = group.options.find(m => m.id === optionId)
         if (modifier) {
           fullModifierData.push({
             groupId: group.id,
             groupName: group.name,
             modifierId: modifier.id,
             modifierName: modifier.name,
-            price: modifier.priceAdjustment,
+            price: modifier.price,
             quantity: 1,
           })
         }
