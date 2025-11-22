@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, Calendar, Mail, Download, MapPin, Clock, Users, FileText } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -45,6 +46,8 @@ export function BookingConfirmation({
   className,
 }: BookingConfirmationProps) {
   const t = useTranslations('booking')
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   const totalGuests = guests
     ? guests.adults + (guests.children || 0) + (guests.infants || 0)
@@ -196,7 +199,7 @@ export function BookingConfirmation({
             </button>
           )}
           <Link
-            href="/account"
+            href={`/${locale}/account`}
             className="flex-1 px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-white rounded-xl font-medium text-center transition-colors"
           >
             {t('viewBookings')}

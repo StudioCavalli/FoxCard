@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import { Store, ChevronDown, X } from 'lucide-react'
 import { usePublicStore } from '@/lib/context/public-store-context'
 import Link from 'next/link'
@@ -8,6 +9,8 @@ import Link from 'next/link'
 export function PublicStoreSelector() {
   const [isOpen, setIsOpen] = useState(false)
   const { selectedStore, setSelectedStore, stores, isLoading } = usePublicStore()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   const currentStore = stores.find(s => s.id === selectedStore)
 
@@ -119,7 +122,7 @@ export function PublicStoreSelector() {
             {/* Footer */}
             <div className="p-3 border-t border-theme-border bg-theme-background/50">
               <Link
-                href="/stores"
+                href={`/${locale}/stores`}
                 onClick={() => setIsOpen(false)}
                 className="block w-full text-center px-4 py-2 text-sm font-medium text-theme-primary hover:bg-theme-primary/10 rounded-lg transition-colors"
               >

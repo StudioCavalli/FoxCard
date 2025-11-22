@@ -23,6 +23,7 @@ import {
 import { useStoreContext } from '@/lib/context/store-context'
 import { useSidebar } from '@/lib/context/sidebar-context'
 import { trpc } from '@/lib/trpc/client'
+import { LanguageSelector } from '@/components/i18n/LanguageSelector'
 
 // Map paths to readable names
 const pathNames: Record<string, string> = {
@@ -181,6 +182,11 @@ export function MerchantHeader() {
             <span className="hidden lg:inline">{t('header.viewStore')}</span>
           </Link>
         )}
+
+        {/* Language Selector */}
+        <div className="hidden sm:block">
+          <LanguageSelector variant="compact" />
+        </div>
 
         {/* Notifications */}
         <div className="relative">

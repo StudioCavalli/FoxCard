@@ -1,6 +1,6 @@
 # 🌟 GoldenEra - E-commerce Open Source
 
-**Version 1.0.0** 🎉 Production Ready
+**Version 1.14.0** 🏨 Commerce-Type Specific Features (M14)
 
 Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. GoldenEra est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 

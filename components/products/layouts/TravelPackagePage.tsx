@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/lib/store/cart'
@@ -18,6 +18,8 @@ interface TravelPackagePageProps {
 
 export function TravelPackagePage({ product }: TravelPackagePageProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
   const t = useTranslations()
   const addItem = useCartStore((state) => state.addItem)
 
@@ -102,7 +104,7 @@ export function TravelPackagePage({ product }: TravelPackagePageProps) {
         destination,
       },
     })
-    router.push('/cart')
+    router.push(`/${locale}/cart`)
   }
 
   return (
@@ -120,7 +122,7 @@ export function TravelPackagePage({ product }: TravelPackagePageProps) {
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="mx-auto" style={{ maxWidth: 'var(--theme-container-max-width)' }}>
             <Link
-              href="/products"
+              href={`/${locale}/products`}
               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />

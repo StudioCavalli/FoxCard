@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Menu, X, User, ShoppingBag, Search } from 'lucide-react'
 import { useUIStore } from '@/lib/store/ui'
@@ -18,6 +19,8 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const t = useTranslations()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,7 +48,7 @@ export function Header() {
 
             {/* Logo with premium animation */}
             <Link
-              href="/"
+              href={`/${locale}`}
               className="flex items-center gap-3 group relative z-10"
             >
               <div className={`relative transition-all duration-300 ${
@@ -71,9 +74,9 @@ export function Header() {
             {/* Desktop Navigation - Simplified */}
             <nav className="hidden lg:flex items-center gap-1">
               {[
-                { href: '/', label: t('common.home') },
-                { href: '/stores', label: t('store.title') },
-                { href: '/categories', label: t('common.categories') },
+                { href: `/${locale}`, label: t('common.home') },
+                { href: `/${locale}/stores`, label: t('store.title') },
+                { href: `/${locale}/categories`, label: t('common.categories') },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -103,13 +106,13 @@ export function Header() {
 
               {/* User */}
               {session ? (
-                <Link href="/account" className="hidden md:block">
+                <Link href={`/${locale}/account`} className="hidden md:block">
                   <button className="relative p-2.5 text-theme-text-secondary hover:text-theme-primary bg-theme-surface/50 hover:bg-theme-surface border border-theme-border rounded-full transition-all duration-200 hover:scale-105 active:scale-95">
                     <User className="w-5 h-5" strokeWidth={2} />
                   </button>
                 </Link>
               ) : (
-                <Link href="/auth/login" className="hidden md:block">
+                <Link href={`/${locale}/auth/login`} className="hidden md:block">
                   <button className="px-4 py-2 text-sm font-medium text-theme-text-secondary hover:text-theme-primary bg-theme-surface/50 hover:bg-theme-surface border border-theme-border rounded-full transition-all duration-200 hover:scale-105 active:scale-95">
                     {t('common.login')}
                   </button>
@@ -165,10 +168,10 @@ export function Header() {
               {/* Navigation - Mobile Simplified */}
               <nav className="flex-1 space-y-1">
                 {[
-                  { href: '/', label: t('common.home') },
-                  { href: '/stores', label: t('store.title') },
-                  { href: '/categories', label: t('common.categories') },
-                  session ? { href: '/account', label: t('common.account') } : { href: '/auth/login', label: t('common.login') },
+                  { href: `/${locale}`, label: t('common.home') },
+                  { href: `/${locale}/stores`, label: t('store.title') },
+                  { href: `/${locale}/categories`, label: t('common.categories') },
+                  session ? { href: `/${locale}/account`, label: t('common.account') } : { href: `/${locale}/auth/login`, label: t('common.login') },
                 ].map((item) => (
                   <Link
                     key={item.href}
