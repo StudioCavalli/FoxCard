@@ -45,7 +45,7 @@ export function LanguageSelector({ position = 'bottom', variant = 'default' }: L
 
   const switchLocale = (newLocale: Locale) => {
     // Save locale preference in cookie (expires in 1 year)
-    Cookies.set('NEXT_LOCALE', newLocale, { expires: 365, path: '/' })
+    Cookies.set('NEXT_LOCALE', newLocale, { expires: 365, path: '/', sameSite: 'lax' })
 
     // Get the current path without the locale prefix
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
