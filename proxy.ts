@@ -36,11 +36,12 @@ const countryToLocale: Record<string, Locale> = {
   IE: 'en',
 }
 
-// Create i18n middleware
+// Create i18n middleware with cookie configuration
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
   localePrefix: 'always',
+  localeDetection: false, // Disable automatic detection - we handle it ourselves
 })
 
 // Simple in-memory cache for maintenance mode
@@ -217,6 +218,22 @@ export default withAuth(
     }
 
     // Handle i18n routing
+    // When user navigates with locale in URL, save it to cookie (explicit choice)
+    const currentLocale = pathname.split('/')[1] as Locale
+    const savedLocale = req.cookies.get('NEXT_LOCALE')?.value as Locale | undefined
+
+    // If the URL locale differs from saved cookie, update the cookie
+    // This happens when user clicks a locale link or changes language
+    if (locales.includes(currentLocale) && currentLocale !== savedLocale) {
+      const response = intlMiddleware(req)
+      response.cookies.set('NEXT_LOCALE', currentLocale, {
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+        path: '/',
+        sameSite: 'lax',
+      })
+      return response
+    }
+
     return intlMiddleware(req)
   },
   {

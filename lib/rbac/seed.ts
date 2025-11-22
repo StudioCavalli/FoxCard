@@ -110,6 +110,31 @@ export async function getUserPermissions(
   storeId: string,
   prisma: PrismaClient
 ): Promise<string[]> {
+  // First check if user is SUPER_ADMIN - they have all permissions
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  })
+
+  if (user?.role === 'SUPER_ADMIN') {
+    // SUPER_ADMIN has all permissions
+    const { ALL_PERMISSIONS } = await import('./roles')
+    return ALL_PERMISSIONS
+  }
+
+  // Check if user is the store owner
+  const store = await prisma.store.findUnique({
+    where: { id: storeId },
+    select: { ownerId: true },
+  })
+
+  if (store?.ownerId === userId) {
+    // Store owner has all permissions
+    const { ALL_PERMISSIONS } = await import('./roles')
+    return ALL_PERMISSIONS
+  }
+
+  // Check StoreUser for assigned role permissions
   const storeUser = await prisma.storeUser.findUnique({
     where: {
       userId_storeId: {
