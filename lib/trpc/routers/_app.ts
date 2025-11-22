@@ -37,6 +37,7 @@ import { crsdpayRouter } from './crsdpay'
 import { commerceTypeRouter } from './commerce-type'
 import { paymentGatewayRouter } from './payment-gateway'
 import { superadminRouter } from './superadmin'
+import { teamRouter } from './team'
 import { digitalRouter } from './digital'
 import { bookingRouter } from './booking'
 import { restaurantRouter } from './restaurant'
@@ -84,6 +85,7 @@ export const appRouter = router({
   commerceType: commerceTypeRouter,
   paymentGateway: paymentGatewayRouter,
   superadmin: superadminRouter,
+  team: teamRouter,
   digital: digitalRouter,
   booking: bookingRouter,
   restaurant: restaurantRouter,

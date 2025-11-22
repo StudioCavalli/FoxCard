@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, Suspense, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, ArrowLeft, AlertCircle, AlertTriangle } from 'lucide-react'
 import { usePlatformName, usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
@@ -11,10 +11,12 @@ import { useTranslations } from 'next-intl'
 function LoginForm() {
   const t = useTranslations()
   const router = useRouter()
+  const params = useParams()
   const searchParams = useSearchParams()
   const platformName = usePlatformName()
   const { settings } = usePlatformSettings()
-  const from = searchParams.get('from') || '/account'
+  const locale = params?.locale || 'fr'
+  const from = searchParams.get('from')
   const registered = searchParams.get('registered') === 'true'
 
   const [formData, setFormData] = useState({
@@ -45,7 +47,31 @@ function LoginForm() {
       if (result?.error) {
         setError(t('auth.invalidCredentials'))
       } else {
-        router.push(from)
+        // Get the session to determine the user's role
+        const session = await getSession()
+        const userRole = session?.user?.role as string | undefined
+
+        // Determine redirect URL based on role
+        let redirectUrl: string
+
+        if (from) {
+          // If there's a "from" parameter, use it (deep linking)
+          redirectUrl = from
+        } else {
+          // Redirect based on role
+          switch (userRole) {
+            case 'SUPER_ADMIN':
+              redirectUrl = `/${locale}/superadmin`
+              break
+            case 'ADMIN':
+              redirectUrl = `/${locale}/merchant`
+              break
+            default:
+              redirectUrl = `/${locale}/account`
+          }
+        }
+
+        router.push(redirectUrl)
         router.refresh()
       }
     } catch (error) {
