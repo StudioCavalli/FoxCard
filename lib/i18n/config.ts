@@ -4,8 +4,8 @@ import { getRequestConfig } from 'next-intl/server'
 export const locales = ['fr', 'en', 'de', 'es', 'sk'] as const
 export type Locale = (typeof locales)[number]
 
-// Default locale
-export const defaultLocale: Locale = 'fr'
+// Default locale - Slovak as primary market
+export const defaultLocale: Locale = 'sk'
 
 // Locale labels for UI
 export const localeLabels: Record<Locale, string> = {

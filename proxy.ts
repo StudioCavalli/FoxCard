@@ -1,7 +1,40 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
-import { locales, defaultLocale } from './lib/i18n/config'
+import { locales, defaultLocale, type Locale } from './lib/i18n/config'
+
+// Country to locale mapping for geo-detection
+const countryToLocale: Record<string, Locale> = {
+  // Slovak-speaking (primary market)
+  SK: 'sk',
+  CZ: 'sk', // Czech - closest to Slovak
+  // French-speaking
+  FR: 'fr',
+  BE: 'fr',
+  CH: 'fr',
+  LU: 'fr',
+  MC: 'fr',
+  // German-speaking
+  DE: 'de',
+  AT: 'de',
+  LI: 'de',
+  // Spanish-speaking
+  ES: 'es',
+  MX: 'es',
+  AR: 'es',
+  CO: 'es',
+  CL: 'es',
+  PE: 'es',
+  VE: 'es',
+  EC: 'es',
+  // English-speaking
+  US: 'en',
+  GB: 'en',
+  CA: 'en',
+  AU: 'en',
+  NZ: 'en',
+  IE: 'en',
+}
 
 // Create i18n middleware
 const intlMiddleware = createMiddleware({
@@ -137,12 +170,50 @@ export default withAuth(
 
     // Check for saved locale preference in cookie when no locale in path
     if (pathnameIsMissingLocale) {
-      const savedLocale = req.cookies.get('NEXT_LOCALE')?.value
-      if (savedLocale && locales.includes(savedLocale as typeof locales[number])) {
-        const url = req.nextUrl.clone()
-        url.pathname = `/${savedLocale}${pathname}`
-        return NextResponse.redirect(url)
+      let detectedLocale: Locale = defaultLocale
+
+      // 1. First priority: Check cookie for user preference
+      const savedLocale = req.cookies.get('NEXT_LOCALE')?.value as Locale | undefined
+      if (savedLocale && locales.includes(savedLocale)) {
+        detectedLocale = savedLocale
+      } else {
+        // 2. Second priority: Detect from country (Vercel geo header)
+        const country = req.headers.get('x-vercel-ip-country') || ''
+        if (country && countryToLocale[country]) {
+          detectedLocale = countryToLocale[country]
+        } else {
+          // 3. Third priority: Check Accept-Language header
+          const acceptLanguage = req.headers.get('accept-language')
+          if (acceptLanguage) {
+            const languages = acceptLanguage.split(',').map((lang) => {
+              const [code] = lang.trim().split(';')
+              return code.split('-')[0].toLowerCase()
+            })
+            for (const lang of languages) {
+              if (locales.includes(lang as Locale)) {
+                detectedLocale = lang as Locale
+                break
+              }
+            }
+          }
+        }
       }
+
+      // Redirect to detected locale
+      const url = req.nextUrl.clone()
+      url.pathname = `/${detectedLocale}${pathname}`
+      const response = NextResponse.redirect(url)
+
+      // Save locale in cookie if not already set (for persistence)
+      if (!savedLocale) {
+        response.cookies.set('NEXT_LOCALE', detectedLocale, {
+          maxAge: 60 * 60 * 24 * 365, // 1 year
+          path: '/',
+          sameSite: 'lax',
+        })
+      }
+
+      return response
     }
 
     // Handle i18n routing
