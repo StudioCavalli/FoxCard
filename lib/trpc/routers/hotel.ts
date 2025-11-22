@@ -735,4 +735,306 @@ export const hotelRouter = router({
         where: { id: input.amenityId },
       })
     }),
+
+  // ============ RESERVATIONS (Prisma) ============
+
+  /**
+   * Get reservations for a date range
+   */
+  getReservations: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      startDate: z.string(),
+      endDate: z.string(),
+      status: z.string().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.hotelReservation.findMany({
+        where: {
+          storeId: input.storeId,
+          checkInDate: { gte: new Date(input.startDate) },
+          checkOutDate: { lte: new Date(input.endDate) },
+          ...(input.status && { status: input.status as any }),
+        },
+        include: {
+          room: {
+            include: { roomType: true },
+          },
+        },
+        orderBy: { checkInDate: 'asc' },
+      })
+    }),
+
+  /**
+   * Get single reservation
+   */
+  getReservation: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      reservationId: z.string(),
+    }))
+    .query(async ({ input, ctx }) => {
+      return ctx.prisma.hotelReservation.findFirst({
+        where: {
+          id: input.reservationId,
+          storeId: input.storeId,
+        },
+        include: {
+          room: {
+            include: { roomType: true },
+          },
+        },
+      })
+    }),
+
+  /**
+   * Get today's check-ins and check-outs
+   */
+  getTodayChecks: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+    }))
+    .query(async ({ input, ctx }) => {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const [arrivals, departures, inHouse] = await Promise.all([
+        // Arrivals today
+        ctx.prisma.hotelReservation.findMany({
+          where: {
+            storeId: input.storeId,
+            checkInDate: { gte: today, lt: tomorrow },
+            status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+          },
+          include: { room: { include: { roomType: true } } },
+          orderBy: { checkInDate: 'asc' },
+        }),
+        // Departures today
+        ctx.prisma.hotelReservation.findMany({
+          where: {
+            storeId: input.storeId,
+            checkOutDate: { gte: today, lt: tomorrow },
+            status: { in: ['CHECKED_IN', 'CHECKED_OUT'] },
+          },
+          include: { room: { include: { roomType: true } } },
+          orderBy: { checkOutDate: 'asc' },
+        }),
+        // Currently in house
+        ctx.prisma.hotelReservation.findMany({
+          where: {
+            storeId: input.storeId,
+            status: 'CHECKED_IN',
+          },
+          include: { room: { include: { roomType: true } } },
+          orderBy: { checkOutDate: 'asc' },
+        }),
+      ])
+
+      return { arrivals, departures, inHouse }
+    }),
+
+  /**
+   * Check-in a reservation
+   */
+  checkInReservation: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      reservationId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.prisma.hotelReservation.update({
+        where: { id: input.reservationId },
+        data: {
+          status: 'CHECKED_IN',
+          actualCheckIn: new Date(),
+          checkedInBy: ctx.session.user.id,
+        },
+      })
+    }),
+
+  /**
+   * Check-out a reservation
+   */
+  checkOutReservation: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      reservationId: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const reservation = await ctx.prisma.hotelReservation.update({
+        where: { id: input.reservationId },
+        data: {
+          status: 'CHECKED_OUT',
+          actualCheckOut: new Date(),
+          checkedOutBy: ctx.session.user.id,
+        },
+      })
+
+      // Update room status to CLEANING
+      await ctx.prisma.hotelRoom.update({
+        where: { id: reservation.roomId },
+        data: { status: 'CLEANING' },
+      })
+
+      return reservation
+    }),
+
+  /**
+   * Create reservation
+   */
+  createReservation: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      roomId: z.string(),
+      checkInDate: z.string(),
+      checkOutDate: z.string(),
+      guestName: z.string(),
+      guestEmail: z.string(),
+      guestPhone: z.string().optional(),
+      adultCount: z.number().default(1),
+      childCount: z.number().default(0),
+      roomRate: z.number(),
+      specialRequests: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const checkIn = new Date(input.checkInDate)
+      const checkOut = new Date(input.checkOutDate)
+      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+      const totalAmount = input.roomRate * nights
+
+      return ctx.prisma.hotelReservation.create({
+        data: {
+          storeId: input.storeId,
+          roomId: input.roomId,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
+          nights,
+          guestName: input.guestName,
+          guestEmail: input.guestEmail,
+          guestPhone: input.guestPhone,
+          guestCount: input.adultCount + input.childCount,
+          adultCount: input.adultCount,
+          childCount: input.childCount,
+          roomRate: input.roomRate,
+          totalAmount,
+          specialRequests: input.specialRequests,
+          status: 'CONFIRMED',
+        },
+        include: { room: { include: { roomType: true } } },
+      })
+    }),
+
+  // ============ GUESTS ============
+
+  /**
+   * Get guests list (aggregated from reservations)
+   */
+  getGuests: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      search: z.string().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      // Get all unique guests from reservations
+      const reservations = await ctx.prisma.hotelReservation.findMany({
+        where: {
+          storeId: input.storeId,
+          ...(input.search && {
+            OR: [
+              { guestName: { contains: input.search, mode: 'insensitive' } },
+              { guestEmail: { contains: input.search, mode: 'insensitive' } },
+              { guestPhone: { contains: input.search } },
+            ],
+          }),
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+
+      // Group by email to get unique guests
+      const guestMap = new Map<string, any>()
+      for (const res of reservations) {
+        const existing = guestMap.get(res.guestEmail)
+        if (existing) {
+          existing.totalStays++
+          existing.totalNights += res.nights
+          existing.totalSpent += res.totalAmount
+          if (new Date(res.checkOutDate) > new Date(existing.lastStay || 0)) {
+            existing.lastStay = res.checkOutDate
+          }
+        } else {
+          guestMap.set(res.guestEmail, {
+            id: res.guestEmail, // Use email as ID for now
+            name: res.guestName,
+            email: res.guestEmail,
+            phone: res.guestPhone,
+            totalStays: 1,
+            totalNights: res.nights,
+            totalSpent: res.totalAmount,
+            lastStay: res.checkOutDate,
+            createdAt: res.createdAt,
+            isVip: false,
+          })
+        }
+      }
+
+      return Array.from(guestMap.values()).sort((a, b) =>
+        new Date(b.lastStay).getTime() - new Date(a.lastStay).getTime()
+      )
+    }),
+
+  /**
+   * Get single guest with history
+   */
+  getGuest: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      guestId: z.string(), // email
+    }))
+    .query(async ({ input, ctx }) => {
+      const reservations = await ctx.prisma.hotelReservation.findMany({
+        where: {
+          storeId: input.storeId,
+          guestEmail: input.guestId,
+        },
+        include: { room: { include: { roomType: true } } },
+        orderBy: { checkInDate: 'desc' },
+      })
+
+      if (reservations.length === 0) return null
+
+      const first = reservations[reservations.length - 1]
+      const last = reservations[0]
+
+      return {
+        id: input.guestId,
+        name: last.guestName,
+        email: last.guestEmail,
+        phone: last.guestPhone,
+        totalStays: reservations.length,
+        totalNights: reservations.reduce((sum, r) => sum + r.nights, 0),
+        totalSpent: reservations.reduce((sum, r) => sum + r.totalAmount, 0),
+        lastStay: last.checkOutDate,
+        createdAt: first.createdAt,
+        isVip: false,
+        reservations,
+        preferences: null,
+        notes: null,
+      }
+    }),
+
+  /**
+   * Toggle guest VIP status (placeholder)
+   */
+  toggleGuestVip: adminProcedure
+    .input(z.object({
+      storeId: z.string(),
+      guestId: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      // In a real implementation, this would update a guest record
+      // For now, we just return success
+      return { success: true }
+    }),
 })
