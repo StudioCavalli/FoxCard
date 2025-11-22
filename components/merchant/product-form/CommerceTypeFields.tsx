@@ -1,7 +1,9 @@
 'use client'
 
 import { CommerceType } from '@/lib/commerce-types'
-import { AlertTriangle, Wine, Utensils, Shirt, Cpu, Sparkles, Download, CalendarCheck, Building2, Plane, Ticket, ChefHat } from 'lucide-react'
+import { AlertTriangle, Wine, Utensils, Shirt, Cpu, Sparkles, Download, CalendarCheck, Building2, Plane, Ticket, ChefHat, Settings2, Check, X } from 'lucide-react'
+import { trpc } from '@/lib/trpc/client'
+import { useStoreContext } from '@/lib/context/store-context'
 
 // Types for commerce-specific attributes
 export interface CommerceTypeFieldsProps {
@@ -613,7 +615,22 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
 
 // Restaurant Fields
 function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'commerceType'>) {
+  const { storeId } = useStoreContext()
   const allergens = (attributes.allergens as string[]) || []
+  const selectedModifierGroups = (attributes.modifierGroupIds as string[]) || []
+
+  // Fetch available modifier groups
+  const { data: modifierGroups } = trpc.restaurant.getModifierGroups.useQuery(
+    { storeId: storeId! },
+    { enabled: !!storeId }
+  )
+
+  const toggleModifierGroup = (groupId: string) => {
+    const newSelection = selectedModifierGroups.includes(groupId)
+      ? selectedModifierGroups.filter(id => id !== groupId)
+      : [...selectedModifierGroups, groupId]
+    onChange({ ...attributes, modifierGroupIds: newSelection })
+  }
 
   return (
     <div className="space-y-4">
@@ -694,6 +711,58 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           <span className="text-sm">Épicé</span>
         </label>
       </div>
+
+      {/* Modifier Groups Selection */}
+      {modifierGroups && modifierGroups.length > 0 && (
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400 mb-3">
+            <Settings2 className="w-5 h-5" />
+            <span className="font-medium">Options & Suppléments</span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+            Sélectionnez les groupes de modificateurs disponibles pour ce plat
+          </p>
+          <div className="space-y-2">
+            {modifierGroups.map((group) => (
+              <label
+                key={group.id}
+                className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
+                  selectedModifierGroups.includes(group.id)
+                    ? 'bg-violet-50 dark:bg-violet-500/10 border-2 border-violet-500'
+                    : 'bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedModifierGroups.includes(group.id)}
+                    onChange={() => toggleModifierGroup(group.id)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                    selectedModifierGroups.includes(group.id)
+                      ? 'bg-violet-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700'
+                  }`}>
+                    {selectedModifierGroups.includes(group.id) && <Check className="w-3 h-3" />}
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">{group.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {group.selectionType === 'SINGLE' ? 'Choix unique' : group.selectionType === 'MULTIPLE' ? 'Choix multiple' : 'Quantité'}
+                      {group.isRequired && ' • Obligatoire'}
+                      {' • '}{group.modifiers?.length || 0} option(s)
+                    </p>
+                  </div>
+                </div>
+                {selectedModifierGroups.includes(group.id) && (
+                  <span className="text-xs font-medium text-violet-600 dark:text-violet-400">Activé</span>
+                )}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
