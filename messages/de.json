@@ -48,7 +48,11 @@
     "contactUs": "Kontaktieren Sie uns",
     "readMore": "Mehr lesen",
     "showMore": "Mehr anzeigen",
-    "showLess": "Weniger anzeigen"
+    "showLess": "Weniger anzeigen",
+    "timePicker": {
+      "commonTimes": "Häufige Zeiten",
+      "confirm": "Bestätigen"
+    }
   },
   "header": {
     "menu": "Menü",

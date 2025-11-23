@@ -8,6 +8,7 @@ import { AdminBadge } from '@/components/admin/ui/AdminBadge'
 import { AdminToggle } from '@/components/admin/ui/AdminToggle'
 import { AdminInput } from '@/components/admin/ui/AdminInput'
 import { AdminModal } from '@/components/admin/ui/AdminModal'
+import { AdminTimePicker } from '@/components/admin/ui/AdminTimePicker'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useTranslations } from 'next-intl'
@@ -222,21 +223,19 @@ export default function MerchantHoursPage() {
                 {/* Time Inputs */}
                 {schedule[day]?.isOpen && (
                   <div className="flex items-center gap-2 sm:gap-3 flex-1">
-                    <div className="flex-1 max-w-[120px]">
-                      <input
-                        type="time"
+                    <div className="flex-1 max-w-[140px]">
+                      <AdminTimePicker
                         value={schedule[day]?.openTime}
-                        onChange={(e) => updateDaySchedule(day, 'openTime', e.target.value)}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                        onChange={(value) => updateDaySchedule(day, 'openTime', value)}
+                        minuteStep={15}
                       />
                     </div>
                     <span className="text-slate-400 dark:text-slate-500 font-medium">→</span>
-                    <div className="flex-1 max-w-[120px]">
-                      <input
-                        type="time"
+                    <div className="flex-1 max-w-[140px]">
+                      <AdminTimePicker
                         value={schedule[day]?.closeTime}
-                        onChange={(e) => updateDaySchedule(day, 'closeTime', e.target.value)}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                        onChange={(value) => updateDaySchedule(day, 'closeTime', value)}
+                        minuteStep={15}
                       />
                     </div>
                   </div>
@@ -374,17 +373,17 @@ export default function MerchantHoursPage() {
 
           {newSpecialDate.isOpen && (
             <div className="grid grid-cols-2 gap-4">
-              <AdminInput
-                type="time"
+              <AdminTimePicker
                 label={t('specialDates.openTime')}
                 value={newSpecialDate.openTime}
-                onChange={(e) => setNewSpecialDate({ ...newSpecialDate, openTime: e.target.value })}
+                onChange={(value) => setNewSpecialDate({ ...newSpecialDate, openTime: value })}
+                minuteStep={15}
               />
-              <AdminInput
-                type="time"
+              <AdminTimePicker
                 label={t('specialDates.closeTime')}
                 value={newSpecialDate.closeTime}
-                onChange={(e) => setNewSpecialDate({ ...newSpecialDate, closeTime: e.target.value })}
+                onChange={(value) => setNewSpecialDate({ ...newSpecialDate, closeTime: value })}
+                minuteStep={15}
               />
             </div>
           )}
