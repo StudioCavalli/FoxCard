@@ -100,6 +100,12 @@ export default function ThemeEditorPage() {
   const [history, setHistory] = useState<ThemeConfig[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
 
+  // Fetch theme data
+  const { data: theme, isLoading } = trpc.theme.getById.useQuery(
+    { storeId: storeId!, id: themeId },
+    { enabled: !!themeId && themeId !== 'new' }
+  )
+
   // Derive hasChanges from state (no useEffect needed)
   const hasChanges = (() => {
     const configChanged = JSON.stringify(config) !== JSON.stringify(originalConfig)
@@ -107,12 +113,6 @@ export default function ThemeEditorPage() {
     const descChanged = theme && themeDescription !== (theme.description || '')
     return !!(configChanged || nameChanged || descChanged)
   })()
-
-  // Fetch theme data
-  const { data: theme, isLoading } = trpc.theme.getById.useQuery(
-    { storeId: storeId!, id: themeId },
-    { enabled: !!themeId && themeId !== 'new' }
-  )
 
   // Mutations
   const updateThemeMutation = trpc.theme.update.useMutation()
@@ -196,7 +196,6 @@ export default function ThemeEditorPage() {
         {
           onSuccess: (data) => {
             setOriginalConfig(config)
-            setHasChanges(false)
             router.push(`/admin/themes/editor/${data.id}`)
           },
           onError: (error) => {
@@ -216,7 +215,6 @@ export default function ThemeEditorPage() {
         {
           onSuccess: () => {
             setOriginalConfig(config)
-            setHasChanges(false)
           },
           onError: (error) => {
             alert(error.message)

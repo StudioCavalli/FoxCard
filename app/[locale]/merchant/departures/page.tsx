@@ -48,14 +48,6 @@ interface Departure {
   guaranteedDeparture: boolean
 }
 
-interface TravelPackage {
-  id: string
-  name: string
-  destination: string
-  duration: number
-  basePrice: number
-  departureDates: Departure[]
-}
 
 export default function DeparturesPage() {
   const { storeId } = useStoreContext()
@@ -113,7 +105,7 @@ export default function DeparturesPage() {
   // Get departures for selected package
   const selectedPackageData = useMemo(() => {
     if (!packages || !selectedPackage) return null
-    return packages.find((p: TravelPackage) => p.id === selectedPackage) || null
+    return packages.find((p: any) => p.id === selectedPackage) || null
   }, [packages, selectedPackage])
 
   // Calendar generation
@@ -236,7 +228,7 @@ export default function DeparturesPage() {
       <AdminCard>
         <h3 className="font-medium text-gray-900 mb-4">Sélectionner un voyage</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {packages?.map((pkg: TravelPackage) => (
+          {packages?.map((pkg: any) => (
             <button
               key={pkg.id}
               onClick={() => setSelectedPackage(pkg.id)}

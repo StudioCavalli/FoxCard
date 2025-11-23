@@ -52,11 +52,13 @@ export default function DownloadsAnalyticsPage() {
 
   // Get products (digital)
   const { data: productsData, isLoading: productsLoading } = trpc.product.getAll.useQuery(
-    { storeId: storeId!, limit: 100, type: 'DIGITAL' },
+    { storeId: storeId!, limit: 100 },
     { enabled: !!storeId }
   )
 
-  const digitalProducts = productsData?.products || []
+  // Filter to only digital products
+  const digitalProducts = productsData?.products?.filter((p: any) => p.type === 'DIGITAL') || []
+
 
   // Mock download stats
   const downloadStats: DownloadStat[] = [

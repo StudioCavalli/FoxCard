@@ -88,11 +88,12 @@ export default function LicensesPage() {
 
   // Get products (digital)
   const { data: productsData } = trpc.product.getAll.useQuery(
-    { storeId: storeId!, limit: 100, type: 'DIGITAL' },
+    { storeId: storeId!, limit: 100 },
     { enabled: !!storeId }
   )
 
-  const digitalProducts = productsData?.products || []
+  // Filter to only digital products
+  const digitalProducts = productsData?.products?.filter((p: any) => p.type === 'DIGITAL') || []
 
   // Mock licenses data
   const [licenses, setLicenses] = useState<License[]>([

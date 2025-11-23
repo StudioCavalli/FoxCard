@@ -49,12 +49,12 @@ describe('Store SEO Generation', () => {
     it('should include OpenGraph data', () => {
       const metadata = generateStoreMetadata(mockStore, 'fr')
       expect(metadata.openGraph?.siteName).toBe('Test Store')
-      expect(metadata.openGraph?.type).toBe('website')
+      expect((metadata.openGraph as any)?.type).toBe('website')
     })
 
     it('should include Twitter card data', () => {
       const metadata = generateStoreMetadata(mockStore, 'fr')
-      expect(metadata.twitter?.card).toBe('summary_large_image')
+      expect((metadata.twitter as any)?.card).toBe('summary_large_image')
     })
 
     it('should include language alternates', () => {
