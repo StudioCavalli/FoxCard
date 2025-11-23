@@ -23,16 +23,8 @@ import {
   Moon
 } from 'lucide-react'
 
-// Days of the week
-const DAYS = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' },
-]
+// Days of the week (keys used for translations and schedule)
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 interface DaySchedule {
   isOpen: boolean
@@ -198,19 +190,19 @@ export default function MerchantHoursPage() {
           </div>
         </div>
         <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-          {DAYS.map(({ key, label }) => (
+          {DAYS.map((day) => (
             <div
-              key={key}
+              key={day}
               className={`p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${
-                isToday(key) ? 'bg-violet-50 dark:bg-violet-500/10' : ''
+                isToday(day) ? 'bg-violet-50 dark:bg-violet-500/10' : ''
               }`}
             >
               {/* Day Label */}
               <div className="sm:w-32 flex items-center gap-2">
-                <span className={`font-medium ${isToday(key) ? 'text-violet-600 dark:text-violet-400' : 'text-slate-900 dark:text-white'}`}>
-                  {t(`days.${key}`)}
+                <span className={`font-medium ${isToday(day) ? 'text-violet-600 dark:text-violet-400' : 'text-slate-900 dark:text-white'}`}>
+                  {t(`days.${day}`)}
                 </span>
-                {isToday(key) && (
+                {isToday(day) && (
                   <AdminBadge variant="purple" size="sm">{t('today')}</AdminBadge>
                 )}
               </div>
@@ -219,24 +211,24 @@ export default function MerchantHoursPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={schedule[key]?.isOpen}
-                  onChange={(e) => updateDaySchedule(key, 'isOpen', e.target.checked)}
+                  checked={schedule[day]?.isOpen}
+                  onChange={(e) => updateDaySchedule(day, 'isOpen', e.target.checked)}
                   className="w-5 h-5 rounded text-violet-600 border-slate-300 dark:border-slate-600 focus:ring-violet-500"
                 />
-                <span className={`text-sm ${schedule[key]?.isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  {schedule[key]?.isOpen ? t('open') : t('closed')}
+                <span className={`text-sm ${schedule[day]?.isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                  {schedule[day]?.isOpen ? t('open') : t('closed')}
                 </span>
               </label>
 
               {/* Time Inputs */}
-              {schedule[key]?.isOpen && (
+              {schedule[day]?.isOpen && (
                 <div className="flex items-center gap-3 flex-1">
                   <div className="flex items-center gap-2">
                     <Sunrise className="w-4 h-4 text-slate-400" />
                     <input
                       type="time"
-                      value={schedule[key]?.openTime}
-                      onChange={(e) => updateDaySchedule(key, 'openTime', e.target.value)}
+                      value={schedule[day]?.openTime}
+                      onChange={(e) => updateDaySchedule(day, 'openTime', e.target.value)}
                       className="px-3 py-2 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
                     />
                   </div>
@@ -245,8 +237,8 @@ export default function MerchantHoursPage() {
                     <Moon className="w-4 h-4 text-slate-400" />
                     <input
                       type="time"
-                      value={schedule[key]?.closeTime}
-                      onChange={(e) => updateDaySchedule(key, 'closeTime', e.target.value)}
+                      value={schedule[day]?.closeTime}
+                      onChange={(e) => updateDaySchedule(day, 'closeTime', e.target.value)}
                       className="px-3 py-2 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
                     />
                   </div>
