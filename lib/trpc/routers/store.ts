@@ -424,6 +424,16 @@ export const storeRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Store not found' })
       }
 
+      // HTML escape function to prevent XSS
+      const escapeHtml = (str: string) => {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;')
+      }
+
       // Create email log for contact form
       await ctx.prisma.emailLog.create({
         data: {
@@ -431,13 +441,13 @@ export const storeRouter = router({
           templateName: 'contact_form',
           to: store.publicEmail || store.owner.email,
           from: input.email,
-          subject: `Contact Form: ${input.subject}`,
+          subject: `Contact Form: ${escapeHtml(input.subject)}`,
           htmlBody: `
             <h2>New Contact Form Message</h2>
-            <p><strong>From:</strong> ${input.name} (${input.email})</p>
-            <p><strong>Subject:</strong> ${input.subject}</p>
+            <p><strong>From:</strong> ${escapeHtml(input.name)} (${escapeHtml(input.email)})</p>
+            <p><strong>Subject:</strong> ${escapeHtml(input.subject)}</p>
             <p><strong>Message:</strong></p>
-            <p>${input.message.replace(/\n/g, '<br>')}</p>
+            <p>${escapeHtml(input.message).replace(/\n/g, '<br>')}</p>
           `,
           textBody: `
             New Contact Form Message

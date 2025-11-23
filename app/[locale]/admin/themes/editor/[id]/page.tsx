@@ -95,11 +95,18 @@ export default function ThemeEditorPage() {
   const [themeDescription, setThemeDescription] = useState('')
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [showPreview, setShowPreview] = useState(true)
-  const [hasChanges, setHasChanges] = useState(false)
 
   // History for undo/redo
   const [history, setHistory] = useState<ThemeConfig[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+
+  // Derive hasChanges from state (no useEffect needed)
+  const hasChanges = (() => {
+    const configChanged = JSON.stringify(config) !== JSON.stringify(originalConfig)
+    const nameChanged = theme && themeName !== theme.name
+    const descChanged = theme && themeDescription !== (theme.description || '')
+    return !!(configChanged || nameChanged || descChanged)
+  })()
 
   // Fetch theme data
   const { data: theme, isLoading } = trpc.theme.getById.useQuery(
@@ -129,14 +136,6 @@ export default function ThemeEditorPage() {
       setHistoryIndex(0)
     }
   }, [theme])
-
-  // Track changes
-  useEffect(() => {
-    const configChanged = JSON.stringify(config) !== JSON.stringify(originalConfig)
-    const nameChanged = theme && themeName !== theme.name
-    const descChanged = theme && themeDescription !== (theme.description || '')
-    setHasChanges(!!(configChanged || nameChanged || descChanged))
-  }, [config, originalConfig, themeName, themeDescription, theme])
 
   // Update config with history
   const updateConfig = useCallback((newConfig: ThemeConfig) => {
