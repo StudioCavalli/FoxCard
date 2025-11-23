@@ -1267,7 +1267,8 @@
           "closeTime": "Čas zatvorenia",
           "empty": "Žiadne špeciálne dátumy",
           "emptyDesc": "Pridajte sviatky alebo špeciálne udalosti"
-        }
+        },
+        "closedAllDay": "Zatvorené celý deň"
       }
     },
     "travel": {

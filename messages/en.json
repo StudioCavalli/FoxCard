@@ -1334,7 +1334,8 @@
           "closeTime": "Closing time",
           "empty": "No special dates",
           "emptyDesc": "Add holidays or special events"
-        }
+        },
+        "closedAllDay": "Closed all day"
       }
     },
     "travel": {

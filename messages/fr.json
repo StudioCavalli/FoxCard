@@ -1334,7 +1334,8 @@
           "closeTime": "Heure de fermeture",
           "empty": "Aucune date spéciale",
           "emptyDesc": "Ajoutez des jours fériés ou événements spéciaux"
-        }
+        },
+        "closedAllDay": "Fermé toute la journée"
       }
     },
     "travel": {
