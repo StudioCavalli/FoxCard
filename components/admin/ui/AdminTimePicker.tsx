@@ -120,56 +120,56 @@ export function AdminTimePicker({
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-50 mt-2 w-full bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden">
+          <div className="absolute z-50 mt-2 left-0 min-w-[280px] bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden">
             <div className="p-4">
               {/* Spinner Controls */}
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-6">
                 {/* Hours */}
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center gap-1">
                   <button
                     type="button"
                     onClick={incrementHours}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    <ChevronUp className="w-5 h-5 text-slate-500" />
+                    <ChevronUp className="w-5 h-5 text-slate-400" />
                   </button>
-                  <div className="w-16 h-14 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
-                    <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                  <div className="w-14 h-12 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
+                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">
                       {hours.toString().padStart(2, '0')}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={decrementHours}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                    <ChevronDown className="w-5 h-5 text-slate-400" />
                   </button>
                 </div>
 
                 {/* Separator */}
-                <span className="text-2xl font-bold text-slate-400">:</span>
+                <span className="text-xl font-bold text-slate-400">:</span>
 
                 {/* Minutes */}
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center gap-1">
                   <button
                     type="button"
                     onClick={incrementMinutes}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    <ChevronUp className="w-5 h-5 text-slate-500" />
+                    <ChevronUp className="w-5 h-5 text-slate-400" />
                   </button>
-                  <div className="w-16 h-14 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
-                    <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                  <div className="w-14 h-12 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
+                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">
                       {minutes.toString().padStart(2, '0')}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={decrementMinutes}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                    <ChevronDown className="w-5 h-5 text-slate-400" />
                   </button>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export function AdminTimePicker({
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
                   {t('commonTimes')}
                 </p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {['06:00', '08:00', '09:00', '10:00', '12:00', '14:00', '18:00', '22:00'].map((time) => (
                     <button
                       key={time}
@@ -189,7 +189,7 @@ export function AdminTimePicker({
                         setIsOpen(false)
                       }}
                       className={cn(
-                        'px-2 py-1.5 text-sm font-medium rounded-lg transition-colors',
+                        'px-2 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap',
                         value === time
                           ? 'bg-violet-600 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -207,7 +207,7 @@ export function AdminTimePicker({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors"
+                className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
                 {t('confirm')}
               </button>
