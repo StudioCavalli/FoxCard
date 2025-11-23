@@ -635,6 +635,18 @@
     "orders": "Objednávky",
     "customers": "Zákazníci",
     "analytics": "Analytika",
+    "reports": {
+      "title": "Reporty",
+      "description": "Exportujte a analyzujte svoje dáta",
+      "comingSoon": "Čoskoro",
+      "comingSoonDescription": "Podrobné reporty budú čoskoro dostupné. Budete môcť exportovať svoje predaje, analyzovať svoj výkon a sledovať svoje trendy.",
+      "features": {
+        "salesReport": "Report predajov",
+        "analytics": "Podrobná analytika",
+        "periodic": "Periodické reporty",
+        "export": "Export CSV/PDF"
+      }
+    },
     "settings": "Nastavenia",
     "revenue": "Príjmy",
     "todayOrders": "Dnešné objednávky",
