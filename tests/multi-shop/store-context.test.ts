@@ -98,7 +98,7 @@ describe('Multi-Shop Public Context', () => {
         { id: 'p2', storeId: 'store-2', name: 'Product 2' },
         { id: 'p3', storeId: 'store-1', name: 'Product 3' },
       ]
-      const selectedStore = 'store-1'
+      const selectedStore: string = 'store-1'
 
       const filteredProducts =
         selectedStore === 'all'
