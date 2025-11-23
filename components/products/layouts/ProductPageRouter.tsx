@@ -7,6 +7,7 @@ import { TravelPackagePage } from './TravelPackagePage'
 import { RestaurantMenuPage } from './RestaurantMenuPage'
 import { DigitalProductPage } from './DigitalProductPage'
 import { ServiceBookingPage } from './ServiceBookingPage'
+import { AlcoholProductPage } from './AlcoholProductPage'
 
 interface ProductPageRouterProps {
   product: any
@@ -33,6 +34,8 @@ export function ProductPageRouter({ product, storeId }: ProductPageRouterProps) 
     case 'SERVICES':
     case 'RECREATION':
       return <ServiceBookingPage product={product} />
+    case 'ALCOHOL':
+      return <AlcoholProductPage product={product} />
     default:
       // Standard e-commerce layout for GENERAL, FASHION, ELECTRONICS, etc.
       return <StandardProductPage product={product} />
