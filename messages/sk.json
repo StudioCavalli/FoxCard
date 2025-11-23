@@ -48,7 +48,11 @@
     "contactUs": "Kontaktujte nás",
     "readMore": "Čítať viac",
     "showMore": "Zobraziť viac",
-    "showLess": "Zobraziť menej"
+    "showLess": "Zobraziť menej",
+    "timePicker": {
+      "commonTimes": "Bežné časy",
+      "confirm": "Potvrdiť"
+    }
   },
   "header": {
     "menu": "Menu",
