@@ -716,7 +716,6 @@
     "lowStockAlertDesc": "Alert when a product reaches low stock threshold",
     "customerMessage": "Customer message",
     "customerMessageDesc": "Notification when a customer contacts you",
-    "reports": "Reports",
     "weeklyReport": "Weekly report",
     "weeklyReportDesc": "Summary of your sales each week",
     "monthlyReport": "Monthly report",

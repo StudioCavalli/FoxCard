@@ -706,7 +706,6 @@
     "lowStockAlertDesc": "Warnung, wenn ein Produkt den niedrigen Lagerbestand erreicht",
     "customerMessage": "Kundennachricht",
     "customerMessageDesc": "Benachrichtigung, wenn ein Kunde Sie kontaktiert",
-    "reports": "Berichte",
     "weeklyReport": "Wochenbericht",
     "weeklyReportDesc": "Zusammenfassung Ihrer Verkäufe jede Woche",
     "monthlyReport": "Monatsbericht",
