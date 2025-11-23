@@ -645,6 +645,18 @@
     },
     "customers": "Customers",
     "analytics": "Analytics",
+    "reports": {
+      "title": "Reports",
+      "description": "Export and analyze your data",
+      "comingSoon": "Coming Soon",
+      "comingSoonDescription": "Detailed reports will be available soon. You will be able to export your sales, analyze your performance, and track your trends.",
+      "features": {
+        "salesReport": "Sales Report",
+        "analytics": "Detailed Analytics",
+        "periodic": "Periodic Reports",
+        "export": "CSV/PDF Export"
+      }
+    },
     "settings": "Settings",
     "revenue": "Revenue",
     "todayOrders": "Today's orders",

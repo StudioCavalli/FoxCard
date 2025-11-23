@@ -635,6 +635,18 @@
     "orders": "Bestellungen",
     "customers": "Kunden",
     "analytics": "Analysen",
+    "reports": {
+      "title": "Berichte",
+      "description": "Exportieren und analysieren Sie Ihre Daten",
+      "comingSoon": "Demnächst verfügbar",
+      "comingSoonDescription": "Detaillierte Berichte werden bald verfügbar sein. Sie können Ihre Verkäufe exportieren, Ihre Leistung analysieren und Ihre Trends verfolgen.",
+      "features": {
+        "salesReport": "Verkaufsbericht",
+        "analytics": "Detaillierte Analysen",
+        "periodic": "Periodische Berichte",
+        "export": "CSV/PDF Export"
+      }
+    },
     "settings": "Einstellungen",
     "revenue": "Umsatz",
     "todayOrders": "Heutige Bestellungen",

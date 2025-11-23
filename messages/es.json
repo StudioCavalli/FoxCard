@@ -635,6 +635,18 @@
     "orders": "Pedidos",
     "customers": "Clientes",
     "analytics": "Analítica",
+    "reports": {
+      "title": "Informes",
+      "description": "Exporta y analiza tus datos",
+      "comingSoon": "Próximamente",
+      "comingSoonDescription": "Los informes detallados estarán disponibles pronto. Podrás exportar tus ventas, analizar tu rendimiento y seguir tus tendencias.",
+      "features": {
+        "salesReport": "Informe de ventas",
+        "analytics": "Análisis detallado",
+        "periodic": "Informes periódicos",
+        "export": "Exportar CSV/PDF"
+      }
+    },
     "settings": "Configuración",
     "revenue": "Ingresos",
     "todayOrders": "Pedidos de hoy",

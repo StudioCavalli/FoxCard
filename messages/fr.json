@@ -644,6 +644,18 @@
     },
     "customers": "Clients",
     "analytics": "Analytiques",
+    "reports": {
+      "title": "Rapports",
+      "description": "Exportez et analysez vos données",
+      "comingSoon": "Bientôt disponible",
+      "comingSoonDescription": "Les rapports détaillés seront disponibles prochainement. Vous pourrez exporter vos ventes, analyser vos performances et suivre vos tendances.",
+      "features": {
+        "salesReport": "Rapport des ventes",
+        "analytics": "Analyses détaillées",
+        "periodic": "Rapports périodiques",
+        "export": "Export CSV/PDF"
+      }
+    },
     "settings": "Paramètres",
     "revenue": "Chiffre d'affaires",
     "todayOrders": "Commandes du jour",
