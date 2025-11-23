@@ -44,10 +44,10 @@ test.describe('Services Commerce Type', () => {
     await page.click('[data-testid="service-card"]')
 
     // Select a date
-    await page.click('[data-testid="date-picker"] button:not([disabled])').first()
+    await page.locator('[data-testid="date-picker"] button:not([disabled])').first().click()
 
     // Select time slot
-    await page.click('[data-testid="time-slot"]:not([disabled])').first()
+    await page.locator('[data-testid="time-slot"]:not([disabled])').first().click()
 
     // Verify selection
     await expect(page.locator('[data-testid="selected-time"]')).toBeVisible()
@@ -57,8 +57,8 @@ test.describe('Services Commerce Type', () => {
     await page.click('[data-testid="service-card"]')
 
     // Select date and time
-    await page.click('[data-testid="date-picker"] button:not([disabled])').first()
-    await page.click('[data-testid="time-slot"]:not([disabled])').first()
+    await page.locator('[data-testid="date-picker"] button:not([disabled])').first().click()
+    await page.locator('[data-testid="time-slot"]:not([disabled])').first().click()
 
     // Book
     await page.click('[data-testid="book-appointment"]')

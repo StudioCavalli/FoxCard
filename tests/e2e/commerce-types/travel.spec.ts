@@ -48,7 +48,7 @@ test.describe('Travel Commerce Type', () => {
     await page.click('[data-testid="package-card"]')
 
     // Select a departure
-    await page.click('[data-testid="departure-option"]:not([disabled])').first()
+    await page.locator('[data-testid="departure-option"]:not([disabled])').first().click()
 
     // Verify selection
     await expect(page.locator('[data-testid="selected-departure"]')).toBeVisible()
@@ -58,7 +58,7 @@ test.describe('Travel Commerce Type', () => {
     await page.click('[data-testid="package-card"]')
 
     // Select departure
-    await page.click('[data-testid="departure-option"]:not([disabled])').first()
+    await page.locator('[data-testid="departure-option"]:not([disabled])').first().click()
 
     // Book
     await page.click('[data-testid="book-package"]')

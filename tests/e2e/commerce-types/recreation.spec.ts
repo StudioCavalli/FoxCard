@@ -41,7 +41,7 @@ test.describe('Recreation Commerce Type', () => {
     await page.click('[data-testid="activity-card"]')
 
     // Select a session
-    await page.click('[data-testid="session-slot"]:not([disabled])').first()
+    await page.locator('[data-testid="session-slot"]:not([disabled])').first().click()
 
     // Verify selection
     await expect(page.locator('[data-testid="selected-session"]')).toBeVisible()
@@ -51,7 +51,7 @@ test.describe('Recreation Commerce Type', () => {
     await page.click('[data-testid="activity-card"]')
 
     // Select session
-    await page.click('[data-testid="session-slot"]:not([disabled])').first()
+    await page.locator('[data-testid="session-slot"]:not([disabled])').first().click()
 
     // Book
     await page.click('[data-testid="book-session"]')
@@ -72,7 +72,8 @@ test.describe('Recreation Commerce Type', () => {
     await page.click('[data-testid="filter-yoga"]')
 
     // Verify filtered results
-    await expect(page.locator('[data-testid="activity-card"]')).toHaveCount({ min: 1 })
+    const count = await page.locator('[data-testid="activity-card"]').count()
+    expect(count).toBeGreaterThanOrEqual(1)
   })
 })
 
@@ -145,7 +146,7 @@ test.describe('Recreation Merchant Dashboard', () => {
     await page.click('[data-testid="calendar-session"]')
 
     // Check in a participant
-    await page.click('[data-testid="checkin-button"]').first()
+    await page.locator('[data-testid="checkin-button"]').first().click()
 
     // Verify checked in
     await expect(page.locator('[data-testid="participant-row"]').first()).toHaveClass(/checked-in/)
