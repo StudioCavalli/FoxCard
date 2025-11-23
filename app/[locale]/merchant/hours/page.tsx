@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation'
 import { AdminCard } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminBadge } from '@/components/admin/ui/AdminBadge'
+import { AdminToggle } from '@/components/admin/ui/AdminToggle'
+import { AdminInput } from '@/components/admin/ui/AdminInput'
+import { AdminModal } from '@/components/admin/ui/AdminModal'
 import { trpc } from '@/lib/trpc/client'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useTranslations } from 'next-intl'
@@ -16,11 +19,8 @@ import {
   Loader2,
   X,
   Trash2,
-  AlertCircle,
   Check,
-  CalendarDays,
-  Sunrise,
-  Moon
+  CalendarDays
 } from 'lucide-react'
 
 // Days of the week (keys used for translations and schedule)
@@ -193,57 +193,64 @@ export default function MerchantHoursPage() {
           {DAYS.map((day) => (
             <div
               key={day}
-              className={`p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${
+              className={`p-4 sm:p-5 ${
                 isToday(day) ? 'bg-violet-50 dark:bg-violet-500/10' : ''
               }`}
             >
-              {/* Day Label */}
-              <div className="sm:w-32 flex items-center gap-2">
-                <span className={`font-medium ${isToday(day) ? 'text-violet-600 dark:text-violet-400' : 'text-slate-900 dark:text-white'}`}>
-                  {t(`days.${day}`)}
-                </span>
-                {isToday(day) && (
-                  <AdminBadge variant="purple" size="sm">{t('today')}</AdminBadge>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                {/* Day Label */}
+                <div className="sm:w-36 flex items-center gap-2">
+                  <span className={`font-semibold ${isToday(day) ? 'text-violet-600 dark:text-violet-400' : 'text-slate-900 dark:text-white'}`}>
+                    {t(`days.${day}`)}
+                  </span>
+                  {isToday(day) && (
+                    <AdminBadge variant="purple" size="sm">{t('today')}</AdminBadge>
+                  )}
+                </div>
+
+                {/* Open/Closed Toggle */}
+                <div className="flex items-center gap-4 sm:w-32">
+                  <AdminToggle
+                    checked={schedule[day]?.isOpen}
+                    onChange={(e) => updateDaySchedule(day, 'isOpen', e.target.checked)}
+                  />
+                  <span className={`text-sm font-medium ${schedule[day]?.isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                    {schedule[day]?.isOpen ? t('open') : t('closed')}
+                  </span>
+                </div>
+
+                {/* Time Inputs */}
+                {schedule[day]?.isOpen && (
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                    <div className="flex-1 max-w-[120px]">
+                      <input
+                        type="time"
+                        value={schedule[day]?.openTime}
+                        onChange={(e) => updateDaySchedule(day, 'openTime', e.target.value)}
+                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                      />
+                    </div>
+                    <span className="text-slate-400 dark:text-slate-500 font-medium">→</span>
+                    <div className="flex-1 max-w-[120px]">
+                      <input
+                        type="time"
+                        value={schedule[day]?.closeTime}
+                        onChange={(e) => updateDaySchedule(day, 'closeTime', e.target.value)}
+                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Closed indicator */}
+                {!schedule[day]?.isOpen && (
+                  <div className="flex-1 flex items-center">
+                    <span className="text-sm text-slate-400 dark:text-slate-500 italic">
+                      {t('closedAllDay')}
+                    </span>
+                  </div>
                 )}
               </div>
-
-              {/* Open/Closed Toggle */}
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={schedule[day]?.isOpen}
-                  onChange={(e) => updateDaySchedule(day, 'isOpen', e.target.checked)}
-                  className="w-5 h-5 rounded text-violet-600 border-slate-300 dark:border-slate-600 focus:ring-violet-500"
-                />
-                <span className={`text-sm ${schedule[day]?.isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  {schedule[day]?.isOpen ? t('open') : t('closed')}
-                </span>
-              </label>
-
-              {/* Time Inputs */}
-              {schedule[day]?.isOpen && (
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Sunrise className="w-4 h-4 text-slate-400" />
-                    <input
-                      type="time"
-                      value={schedule[day]?.openTime}
-                      onChange={(e) => updateDaySchedule(day, 'openTime', e.target.value)}
-                      className="px-3 py-2 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                    />
-                  </div>
-                  <span className="text-slate-400">—</span>
-                  <div className="flex items-center gap-2">
-                    <Moon className="w-4 h-4 text-slate-400" />
-                    <input
-                      type="time"
-                      value={schedule[day]?.closeTime}
-                      onChange={(e) => updateDaySchedule(day, 'closeTime', e.target.value)}
-                      className="px-3 py-2 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -318,106 +325,71 @@ export default function MerchantHoursPage() {
       </AdminCard>
 
       {/* Add Special Date Modal */}
-      {showAddSpecialDate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                {t('specialDates.addTitle')}
-              </h2>
-              <button
-                onClick={() => setShowAddSpecialDate(false)}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
-              >
-                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t('specialDates.date')} *
-                </label>
-                <input
-                  type="date"
-                  value={newSpecialDate.date}
-                  onChange={(e) => setNewSpecialDate({ ...newSpecialDate, date: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                />
-              </div>
+      <AdminModal
+        isOpen={showAddSpecialDate}
+        onClose={() => setShowAddSpecialDate(false)}
+        title={t('specialDates.addTitle')}
+        size="sm"
+        footer={
+          <>
+            <AdminButton
+              variant="secondary"
+              onClick={() => setShowAddSpecialDate(false)}
+            >
+              {t('cancel')}
+            </AdminButton>
+            <AdminButton
+              onClick={addSpecialDate}
+              disabled={!newSpecialDate.date || !newSpecialDate.name}
+            >
+              {t('specialDates.addButton')}
+            </AdminButton>
+          </>
+        }
+      >
+        <div className="space-y-5">
+          <AdminInput
+            type="date"
+            label={`${t('specialDates.date')} *`}
+            value={newSpecialDate.date}
+            onChange={(e) => setNewSpecialDate({ ...newSpecialDate, date: e.target.value })}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t('specialDates.name')} *
-                </label>
-                <input
-                  type="text"
-                  value={newSpecialDate.name}
-                  onChange={(e) => setNewSpecialDate({ ...newSpecialDate, name: e.target.value })}
-                  placeholder={t('specialDates.namePlaceholder')}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                />
-              </div>
+          <AdminInput
+            type="text"
+            label={`${t('specialDates.name')} *`}
+            value={newSpecialDate.name}
+            onChange={(e) => setNewSpecialDate({ ...newSpecialDate, name: e.target.value })}
+            placeholder={t('specialDates.namePlaceholder')}
+          />
 
-              <label className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={newSpecialDate.isOpen}
-                  onChange={(e) => setNewSpecialDate({ ...newSpecialDate, isOpen: e.target.checked })}
-                  className="w-5 h-5 rounded text-violet-600 border-slate-300 dark:border-slate-600 focus:ring-violet-500"
-                />
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-white">{t('specialDates.openOnDate')}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{t('specialDates.openOnDateDesc')}</p>
-                </div>
-              </label>
-
-              {newSpecialDate.isOpen && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {t('specialDates.openTime')}
-                    </label>
-                    <input
-                      type="time"
-                      value={newSpecialDate.openTime}
-                      onChange={(e) => setNewSpecialDate({ ...newSpecialDate, openTime: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {t('specialDates.closeTime')}
-                    </label>
-                    <input
-                      type="time"
-                      value={newSpecialDate.closeTime}
-                      onChange={(e) => setNewSpecialDate({ ...newSpecialDate, closeTime: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <AdminButton
-                  variant="secondary"
-                  onClick={() => setShowAddSpecialDate(false)}
-                  className="flex-1"
-                >
-                  {t('cancel')}
-                </AdminButton>
-                <AdminButton
-                  onClick={addSpecialDate}
-                  disabled={!newSpecialDate.date || !newSpecialDate.name}
-                  className="flex-1"
-                >
-                  {t('specialDates.addButton')}
-                </AdminButton>
-              </div>
-            </div>
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+            <AdminToggle
+              checked={newSpecialDate.isOpen}
+              onChange={(e) => setNewSpecialDate({ ...newSpecialDate, isOpen: e.target.checked })}
+              label={t('specialDates.openOnDate')}
+              description={t('specialDates.openOnDateDesc')}
+            />
           </div>
+
+          {newSpecialDate.isOpen && (
+            <div className="grid grid-cols-2 gap-4">
+              <AdminInput
+                type="time"
+                label={t('specialDates.openTime')}
+                value={newSpecialDate.openTime}
+                onChange={(e) => setNewSpecialDate({ ...newSpecialDate, openTime: e.target.value })}
+              />
+              <AdminInput
+                type="time"
+                label={t('specialDates.closeTime')}
+                value={newSpecialDate.closeTime}
+                onChange={(e) => setNewSpecialDate({ ...newSpecialDate, closeTime: e.target.value })}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </AdminModal>
     </div>
   )
 }

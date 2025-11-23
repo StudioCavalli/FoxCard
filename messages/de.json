@@ -1267,7 +1267,8 @@
           "closeTime": "Schließzeit",
           "empty": "Keine besonderen Termine",
           "emptyDesc": "Feiertage oder besondere Veranstaltungen hinzufügen"
-        }
+        },
+        "closedAllDay": "Ganztägig geschlossen"
       }
     },
     "travel": {
