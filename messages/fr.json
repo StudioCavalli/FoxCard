@@ -715,7 +715,6 @@
     "lowStockAlertDesc": "Alerte quand un produit atteint le seuil de stock faible",
     "customerMessage": "Message client",
     "customerMessageDesc": "Notification quand un client vous contacte",
-    "reports": "Rapports",
     "weeklyReport": "Rapport hebdomadaire",
     "weeklyReportDesc": "Résumé de vos ventes chaque semaine",
     "monthlyReport": "Rapport mensuel",

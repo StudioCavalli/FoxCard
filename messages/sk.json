@@ -706,7 +706,6 @@
     "lowStockAlertDesc": "Upozornenie, keď produkt dosiahne hranicu nízkeho stavu",
     "customerMessage": "Správa od zákazníka",
     "customerMessageDesc": "Notifikácia, keď vás zákazník kontaktuje",
-    "reports": "Správy",
     "weeklyReport": "Týždenná správa",
     "weeklyReportDesc": "Súhrn vašich predajov každý týždeň",
     "monthlyReport": "Mesačná správa",
