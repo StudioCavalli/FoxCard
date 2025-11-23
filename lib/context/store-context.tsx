@@ -80,6 +80,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const storesError = isSuperAdmin ? allStoresError : userStoresError
 
+  // Combined effect for store initialization and impersonation restoration
   useEffect(() => {
     // Reset error state
     setError(null)
@@ -105,6 +106,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     if (stores && stores.length > 0) {
+      // Check for impersonation first (SuperAdmin only)
+      if (isSuperAdmin) {
+        const impersonatingId = localStorage.getItem('impersonatingStoreId')
+        if (impersonatingId) {
+          const store = stores.find(s => s.id === impersonatingId)
+          if (store) {
+            setIsImpersonating(true)
+            setImpersonatedStore({
+              id: store.id,
+              name: store.name,
+              slug: 'slug' in store ? store.slug : undefined,
+              status: 'status' in store ? store.status : undefined,
+            })
+            setStoreId(store.id)
+            setStoreName(store.name)
+            setIsLoading(false)
+            return
+          }
+        }
+      }
+
       // Check localStorage for previously selected store
       const savedStoreId = localStorage.getItem('selectedStoreId')
       const store = savedStoreId
@@ -119,7 +141,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsLoading(false)
       setError('Vous n\'avez pas encore de boutique. Créez-en une pour commencer.')
     }
-  }, [stores, storesError, sessionStatus])
+  }, [stores, storesError, sessionStatus, isSuperAdmin])
 
   const handleSetStoreId = (id: string) => {
     const store = stores?.find(s => s.id === id)
@@ -164,27 +186,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setStoreName(store.name)
     }
   }
-
-  // Restore impersonation on mount
-  useEffect(() => {
-    if (isSuperAdmin && stores && stores.length > 0) {
-      const impersonatingId = localStorage.getItem('impersonatingStoreId')
-      if (impersonatingId) {
-        const store = stores.find(s => s.id === impersonatingId)
-        if (store) {
-          setIsImpersonating(true)
-          setImpersonatedStore({
-            id: store.id,
-            name: store.name,
-            slug: 'slug' in store ? store.slug : undefined,
-            status: 'status' in store ? store.status : undefined,
-          })
-          setStoreId(store.id)
-          setStoreName(store.name)
-        }
-      }
-    }
-  }, [isSuperAdmin, stores])
 
   // Map stores to simple format
   const storesList: Store[] = stores?.map(s => ({

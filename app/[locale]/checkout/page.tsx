@@ -6,9 +6,8 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, Truck, MapPin, Mail, User, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift, Calendar, Download, Wine } from 'lucide-react'
+import { ShoppingBag, CreditCard, MapPin, Mail, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift, Calendar, Download } from 'lucide-react'
 import Link from 'next/link'
-import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 import { analyzeCartForCheckout, type CheckoutFlowConfig } from '@/lib/checkout/checkout-flow'
 import { useSession } from 'next-auth/react'
 import { usePublicStore } from '@/lib/context/public-store-context'
@@ -31,22 +30,28 @@ export default function CheckoutPage() {
   const t = useTranslations()
   const { data: session } = useSession()
   const { selectedStore, stores } = usePublicStore()
-  const { items, getTotalPrice, clearCart, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
+  const { items, getTotalPrice, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
 
   // Get current store ID from cart items or selected store
   const currentStoreId = items[0]?.storeId || (selectedStore !== 'all' ? selectedStore : stores[0]?.id)
   // Get customer ID from session
   const customerId = session?.user?.id
-  const [currentStep, setCurrentStep] = useState(1)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank_transfer'>('card')
+  // Core checkout state
+  const [checkoutState, setCheckoutState] = useState({
+    currentStep: 1,
+    isProcessing: false,
+    error: '',
+    paymentMethod: 'card' as 'card' | 'paypal' | 'bank_transfer',
+  })
 
   // Booking data for booking-type checkouts
   const [bookingData, setBookingData] = useState<BookingData>({})
 
   // Age verification for alcohol products
   const [alcoholAgeVerified, setAlcoholAgeVerified] = useState(false)
+
+  // Destructure for easier access
+  const { currentStep, isProcessing, error, paymentMethod } = checkoutState
 
   // Analyze cart for adaptive checkout flow
   const checkoutFlow = useMemo<CheckoutFlowConfig>(() => {
@@ -85,7 +90,7 @@ export default function CheckoutPage() {
     bankTransferEnabled: true,
   })
 
-  // Fetch payment settings
+  // Fetch payment settings once on mount
   useEffect(() => {
     async function fetchPaymentSettings() {
       try {
@@ -98,13 +103,15 @@ export default function CheckoutPage() {
             bankTransferEnabled: settings.bankTransferEnabled ?? true,
           })
           // Set default payment method to first available
+          let defaultMethod: 'card' | 'paypal' | 'bank_transfer' = 'card'
           if (settings.stripeEnabled) {
-            setPaymentMethod('card')
+            defaultMethod = 'card'
           } else if (settings.paypalEnabled) {
-            setPaymentMethod('paypal')
+            defaultMethod = 'paypal'
           } else if (settings.bankTransferEnabled) {
-            setPaymentMethod('bank_transfer')
+            defaultMethod = 'bank_transfer'
           }
+          setCheckoutState(prev => ({ ...prev, paymentMethod: defaultMethod }))
         }
       } catch (error) {
         console.error('Failed to fetch payment settings:', error)
@@ -112,20 +119,33 @@ export default function CheckoutPage() {
     }
     fetchPaymentSettings()
   }, [])
-  const [discountCode, setDiscountCode] = useState('')
-  const [appliedDiscount, setAppliedDiscount] = useState<{
-    id: string
+  // Discount state (combined)
+  const [discountState, setDiscountState] = useState<{
     code: string
-    type: string
-    value: number
-    discountAmount: number
-  } | null>(null)
-  const [discountError, setDiscountError] = useState('')
+    applied: {
+      id: string
+      code: string
+      type: string
+      value: number
+      discountAmount: number
+    } | null
+    error: string
+  }>({
+    code: '',
+    applied: null,
+    error: '',
+  })
 
-  // Loyalty points
-  const [loyaltyPointsUsed, setLoyaltyPointsUsed] = useState(0)
-  const [loyaltyPointsInput, setLoyaltyPointsInput] = useState('')
-  const [loyaltyError, setLoyaltyError] = useState('')
+  // Loyalty points state (combined)
+  const [loyaltyState, setLoyaltyState] = useState({
+    pointsUsed: 0,
+    input: '',
+    error: '',
+  })
+
+  // Destructure for easier access
+  const { code: discountCode, applied: appliedDiscount, error: discountError } = discountState
+  const { pointsUsed: loyaltyPointsUsed, input: loyaltyPointsInput, error: loyaltyError } = loyaltyState
 
   // Customer ID is now retrieved from session at component level
 
@@ -140,15 +160,20 @@ export default function CheckoutPage() {
     phone: '',
   })
 
-  // Load saved checkout data from localStorage
+  // Load saved checkout data from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('goldenera-checkout')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        setFormData(parsed.formData || formData)
-        setCurrentStep(parsed.currentStep || 1)
-        setPaymentMethod(parsed.paymentMethod || 'card')
+        if (parsed.formData) setFormData(parsed.formData)
+        if (parsed.currentStep || parsed.paymentMethod) {
+          setCheckoutState(prev => ({
+            ...prev,
+            currentStep: parsed.currentStep || prev.currentStep,
+            paymentMethod: parsed.paymentMethod || prev.paymentMethod,
+          }))
+        }
       } catch (e) {
         console.error('Failed to load saved checkout data:', e)
       }
@@ -209,13 +234,11 @@ export default function CheckoutPage() {
         localStorage.removeItem('goldenera-checkout')
       } catch (err) {
         console.error('Failed to create payment session:', err)
-        setError(t('checkout.errorPaymentSession'))
-        setIsProcessing(false)
+        setCheckoutState(prev => ({ ...prev, error: t('checkout.errorPaymentSession'), isProcessing: false }))
       }
     },
-    onError: (error) => {
-      setError(error.message || t('checkout.errorCreateOrder'))
-      setIsProcessing(false)
+    onError: (err) => {
+      setCheckoutState(prev => ({ ...prev, error: err.message || t('checkout.errorCreateOrder'), isProcessing: false }))
     },
   })
 
@@ -266,61 +289,55 @@ export default function CheckoutPage() {
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) {
-      setDiscountError(t('checkout.enterPromoCode'))
+      setDiscountState(prev => ({ ...prev, error: t('checkout.enterPromoCode') }))
       return
     }
 
-    setDiscountError('')
+    setDiscountState(prev => ({ ...prev, error: '' }))
 
     try {
       const result = await validateDiscount.refetch()
       if (result.data) {
-        setAppliedDiscount(result.data)
-        setDiscountCode('')
+        setDiscountState({ code: '', applied: result.data, error: '' })
       }
     } catch (err: any) {
-      setDiscountError(err.message || t('checkout.invalidPromoCode'))
+      setDiscountState(prev => ({ ...prev, error: err.message || t('checkout.invalidPromoCode') }))
     }
   }
 
   const handleRemoveDiscount = () => {
-    setAppliedDiscount(null)
-    setDiscountError('')
+    setDiscountState(prev => ({ ...prev, applied: null, error: '' }))
   }
 
   const handleApplyLoyaltyPoints = () => {
     const pointsToUse = parseInt(loyaltyPointsInput)
 
     if (!pointsToUse || pointsToUse <= 0) {
-      setLoyaltyError(t('checkout.enterValidPoints'))
+      setLoyaltyState(prev => ({ ...prev, error: t('checkout.enterValidPoints') }))
       return
     }
 
     if (!loyaltyData || pointsToUse > loyaltyData.points) {
-      setLoyaltyError(t('checkout.onlyHavePoints', { count: loyaltyData?.points || 0 }))
+      setLoyaltyState(prev => ({ ...prev, error: t('checkout.onlyHavePoints', { count: loyaltyData?.points || 0 }) }))
       return
     }
 
     // Calculate max points that can be used (can't exceed order total)
     const maxPointsUsable = Math.floor(subtotal + shipping - discount)
     if (pointsToUse > maxPointsUsable) {
-      setLoyaltyError(t('checkout.maxPointsUsable', { count: maxPointsUsable }))
+      setLoyaltyState(prev => ({ ...prev, error: t('checkout.maxPointsUsable', { count: maxPointsUsable }) }))
       return
     }
 
-    setLoyaltyPointsUsed(pointsToUse)
-    setLoyaltyPointsInput('')
-    setLoyaltyError('')
+    setLoyaltyState({ pointsUsed: pointsToUse, input: '', error: '' })
   }
 
   const handleRemoveLoyaltyPoints = () => {
-    setLoyaltyPointsUsed(0)
-    setLoyaltyError('')
+    setLoyaltyState(prev => ({ ...prev, pointsUsed: 0, error: '' }))
   }
 
   const handleSubmit = async () => {
-    setError('')
-    setIsProcessing(true)
+    setCheckoutState(prev => ({ ...prev, error: '', isProcessing: true }))
 
     try {
       const result = await createOrder.mutateAsync({
@@ -444,16 +461,14 @@ export default function CheckoutPage() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1)
-      setError('')
+      setCheckoutState(prev => ({ ...prev, currentStep: prev.currentStep + 1, error: '' }))
     } else {
-      setError(t('checkout.fillRequired'))
+      setCheckoutState(prev => ({ ...prev, error: t('checkout.fillRequired') }))
     }
   }
 
   const handlePrevious = () => {
-    setCurrentStep(currentStep - 1)
-    setError('')
+    setCheckoutState(prev => ({ ...prev, currentStep: prev.currentStep - 1, error: '' }))
   }
 
   const subtotal = getTotalPrice()
@@ -855,7 +870,7 @@ export default function CheckoutPage() {
                 <div className="space-y-3 mb-6">
                   {paymentSettings.stripeEnabled && (
                     <div
-                      onClick={() => setPaymentMethod('card')}
+                      onClick={() => setCheckoutState(prev => ({ ...prev, paymentMethod: 'card' }))}
                       className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                         paymentMethod === 'card'
                           ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
@@ -876,7 +891,7 @@ export default function CheckoutPage() {
 
                   {paymentSettings.paypalEnabled && (
                     <div
-                      onClick={() => setPaymentMethod('paypal')}
+                      onClick={() => setCheckoutState(prev => ({ ...prev, paymentMethod: 'paypal' }))}
                       className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                         paymentMethod === 'paypal'
                           ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
@@ -899,7 +914,7 @@ export default function CheckoutPage() {
 
                   {paymentSettings.bankTransferEnabled && (
                     <div
-                      onClick={() => setPaymentMethod('bank_transfer')}
+                      onClick={() => setCheckoutState(prev => ({ ...prev, paymentMethod: 'bank_transfer' }))}
                       className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                         paymentMethod === 'bank_transfer'
                           ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
@@ -1067,8 +1082,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={discountCode}
                         onChange={(e) => {
-                          setDiscountCode(e.target.value.toUpperCase())
-                          setDiscountError('')
+                          setDiscountState(prev => ({ ...prev, code: e.target.value.toUpperCase(), error: '' }))
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
@@ -1151,8 +1165,7 @@ export default function CheckoutPage() {
                         max={Math.min(loyaltyData.points, Math.floor(subtotal + shipping - discount))}
                         value={loyaltyPointsInput}
                         onChange={(e) => {
-                          setLoyaltyPointsInput(e.target.value)
-                          setLoyaltyError('')
+                          setLoyaltyState(prev => ({ ...prev, input: e.target.value, error: '' }))
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {

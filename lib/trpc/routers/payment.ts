@@ -11,13 +11,39 @@ import {
 } from '@paypal/paypal-server-sdk'
 import { TRPCError } from '@trpc/server'
 
+// Validate redirect URLs to prevent open redirects
+const validateRedirectUrl = (url: string, allowedHost: string) => {
+  try {
+    const parsedUrl = new URL(url)
+    const allowedUrl = new URL(allowedHost)
+
+    // Allow same hostname or localhost for development
+    if (parsedUrl.hostname === allowedUrl.hostname ||
+        parsedUrl.hostname === 'localhost' ||
+        parsedUrl.hostname === '127.0.0.1') {
+      return url
+    }
+
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid redirect URL: must match application domain',
+    })
+  } catch (error) {
+    if (error instanceof TRPCError) throw error
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid URL format',
+    })
+  }
+}
+
 export const paymentRouter = router({
   createCheckoutSession: publicProcedure
     .input(
       z.object({
         orderId: z.string(),
-        successUrl: z.string(),
-        cancelUrl: z.string(),
+        successUrl: z.string().url(),
+        cancelUrl: z.string().url(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -28,6 +54,11 @@ export const paymentRouter = router({
           message: 'Payment provider not configured. Please contact the store administrator.',
         })
       }
+
+      // Validate redirect URLs
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const successUrl = validateRedirectUrl(input.successUrl, appUrl)
+      const cancelUrl = validateRedirectUrl(input.cancelUrl, appUrl)
 
       try {
         // Get the order with items
@@ -106,8 +137,8 @@ export const paymentRouter = router({
             orderId: order.id,
             orderNumber: order.orderNumber,
           },
-          success_url: input.successUrl,
-          cancel_url: input.cancelUrl,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
           shipping_address_collection: {
             allowed_countries: ['FR', 'BE', 'CH', 'LU', 'MC'],
           },
