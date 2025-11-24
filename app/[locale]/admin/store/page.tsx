@@ -5,6 +5,7 @@ import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { SingleImageUpload } from '@/components/ui/SingleImageUpload'
 import { Store, Save, Eye, Image as ImageIcon, Globe, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Star } from 'lucide-react'
 
 export default function StoreSettingsPage() {
@@ -195,14 +196,13 @@ export default function StoreSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logo (URL)
-              </label>
-              <Input
-                type="url"
+              <SingleImageUpload
+                label="Logo de la boutique"
                 value={formData.logo}
-                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                placeholder="https://example.com/logo.png"
+                onChange={(url) => setFormData({ ...formData, logo: url })}
+                storeId={storeId || undefined}
+                aspectRatio="logo"
+                placeholder="Cliquez pour uploader votre logo"
               />
             </div>
 
@@ -240,14 +240,13 @@ export default function StoreSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image de bannière (URL)
-              </label>
-              <Input
-                type="url"
+              <SingleImageUpload
+                label="Image de bannière"
                 value={formData.bannerImage}
-                onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
-                placeholder="https://example.com/banner.jpg"
+                onChange={(url) => setFormData({ ...formData, bannerImage: url })}
+                storeId={storeId || undefined}
+                aspectRatio="banner"
+                placeholder="Cliquez pour uploader votre bannière"
               />
             </div>
 
