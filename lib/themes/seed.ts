@@ -309,7 +309,7 @@ export async function seedThemePresets(prisma: PrismaClient) {
         isPublic: true,
         isPremium: presetData.isPremium,
         tags: presetData.tags,
-        author: 'GoldenEra',
+        author: 'GEM',
         version: '1.0.0',
       },
     })

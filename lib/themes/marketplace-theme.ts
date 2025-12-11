@@ -3,27 +3,27 @@ import { ThemeConfig } from './presets'
 /**
  * MARKETPLACE THEME
  * Default theme for "All Stores" mode
- * Neutral, professional design that works for multi-merchant marketplace view
+ * GEM (Golden Era Marketplace) brand colors
  */
 export const marketplaceTheme: ThemeConfig = {
   colors: {
-    // Neutral primary color - indigo for trustworthy marketplace feel
-    primary: '#6366f1',
-    secondary: '#8b5cf6',
-    accent: '#ec4899',
+    // GEM brand colors - Gold/Olive primary
+    primary: '#A69F3C',
+    secondary: '#1A1A1A',
+    accent: '#C4B84D',
 
     // Clean backgrounds
-    background: '#f9fafb',
-    surface: '#ffffff',
+    background: '#FFFFFF',
+    surface: '#FAFAF8',
 
     // Professional text colors
-    text: '#111827',
-    textSecondary: '#6b7280',
-    textMuted: '#9ca3af',
+    text: '#1A1A1A',
+    textSecondary: '#4A4A4A',
+    textMuted: '#8A8A8A',
 
     // Subtle borders
-    border: '#e5e7eb',
-    borderLight: '#f3f4f6',
+    border: '#E5E5E0',
+    borderLight: '#F5F5F2',
   },
   fonts: {
     heading: 'Inter',
