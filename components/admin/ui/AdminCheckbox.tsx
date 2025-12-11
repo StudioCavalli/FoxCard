@@ -40,10 +40,10 @@ export const AdminCheckbox = forwardRef<HTMLInputElement, AdminCheckboxProps>(
               <div
                 className={cn(
                   'w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center',
-                  'peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500/20 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-white dark:peer-focus-visible:ring-offset-slate-900',
+                  'peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500/20 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-white dark:peer-focus-visible:ring-offset-slate-900',
                   checked
-                    ? 'bg-violet-500 border-violet-500 dark:bg-violet-600 dark:border-violet-600'
-                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:border-violet-400 dark:hover:border-violet-500',
+                    ? 'bg-primary-500 border-primary-500 dark:bg-primary-600 dark:border-primary-600'
+                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500',
                   error && 'border-red-500 dark:border-red-500'
                 )}
               >

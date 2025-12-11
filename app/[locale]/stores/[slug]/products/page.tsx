@@ -48,11 +48,11 @@ export default function StoreProductsPage({ params, searchParams }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <Link href="/stores" className="hover:text-indigo-600">
+            <Link href="/stores" className="hover:text-primary-600">
               Boutiques
             </Link>
             <span>/</span>
-            <Link href={`/stores/${slug}`} className="hover:text-indigo-600">
+            <Link href={`/stores/${slug}`} className="hover:text-primary-600">
               {store?.name || 'Chargement...'}
             </Link>
             <span>/</span>
@@ -67,7 +67,7 @@ export default function StoreProductsPage({ params, searchParams }: PageProps) {
                   <Image src={store.logo} alt={store.name} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
                   <Store className="w-8 h-8 text-white" />
                 </div>
               )}
@@ -99,7 +99,7 @@ export default function StoreProductsPage({ params, searchParams }: PageProps) {
                   href={`/stores/${slug}/products`}
                   className={`block px-4 py-2 rounded-lg transition-colors ${
                     !categorySlug
-                      ? 'bg-indigo-50 text-indigo-600 font-medium'
+                      ? 'bg-primary-50 text-primary-600 font-medium'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -111,7 +111,7 @@ export default function StoreProductsPage({ params, searchParams }: PageProps) {
                     href={`/stores/${slug}/products?category=${category.slug}`}
                     className={`block px-4 py-2 rounded-lg transition-colors ${
                       categorySlug === category.slug
-                        ? 'bg-indigo-50 text-indigo-600 font-medium'
+                        ? 'bg-primary-50 text-primary-600 font-medium'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -143,7 +143,7 @@ export default function StoreProductsPage({ params, searchParams }: PageProps) {
                 placeholder="Rechercher des produits..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 

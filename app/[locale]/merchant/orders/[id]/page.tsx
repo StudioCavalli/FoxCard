@@ -91,7 +91,7 @@ export default function OrderDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
       </div>
     )
   }
@@ -272,7 +272,7 @@ export default function OrderDetailPage() {
             </h2>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/20">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/20">
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -359,7 +359,7 @@ export default function OrderDetailPage() {
                   value={order.status}
                   onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
                   disabled={isUpdating}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all disabled:opacity-50"
                 >
                   <option value="PENDING">En attente</option>
                   <option value="PROCESSING">En cours</option>
@@ -375,7 +375,7 @@ export default function OrderDetailPage() {
                   value={(order as any).fulfillmentStatus || 'UNFULFILLED'}
                   onChange={(e) => handleFulfillmentChange(e.target.value as FulfillmentStatus)}
                   disabled={isUpdating}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all disabled:opacity-50"
                 >
                   <option value="UNFULFILLED">Non expédié</option>
                   <option value="PARTIALLY_FULFILLED">Partiellement expédié</option>

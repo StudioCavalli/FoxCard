@@ -153,7 +153,7 @@ export default function DeliverySettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
       </div>
     )
   }
@@ -189,7 +189,7 @@ export default function DeliverySettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <Clock className="w-4 h-4 text-violet-500" />
+                <Clock className="w-4 h-4 text-primary-500" />
                 {t('preparationTime')}
               </label>
               <div className="flex items-center gap-2">
@@ -208,7 +208,7 @@ export default function DeliverySettingsPage() {
             {/* Delivery Radius */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <MapPin className="w-4 h-4 text-violet-500" />
+                <MapPin className="w-4 h-4 text-primary-500" />
                 {t('deliveryRadius')}
               </label>
               <div className="flex items-center gap-2">
@@ -227,7 +227,7 @@ export default function DeliverySettingsPage() {
             {/* Minimum Order */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <Euro className="w-4 h-4 text-violet-500" />
+                <Euro className="w-4 h-4 text-primary-500" />
                 {t('minOrder')}
               </label>
               <div className="flex items-center gap-2">
@@ -291,8 +291,8 @@ export default function DeliverySettingsPage() {
           {/* Slots list */}
           {!settings.slots || settings.slots.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 bg-violet-100 dark:bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-primary-600 dark:text-primary-400" />
               </div>
               <h4 className="font-medium text-slate-900 dark:text-white mb-2">{t('noSlots')}</h4>
               <p className="text-sm text-slate-500 dark:text-slate-400">{t('noSlotsDescription')}</p>

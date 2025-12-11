@@ -246,7 +246,7 @@ export default function AmenitiesPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="WiFi, Piscine, Spa..."
                   required
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -257,7 +257,7 @@ export default function AmenitiesPage() {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
@@ -276,7 +276,7 @@ export default function AmenitiesPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Description optionnelle..."
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export default function AmenitiesPage() {
                     type="checkbox"
                     checked={formData.isHighlighted}
                     onChange={(e) => setFormData({ ...formData, isHighlighted: e.target.checked })}
-                    className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
+                    className="rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500"
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-300">Mettre en avant cet équipement</span>
                 </label>
@@ -316,7 +316,7 @@ export default function AmenitiesPage() {
       {/* Amenities List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : filteredAmenities.length === 0 ? (
         <AdminCard padding="lg">
@@ -346,7 +346,7 @@ export default function AmenitiesPage() {
                     <AdminCard
                       key={amenity.id}
                       padding="sm"
-                      className={amenity.isHighlighted ? 'ring-2 ring-violet-500' : ''}
+                      className={amenity.isHighlighted ? 'ring-2 ring-primary-500' : ''}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">

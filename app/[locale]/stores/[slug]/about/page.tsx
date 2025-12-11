@@ -63,11 +63,11 @@ export default function StoreAboutPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <Link href="/stores" className="hover:text-indigo-600">
+            <Link href="/stores" className="hover:text-primary-600">
               Boutiques
             </Link>
             <span>/</span>
-            <Link href={`/stores/${slug}`} className="hover:text-indigo-600">
+            <Link href={`/stores/${slug}`} className="hover:text-primary-600">
               {store.name}
             </Link>
             <span>/</span>
@@ -82,7 +82,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Image src={store.logo} alt={store.name} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
                   <Store className="w-8 h-8 text-white" />
                 </div>
               )}
@@ -121,8 +121,8 @@ export default function StoreAboutPage({ params }: PageProps) {
             {/* Founded Date */}
             {store.foundedAt && (
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-indigo-50 rounded-lg">
-                  <Calendar className="w-5 h-5 text-indigo-600" />
+                <div className="p-2 bg-primary-50 rounded-lg">
+                  <Calendar className="w-5 h-5 text-primary-600" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Fondée en</p>
@@ -185,7 +185,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <p className="font-medium text-gray-900">Email</p>
                   <a
                     href={`mailto:${store.publicEmail}`}
-                    className="text-indigo-600 hover:underline"
+                    className="text-primary-600 hover:underline"
                   >
                     {store.publicEmail}
                   </a>
@@ -202,7 +202,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <p className="font-medium text-gray-900">Téléphone</p>
                   <a
                     href={`tel:${store.publicPhone}`}
-                    className="text-indigo-600 hover:underline"
+                    className="text-primary-600 hover:underline"
                   >
                     {store.publicPhone}
                   </a>

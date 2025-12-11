@@ -153,7 +153,7 @@ export default function SuperAdminSupportPage() {
       return (
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Chargement du ticket...</p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function SuperAdminSupportPage() {
         {/* Back button */}
         <button
           onClick={() => setSelectedTicketId(null)}
-          className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+          className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Retour aux tickets</span>
@@ -209,7 +209,7 @@ export default function SuperAdminSupportPage() {
                   options={statusOptions}
                   disabled={updateStatus.isPending}
                 />
-                {updateStatus.isPending && <Loader2 className="w-4 h-4 animate-spin text-violet-500" />}
+                {updateStatus.isPending && <Loader2 className="w-4 h-4 animate-spin text-primary-500" />}
               </div>
             </div>
           </div>
@@ -231,8 +231,8 @@ export default function SuperAdminSupportPage() {
             </div>
             {selectedTicket.store && (
               <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-                  <Store className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-white">
@@ -271,7 +271,7 @@ export default function SuperAdminSupportPage() {
         <AdminCard>
           <div className="p-5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -298,21 +298,21 @@ export default function SuperAdminSupportPage() {
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.isAdmin
-                        ? 'bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20'
+                        ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span
                         className={`text-xs font-medium ${
-                          message.isAdmin ? 'text-violet-200' : 'text-slate-500 dark:text-slate-400'
+                          message.isAdmin ? 'text-primary-200' : 'text-slate-500 dark:text-slate-400'
                         }`}
                       >
                         {message.authorName}
                       </span>
                       <span
                         className={`text-xs ${
-                          message.isAdmin ? 'text-violet-200' : 'text-slate-400 dark:text-slate-500'
+                          message.isAdmin ? 'text-primary-200' : 'text-slate-400 dark:text-slate-500'
                         }`}
                       >
                         {formatDate(message.createdAt)}
@@ -468,7 +468,7 @@ export default function SuperAdminSupportPage() {
       {isLoadingTickets && (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des tickets...</p>
           </div>
         </div>

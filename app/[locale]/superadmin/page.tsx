@@ -90,7 +90,7 @@ export default function SuperAdminDashboard() {
                 <div key={month} className="group flex items-center gap-4">
                   <span className="w-16 text-sm font-medium text-slate-500 dark:text-slate-400">{month}</span>
                   <div className="flex-1 h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-xl flex items-center justify-end px-3" style={{ width: `${Math.max(pct, 5)}%` }}>
+                    <div className="h-full bg-gradient-to-r from-primary-500 to-primary-500 rounded-xl flex items-center justify-end px-3" style={{ width: `${Math.max(pct, 5)}%` }}>
                       <span className="text-xs font-semibold text-white whitespace-nowrap">{formatPrice(data.revenue)}</span>
                     </div>
                   </div>
@@ -104,7 +104,7 @@ export default function SuperAdminDashboard() {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Actions Rapides</h3>
           {[
-            { href: '/superadmin/stores', icon: Store, title: 'Boutiques', desc: stats.totalStores + ' boutiques', gradient: 'from-violet-500 to-indigo-600', shadow: 'violet' },
+            { href: '/superadmin/stores', icon: Store, title: 'Boutiques', desc: stats.totalStores + ' boutiques', gradient: 'from-primary-500 to-primary-600', shadow: 'violet' },
             { href: '/superadmin/users', icon: Users, title: 'Utilisateurs', desc: stats.totalUsers + ' utilisateurs', gradient: 'from-blue-500 to-cyan-600', shadow: 'blue' },
             { href: '/superadmin/settings', icon: Settings, title: 'Paramètres', desc: 'Configurer', gradient: 'from-slate-500 to-slate-600', shadow: 'slate' },
             { href: '/superadmin/analytics', icon: BarChart3, title: 'Analytics', desc: 'Rapports', gradient: 'from-emerald-500 to-green-600', shadow: 'emerald' },

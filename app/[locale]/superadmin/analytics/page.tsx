@@ -93,7 +93,7 @@ export default function SuperAdminAnalyticsPage() {
       case 2:
         return 'from-orange-500 to-amber-500'
       default:
-        return 'from-violet-500 to-indigo-500'
+        return 'from-primary-500 to-primary-500'
     }
   }
 
@@ -186,7 +186,7 @@ export default function SuperAdminAnalyticsPage() {
 
         <AdminCard className="p-5">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
               <ShoppingCart className="w-7 h-7 text-white" />
             </div>
             <div>
@@ -221,7 +221,7 @@ export default function SuperAdminAnalyticsPage() {
       {isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des données...</p>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function SuperAdminAnalyticsPage() {
                             </p>
                           </div>
                           <Link href={`/superadmin/stores/${store.storeId}`}>
-                            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-violet-600 dark:hover:text-violet-400">
+                            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-primary-600 dark:hover:text-primary-400">
                               <ExternalLink className="w-4 h-4" />
                             </button>
                           </Link>
@@ -348,7 +348,7 @@ export default function SuperAdminAnalyticsPage() {
         <AdminCard>
           <div className="p-5 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                 <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -381,7 +381,7 @@ export default function SuperAdminAnalyticsPage() {
                     >
                       <div className="relative w-full flex justify-center">
                         <div
-                          className="w-full max-w-8 bg-gradient-to-t from-violet-500 to-indigo-500 rounded-t-lg transition-all duration-300 group-hover:from-violet-600 group-hover:to-indigo-600"
+                          className="w-full max-w-8 bg-gradient-to-t from-primary-500 to-primary-500 rounded-t-lg transition-all duration-300 group-hover:from-primary-600 group-hover:to-primary-600"
                           style={{ height: `${Math.max(heightPercent, 4)}%`, minHeight: '8px' }}
                         />
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap">

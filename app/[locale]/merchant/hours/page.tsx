@@ -186,7 +186,7 @@ export default function MerchantHoursPage() {
       <AdminCard>
         <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <Clock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             <h2 className="font-semibold text-slate-900 dark:text-white">{t('weeklySchedule')}</h2>
           </div>
         </div>
@@ -195,13 +195,13 @@ export default function MerchantHoursPage() {
             <div
               key={day}
               className={`p-4 sm:p-5 ${
-                isToday(day) ? 'bg-violet-50 dark:bg-violet-500/10' : ''
+                isToday(day) ? 'bg-primary-50 dark:bg-primary-500/10' : ''
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 {/* Day Label */}
                 <div className="sm:w-36 flex items-center gap-2">
-                  <span className={`font-semibold ${isToday(day) ? 'text-violet-600 dark:text-violet-400' : 'text-slate-900 dark:text-white'}`}>
+                  <span className={`font-semibold ${isToday(day) ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white'}`}>
                     {t(`days.${day}`)}
                   </span>
                   {isToday(day) && (
@@ -260,7 +260,7 @@ export default function MerchantHoursPage() {
         <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              <CalendarDays className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               <h2 className="font-semibold text-slate-900 dark:text-white">{t('specialDates.title')}</h2>
             </div>
             <AdminButton

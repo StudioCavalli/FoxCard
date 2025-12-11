@@ -324,7 +324,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.name}
                 onChange={(e) => setNewFile({ ...newFile, name: e.target.value })}
                 placeholder="Ex: Guide complet PDF"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -333,7 +333,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.fileName}
                 onChange={(e) => setNewFile({ ...newFile, fileName: e.target.value })}
                 placeholder="guide-complet.pdf"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -359,7 +359,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.fileUrl}
                 onChange={(e) => setNewFile({ ...newFile, fileUrl: e.target.value })}
                 placeholder="https://storage.example.com/files/guide.pdf"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
               <p className="text-xs text-gray-500 mt-1">
                 URL sécurisée vers le fichier (S3, CloudFlare R2, etc.)
@@ -372,7 +372,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.fileSize || ''}
                 onChange={(e) => setNewFile({ ...newFile, fileSize: parseInt(e.target.value) || 0 })}
                 placeholder="1048576"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -381,7 +381,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.version}
                 onChange={(e) => setNewFile({ ...newFile, version: e.target.value })}
                 placeholder="1.0.0"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -391,7 +391,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.maxDownloads}
                 onChange={(e) => setNewFile({ ...newFile, maxDownloads: e.target.value })}
                 placeholder="Illimité si vide"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -401,7 +401,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.expiryDays}
                 onChange={(e) => setNewFile({ ...newFile, expiryDays: e.target.value })}
                 placeholder="Jamais si vide"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>
@@ -410,7 +410,7 @@ export function DigitalFilesManager({ productId, isDigitalProduct }: DigitalFile
                 value={newFile.licenseKey}
                 onChange={(e) => setNewFile({ ...newFile, licenseKey: e.target.value })}
                 placeholder="XXXX-XXXX-XXXX-XXXX"
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
             <div>

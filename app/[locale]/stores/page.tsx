@@ -24,10 +24,10 @@ export default function StoresDirectoryPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-16">
+      <div className="bg-gradient-to-r from-primary-600 to-purple-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">{t('store.discoverStores')}</h1>
-          <p className="text-xl text-indigo-100 mb-8">
+          <p className="text-xl text-primary-100 mb-8">
             {t('store.subtitle')}
           </p>
 
@@ -61,7 +61,7 @@ export default function StoresDirectoryPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="name">{t('store.sortOptions.alphabetical')}</option>
               <option value="newest">{t('store.sortOptions.newest')}</option>
@@ -119,7 +119,7 @@ export default function StoresDirectoryPage() {
                       />
                     </div>
                   ) : (
-                    <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
                       <span className="text-3xl font-bold text-white">
                         {store.name.charAt(0).toUpperCase()}
                       </span>

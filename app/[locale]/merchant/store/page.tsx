@@ -181,10 +181,10 @@ export default function MerchantStorePage() {
         {currentConfig && !showTypeSelector && (
           <div className="p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-purple-500/20 dark:from-primary-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
                 {(() => {
                   const Icon = iconMap[selectedType!]
-                  return <Icon className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                  return <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 })()}
               </div>
               <div className="flex-1">
@@ -306,25 +306,25 @@ export default function MerchantStorePage() {
                     disabled={updateCommerceType.isPending}
                     className={`p-4 rounded-xl border-2 text-left transition-all ${
                       isSelected
-                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         isSelected
-                          ? 'bg-violet-100 dark:bg-violet-500/20'
+                          ? 'bg-primary-100 dark:bg-primary-500/20'
                           : 'bg-slate-100 dark:bg-slate-700'
                       }`}>
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-violet-600 dark:text-violet-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium ${isSelected ? 'text-violet-900 dark:text-violet-100' : 'text-slate-900 dark:text-white'}`}>
+                          <span className={`font-medium ${isSelected ? 'text-primary-900 dark:text-primary-100' : 'text-slate-900 dark:text-white'}`}>
                             {config.name}
                           </span>
                           <span>{config.emoji}</span>
-                          {isSelected && <Check className="w-4 h-4 text-violet-500" />}
+                          {isSelected && <Check className="w-4 h-4 text-primary-500" />}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{config.description}</p>
                       </div>
@@ -340,7 +340,7 @@ export default function MerchantStorePage() {
       {/* Store Info Card */}
       <AdminCard className="overflow-hidden" padding="none">
         {/* Banner */}
-        <div className="h-32 bg-gradient-to-r from-violet-500 to-purple-600 relative">
+        <div className="h-32 bg-gradient-to-r from-primary-500 to-purple-600 relative">
           {store?.bannerImage && (
             <img src={store.bannerImage} alt="" className="w-full h-full object-cover" />
           )}
@@ -367,7 +367,7 @@ export default function MerchantStorePage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -379,7 +379,7 @@ export default function MerchantStorePage() {
                   value={formData.tagline}
                   onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                   placeholder="Une phrase accrocheuse pour votre boutique"
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -391,7 +391,7 @@ export default function MerchantStorePage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Décrivez votre boutique..."
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -404,7 +404,7 @@ export default function MerchantStorePage() {
                     value={formData.publicEmail}
                     onChange={(e) => setFormData({ ...formData, publicEmail: e.target.value })}
                     placeholder="contact@maboutique.com"
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                   />
                 </div>
                 <div>
@@ -416,7 +416,7 @@ export default function MerchantStorePage() {
                     value={formData.publicPhone}
                     onChange={(e) => setFormData({ ...formData, publicPhone: e.target.value })}
                     placeholder="+33 1 23 45 67 89"
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                   />
                 </div>
               </div>
@@ -467,7 +467,7 @@ export default function MerchantStorePage() {
           <div className="flex items-center gap-2 flex-wrap">
             {currentConfig.checkoutSteps.map((step, i) => (
               <div key={step} className="flex items-center gap-2">
-                <span className="px-3 py-1.5 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium rounded-lg capitalize">
+                <span className="px-3 py-1.5 bg-primary-100 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300 text-sm font-medium rounded-lg capitalize">
                   {step.replace(/-/g, ' ')}
                 </span>
                 {i < currentConfig.checkoutSteps.length - 1 && (

@@ -299,7 +299,7 @@ function BeautyAttributes({ attributes }: { attributes: Record<string, any> }) {
       {attributes.certifications && (
         <div className="flex flex-wrap gap-2">
           {(attributes.certifications as string[]).map((cert) => (
-            <span key={cert} className="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded">
+            <span key={cert} className="px-2 py-1 bg-primary-100 text-pink-800 text-xs rounded">
               {translateCertification(cert)}
             </span>
           ))}

@@ -135,7 +135,7 @@ export default function SuperAdminStoresPage() {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       )}
 
@@ -165,8 +165,8 @@ export default function SuperAdminStoresPage() {
                       {store.logo ? (
                         <img src={store.logo} alt={store.name} className="w-16 h-16 rounded-xl object-cover" />
                       ) : (
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 flex items-center justify-center">
-                          <Store className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500/10 to-primary-500/10 flex items-center justify-center">
+                          <Store className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                         </div>
                       )}
                     </div>
@@ -221,8 +221,8 @@ export default function SuperAdminStoresPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
-                            <Users className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                          <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                            <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                           </div>
                           <div>
                             <p className="text-xs text-slate-500 dark:text-slate-400">Clients</p>
@@ -308,8 +308,8 @@ export default function SuperAdminStoresPage() {
             hint="Définit les fonctionnalités disponibles pour cette boutique"
           />
           {createForm.commerceType !== 'GENERAL' && (
-            <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
-              <p className="text-sm text-indigo-700 dark:text-indigo-300">{commerceTypeConfigs[createForm.commerceType].description}</p>
+            <div className="p-3 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
+              <p className="text-sm text-primary-700 dark:text-primary-300">{commerceTypeConfigs[createForm.commerceType].description}</p>
               <div className="flex flex-wrap gap-1 mt-2">
                 {commerceTypeConfigs[createForm.commerceType].features.hasPhysicalProducts && (
                   <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">Physique</span>

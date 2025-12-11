@@ -23,9 +23,9 @@ interface AdminStatCardProps {
 
 const variantStyles: Record<StatVariant, { bg: string; icon: string; trend: string }> = {
   violet: {
-    bg: 'bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20',
-    icon: 'bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30',
-    trend: 'text-violet-600 dark:text-violet-400',
+    bg: 'bg-gradient-to-br from-primary-500/10 to-primary-500/10 dark:from-primary-500/20 dark:to-primary-500/20',
+    icon: 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30',
+    trend: 'text-primary-600 dark:text-primary-400',
   },
   blue: {
     bg: 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20',
@@ -43,8 +43,8 @@ const variantStyles: Record<StatVariant, { bg: string; icon: string; trend: stri
     trend: 'text-amber-600 dark:text-amber-400',
   },
   rose: {
-    bg: 'bg-gradient-to-br from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20',
-    icon: 'bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30',
+    bg: 'bg-gradient-to-br from-rose-500/10 to-primary-400/10 dark:from-rose-500/20 dark:to-primary-400/20',
+    icon: 'bg-gradient-to-br from-rose-500 to-primary-500 text-white shadow-lg shadow-rose-500/30',
     trend: 'text-rose-600 dark:text-rose-400',
   },
   slate: {

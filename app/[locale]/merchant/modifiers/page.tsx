@@ -332,7 +332,7 @@ export default function ModifiersPage() {
                   onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
                   placeholder={t('groupNamePlaceholder')}
                   required
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -343,7 +343,7 @@ export default function ModifiersPage() {
                 <select
                   value={groupForm.selectionType}
                   onChange={(e) => setGroupForm({ ...groupForm, selectionType: e.target.value as 'SINGLE' | 'MULTIPLE' | 'QUANTITY' })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 >
                   <option value="SINGLE">{t('single')}</option>
                   <option value="MULTIPLE">{t('multiple')}</option>
@@ -359,7 +359,7 @@ export default function ModifiersPage() {
                   value={groupForm.description}
                   onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
                   placeholder={t('descriptionPlaceholder')}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function ModifiersPage() {
                   min="0"
                   value={groupForm.minSelections}
                   onChange={(e) => setGroupForm({ ...groupForm, minSelections: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -386,7 +386,7 @@ export default function ModifiersPage() {
                   value={groupForm.maxSelections ?? ''}
                   onChange={(e) => setGroupForm({ ...groupForm, maxSelections: e.target.value ? parseInt(e.target.value) : null })}
                   placeholder={t('unlimited')}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
 
@@ -396,7 +396,7 @@ export default function ModifiersPage() {
                     type="checkbox"
                     checked={groupForm.isRequired}
                     onChange={(e) => setGroupForm({ ...groupForm, isRequired: e.target.checked })}
-                    className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
+                    className="rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500"
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-300">{t('isRequired')}</span>
                 </label>
@@ -436,7 +436,7 @@ export default function ModifiersPage() {
       {/* Groups List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : !groups || groups.length === 0 ? (
         <AdminCard padding="lg">
@@ -542,7 +542,7 @@ export default function ModifiersPage() {
                                 onChange={(e) => setModifierForm({ ...modifierForm, name: e.target.value })}
                                 placeholder={t('modifierName')}
                                 required
-                                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                               />
                               <input
                                 type="number"
@@ -552,7 +552,7 @@ export default function ModifiersPage() {
                                   setModifierForm({ ...modifierForm, priceAdjustment: parseFloat(e.target.value) || 0 })
                                 }
                                 placeholder={t('priceAdjustment')}
-                                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                               />
                               <div className="flex items-center gap-4">
                                 <label className="flex items-center gap-2 text-sm">
@@ -560,7 +560,7 @@ export default function ModifiersPage() {
                                     type="checkbox"
                                     checked={modifierForm.isDefault}
                                     onChange={(e) => setModifierForm({ ...modifierForm, isDefault: e.target.checked })}
-                                    className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
+                                    className="rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500"
                                   />
                                   <span className="text-slate-700 dark:text-slate-300">{t('default')}</span>
                                 </label>
@@ -569,7 +569,7 @@ export default function ModifiersPage() {
                                     type="checkbox"
                                     checked={modifierForm.isAvailable}
                                     onChange={(e) => setModifierForm({ ...modifierForm, isAvailable: e.target.checked })}
-                                    className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
+                                    className="rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500"
                                   />
                                   <span className="text-slate-700 dark:text-slate-300">{t('available')}</span>
                                 </label>
@@ -666,7 +666,7 @@ export default function ModifiersPage() {
                           onChange={(e) => setModifierForm({ ...modifierForm, name: e.target.value })}
                           placeholder={t('modifierName')}
                           required
-                          className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                          className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                         />
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -678,7 +678,7 @@ export default function ModifiersPage() {
                               setModifierForm({ ...modifierForm, priceAdjustment: parseFloat(e.target.value) || 0 })
                             }
                             placeholder="0.00"
-                            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                           />
                         </div>
                         <div className="flex items-center gap-4">
@@ -687,7 +687,7 @@ export default function ModifiersPage() {
                               type="checkbox"
                               checked={modifierForm.isDefault}
                               onChange={(e) => setModifierForm({ ...modifierForm, isDefault: e.target.checked })}
-                              className="rounded border-slate-300 dark:border-slate-600 text-violet-500 focus:ring-violet-500"
+                              className="rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500"
                             />
                             <span className="text-slate-700 dark:text-slate-300">{t('default')}</span>
                           </label>

@@ -176,7 +176,7 @@ export default function ReservationsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <AdminCard padding="md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 dark:from-blue-500/30 dark:to-indigo-500/30 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-primary-500/20 dark:from-blue-500/30 dark:to-primary-500/30 rounded-xl flex items-center justify-center">
               <CalendarDays className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
@@ -211,8 +211,8 @@ export default function ReservationsPage() {
         </AdminCard>
         <AdminCard padding="md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500/20 to-purple-500/20 dark:from-primary-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
               <p className="text-sm text-slate-500 dark:text-slate-400">Ce mois</p>
@@ -257,7 +257,7 @@ export default function ReservationsPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
           </div>
         ) : (
           <>
@@ -284,11 +284,11 @@ export default function ReservationsPage() {
                   <div
                     key={date.toISOString()}
                     className={`h-24 border rounded-lg p-1 overflow-hidden ${
-                      isToday ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10' : 'border-slate-200 dark:border-slate-700'
+                      isToday ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10' : 'border-slate-200 dark:border-slate-700'
                     }`}
                   >
                     <div className={`text-sm font-medium mb-1 ${
-                      isToday ? 'text-violet-600 dark:text-violet-400' : 'text-slate-700 dark:text-slate-300'
+                      isToday ? 'text-primary-600 dark:text-primary-400' : 'text-slate-700 dark:text-slate-300'
                     }`}>
                       {date.getDate()}
                     </div>
@@ -329,7 +329,7 @@ export default function ReservationsPage() {
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-48 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="pl-9 w-48 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
               />
             </div>
           </div>
@@ -349,7 +349,7 @@ export default function ReservationsPage() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-violet-500/20">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-primary-500/20">
                       {res.guestName?.charAt(0) || 'G'}
                     </div>
                     <div>
