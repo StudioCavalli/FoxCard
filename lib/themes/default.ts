@@ -2,38 +2,38 @@ import { Theme } from './types'
 
 export const defaultTheme: Theme = {
   id: 'default',
-  name: 'Thème par défaut',
-  description: 'Thème moderne et minimaliste de GoldenEra',
+  name: 'GEM Default',
+  description: 'Thème officiel Golden Era Marketplace',
   version: '1.0.0',
-  author: 'Foxcase',
+  author: 'GEM',
   colors: {
     light: {
-      primary: '#14b8a6', // Teal-500
-      secondary: '#ec4899', // Pink-500
-      accent: '#f59e0b', // Amber-500
+      primary: '#A69F3C', // GEM Gold
+      secondary: '#1A1A1A', // GEM Black
+      accent: '#C4B84D', // GEM Gold Light
       background: '#ffffff',
-      foreground: '#0f172a', // Slate-900
-      muted: '#f1f5f9', // Slate-100
-      border: '#e2e8f0', // Slate-200
+      foreground: '#1A1A1A', // GEM Black
+      muted: '#FAFAF8', // Warm white
+      border: '#E5E5E0', // Warm gray
       input: '#ffffff',
-      ring: '#14b8a6',
-      success: '#10b981', // Green-500
-      warning: '#f59e0b', // Amber-500
-      error: '#ef4444', // Red-500
+      ring: '#A69F3C',
+      success: '#22C55E', // Green-500
+      warning: '#F59E0B', // Amber-500
+      error: '#EF4444', // Red-500
     },
     dark: {
-      primary: '#14b8a6',
-      secondary: '#ec4899',
-      accent: '#f59e0b',
-      background: '#0f172a', // Slate-900
-      foreground: '#f8fafc', // Slate-50
-      muted: '#1e293b', // Slate-800
-      border: '#334155', // Slate-700
-      input: '#1e293b',
-      ring: '#14b8a6',
-      success: '#10b981',
-      warning: '#f59e0b',
-      error: '#ef4444',
+      primary: '#C4B84D', // GEM Gold Light
+      secondary: '#A69F3C', // GEM Gold
+      accent: '#E8DC6A', // GEM Gold Bright
+      background: '#1A1A1A', // GEM Black
+      foreground: '#F8F8F6', // Warm white
+      muted: '#2D2D2D', // Dark gray
+      border: '#404040', // Medium gray
+      input: '#2D2D2D',
+      ring: '#C4B84D',
+      success: '#22C55E',
+      warning: '#F59E0B',
+      error: '#EF4444',
     },
   },
   typography: {
