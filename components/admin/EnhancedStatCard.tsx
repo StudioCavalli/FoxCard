@@ -17,9 +17,9 @@ interface EnhancedStatCardProps {
 
 const colorStyles = {
   indigo: {
-    bg: 'bg-indigo-50',
-    icon: 'text-indigo-600',
-    trend: 'text-indigo-600',
+    bg: 'bg-primary-50',
+    icon: 'text-primary-600',
+    trend: 'text-primary-600',
   },
   green: {
     bg: 'bg-green-50',

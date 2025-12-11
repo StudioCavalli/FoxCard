@@ -74,12 +74,12 @@ const categoryIcons: Record<string, any> = {
 }
 
 const categoryColors: Record<string, string> = {
-  Boutiques: 'from-violet-500 to-indigo-600',
+  Boutiques: 'from-primary-500 to-primary-600',
   Utilisateurs: 'from-blue-500 to-cyan-600',
   Commandes: 'from-amber-500 to-orange-600',
   Analytics: 'from-emerald-500 to-green-600',
   Paramètres: 'from-slate-500 to-gray-600',
-  Support: 'from-rose-500 to-pink-600',
+  Support: 'from-rose-500 to-primary-500',
   Appels: 'from-red-500 to-rose-600',
 }
 
@@ -198,7 +198,7 @@ export default function SuperAdminRolesPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
           <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des rôles...</p>
         </div>
       </div>
@@ -272,7 +272,7 @@ export default function SuperAdminRolesPage() {
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                         role.isSystem
-                          ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30'
+                          ? 'bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30'
                           : 'bg-slate-100 dark:bg-slate-700'
                       }`}>
                         {role.isSystem ? (
@@ -301,7 +301,7 @@ export default function SuperAdminRolesPage() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleOpenModal(role)}
-                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-violet-600 dark:hover:text-violet-400"
+                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -335,8 +335,8 @@ export default function SuperAdminRolesPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-                        <Key className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                      <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center">
+                        <Key className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div>
                         <p className="text-lg font-bold text-slate-900 dark:text-white">
@@ -363,7 +363,7 @@ export default function SuperAdminRolesPage() {
                       ) : null
                     })}
                     {permCount > 5 && (
-                      <span className="px-2.5 py-1 text-xs font-medium bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-lg">
+                      <span className="px-2.5 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 rounded-lg">
                         +{permCount - 5} autres
                       </span>
                     )}
@@ -448,15 +448,15 @@ export default function SuperAdminRolesPage() {
                         <div
                           className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                             allSelected
-                              ? 'bg-violet-600 border-violet-600'
+                              ? 'bg-primary-600 border-primary-600'
                               : someSelected
-                              ? 'bg-violet-100 dark:bg-violet-500/20 border-violet-400 dark:border-violet-500'
+                              ? 'bg-primary-100 dark:bg-primary-500/20 border-primary-400 dark:border-primary-500'
                               : 'border-slate-300 dark:border-slate-600'
                           }`}
                         >
                           {allSelected && <Check className="w-3 h-3 text-white" />}
                           {!allSelected && someSelected && (
-                            <div className="w-2 h-2 bg-violet-600 rounded-sm" />
+                            <div className="w-2 h-2 bg-primary-600 rounded-sm" />
                           )}
                         </div>
                       </button>
@@ -472,14 +472,14 @@ export default function SuperAdminRolesPage() {
                               key={permission.id}
                               className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                                 isSelected
-                                  ? 'bg-violet-50 dark:bg-violet-500/10'
+                                  ? 'bg-primary-50 dark:bg-primary-500/10'
                                   : 'hover:bg-slate-50 dark:hover:bg-slate-800'
                               }`}
                             >
                               <div
                                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                                   isSelected
-                                    ? 'bg-violet-600 border-violet-600'
+                                    ? 'bg-primary-600 border-primary-600'
                                     : 'border-slate-300 dark:border-slate-600'
                                 }`}
                               >
@@ -494,7 +494,7 @@ export default function SuperAdminRolesPage() {
                               <div className="flex-1">
                                 <p className={`text-sm font-medium ${
                                   isSelected
-                                    ? 'text-violet-700 dark:text-violet-300'
+                                    ? 'text-primary-700 dark:text-primary-300'
                                     : 'text-slate-700 dark:text-slate-300'
                                 }`}>
                                   {permission.name}

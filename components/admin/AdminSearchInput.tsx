@@ -17,7 +17,7 @@ const AdminSearchInput = forwardRef<HTMLInputElement, AdminSearchInputProps>(
           type="text"
           className={cn(
             'w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white',
-            'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20',
+            'focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20',
             'outline-none transition-all text-sm',
             'placeholder:text-gray-400',
             className

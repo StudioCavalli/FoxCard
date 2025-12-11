@@ -188,7 +188,7 @@ export default function SuperAdminOrdersPage() {
       {isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des commandes...</p>
           </div>
         </div>
@@ -259,8 +259,8 @@ export default function SuperAdminOrdersPage() {
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                            <Hash className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-500/10 to-primary-500/10 dark:from-primary-500/20 dark:to-primary-500/20 flex items-center justify-center flex-shrink-0">
+                            <Hash className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-mono text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[140px]" title={order.orderNumber}>
@@ -318,14 +318,14 @@ export default function SuperAdminOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleViewOrder(order)}
-                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
                             title="Voir les détails"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <Link href={`/superadmin/stores/${order.storeId}`}>
                             <button
-                              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400"
+                              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
                               title="Voir la boutique"
                             >
                               <ExternalLink className="w-4 h-4" />
@@ -401,8 +401,8 @@ export default function SuperAdminOrdersPage() {
               {/* Customer Info */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  <div className="w-9 h-9 rounded-lg bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
@@ -418,8 +418,8 @@ export default function SuperAdminOrdersPage() {
               {/* Store Info */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                    <Store className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-9 h-9 rounded-lg bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                    <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
@@ -427,7 +427,7 @@ export default function SuperAdminOrdersPage() {
                     </p>
                     <Link
                       href={`/superadmin/stores/${selectedOrder.storeId}`}
-                      className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
+                      className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                     >
                       Voir la boutique →
                     </Link>

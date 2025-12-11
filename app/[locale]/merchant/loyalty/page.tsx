@@ -131,8 +131,8 @@ export default function MerchantLoyaltyPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-indigo-500/20 dark:from-violet-500/30 dark:to-indigo-500/30 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500/20 to-primary-500/20 dark:from-primary-500/30 dark:to-primary-500/30 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
               <p className="text-sm text-slate-500 dark:text-slate-400">{t('stats.totalMembers')}</p>
@@ -182,7 +182,7 @@ export default function MerchantLoyaltyPage() {
       <AdminCard>
         <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <Settings className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             <h2 className="font-semibold text-slate-900 dark:text-white">{t('settings.title')}</h2>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function MerchantLoyaltyPage() {
             {/* Signup Bonus */}
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
-                <Gift className="w-4 h-4 text-violet-500" />
+                <Gift className="w-4 h-4 text-primary-500" />
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('settings.signupBonus')}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{LOYALTY_CONFIG.signupBonus} pts</p>
@@ -259,7 +259,7 @@ export default function MerchantLoyaltyPage() {
               <select
                 value={selectedTier}
                 onChange={(e) => setSelectedTier(e.target.value as any)}
-                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                className="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               >
                 <option value="ALL">{t('members.allTiers')}</option>
                 <option value="BRONZE">Bronze</option>
@@ -275,7 +275,7 @@ export default function MerchantLoyaltyPage() {
                   placeholder={t('members.search')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                  className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function MerchantLoyaltyPage() {
                   <tr key={customer.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-500 rounded-full flex items-center justify-center text-white font-semibold">
                           {customer.firstName?.charAt(0) || customer.email.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -381,7 +381,7 @@ export default function MerchantLoyaltyPage() {
             </div>
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-500 rounded-full flex items-center justify-center text-white font-semibold">
                   {selectedCustomer.firstName?.charAt(0) || selectedCustomer.email.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -403,7 +403,7 @@ export default function MerchantLoyaltyPage() {
                   value={adjustPoints}
                   onChange={(e) => setAdjustPoints(e.target.value)}
                   placeholder={t('adjust.pointsPlaceholder')}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   {t('adjust.pointsHint')}
@@ -419,7 +419,7 @@ export default function MerchantLoyaltyPage() {
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
                   placeholder={t('adjust.reasonPlaceholder')}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
 

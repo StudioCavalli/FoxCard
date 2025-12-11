@@ -106,7 +106,7 @@ export function QuickActionsButton({ className, onScanResult, onPhotoCapture }: 
       id: 'take-photo',
       label: t('quickActions.takePhoto'),
       icon: Camera,
-      color: 'bg-pink-500',
+      color: 'bg-primary-400',
       action: () => {
         haptic.light()
         setShowCamera(true)

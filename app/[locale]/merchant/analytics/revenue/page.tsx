@@ -231,7 +231,7 @@ export default function RevenueAnalyticsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : (
         <>
@@ -262,13 +262,13 @@ export default function RevenueAnalyticsPage() {
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Revenu par chambre disponible</p>
             </AdminCard>
 
-            <AdminCard padding="lg" className="ring-2 ring-violet-500/30 dark:ring-violet-400/30">
+            <AdminCard padding="lg" className="ring-2 ring-primary-500/30 dark:ring-primary-400/30">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-purple-500/20 dark:from-primary-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-4">
+              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mt-4">
                 {formatPrice(metrics.adr)}
               </p>
               <p className="text-sm text-slate-700 dark:text-slate-300">{t('adr')}</p>
@@ -289,8 +289,8 @@ export default function RevenueAnalyticsPage() {
 
             <AdminCard padding="lg">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 dark:from-indigo-500/30 dark:to-blue-500/30 rounded-xl flex items-center justify-center">
-                  <Bed className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-blue-500/20 dark:from-primary-500/30 dark:to-blue-500/30 rounded-xl flex items-center justify-center">
+                  <Bed className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white mt-4">
@@ -310,7 +310,7 @@ export default function RevenueAnalyticsPage() {
                 </p>
               </div>
               <div>
-                <p className="font-medium text-violet-600 dark:text-violet-400">ADR (Average Daily Rate)</p>
+                <p className="font-medium text-primary-600 dark:text-primary-400">ADR (Average Daily Rate)</p>
                 <p className="text-slate-600 dark:text-slate-400">
                   Prix moyen par nuit vendue. ADR = CA / Nuits vendues
                 </p>
@@ -367,7 +367,7 @@ export default function RevenueAnalyticsPage() {
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-violet-500 rounded-full"
+                      className="h-full bg-primary-500 rounded-full"
                       style={{ width: `${stats?.occupancyRate || 0}%` }}
                     />
                   </div>

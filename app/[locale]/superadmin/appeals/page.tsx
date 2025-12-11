@@ -117,7 +117,7 @@ export default function SuperAdminAppealsPage() {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       )}
 
@@ -187,9 +187,9 @@ export default function SuperAdminAppealsPage() {
 
                       {/* Admin Response (if any) */}
                       {appeal.adminResponse && (
-                        <div className="mt-3 p-3 rounded-xl bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20">
-                          <p className="text-xs font-medium text-violet-700 dark:text-violet-300 mb-1">Reponse admin</p>
-                          <p className="text-sm text-violet-600 dark:text-violet-400">{appeal.adminResponse}</p>
+                        <div className="mt-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
+                          <p className="text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">Reponse admin</p>
+                          <p className="text-sm text-primary-600 dark:text-primary-400">{appeal.adminResponse}</p>
                         </div>
                       )}
                     </div>
@@ -238,8 +238,8 @@ export default function SuperAdminAppealsPage() {
               {selectedAppeal.store?.logo ? (
                 <img src={selectedAppeal.store.logo} alt={selectedAppeal.store.name} className="w-16 h-16 rounded-xl object-cover" />
               ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 flex items-center justify-center">
-                  <Store className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500/10 to-primary-500/10 flex items-center justify-center">
+                  <Store className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                 </div>
               )}
               <div>
@@ -311,8 +311,8 @@ export default function SuperAdminAppealsPage() {
             {selectedAppeal.adminResponse && (
               <div>
                 <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Reponse de l'administrateur</h4>
-                <div className="p-4 rounded-xl bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20">
-                  <p className="text-sm text-violet-700 dark:text-violet-400 whitespace-pre-wrap">{selectedAppeal.adminResponse}</p>
+                <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
+                  <p className="text-sm text-primary-700 dark:text-primary-400 whitespace-pre-wrap">{selectedAppeal.adminResponse}</p>
                 </div>
               </div>
             )}
@@ -383,7 +383,7 @@ export default function SuperAdminAppealsPage() {
                 id="reactivate"
                 checked={reactivateStore}
                 onChange={(e) => setReactivateStore(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
               />
               <label htmlFor="reactivate" className="text-sm text-slate-700 dark:text-slate-300">
                 Reactiver la boutique immediatement

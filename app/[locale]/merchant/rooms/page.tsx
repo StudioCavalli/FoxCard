@@ -89,8 +89,8 @@ export default function RoomsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminCard padding="md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-indigo-500/20 dark:from-violet-500/30 dark:to-indigo-500/30 rounded-xl flex items-center justify-center">
-              <Bed className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500/20 to-primary-500/20 dark:from-primary-500/30 dark:to-primary-500/30 rounded-xl flex items-center justify-center">
+              <Bed className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
               <p className="text-sm text-slate-500 dark:text-slate-400">Total chambres</p>
@@ -148,13 +148,13 @@ export default function RoomsPage() {
               placeholder="Rechercher une chambre..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           >
             <option value="all">Tous les statuts</option>
             <option value="ACTIVE">Active</option>
@@ -167,7 +167,7 @@ export default function RoomsPage() {
       {/* Rooms Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : rooms.length === 0 ? (
         <AdminCard padding="lg">
@@ -232,7 +232,7 @@ export default function RoomsPage() {
                       <div className="text-slate-500 dark:text-slate-400">{attrs.size} m²</div>
                     )}
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg text-violet-600 dark:text-violet-400">
+                      <span className="font-bold text-lg text-primary-600 dark:text-primary-400">
                         {formatPrice(product.price)}
                       </span>
                       <span className="text-slate-400">/ nuit</span>

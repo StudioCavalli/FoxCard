@@ -59,8 +59,8 @@ export default function MerchantCustomersPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <AdminCard padding="md">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-indigo-500/20 dark:from-violet-500/30 dark:to-indigo-500/30 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-primary-500/20 dark:from-primary-500/30 dark:to-primary-500/30 rounded-xl flex items-center justify-center">
+              <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
               <p className="text-sm text-slate-500 dark:text-slate-400">Total clients</p>
@@ -103,7 +103,7 @@ export default function MerchantCustomersPage() {
             placeholder="Rechercher par nom ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </AdminCard>
@@ -154,11 +154,11 @@ export default function MerchantCustomersPage() {
                   <tr key={customer.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-4">
                       <Link href={`${basePath}/customers/${customer.id}`} className="flex items-center gap-3 hover:opacity-80">
-                        <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-violet-500/20">
+                        <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-primary-500/20">
                           {customer.firstName?.charAt(0) || customer.email.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-slate-900 dark:text-white truncate hover:text-violet-600 dark:hover:text-violet-400">
+                          <p className="font-medium text-slate-900 dark:text-white truncate hover:text-primary-600 dark:hover:text-primary-400">
                             {customer.firstName || customer.lastName
                               ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
                               : 'Client'}

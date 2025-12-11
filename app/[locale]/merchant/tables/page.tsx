@@ -136,7 +136,7 @@ export default function TablesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
       </div>
     )
   }
@@ -183,7 +183,7 @@ export default function TablesPage() {
         </AdminCard>
         <AdminCard padding="md">
           <div className="text-center">
-            <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">{stats.totalCapacity}</div>
+            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.totalCapacity}</div>
             <div className="text-xs text-slate-500 dark:text-slate-400">{t('totalCapacity')}</div>
           </div>
         </AdminCard>
@@ -251,8 +251,8 @@ export default function TablesPage() {
       {!tables || tables.length === 0 ? (
         <AdminCard padding="lg">
           <div className="text-center py-12">
-            <div className="w-20 h-20 bg-violet-100 dark:bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UtensilsCrossed className="w-10 h-10 text-violet-600 dark:text-violet-400" />
+            <div className="w-20 h-20 bg-primary-100 dark:bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UtensilsCrossed className="w-10 h-10 text-primary-600 dark:text-primary-400" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
               {t('noTables')}

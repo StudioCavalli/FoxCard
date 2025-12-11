@@ -20,7 +20,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: 'bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
   danger: 'bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400',
   info: 'bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
-  purple: 'bg-violet-50 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400',
+  purple: 'bg-primary-50 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400',
 }
 
 const dotStyles: Record<BadgeVariant, string> = {
@@ -29,7 +29,7 @@ const dotStyles: Record<BadgeVariant, string> = {
   warning: 'bg-amber-500',
   danger: 'bg-red-500',
   info: 'bg-blue-500',
-  purple: 'bg-violet-500',
+  purple: 'bg-primary-500',
 }
 
 export function AdminBadge({

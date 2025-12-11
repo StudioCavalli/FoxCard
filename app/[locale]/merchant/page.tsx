@@ -287,7 +287,7 @@ export default function MerchantDashboard() {
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="py-4 px-6">
-                      <Link href={`${basePath}/orders/${order.id}`} className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">
+                      <Link href={`${basePath}/orders/${order.id}`} className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
                         #{order.orderNumber}
                       </Link>
                     </td>
@@ -330,7 +330,7 @@ export default function MerchantDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <h3 className="lg:col-span-3 text-lg font-semibold text-slate-900 dark:text-white">Actions Rapides</h3>
         {[
-          { href: `${basePath}/products/new`, icon: Plus, title: t('addProduct'), desc: t('createNewProduct'), gradient: 'from-violet-500 to-indigo-600', shadow: 'violet' },
+          { href: `${basePath}/products/new`, icon: Plus, title: t('addProduct'), desc: t('createNewProduct'), gradient: 'from-primary-500 to-primary-600', shadow: 'violet' },
           { href: `${basePath}/orders`, icon: ShoppingCart, title: t('manageOrders'), desc: t('processOrders'), gradient: 'from-emerald-500 to-green-600', shadow: 'emerald' },
           { href: `${basePath}/customers`, icon: Users, title: t('customerBase'), desc: t('manageCustomers'), gradient: 'from-amber-500 to-orange-600', shadow: 'amber' },
         ].map((item) => (

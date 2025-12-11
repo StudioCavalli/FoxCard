@@ -29,7 +29,7 @@ export const AdminTextarea = forwardRef<HTMLTextAreaElement, AdminTextareaProps>
           className={cn(
             'w-full rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500',
             'transition-all duration-200 resize-none',
-            'focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
             'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50 dark:disabled:bg-slate-900',
             error
               ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20'
