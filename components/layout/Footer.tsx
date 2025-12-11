@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { Facebook, Twitter, Instagram, Github, Mail, Phone, MapPin, ArrowUpRight, Heart } from 'lucide-react'
 import { usePlatformName } from '@/lib/platform/PlatformSettingsProvider'
@@ -26,18 +27,14 @@ export function Footer() {
 
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href={`/${locale}`} className="inline-flex items-center gap-3 group mb-6">
-              <div className="relative w-10 h-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl blur-md opacity-50 group-hover:opacity-100 transition-opacity" />
-                <div className="relative w-full h-full bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl flex items-center justify-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-theme-background">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-              </div>
-              <span className="text-xl font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}>
-                {platformName}
-              </span>
+            <Link href={`/${locale}`} className="inline-flex items-center group mb-6">
+              <Image
+                src="/images/logo.png"
+                alt="GEM - Golden Era Marketplace"
+                width={140}
+                height={45}
+                className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
             </Link>
             <p className="text-theme-text-secondary leading-relaxed mb-6 max-w-sm">
               {t('footer.description')}

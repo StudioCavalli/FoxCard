@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -43,7 +44,7 @@ export default function InstallPage() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">GoldenEra est déjà installé</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">GEM est déjà installé</h2>
           <p className="text-gray-600 mb-6">Votre installation est complète et opérationnelle.</p>
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => window.location.href = '/'}>
@@ -101,11 +102,16 @@ export default function InstallPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm mb-4">
-            <Rocket className="w-5 h-5 text-primary-600" />
-            <span className="font-semibold text-gray-900">GoldenEra Installation</span>
+            <Image
+              src="/images/logo.png"
+              alt="GEM"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {currentStep === 'welcome' && 'Bienvenue sur GoldenEra'}
+            {currentStep === 'welcome' && 'Bienvenue sur GEM'}
             {currentStep === 'prerequisites' && 'Vérification des prérequis'}
             {currentStep === 'database' && 'Configuration de la base de données'}
             {currentStep === 'configuration' && 'Configuration optionnelle'}
@@ -141,7 +147,7 @@ export default function InstallPage() {
                 <Rocket className="w-10 h-10 text-primary-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Installez GoldenEra en quelques minutes
+                Installez GEM en quelques minutes
               </h2>
               <p className="text-gray-600 mb-6">
                 Cet assistant va vous guider pas à pas pour configurer votre boutique en ligne.
@@ -427,7 +433,7 @@ export default function InstallPage() {
                 Installation terminée avec succès !
               </h2>
               <p className="text-gray-600 mb-6">
-                GoldenEra est maintenant installé et prêt à l'emploi. Vous pouvez accéder à votre boutique et à l'interface d'administration.
+                GEM est maintenant installé et prêt à l'emploi. Vous pouvez accéder à votre boutique et à l'interface d'administration.
               </p>
 
               {generatedSecret && (
@@ -484,7 +490,7 @@ export default function InstallPage() {
 
         {/* Footer */}
         <p className="text-center text-gray-600 text-sm mt-6">
-          GoldenEra • E-commerce Open Source
+          GEM - Golden Era Marketplace • E-commerce Open Source
         </p>
       </div>
     </div>
