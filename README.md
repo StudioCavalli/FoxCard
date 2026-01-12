@@ -1,8 +1,8 @@
-# 🌟 GoldenEra - E-commerce Open Source
+# 🌟 GoldenEra Marketplace - E-commerce Open Source
 
 **Version 1.14.0** 🏨 Commerce-Type Specific Features (M14)
 
-Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. GoldenEra est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
+Alternative 100% gratuite et open source à Shopify, construite avec les technologies web modernes. GoldenEra Marketplace est une plateforme e-commerce complète, prête à l'emploi, avec un design moderne et une architecture scalable.
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-success)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -865,7 +865,7 @@ Après le seed, utilisez ces credentials :
   - Désactivé en développement, actif en production
   - Support mode hors ligne avec page dédiée
 - [x] **Manifest PWA** (`public/manifest.json`) :
-  - Nom : "GoldenEra - E-commerce Open Source"
+  - Nom : "GoldenEra Marketplace - E-commerce Open Source"
   - Icônes PWA : 72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512
   - Display mode : standalone
   - Couleur de thème : #14b8a6 (Teal)
@@ -1281,7 +1281,7 @@ Après le seed, utilisez ces credentials :
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! GoldenEra est un projet open source qui vit grâce à sa communauté.
+Les contributions sont les bienvenues ! GoldenEra Marketplace est un projet open source qui vit grâce à sa communauté.
 
 ### 📚 Documentation Complète
 

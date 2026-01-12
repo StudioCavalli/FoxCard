@@ -20,7 +20,7 @@ interface PlatformSettingsContextType {
 }
 
 const defaultSettings: PlatformSettings = {
-  platformName: 'GoldenEra',
+  platformName: 'GoldenEra Marketplace',
   maintenanceMode: false,
   maintenanceMessage: '',
   defaultCurrency: 'EUR',
