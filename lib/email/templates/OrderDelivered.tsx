@@ -20,7 +20,7 @@ interface OrderDeliveredProps {
 }
 
 export const OrderDelivered = ({
-  storeName = 'GoldenEra',
+  storeName = 'GoldenEra Marketplace',
   storeLogo,
   customerName,
   orderNumber,

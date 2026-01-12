@@ -27,9 +27,9 @@ async function main() {
     update: {},
     create: {
       id: '000000000000000000000001',
-      name: 'GoldenEra Demo Store',
+      name: 'GoldenEra Marketplace Demo Store',
       slug: 'demo',
-      description: 'Boutique de démonstration GoldenEra',
+      description: 'Boutique de démonstration GoldenEra Marketplace',
       ownerId: adminUser.id,
     },
   })

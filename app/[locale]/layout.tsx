@@ -39,7 +39,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const settings = await getPlatformSettings()
-  const platformName = settings.platformName || 'GoldenEra'
+  const platformName = settings.platformName || 'GoldenEra Marketplace'
   const platformUrl = settings.platformUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   // Get locale-specific SEO translations

@@ -15,7 +15,7 @@ export interface NewsletterConfirmationProps extends BaseLayoutProps {
 }
 
 export const NewsletterConfirmation = ({
-  storeName = 'GoldenEra',
+  storeName = 'GoldenEra Marketplace',
   storeLogo,
   firstName,
   confirmUrl,

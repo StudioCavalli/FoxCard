@@ -106,7 +106,7 @@ export const installRouter = router({
         // Vérifier si déjà installé
         const installed = await isInstalled()
         if (installed) {
-          throw new Error('GoldenEra est déjà installé')
+          throw new Error('GoldenEra Marketplace est déjà installé')
         }
 
         // Tester la connexion DB
@@ -138,7 +138,7 @@ R2_SECRET_ACCESS_KEY="${input.r2SecretAccessKey}"
 R2_BUCKET_NAME="${input.r2BucketName}"
 R2_PUBLIC_URL="https://${input.r2BucketName}.${input.r2AccountId}.r2.cloudflarestorage.com"
 ` : ''}
-# GoldenEra
+# GoldenEra Marketplace
 NODE_ENV="production"
 `
 

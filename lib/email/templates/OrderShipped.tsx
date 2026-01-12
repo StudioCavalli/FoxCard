@@ -34,7 +34,7 @@ interface OrderShippedProps {
 }
 
 export const OrderShipped = ({
-  storeName = 'GoldenEra',
+  storeName = 'GoldenEra Marketplace',
   storeLogo,
   customerName,
   orderNumber,
