@@ -59,7 +59,7 @@ export function StoreSelector({ onSelect }: StoreSelectorProps) {
     return (
       <Link
         href={`/${locale}/merchant/store/new`}
-        className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg text-white text-sm transition-colors"
       >
         <Plus className="w-4 h-4" />
         <span>{t('createStore')}</span>
@@ -71,7 +71,7 @@ export function StoreSelector({ onSelect }: StoreSelectorProps) {
   if (stores.length === 1) {
     return (
       <div className="flex items-center gap-3 px-3 py-2">
-        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
           <Store className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export function StoreSelector({ onSelect }: StoreSelectorProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-800 rounded-lg transition-colors"
       >
-        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
           <Store className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0 text-left">
@@ -113,16 +113,16 @@ export function StoreSelector({ onSelect }: StoreSelectorProps) {
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
                   store.id === storeId
-                    ? 'bg-indigo-600/20 text-indigo-400'
+                    ? 'bg-primary-600/20 text-primary-400'
                     : 'text-slate-300 hover:bg-slate-700'
                 )}
               >
-                <div className="w-7 h-7 bg-gradient-to-br from-indigo-500/80 to-purple-600/80 rounded-md flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 bg-gradient-to-br from-primary-500/80 to-purple-600/80 rounded-md flex items-center justify-center flex-shrink-0">
                   <Store className="w-3.5 h-3.5 text-white" />
                 </div>
                 <span className="flex-1 text-sm truncate">{store.name}</span>
                 {store.id === storeId && (
-                  <Check className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                  <Check className="w-4 h-4 text-primary-400 flex-shrink-0" />
                 )}
               </button>
             ))}

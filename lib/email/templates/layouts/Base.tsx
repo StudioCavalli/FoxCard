@@ -20,7 +20,7 @@ export interface BaseLayoutProps {
 
 export const BaseLayout = ({
   children,
-  storeName = 'GoldenEra',
+  storeName = 'GoldenEra Marketplace',
   storeLogo,
   trackingPixelUrl,
 }: BaseLayoutProps) => {

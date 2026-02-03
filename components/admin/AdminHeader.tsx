@@ -103,7 +103,7 @@ export function AdminHeader() {
                       </div>
                     </div>
                     <div className="p-3 border-t border-gray-100 bg-gray-50">
-                      <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                      <button className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium">
                         Voir toutes les notifications
                       </button>
                     </div>
@@ -118,7 +118,7 @@ export function AdminHeader() {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 pl-3 pr-2 py-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                   {session?.user?.name?.charAt(0)?.toUpperCase() || session?.user?.email?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div className="hidden md:block text-left">

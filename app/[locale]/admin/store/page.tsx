@@ -190,7 +190,7 @@ export default function StoreSettingsPage() {
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Une brève description de votre boutique..."
               />
             </div>
@@ -258,7 +258,7 @@ export default function StoreSettingsPage() {
                 rows={8}
                 value={formData.story}
                 onChange={(e) => setFormData({ ...formData, story: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Racontez l'histoire de votre boutique, votre mission, vos valeurs..."
               />
             </div>
@@ -269,7 +269,7 @@ export default function StoreSettingsPage() {
                 id="showOnDirectory"
                 checked={formData.showOnDirectory}
                 onChange={(e) => setFormData({ ...formData, showOnDirectory: e.target.checked })}
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
               <label htmlFor="showOnDirectory" className="text-sm text-gray-700">
                 Afficher dans le répertoire des boutiques
@@ -382,7 +382,7 @@ export default function StoreSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Instagram className="w-4 h-4 text-pink-600" />
+                <Instagram className="w-4 h-4 text-primary-500" />
                 Instagram
               </label>
               <Input

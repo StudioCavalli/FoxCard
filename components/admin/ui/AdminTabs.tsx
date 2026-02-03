@@ -42,11 +42,11 @@ export function AdminTabs({
       inactive: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
     },
     pills: {
-      active: 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300',
+      active: 'bg-primary-100 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300',
       inactive: 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800',
     },
     underline: {
-      active: 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 -mb-px',
+      active: 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 -mb-px',
       inactive: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-b-2 border-transparent -mb-px',
     },
   }
@@ -86,7 +86,7 @@ export function AdminTabs({
                   'ml-1 px-1.5 py-0.5 text-xs font-semibold rounded-full',
                   isActive
                     ? variant === 'pills'
-                      ? 'bg-violet-200 dark:bg-violet-500/30 text-violet-700 dark:text-violet-300'
+                      ? 'bg-primary-200 dark:bg-primary-500/30 text-primary-700 dark:text-primary-300'
                       : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                 )}

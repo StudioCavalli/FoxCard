@@ -42,7 +42,7 @@ export function AdaptiveSidebar() {
         collapsed ? 'flex justify-center' : ''
       )}>
         {collapsed ? (
-          <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+          <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <span className="text-lg">{config?.emoji || '🏪'}</span>
           </div>
         ) : (
@@ -110,7 +110,7 @@ export function AdaptiveSidebar() {
       <div className="border-t border-slate-700/50 p-4">
         {!collapsed ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-violet-500/20">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-primary-500/20">
               {session?.user?.name?.charAt(0).toUpperCase() || 'M'}
             </div>
             <div className="flex-1 min-w-0">
@@ -221,14 +221,14 @@ function NavItemComponent({
         collapsed ? 'justify-center' : '',
         nested && !collapsed && 'ml-4',
         isActive
-          ? 'bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-white border border-violet-500/30 shadow-lg shadow-violet-500/10'
+          ? 'bg-gradient-to-r from-primary-500/20 to-primary-500/20 text-white border border-primary-500/30 shadow-lg shadow-primary-500/10'
           : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
       )}
     >
       <div className={cn(
         'flex-shrink-0 flex items-center justify-center rounded-lg transition-all',
         nested ? 'w-7 h-7' : 'w-8 h-8',
-        isActive ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md' : ''
+        isActive ? 'bg-gradient-to-br from-primary-500 to-primary-600 shadow-md' : ''
       )}>
         <item.icon className={cn(
           'transition-colors',
@@ -240,12 +240,12 @@ function NavItemComponent({
         <>
           <span className={cn('truncate flex-1', isActive ? 'font-semibold' : '')}>{t(item.labelKey)}</span>
           {item.badge !== undefined && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-violet-500/20 text-violet-400 rounded-full">
+            <span className="px-2 py-0.5 text-xs font-medium bg-primary-500/20 text-primary-400 rounded-full">
               {item.badge}
             </span>
           )}
           {isActive && (
-            <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
+            <div className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
           )}
         </>
       )}
@@ -316,7 +316,7 @@ function NavGroupComponent({
         <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
           <group.icon className={cn(
             'w-5 h-5 transition-colors',
-            hasActiveChild ? 'text-violet-400' : 'text-slate-500'
+            hasActiveChild ? 'text-primary-400' : 'text-slate-500'
           )} />
         </div>
         <span className="truncate flex-1 text-left">{t(group.labelKey)}</span>

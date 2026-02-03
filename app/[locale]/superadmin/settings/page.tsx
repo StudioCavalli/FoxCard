@@ -133,7 +133,7 @@ export default function SuperAdminSettingsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
           <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des paramètres...</p>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function SuperAdminSettingsPage() {
       onClick={() => !disabled && onChange(!checked)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
         checked
-          ? 'bg-violet-600'
+          ? 'bg-primary-600'
           : 'bg-slate-200 dark:bg-slate-700'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
@@ -244,14 +244,14 @@ export default function SuperAdminSettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                   activeTab === tab.id
-                    ? 'bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : ''}`} />
                 <div>
                   <span className="font-medium block">{tab.label}</span>
-                  <span className={`text-xs ${activeTab === tab.id ? 'text-violet-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                  <span className={`text-xs ${activeTab === tab.id ? 'text-primary-200' : 'text-slate-400 dark:text-slate-500'}`}>
                     {tab.description}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export default function SuperAdminSettingsPage() {
             <AdminCard>
               <div className="p-5 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                     <Settings className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -463,7 +463,7 @@ export default function SuperAdminSettingsPage() {
               <div className="p-5 space-y-4">
                 <SettingRow
                   icon={CreditCard}
-                  iconBg="bg-gradient-to-br from-violet-500 to-indigo-600"
+                  iconBg="bg-gradient-to-br from-primary-500 to-primary-600"
                   title="Stripe"
                   description="Cartes bancaires et plus"
                 >
@@ -505,7 +505,7 @@ export default function SuperAdminSettingsPage() {
             <AdminCard>
               <div className="p-5 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-primary-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
                     <Shield className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -518,7 +518,7 @@ export default function SuperAdminSettingsPage() {
               <div className="p-5 space-y-4">
                 <SettingRow
                   icon={UserPlus}
-                  iconBg="bg-gradient-to-br from-violet-500 to-indigo-600"
+                  iconBg="bg-gradient-to-br from-primary-500 to-primary-600"
                   title="Autoriser les inscriptions"
                   description="Permettre aux nouveaux utilisateurs de s'inscrire"
                 >

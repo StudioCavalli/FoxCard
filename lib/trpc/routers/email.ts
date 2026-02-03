@@ -489,7 +489,7 @@ function generateTestData(template: string): { subject: string; props: any } {
 
     case 'WelcomeEmail':
       return {
-        subject: 'Bienvenue sur GoldenEra !',
+        subject: 'Bienvenue sur GoldenEra Marketplace !',
         props: {
           customerName: 'Jean Dupont',
           loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/auth/login`,

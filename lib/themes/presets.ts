@@ -66,21 +66,21 @@ export interface ThemeDefinition {
  * Clean, timeless design with generous spacing and subtle animations
  */
 export const minimalTheme: ThemeDefinition = {
-  name: 'Minimal',
+  name: 'GEM Minimal',
   slug: 'minimal',
-  description: 'Design épuré et intemporel. Typographie soignée, espacements généreux, focus absolu sur le produit. Micro-animations subtiles et élégantes.',
+  description: 'Design épuré Golden Era Marketplace. Typographie soignée, espacements généreux, couleurs or et noir élégantes.',
   config: {
     colors: {
-      primary: '#0A0A0A',
-      secondary: '#F7F7F7',
-      accent: '#525252',
+      primary: '#A69F3C',
+      secondary: '#1A1A1A',
+      accent: '#C4B84D',
       background: '#FFFFFF',
-      surface: '#FAFAFA',
-      text: '#0A0A0A',
-      textSecondary: '#737373',
-      textMuted: '#A3A3A3',
-      border: '#E5E5E5',
-      borderLight: '#F5F5F5',
+      surface: '#FAFAF8',
+      text: '#1A1A1A',
+      textSecondary: '#4A4A4A',
+      textMuted: '#8A8A8A',
+      border: '#E5E5E0',
+      borderLight: '#F5F5F2',
     },
     fonts: {
       heading: 'Inter',
@@ -107,21 +107,21 @@ export const minimalTheme: ThemeDefinition = {
  * Sophisticated elegance with refined accents and classical typography
  */
 export const elegantTheme: ThemeDefinition = {
-  name: 'Elegant',
+  name: 'GEM Elegant',
   slug: 'elegant',
-  description: 'Raffinement absolu et élégance intemporelle. Palette sophistiquée, détails dorés subtils, typographie classique. L\'excellence à chaque détail.',
+  description: 'Raffinement Golden Era Marketplace. Palette sophistiquée avec or dominant, typographie classique, élégance intemporelle.',
   config: {
     colors: {
-      primary: '#14120E',
-      secondary: '#D4AF37',
-      accent: '#8B7355',
+      primary: '#A69F3C',
+      secondary: '#2D2D2D',
+      accent: '#D4C65A',
       background: '#FEFDFB',
-      surface: '#F9F8F6',
-      text: '#14120E',
-      textSecondary: '#6B6560',
-      textMuted: '#9C9590',
-      border: '#E8E6E3',
-      borderLight: '#F2F1EE',
+      surface: '#F9F8F4',
+      text: '#1A1A1A',
+      textSecondary: '#5A5A5A',
+      textMuted: '#9A9A9A',
+      border: '#E8E6E0',
+      borderLight: '#F2F1EC',
     },
     fonts: {
       heading: 'Playfair Display',
@@ -148,21 +148,21 @@ export const elegantTheme: ThemeDefinition = {
  * Modern, vibrant design with strong contrasts and bold typography
  */
 export const boldTheme: ThemeDefinition = {
-  name: 'Bold',
+  name: 'GEM Dark',
   slug: 'bold',
-  description: 'Design audacieux et énergique. Couleurs vibrantes, contrastes marqués, typographie puissante. L\'impact visuel maximal.',
+  description: 'Design audacieux Golden Era Marketplace. Mode sombre avec accents dorés lumineux, contrastes marqués.',
   config: {
     colors: {
-      primary: '#0EA5E9',
-      secondary: '#8B5CF6',
-      accent: '#F59E0B',
-      background: '#0F172A',
-      surface: '#1E293B',
-      text: '#F8FAFC',
-      textSecondary: '#94A3B8',
-      textMuted: '#64748B',
-      border: '#334155',
-      borderLight: '#475569',
+      primary: '#C4B84D',
+      secondary: '#A69F3C',
+      accent: '#E8DC6A',
+      background: '#1A1A1A',
+      surface: '#2D2D2D',
+      text: '#F8F8F6',
+      textSecondary: '#B8B8B0',
+      textMuted: '#7A7A70',
+      border: '#404040',
+      borderLight: '#505050',
     },
     fonts: {
       heading: 'Inter',
@@ -210,19 +210,19 @@ export function getThemeNames(): string[] {
  * Generate CSS variables from theme config
  */
 export function generateThemeCSS(config: any): string {
-  // Default values for missing properties
+  // Default values for missing properties - GEM brand colors
   const defaults = {
     colors: {
-      primary: '#0A0A0A',
-      secondary: '#F7F7F7',
-      accent: '#525252',
+      primary: '#A69F3C',
+      secondary: '#1A1A1A',
+      accent: '#C4B84D',
       background: '#FFFFFF',
-      surface: '#FAFAFA',
-      text: '#0A0A0A',
-      textSecondary: '#737373',
-      textMuted: '#A3A3A3',
-      border: '#E5E5E5',
-      borderLight: '#F5F5F5',
+      surface: '#FAFAF8',
+      text: '#1A1A1A',
+      textSecondary: '#4A4A4A',
+      textMuted: '#8A8A8A',
+      border: '#E5E5E0',
+      borderLight: '#F5F5F2',
     },
     fonts: {
       heading: 'Inter',

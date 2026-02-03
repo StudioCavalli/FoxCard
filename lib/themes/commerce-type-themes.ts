@@ -44,15 +44,15 @@ export interface ThemeConfig {
 export const commerceTypeThemes: Record<CommerceType, ThemeConfig> = {
   GENERAL: {
     colors: {
-      primary: '#3B82F6',      // Blue
-      primaryLight: '#93C5FD',
-      primaryDark: '#1D4ED8',
-      secondary: '#6B7280',
-      accent: '#F59E0B',
+      primary: '#A69F3C',      // GEM Gold
+      primaryLight: '#C4B84D',
+      primaryDark: '#8A8432',
+      secondary: '#1A1A1A',
+      accent: '#D4C65A',
       background: '#FFFFFF',
-      surface: '#F9FAFB',
-      text: '#111827',
-      textMuted: '#6B7280'
+      surface: '#FAFAF8',
+      text: '#1A1A1A',
+      textMuted: '#8A8A8A'
     },
     fonts: {
       heading: 'Inter, sans-serif',

@@ -111,7 +111,7 @@ export default function GuestDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
       </div>
     )
   }
@@ -138,7 +138,7 @@ export default function GuestDetailPage() {
             <AdminButton variant="ghost" size="sm" icon={<ArrowLeft className="w-4 h-4" />} />
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/20">
               {guest.isVip ? (
                 <Star className="w-7 h-7 text-amber-300" />
               ) : (

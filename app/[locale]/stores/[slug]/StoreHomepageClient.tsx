@@ -62,7 +62,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div
-        className="relative h-64 bg-gradient-to-r from-indigo-600 to-purple-600"
+        className="relative h-64 bg-gradient-to-r from-primary-600 to-purple-600"
         style={
           store.bannerImage
             ? {
@@ -93,7 +93,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                   <Image src={store.logo} alt={store.name} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center shadow-lg">
                   <span className="text-3xl font-bold text-white">
                     {store.name.charAt(0).toUpperCase()}
                   </span>
@@ -180,7 +180,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                     <Link
                       key={category.id}
                       href={`/stores/${slug}/products?category=${category.slug}`}
-                      className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-500 hover:shadow-md transition-all"
+                      className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all"
                     >
                       {category.image && (
                         <div className="relative w-16 h-16 mb-2 rounded-lg overflow-hidden">
@@ -205,7 +205,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                 {store.publicEmail && (
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <a href={`mailto:${store.publicEmail}`} className="text-indigo-600 hover:underline">
+                    <a href={`mailto:${store.publicEmail}`} className="text-primary-600 hover:underline">
                       {store.publicEmail}
                     </a>
                   </div>
@@ -213,7 +213,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                 {store.publicPhone && (
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <a href={`tel:${store.publicPhone}`} className="text-indigo-600 hover:underline">
+                    <a href={`tel:${store.publicPhone}`} className="text-primary-600 hover:underline">
                       {store.publicPhone}
                     </a>
                   </div>
@@ -255,7 +255,7 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                       href={socialLinks.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors"
+                      className="p-2 rounded-lg bg-pink-50 text-primary-500 hover:bg-primary-100 transition-colors"
                     >
                       <Instagram className="w-5 h-5" />
                     </a>

@@ -84,7 +84,7 @@ export default function MerchantAnalyticsPage() {
         {data.slice(-14).map((item, index) => (
           <div key={index} className="flex-1 flex flex-col items-center">
             <div
-              className="w-full bg-violet-500 rounded-t transition-all hover:bg-violet-600"
+              className="w-full bg-primary-500 rounded-t transition-all hover:bg-primary-600"
               style={{ height: `${(item.revenue / maxRevenue) * 100}%`, minHeight: item.revenue > 0 ? '4px' : '0' }}
               title={`${item.date}: ${formatPrice(item.revenue)}`}
             />
@@ -129,12 +129,12 @@ export default function MerchantAnalyticsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : (
         <>
           {/* Real-time Stats */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+          <div className="bg-gradient-to-r from-primary-500 to-purple-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Temps réel</h2>
               <div className="flex items-center gap-2">
@@ -247,10 +247,10 @@ export default function MerchantAnalyticsPage() {
                   return (
                     <div key={stage.stage} className="relative">
                       <div
-                        className="h-12 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center px-4 transition-all"
+                        className="h-12 bg-primary-100 dark:bg-primary-500/20 rounded-lg flex items-center px-4 transition-all"
                         style={{ width: `${widthPercent}%` }}
                       >
-                        <Icon className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-3" />
+                        <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400 mr-3" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{stage.stage}</p>
                         </div>

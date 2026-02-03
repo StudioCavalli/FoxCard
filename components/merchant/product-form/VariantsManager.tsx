@@ -82,7 +82,7 @@ function VariantOptionSelector({
               onClick={() => toggleValue(option.value)}
               className={`relative w-8 h-8 rounded-full border-2 transition-all ${
                 selectedValues.includes(option.value)
-                  ? 'border-indigo-500 ring-2 ring-indigo-200'
+                  ? 'border-primary-500 ring-2 ring-primary-200'
                   : 'border-gray-200 hover:border-gray-400'
               }`}
               style={{ backgroundColor: option.color }}
@@ -106,7 +106,7 @@ function VariantOptionSelector({
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
               placeholder="Couleur personnalisée (#hex)"
-              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
             />
             <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
               <Plus className="w-4 h-4" />
@@ -128,8 +128,8 @@ function VariantOptionSelector({
               onClick={() => toggleValue(option.value)}
               className={`px-3 py-1.5 text-sm font-medium rounded border transition-all ${
                 selectedValues.includes(option.value)
-                  ? 'bg-indigo-500 text-white border-indigo-500'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-300'
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-primary-300'
               }`}
             >
               {option.label}
@@ -142,7 +142,7 @@ function VariantOptionSelector({
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
               placeholder="Taille personnalisée (ex: 48, 3XL...)"
-              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
             />
             <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
               <Plus className="w-4 h-4" />
@@ -164,7 +164,7 @@ function VariantOptionSelector({
             onClick={() => toggleValue(option.value)}
             className={`px-3 py-1.5 text-sm rounded-lg border transition-all flex items-center gap-1.5 ${
               selectedValues.includes(option.value)
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/50'
+                ? 'bg-primary-50 text-primary-700 border-primary-300 dark:bg-primary-500/20 dark:text-primary-300 dark:border-primary-500/50'
                 : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 dark:bg-slate-700 dark:text-gray-300 dark:border-slate-600'
             }`}
           >
@@ -184,7 +184,7 @@ function VariantOptionSelector({
             value={customValue}
             onChange={(e) => setCustomValue(e.target.value)}
             placeholder="Valeur personnalisée"
-            className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <AdminButton type="button" variant="outline" size="sm" onClick={addCustomValue}>
             <Plus className="w-4 h-4" />
@@ -392,7 +392,7 @@ export function VariantsManager({
                             value={variant.sku || ''}
                             onChange={(e) => updateVariant(index, { sku: e.target.value })}
                             placeholder="SKU"
-                            className="w-32 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                            className="w-32 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -404,7 +404,7 @@ export function VariantsManager({
                               onChange={(e) =>
                                 updateVariant(index, { price: parseFloat(e.target.value) || 0 })
                               }
-                              className="w-full h-8 px-3 pr-6 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                              className="w-full h-8 px-3 pr-6 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                             />
                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm">
                               €
@@ -419,7 +419,7 @@ export function VariantsManager({
                             onChange={(e) =>
                               updateVariant(index, { quantity: parseInt(e.target.value) || 0 })
                             }
-                            className="w-20 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                            className="w-20 h-8 px-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                           />
                         </td>
                         <td className="px-4 py-3 text-right">

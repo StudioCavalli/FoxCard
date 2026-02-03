@@ -100,7 +100,7 @@ export function PublicStoreSelector() {
                       <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">
                         {store.name.charAt(0).toUpperCase()}
                       </span>

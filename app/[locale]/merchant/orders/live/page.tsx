@@ -176,7 +176,7 @@ export default function LiveOrdersPage() {
         <div className="p-4 space-y-3">
           {order.items.map((item: any, index: number) => (
             <div key={index} className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 rounded-full flex items-center justify-center text-sm font-bold">
+              <span className="flex-shrink-0 w-6 h-6 bg-primary-100 dark:bg-primary-500/20 text-primary-700 dark:text-primary-400 rounded-full flex items-center justify-center text-sm font-bold">
                 {item.quantity}
               </span>
               <div className="flex-1">
@@ -263,7 +263,7 @@ export default function LiveOrdersPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : !orders || orders.length === 0 ? (
         <AdminCard padding="lg">

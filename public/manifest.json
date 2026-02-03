@@ -1,11 +1,11 @@
 {
-  "name": "GoldenEra - E-commerce Open Source",
-  "short_name": "GoldenEra",
+  "name": "GEM - Golden Era Marketplace",
+  "short_name": "GEM",
   "description": "Alternative 100% gratuite et open source à Shopify",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#14b8a6",
+  "theme_color": "#A69F3C",
   "orientation": "portrait-primary",
   "icons": [
     {

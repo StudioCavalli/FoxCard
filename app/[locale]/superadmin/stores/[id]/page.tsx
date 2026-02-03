@@ -92,7 +92,7 @@ export default function StoreDetailsPage({
     return (
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
           <p className="text-sm text-slate-500 dark:text-slate-400">Chargement de la boutique...</p>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function StoreDetailsPage({
             </AdminButton>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -272,7 +272,7 @@ export default function StoreDetailsPage({
       <AdminCard>
         <div className="p-5">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-violet-500" />
+            <BarChart3 className="w-4 h-4 text-primary-500" />
             Revenus mensuels
           </h3>
           <div className="space-y-3">
@@ -289,7 +289,7 @@ export default function StoreDetailsPage({
                     <div className="flex-1">
                       <div className="h-7 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center px-2 transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-primary-500 to-primary-500 flex items-center px-2 transition-all duration-500"
                           style={{ width: `${Math.max(percentage, 5)}%` }}
                         >
                           {percentage > 20 && (
@@ -323,7 +323,7 @@ export default function StoreDetailsPage({
         <AdminCard>
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Store className="w-4 h-4 text-violet-500" />
+              <Store className="w-4 h-4 text-primary-500" />
               Informations
             </h3>
             <div className="space-y-3">
@@ -348,7 +348,7 @@ export default function StoreDetailsPage({
                   <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <Globe className="w-3.5 h-3.5" /> Domaine
                   </span>
-                  <span className="text-sm font-medium text-violet-600 dark:text-violet-400">{store.domain}</span>
+                  <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{store.domain}</span>
                 </div>
               )}
               {store.description && (
@@ -365,11 +365,11 @@ export default function StoreDetailsPage({
         <AdminCard>
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <User className="w-4 h-4 text-violet-500" />
+              <User className="w-4 h-4 text-primary-500" />
               Propriétaire
             </h3>
             <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-semibold">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold">
                 {store.owner.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0">
@@ -400,7 +400,7 @@ export default function StoreDetailsPage({
         <AdminCard>
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Users className="w-4 h-4 text-violet-500" />
+              <Users className="w-4 h-4 text-primary-500" />
               Équipe ({store.storeUsers.length})
             </h3>
             <div className="space-y-2">

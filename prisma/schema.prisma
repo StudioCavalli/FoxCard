@@ -2908,7 +2908,7 @@ model PlatformSettings {
   id                     String   @id @default(auto()) @map("_id") @db.ObjectId
 
   // General
-  platformName           String   @default("FoxCard")
+  platformName           String   @default("GoldenEra Marketplace")
   platformUrl            String   @default("https://foxcard.io")
   supportEmail           String   @default("support@foxcard.io")
   maxStoresPerUser       Int      @default(5)

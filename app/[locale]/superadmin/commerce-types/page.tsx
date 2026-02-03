@@ -167,7 +167,7 @@ export default function CommerceTypesPage() {
                   key={type}
                   hover
                   padding="none"
-                  className={isSelected ? 'ring-2 ring-violet-500 dark:ring-violet-400' : ''}
+                  className={isSelected ? 'ring-2 ring-primary-500 dark:ring-primary-400' : ''}
                 >
                   <button
                     onClick={() => setSelectedType(isSelected ? null : type)}
@@ -176,7 +176,7 @@ export default function CommerceTypesPage() {
                     <div className="flex items-start gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                         isSelected
-                          ? 'bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30'
+                          ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>
                         <Icon className="w-6 h-6" />
@@ -219,14 +219,14 @@ export default function CommerceTypesPage() {
             {selectedConfig ? (
               <AdminCard padding="none" className="sticky top-6 overflow-hidden">
                 {/* Header with gradient */}
-                <div className="relative bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20 p-6 border-b border-slate-200 dark:border-slate-700">
-                  <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-violet-500/5" />
-                  <div className="absolute -right-2 -top-2 w-16 h-16 rounded-full bg-violet-500/5" />
+                <div className="relative bg-gradient-to-br from-primary-500/10 to-primary-500/10 dark:from-primary-500/20 dark:to-primary-500/20 p-6 border-b border-slate-200 dark:border-slate-700">
+                  <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-primary-500/5" />
+                  <div className="absolute -right-2 -top-2 w-16 h-16 rounded-full bg-primary-500/5" />
                   <div className="relative flex items-center gap-4">
                     {(() => {
                       const Icon = iconMap[selectedType!]
                       return (
-                        <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-violet-500/30">
+                        <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
                           <Icon className="w-7 h-7" />
                         </div>
                       )
@@ -274,7 +274,7 @@ export default function CommerceTypesPage() {
                           key={step}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg"
                         >
-                          <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center text-[10px] font-bold">
+                          <span className="w-4 h-4 rounded-full bg-primary-500/20 text-primary-600 dark:text-primary-400 flex items-center justify-center text-[10px] font-bold">
                             {i + 1}
                           </span>
                           {step}
@@ -320,8 +320,8 @@ export default function CommerceTypesPage() {
                           .slice(0, 5)
                           .map((store) => (
                             <div key={store.id} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20 flex items-center justify-center">
-                                <Store className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500/10 to-primary-500/10 dark:from-primary-500/20 dark:to-primary-500/20 flex items-center justify-center">
+                                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                               </div>
                               <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{store.name}</span>
                             </div>

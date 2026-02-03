@@ -269,12 +269,12 @@ export default function MerchantThemesPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
         </div>
       ) : themes?.length === 0 ? (
         <AdminCard padding="lg" className="text-center py-12">
-          <div className="w-16 h-16 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Palette className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-500/20 to-purple-500/20 dark:from-primary-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Palette className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           </div>
           <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">Aucun thème</h3>
           <p className="text-slate-500 dark:text-slate-400 mb-4">
@@ -300,7 +300,7 @@ export default function MerchantThemesPage() {
                   className={cn(
                     'p-4 bg-white dark:bg-slate-800 rounded-xl border cursor-pointer transition-all',
                     selectedThemeId === theme.id
-                      ? 'border-violet-500 ring-2 ring-violet-500/20'
+                      ? 'border-primary-500 ring-2 ring-primary-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                   )}
                 >
@@ -389,7 +389,7 @@ export default function MerchantThemesPage() {
                         className={cn(
                           'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors',
                           activeTab === tab.id
-                            ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 bg-violet-50/50 dark:bg-violet-500/10'
+                            ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
                         )}
                       >
@@ -460,7 +460,7 @@ export default function MerchantThemesPage() {
                                   onChange={(e) =>
                                     handleConfigChange(`colors.${color.key}`, e.target.value)
                                   }
-                                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                                 />
                               </div>
                             </div>
@@ -481,7 +481,7 @@ export default function MerchantThemesPage() {
                               onChange={(e) =>
                                 handleConfigChange('fonts.heading', e.target.value)
                               }
-                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
+                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all cursor-pointer"
                             >
                               {FONT_OPTIONS.map((font) => (
                                 <option key={font.value} value={font.value}>
@@ -497,7 +497,7 @@ export default function MerchantThemesPage() {
                             <select
                               value={localConfig.fonts.body}
                               onChange={(e) => handleConfigChange('fonts.body', e.target.value)}
-                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all cursor-pointer"
+                              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all cursor-pointer"
                             >
                               {FONT_OPTIONS.map((font) => (
                                 <option key={font.value} value={font.value}>
@@ -549,7 +549,7 @@ export default function MerchantThemesPage() {
                 <AdminCard padding="none" className="overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                     <h3 className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-violet-500" />
+                      <Eye className="w-4 h-4 text-primary-500" />
                       Aperçu en direct
                     </h3>
                     <button

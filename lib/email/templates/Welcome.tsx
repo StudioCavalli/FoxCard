@@ -13,7 +13,7 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail = ({
-  storeName = 'GoldenEra',
+  storeName = 'GoldenEra Marketplace',
   storeLogo,
   customerName,
   loginUrl,

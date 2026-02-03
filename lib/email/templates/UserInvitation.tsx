@@ -78,7 +78,7 @@ export default function UserInvitation({
               {t.common.questions}
             </Text>
             <Text style={footerText}>
-              © {new Date().getFullYear()} GoldenEra
+              © {new Date().getFullYear()} GoldenEra Marketplace
             </Text>
           </Section>
         </Container>

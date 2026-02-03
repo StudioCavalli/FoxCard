@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Menu, X, User, ShoppingBag, Search } from 'lucide-react'
@@ -46,29 +47,23 @@ export function Header() {
             isScrolled ? 'h-16' : 'h-20'
           }`}>
 
-            {/* Logo with premium animation */}
+            {/* Logo GEM */}
             <Link
               href={`/${locale}`}
-              className="flex items-center gap-3 group relative z-10"
+              className="flex items-center group relative z-10"
             >
               <div className={`relative transition-all duration-300 ${
-                isScrolled ? 'w-9 h-9' : 'w-11 h-11'
+                isScrolled ? 'h-10' : 'h-12'
               }`}>
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl blur-md opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-                {/* Icon */}
-                <div className="relative w-full h-full bg-gradient-to-br from-theme-primary to-theme-accent rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
-                  <ShoppingBag className="w-5 h-5 text-theme-background" strokeWidth={2.5} />
-                </div>
+                <Image
+                  src="/images/logo.png"
+                  alt="GEM - Golden Era Marketplace"
+                  width={isScrolled ? 140 : 160}
+                  height={isScrolled ? 40 : 48}
+                  className="h-full w-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
+                  priority
+                />
               </div>
-              <span
-                className={`font-bold text-theme-text transition-all duration-300 ${
-                  isScrolled ? 'text-xl' : 'text-2xl'
-                }`}
-                style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
-              >
-                {platformName}
-              </span>
             </Link>
 
             {/* Desktop Navigation - Simplified */}

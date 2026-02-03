@@ -34,7 +34,7 @@ export function StatWidget({
   className,
 }: StatWidgetProps) {
   const iconColorClasses = {
-    primary: 'bg-indigo-500/20 text-indigo-400',
+    primary: 'bg-primary-500/20 text-primary-400',
     success: 'bg-emerald-500/20 text-emerald-400',
     warning: 'bg-amber-500/20 text-amber-400',
     danger: 'bg-red-500/20 text-red-400',
