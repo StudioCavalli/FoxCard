@@ -23,7 +23,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 
 // Common Configuration
 const SMTP_FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'noreply@foxcard.com'
-const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'GoldenEra'
+const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'GoldenEra Marketplace'
 
 // Validate configuration based on provider
 function validateConfig(): boolean {

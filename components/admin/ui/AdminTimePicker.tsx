@@ -102,12 +102,12 @@ export function AdminTimePicker({
           className={cn(
             'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-800',
             'transition-all duration-200',
-            'focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
             'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50 dark:disabled:bg-slate-900',
             error
               ? 'border-red-300 dark:border-red-500'
               : isOpen
-                ? 'border-violet-500 ring-2 ring-violet-500/20'
+                ? 'border-primary-500 ring-2 ring-primary-500/20'
                 : 'border-slate-200 dark:border-slate-600',
             className
           )}
@@ -133,8 +133,8 @@ export function AdminTimePicker({
                   >
                     <ChevronUp className="w-5 h-5 text-slate-400" />
                   </button>
-                  <div className="w-14 h-12 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
-                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">
+                  <div className="w-14 h-12 flex items-center justify-center bg-primary-100 dark:bg-primary-500/20 rounded-xl">
+                    <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
                       {hours.toString().padStart(2, '0')}
                     </span>
                   </div>
@@ -159,8 +159,8 @@ export function AdminTimePicker({
                   >
                     <ChevronUp className="w-5 h-5 text-slate-400" />
                   </button>
-                  <div className="w-14 h-12 flex items-center justify-center bg-violet-100 dark:bg-violet-500/20 rounded-xl">
-                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">
+                  <div className="w-14 h-12 flex items-center justify-center bg-primary-100 dark:bg-primary-500/20 rounded-xl">
+                    <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
                       {minutes.toString().padStart(2, '0')}
                     </span>
                   </div>
@@ -191,7 +191,7 @@ export function AdminTimePicker({
                       className={cn(
                         'px-2 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap',
                         value === time
-                          ? 'bg-violet-600 text-white'
+                          ? 'bg-primary-600 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       )}
                     >
@@ -207,7 +207,7 @@ export function AdminTimePicker({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
                 {t('confirm')}
               </button>

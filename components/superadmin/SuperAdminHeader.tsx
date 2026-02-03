@@ -120,7 +120,7 @@ export function SuperAdminHeader() {
           <input
             type="text"
             placeholder="Rechercher..."
-            className="w-64 pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-64 pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-600 rounded border border-slate-200 dark:border-slate-500">
             /K
@@ -148,7 +148,7 @@ export function SuperAdminHeader() {
         {/* Notifications */}
         <button className="relative p-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full" />
         </button>
 
         {/* User Avatar */}
@@ -157,11 +157,11 @@ export function SuperAdminHeader() {
             <p className="text-sm font-medium text-slate-900 dark:text-white">
               {session?.user?.name || 'Admin'}
             </p>
-            <p className="text-xs text-violet-600 dark:text-violet-400 font-medium">
+            <p className="text-xs text-primary-600 dark:text-primary-400 font-medium">
               Super Admin
             </p>
           </div>
-          <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-violet-500/20">
+          <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-primary-500/20">
             {session?.user?.name?.charAt(0).toUpperCase() || 'A'}
           </div>
         </div>

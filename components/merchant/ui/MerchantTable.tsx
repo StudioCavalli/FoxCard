@@ -133,7 +133,7 @@ export function MerchantTable<T extends Record<string, unknown>>({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('common.search')}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -152,7 +152,7 @@ export function MerchantTable<T extends Record<string, unknown>>({
                     type="checkbox"
                     checked={selectedRows?.length === sortedData.length && sortedData.length > 0}
                     onChange={toggleAllSelection}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+                    className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
                   />
                 </th>
               )}
@@ -218,7 +218,7 @@ export function MerchantTable<T extends Record<string, unknown>>({
                     className={cn(
                       'bg-slate-900/30 transition-colors',
                       onRowClick && 'cursor-pointer hover:bg-slate-800/50',
-                      isSelected && 'bg-indigo-900/20'
+                      isSelected && 'bg-primary-900/20'
                     )}
                     onClick={() => onRowClick?.(item)}
                   >
@@ -228,7 +228,7 @@ export function MerchantTable<T extends Record<string, unknown>>({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleRowSelection(id)}
-                          className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+                          className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
                         />
                       </td>
                     )}

@@ -132,7 +132,7 @@ export default function MerchantOrdersPage() {
             className={`transition-all ${statusFilter === 'PROCESSING' ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 dark:from-blue-500/30 dark:to-indigo-500/30 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-primary-500/20 dark:from-blue-500/30 dark:to-primary-500/30 rounded-xl flex items-center justify-center">
                 <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
@@ -192,7 +192,7 @@ export default function MerchantOrdersPage() {
               placeholder="Rechercher par n° commande, client..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
             />
           </div>
           {statusFilter && (
@@ -253,7 +253,7 @@ export default function MerchantOrdersPage() {
                     <td className="py-3 px-4">
                       <Link
                         href={`${basePath}/orders/${order.id}`}
-                        className="font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                       >
                         #{order.orderNumber}
                       </Link>
@@ -358,7 +358,7 @@ export default function MerchantOrdersPage() {
                       name="refundType"
                       checked={!refundAmount}
                       onChange={() => setRefundAmount('')}
-                      className="mr-3 text-violet-600 focus:ring-violet-500"
+                      className="mr-3 text-primary-600 focus:ring-primary-500"
                     />
                     <span className="text-sm text-slate-900 dark:text-white">
                       Remboursement total ({formatPrice(selectedOrder.total)})
@@ -370,7 +370,7 @@ export default function MerchantOrdersPage() {
                       name="refundType"
                       checked={!!refundAmount}
                       onChange={() => setRefundAmount('0')}
-                      className="mr-3 text-violet-600 focus:ring-violet-500"
+                      className="mr-3 text-primary-600 focus:ring-primary-500"
                     />
                     <span className="text-sm text-slate-900 dark:text-white">Remboursement partiel</span>
                   </label>
@@ -389,7 +389,7 @@ export default function MerchantOrdersPage() {
                     step="0.01"
                     value={refundAmount}
                     onChange={(e) => setRefundAmount(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                     placeholder="0.00"
                   />
                 </div>
@@ -403,7 +403,7 @@ export default function MerchantOrdersPage() {
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none"
                   placeholder="Ex: Produit défectueux, demande du client..."
                 />
               </div>

@@ -205,7 +205,7 @@ export default function OccupancyAnalyticsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       ) : (
         <>
@@ -253,8 +253,8 @@ export default function OccupancyAnalyticsPage() {
 
             <AdminCard padding="lg">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-purple-500/20 dark:from-primary-500/30 dark:to-purple-500/30 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
               </div>
               <p className="text-3xl font-bold text-slate-900 dark:text-white mt-4">
@@ -347,9 +347,9 @@ export default function OccupancyAnalyticsPage() {
                 <p className="text-sm text-slate-600 dark:text-slate-400">Arrivées aujourd'hui</p>
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats?.upcomingCheckIns || 0}</p>
               </div>
-              <div className="p-4 bg-violet-50 dark:bg-violet-500/10 rounded-xl">
+              <div className="p-4 bg-primary-50 dark:bg-primary-500/10 rounded-xl">
                 <p className="text-sm text-slate-600 dark:text-slate-400">Départs aujourd'hui</p>
-                <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">{stats?.upcomingCheckOuts || 0}</p>
+                <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats?.upcomingCheckOuts || 0}</p>
               </div>
             </div>
           </AdminCard>

@@ -158,7 +158,7 @@ export function MerchantSidebar() {
         collapsed ? 'justify-center' : ''
       )}>
         {collapsed ? (
-          <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+          <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <Store className="w-5 h-5 text-white" />
           </div>
         ) : (
@@ -192,14 +192,14 @@ export function MerchantSidebar() {
                 className={cn(
                   'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-white border border-violet-500/30 shadow-lg shadow-violet-500/10'
+                    ? 'bg-gradient-to-r from-primary-500/20 to-primary-500/20 text-white border border-primary-500/30 shadow-lg shadow-primary-500/10'
                     : 'text-slate-400 hover:bg-slate-700/50 hover:text-white',
                   collapsed ? 'justify-center' : ''
                 )}
               >
                 <div className={cn(
                   'flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-all',
-                  isActive ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md' : ''
+                  isActive ? 'bg-gradient-to-br from-primary-500 to-primary-600 shadow-md' : ''
                 )}>
                   <item.icon className={cn(
                     'h-5 w-5 transition-colors',
@@ -209,7 +209,7 @@ export function MerchantSidebar() {
                 {!collapsed && <span className={cn('ml-3', isActive ? 'font-semibold' : '')}>{item.name}</span>}
                 {!collapsed && isActive && (
                   <div className="ml-auto flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
+                    <div className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
                   </div>
                 )}
               </Link>
@@ -235,7 +235,7 @@ export function MerchantSidebar() {
                   <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
                     <item.icon className={cn(
                       'h-5 w-5 transition-colors',
-                      hasActiveChild ? 'text-violet-400' : 'text-slate-500'
+                      hasActiveChild ? 'text-primary-400' : 'text-slate-500'
                     )} />
                   </div>
                   <span className="ml-3">{item.title}</span>
@@ -263,14 +263,14 @@ export function MerchantSidebar() {
                       className={cn(
                         'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
                         isActive
-                          ? 'bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-white border border-violet-500/30'
+                          ? 'bg-gradient-to-r from-primary-500/20 to-primary-500/20 text-white border border-primary-500/30'
                           : 'text-slate-400 hover:bg-slate-700/50 hover:text-white',
                         collapsed ? 'justify-center' : ''
                       )}
                     >
                       <div className={cn(
                         'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-all',
-                        isActive ? 'bg-gradient-to-br from-violet-500 to-indigo-600' : ''
+                        isActive ? 'bg-gradient-to-br from-primary-500 to-primary-600' : ''
                       )}>
                         <subItem.icon className={cn(
                           'h-4 w-4 transition-colors',
@@ -291,7 +291,7 @@ export function MerchantSidebar() {
       <div className="border-t border-slate-700/50 p-4">
         {!collapsed ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-violet-500/20">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-primary-500/20">
               {session?.user?.name?.charAt(0).toUpperCase() || 'M'}
             </div>
             <div className="flex-1 min-w-0">

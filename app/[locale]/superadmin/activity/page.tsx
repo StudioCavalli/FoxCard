@@ -48,8 +48,8 @@ const entityConfig: Record<string, { icon: React.ReactNode; color: string; bgCol
   },
   Store: {
     icon: <Store className="w-4 h-4" />,
-    color: 'text-violet-600 dark:text-violet-400',
-    bgColor: 'bg-violet-100 dark:bg-violet-500/20',
+    color: 'text-primary-600 dark:text-primary-400',
+    bgColor: 'bg-primary-100 dark:bg-primary-500/20',
   },
   Product: {
     icon: <Package className="w-4 h-4" />,
@@ -259,7 +259,7 @@ export default function SuperAdminActivityPage() {
       {isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des activités...</p>
           </div>
         </div>
@@ -332,7 +332,7 @@ export default function SuperAdminActivityPage() {
                             <User className="w-3.5 h-3.5" />
                             <span>{activity.user.name || activity.user.email}</span>
                             {activity.user.role === 'SUPER_ADMIN' && (
-                              <Shield className="w-3.5 h-3.5 text-violet-500" />
+                              <Shield className="w-3.5 h-3.5 text-primary-500" />
                             )}
                           </div>
                         )}
@@ -356,7 +356,7 @@ export default function SuperAdminActivityPage() {
                       {activity.metadata && Object.keys(activity.metadata).length > 0 && (
                         <button
                           onClick={() => setExpandedActivity(isExpanded ? null : activity.id)}
-                          className="mt-3 flex items-center gap-1.5 text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                          className="mt-3 flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                         >
                           {isExpanded ? (
                             <>

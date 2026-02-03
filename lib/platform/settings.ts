@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 // Default platform settings
 const defaultSettings = {
   id: 'default',
-  platformName: 'GoldenEra',
-  platformUrl: 'https://foxcard.io',
-  supportEmail: 'support@foxcard.io',
+  platformName: 'GEM',
+  platformUrl: 'https://gem-marketplace.io',
+  supportEmail: 'support@gem-marketplace.io',
   maxStoresPerUser: 5,
   maintenanceMode: false,
   maintenanceMessage: null as string | null,

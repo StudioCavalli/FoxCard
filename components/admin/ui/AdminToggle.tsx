@@ -49,9 +49,9 @@ export const AdminToggle = forwardRef<HTMLInputElement, AdminToggleProps>(
           <div
             className={cn(
               'w-11 h-6 rounded-full transition-colors duration-200',
-              'peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500/20 peer-focus-visible:ring-offset-2',
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500/20 peer-focus-visible:ring-offset-2',
               checked
-                ? 'bg-violet-500 dark:bg-violet-600'
+                ? 'bg-primary-500 dark:bg-primary-600'
                 : 'bg-slate-200 dark:bg-slate-700'
             )}
           />

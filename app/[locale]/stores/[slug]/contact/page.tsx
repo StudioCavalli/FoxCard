@@ -96,11 +96,11 @@ export default function StoreContactPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <Link href="/stores" className="hover:text-indigo-600">
+            <Link href="/stores" className="hover:text-primary-600">
               {t('store.breadcrumbStores')}
             </Link>
             <span>/</span>
-            <Link href={`/stores/${slug}`} className="hover:text-indigo-600">
+            <Link href={`/stores/${slug}`} className="hover:text-primary-600">
               {store.name}
             </Link>
             <span>/</span>
@@ -115,7 +115,7 @@ export default function StoreContactPage({ params }: PageProps) {
                   <Image src={store.logo} alt={store.name} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
                   <Store className="w-8 h-8 text-white" />
                 </div>
               )}
@@ -210,7 +210,7 @@ export default function StoreContactPage({ params }: PageProps) {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder={t('store.messagePlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                       minLength={10}
                     />
                     <p className="mt-2 text-sm text-gray-500">{t('store.minChars', { count: 10 })}</p>
@@ -250,14 +250,14 @@ export default function StoreContactPage({ params }: PageProps) {
                 <div className="space-y-4">
                   {store.publicEmail && (
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-indigo-50 rounded-lg">
-                        <Mail className="w-5 h-5 text-indigo-600" />
+                      <div className="p-2 bg-primary-50 rounded-lg">
+                        <Mail className="w-5 h-5 text-primary-600" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 mb-1">{t('store.email')}</p>
                         <a
                           href={`mailto:${store.publicEmail}`}
-                          className="text-sm text-indigo-600 hover:underline break-all"
+                          className="text-sm text-primary-600 hover:underline break-all"
                         >
                           {store.publicEmail}
                         </a>
@@ -274,7 +274,7 @@ export default function StoreContactPage({ params }: PageProps) {
                         <p className="text-sm font-medium text-gray-900 mb-1">{t('store.phone')}</p>
                         <a
                           href={`tel:${store.publicPhone}`}
-                          className="text-sm text-indigo-600 hover:underline"
+                          className="text-sm text-primary-600 hover:underline"
                         >
                           {store.publicPhone}
                         </a>

@@ -221,7 +221,7 @@ export default function AdminDashboard() {
           </div>
           <Link
             href="/admin/orders"
-            className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
           >
             Voir tout
             <ArrowRight className="w-4 h-4" />
@@ -244,7 +244,7 @@ export default function AdminDashboard() {
             </div>
             <Link
               href="/admin/orders"
-              className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
             >
               Voir toutes
               <ArrowRight className="w-4 h-4" />
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-6">
-                      <Link href={`/admin/orders/${order.id}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                      <Link href={`/admin/orders/${order.id}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
                         #{order.orderNumber}
                       </Link>
                     </td>
@@ -324,12 +324,12 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/admin/products/new" className="group">
-          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-6 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
               <Plus className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-lg mb-1">Ajouter un Produit</h3>
-            <p className="text-indigo-100 text-sm">Créez un nouveau produit dans votre catalogue</p>
+            <p className="text-primary-100 text-sm">Créez un nouveau produit dans votre catalogue</p>
           </div>
         </Link>
 

@@ -226,7 +226,7 @@ export default function NewRoomPage() {
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Ex: Chambre Deluxe Vue Mer"
                   required
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -238,7 +238,7 @@ export default function NewRoomPage() {
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="chambre-deluxe-vue-mer"
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -250,7 +250,7 @@ export default function NewRoomPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Décrivez cette chambre..."
                   rows={4}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function NewRoomPage() {
           {/* Capacity & Beds */}
           <AdminCard padding="lg">
             <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-violet-500" />
+              <Users className="w-5 h-5 text-primary-500" />
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Capacité & Literie</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -273,7 +273,7 @@ export default function NewRoomPage() {
                   max="20"
                   value={formData.maxGuests}
                   onChange={(e) => setFormData({ ...formData, maxGuests: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -286,7 +286,7 @@ export default function NewRoomPage() {
                   max="10"
                   value={formData.maxAdults}
                   onChange={(e) => setFormData({ ...formData, maxAdults: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -299,7 +299,7 @@ export default function NewRoomPage() {
                   max="10"
                   value={formData.maxChildren}
                   onChange={(e) => setFormData({ ...formData, maxChildren: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -312,7 +312,7 @@ export default function NewRoomPage() {
                   max="10"
                   value={formData.bedCount}
                   onChange={(e) => setFormData({ ...formData, bedCount: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
             </div>
@@ -324,7 +324,7 @@ export default function NewRoomPage() {
                 <select
                   value={formData.bedType}
                   onChange={(e) => setFormData({ ...formData, bedType: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 >
                   {bedTypes.map((type) => (
                     <option key={type.value} value={type.value}>{type.label}</option>
@@ -343,7 +343,7 @@ export default function NewRoomPage() {
                     value={formData.sizeSqm}
                     onChange={(e) => setFormData({ ...formData, sizeSqm: e.target.value })}
                     placeholder="25"
-                    className="w-full px-4 py-2.5 pr-10 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 pr-10 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                   />
                   <Maximize className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 </div>
@@ -354,7 +354,7 @@ export default function NewRoomPage() {
           {/* Room Details */}
           <AdminCard padding="lg">
             <div className="flex items-center gap-2 mb-4">
-              <Bed className="w-5 h-5 text-violet-500" />
+              <Bed className="w-5 h-5 text-primary-500" />
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Détails de la chambre</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -367,7 +367,7 @@ export default function NewRoomPage() {
                   value={formData.roomNumber}
                   onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
                   placeholder="101"
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <div>
@@ -380,7 +380,7 @@ export default function NewRoomPage() {
                   value={formData.floorNumber}
                   onChange={(e) => setFormData({ ...formData, floorNumber: e.target.value })}
                   placeholder="1"
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
             </div>
@@ -417,7 +417,7 @@ export default function NewRoomPage() {
           {amenities.length > 0 && (
             <AdminCard padding="lg">
               <div className="flex items-center gap-2 mb-4">
-                <Wifi className="w-5 h-5 text-violet-500" />
+                <Wifi className="w-5 h-5 text-primary-500" />
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Équipements</h2>
               </div>
               <div className="space-y-4">
@@ -437,7 +437,7 @@ export default function NewRoomPage() {
                             className={`
                               inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all
                               ${isSelected
-                                ? 'bg-violet-500 text-white'
+                                ? 'bg-primary-500 text-white'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                               }
                             `}
@@ -495,7 +495,7 @@ export default function NewRoomPage() {
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="0.00"
                     required
-                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
                 </div>
@@ -512,7 +512,7 @@ export default function NewRoomPage() {
                     value={formData.compareAtPrice}
                     onChange={(e) => setFormData({ ...formData, compareAtPrice: e.target.value })}
                     placeholder="0.00"
-                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                    className="w-full px-4 py-2.5 pr-8 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">€</span>
                 </div>
@@ -531,7 +531,7 @@ export default function NewRoomPage() {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as ProductStatus })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 >
                   <option value={ProductStatus.DRAFT}>Brouillon</option>
                   <option value={ProductStatus.ACTIVE}>Active</option>
@@ -552,7 +552,7 @@ export default function NewRoomPage() {
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
             >
               <option value="">Sans type</option>
               {categoriesData?.map((cat) => (
@@ -560,7 +560,7 @@ export default function NewRoomPage() {
               ))}
             </select>
             <Link href={`${basePath}/room-types`} className="block mt-2">
-              <span className="text-sm text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300">
+              <span className="text-sm text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
                 + Gérer les types de chambre
               </span>
             </Link>

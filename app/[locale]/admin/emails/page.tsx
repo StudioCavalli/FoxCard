@@ -139,10 +139,10 @@ export default function AdminEmailsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Taux d'ouverture</p>
-                <p className="text-2xl font-bold text-indigo-600">{stats.openRate}%</p>
+                <p className="text-2xl font-bold text-primary-600">{stats.openRate}%</p>
               </div>
-              <div className="p-3 bg-indigo-100 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-indigo-600" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <BarChart3 className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>

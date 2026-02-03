@@ -162,7 +162,7 @@ export default function SuperAdminUsersPage() {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
         </div>
       )}
 
@@ -189,7 +189,7 @@ export default function SuperAdminUsersPage() {
                       {user.image ? (
                         <img src={user.image} alt={user.name || 'User'} className="w-12 h-12 rounded-xl object-cover" />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
                           {(user.name || user.email).charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -250,7 +250,7 @@ export default function SuperAdminUsersPage() {
               {selectedUser.image ? (
                 <img src={selectedUser.image} alt={selectedUser.name} className="w-20 h-20 rounded-xl object-cover" />
               ) : (
-                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-2xl">
                   {(selectedUser.name || selectedUser.email).charAt(0).toUpperCase()}
                 </div>
               )}
@@ -281,7 +281,7 @@ export default function SuperAdminUsersPage() {
                 <div className="space-y-2">
                   {selectedUser.stores.map((store: any) => (
                     <div key={store.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                      <Store className="w-5 h-5 text-violet-500" />
+                      <Store className="w-5 h-5 text-primary-500" />
                       <div>
                         <p className="font-medium text-slate-900 dark:text-white">{store.name}</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">/{store.slug}</p>

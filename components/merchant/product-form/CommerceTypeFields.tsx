@@ -27,7 +27,7 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
             value={(attributes.brand as string) || ''}
             onChange={(e) => onChange({ ...attributes, brand: e.target.value })}
             placeholder="Ex: Apple, Samsung..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -36,7 +36,7 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
             value={(attributes.model as string) || ''}
             onChange={(e) => onChange({ ...attributes, model: e.target.value })}
             placeholder="Ex: iPhone 15 Pro"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -46,7 +46,7 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
             value={(attributes.warrantyMonths as number) || ''}
             onChange={(e) => onChange({ ...attributes, warrantyMonths: parseInt(e.target.value) || 0 })}
             placeholder="24"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -59,7 +59,7 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
             value={(attributes.repairabilityIndex as number) || ''}
             onChange={(e) => onChange({ ...attributes, repairabilityIndex: parseFloat(e.target.value) || 0 })}
             placeholder="7.5"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -70,7 +70,7 @@ function ElectronicsFields({ attributes, onChange }: Omit<CommerceTypeFieldsProp
           onChange={(e) => onChange({ ...attributes, technicalSpecs: e.target.value })}
           placeholder="Processeur: A17 Pro&#10;RAM: 8GB&#10;Stockage: 256GB"
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -85,7 +85,7 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400 mb-2">
+      <div className="flex items-center gap-2 text-primary-500 dark:text-primary-300 mb-2">
         <Shirt className="w-5 h-5" />
         <span className="font-medium">Mode & Vêtements</span>
       </div>
@@ -96,7 +96,7 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={sizes.join(', ')}
             onChange={(e) => onChange({ ...attributes, sizes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="XS, S, M, L, XL"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Séparez par des virgules</p>
         </div>
@@ -106,7 +106,7 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={colors.join(', ')}
             onChange={(e) => onChange({ ...attributes, colors: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="Noir, Blanc, Rouge"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -115,7 +115,7 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={materials.join(', ')}
             onChange={(e) => onChange({ ...attributes, materials: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
             placeholder="Coton, Polyester, Lin"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -139,7 +139,7 @@ function FashionFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
           value={(attributes.sizeGuide as string) || ''}
           onChange={(e) => onChange({ ...attributes, sizeGuide: e.target.value })}
           placeholder="Lien vers le guide des tailles ou instructions"
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
     </div>
@@ -163,7 +163,7 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
             value={(attributes.weight as string) || ''}
             onChange={(e) => onChange({ ...attributes, weight: e.target.value })}
             placeholder="500g, 1L..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -172,7 +172,7 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
             type="date"
             value={(attributes.expirationDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, expirationDate: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -182,7 +182,7 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
           value={allergens.join(', ')}
           onChange={(e) => onChange({ ...attributes, allergens: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Gluten, Lait, Œufs, Fruits à coque..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
         <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
           <AlertTriangle className="w-3 h-3" />
@@ -196,25 +196,25 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
             placeholder="Calories (kcal)"
             value={(attributes.calories as string) || ''}
             onChange={(e) => onChange({ ...attributes, calories: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <input
             placeholder="Protéines (g)"
             value={(attributes.proteins as string) || ''}
             onChange={(e) => onChange({ ...attributes, proteins: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <input
             placeholder="Glucides (g)"
             value={(attributes.carbs as string) || ''}
             onChange={(e) => onChange({ ...attributes, carbs: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <input
             placeholder="Lipides (g)"
             value={(attributes.fat as string) || ''}
             onChange={(e) => onChange({ ...attributes, fat: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -225,7 +225,7 @@ function FoodFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'com
           onChange={(e) => onChange({ ...attributes, ingredients: e.target.value })}
           placeholder="Liste complète des ingrédients..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -255,7 +255,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.alcoholDegree as number) || ''}
             onChange={(e) => onChange({ ...attributes, alcoholDegree: parseFloat(e.target.value) || 0 })}
             placeholder="12.5"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -265,7 +265,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.volume as number) || ''}
             onChange={(e) => onChange({ ...attributes, volume: parseInt(e.target.value) || 0 })}
             placeholder="750"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -275,7 +275,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.vintage as number) || ''}
             onChange={(e) => onChange({ ...attributes, vintage: parseInt(e.target.value) || 0 })}
             placeholder="2021"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -286,7 +286,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.grapeVariety as string) || ''}
             onChange={(e) => onChange({ ...attributes, grapeVariety: e.target.value })}
             placeholder="Cabernet Sauvignon, Merlot..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -295,7 +295,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.region as string) || ''}
             onChange={(e) => onChange({ ...attributes, region: e.target.value })}
             placeholder="Bordeaux, Champagne..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -305,7 +305,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
           value={(attributes.foodPairing as string) || ''}
           onChange={(e) => onChange({ ...attributes, foodPairing: e.target.value })}
           placeholder="Viandes rouges, fromages affinés..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
       <div>
@@ -315,7 +315,7 @@ function AlcoholFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
           onChange={(e) => onChange({ ...attributes, tastingNotes: e.target.value })}
           placeholder="Robe rubis profond, arômes de fruits rouges..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -337,7 +337,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.fileFormat as string) || ''}
             onChange={(e) => onChange({ ...attributes, fileFormat: e.target.value })}
             placeholder="PDF, MP3, ZIP..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -346,7 +346,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.fileSize as string) || ''}
             onChange={(e) => onChange({ ...attributes, fileSize: e.target.value })}
             placeholder="15 MB, 2.5 GB..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -356,7 +356,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.downloadLimit as number) || ''}
             onChange={(e) => onChange({ ...attributes, downloadLimit: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -366,7 +366,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
             value={(attributes.validityDays as number) || ''}
             onChange={(e) => onChange({ ...attributes, validityDays: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -375,7 +375,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
         <select
           value={(attributes.licenseType as string) || ''}
           onChange={(e) => onChange({ ...attributes, licenseType: e.target.value })}
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         >
           <option value="">Non spécifié</option>
           <option value="personal">Usage personnel</option>
@@ -389,7 +389,7 @@ function DigitalFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, '
           value={(attributes.downloadUrl as string) || ''}
           onChange={(e) => onChange({ ...attributes, downloadUrl: e.target.value })}
           placeholder="https://..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Le lien sera accessible uniquement après l'achat</p>
       </div>
@@ -412,7 +412,7 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
             value={(attributes.duration as string) || ''}
             onChange={(e) => onChange({ ...attributes, duration: e.target.value })}
             placeholder="1h, 2h30, 1 journée..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -420,7 +420,7 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
           <select
             value={(attributes.locationType as string) || ''}
             onChange={(e) => onChange({ ...attributes, locationType: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           >
             <option value="">Non spécifié</option>
             <option value="onsite">Sur place</option>
@@ -435,7 +435,7 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
           type="checkbox"
           checked={(attributes.requiresBooking as boolean) || false}
           onChange={(e) => onChange({ ...attributes, requiresBooking: e.target.checked })}
-          className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500/20"
+          className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500/20"
         />
         <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Nécessite une réservation</span>
       </label>
@@ -446,7 +446,7 @@ function ServicesFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 
           onChange={(e) => onChange({ ...attributes, preparationInstructions: e.target.value })}
           placeholder="Ce que le client doit préparer avant la prestation..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -459,7 +459,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2">
+      <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 mb-2">
         <Building2 className="w-5 h-5" />
         <span className="font-medium">Hébergement</span>
       </div>
@@ -469,7 +469,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
           <select
             value={(attributes.roomType as string) || ''}
             onChange={(e) => onChange({ ...attributes, roomType: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           >
             <option value="">Sélectionner</option>
             <option value="single">Simple</option>
@@ -486,7 +486,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
             value={(attributes.capacity as number) || ''}
             onChange={(e) => onChange({ ...attributes, capacity: parseInt(e.target.value) || 0 })}
             placeholder="2"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -495,7 +495,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
             type="time"
             value={(attributes.checkInTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, checkInTime: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -504,7 +504,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
             type="time"
             value={(attributes.checkOutTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, checkOutTime: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -514,7 +514,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
           value={amenities.join(', ')}
           onChange={(e) => onChange({ ...attributes, amenities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="WiFi, Climatisation, Piscine, Parking..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
       <div>
@@ -524,7 +524,7 @@ function HotelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'co
           onChange={(e) => onChange({ ...attributes, cancellationPolicy: e.target.value })}
           placeholder="Annulation gratuite jusqu'à 24h avant..."
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -546,7 +546,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             value={(attributes.destination as string) || ''}
             onChange={(e) => onChange({ ...attributes, destination: e.target.value })}
             placeholder="Paris, Bali, New York..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -555,7 +555,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             value={(attributes.tripDuration as string) || ''}
             onChange={(e) => onChange({ ...attributes, tripDuration: e.target.value })}
             placeholder="7 jours / 6 nuits"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -564,7 +564,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             type="date"
             value={(attributes.departureDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, departureDate: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -573,7 +573,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             type="date"
             value={(attributes.returnDate as string) || ''}
             onChange={(e) => onChange({ ...attributes, returnDate: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -584,7 +584,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
           onChange={(e) => onChange({ ...attributes, itinerary: e.target.value })}
           placeholder="Jour 1: Arrivée...&#10;Jour 2: Visite..."
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -595,7 +595,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             onChange={(e) => onChange({ ...attributes, inclusions: e.target.value })}
             placeholder="Vol, Hébergement, Petit-déjeuner..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div>
@@ -605,7 +605,7 @@ function TravelFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             onChange={(e) => onChange({ ...attributes, exclusions: e.target.value })}
             placeholder="Repas, Activités optionnelles..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       </div>
@@ -644,7 +644,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           <select
             value={(attributes.dishCategory as string) || ''}
             onChange={(e) => onChange({ ...attributes, dishCategory: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           >
             <option value="">Sélectionner</option>
             <option value="starter">Entrée</option>
@@ -660,7 +660,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
             value={(attributes.prepTime as string) || ''}
             onChange={(e) => onChange({ ...attributes, prepTime: e.target.value })}
             placeholder="15-20 min"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -670,7 +670,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           value={allergens.join(', ')}
           onChange={(e) => onChange({ ...attributes, allergens: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Gluten, Lait, Œufs..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
       <div className="flex flex-wrap gap-4">
@@ -715,7 +715,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
       {/* Modifier Groups Selection */}
       {modifierGroups && modifierGroups.length > 0 && (
         <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400 mb-3">
+          <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 mb-3">
             <Settings2 className="w-5 h-5" />
             <span className="font-medium">Options & Suppléments</span>
           </div>
@@ -728,7 +728,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
                 key={group.id}
                 className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
                   selectedModifierGroups.includes(group.id)
-                    ? 'bg-violet-50 dark:bg-violet-500/10 border-2 border-violet-500'
+                    ? 'bg-primary-50 dark:bg-primary-500/10 border-2 border-primary-500'
                     : 'bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
                 }`}
               >
@@ -741,7 +741,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
                   />
                   <div className={`w-5 h-5 rounded flex items-center justify-center ${
                     selectedModifierGroups.includes(group.id)
-                      ? 'bg-violet-500 text-white'
+                      ? 'bg-primary-500 text-white'
                       : 'bg-slate-200 dark:bg-slate-700'
                   }`}>
                     {selectedModifierGroups.includes(group.id) && <Check className="w-3 h-3" />}
@@ -756,7 +756,7 @@ function RestaurantFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
                   </div>
                 </div>
                 {selectedModifierGroups.includes(group.id) && (
-                  <span className="text-xs font-medium text-violet-600 dark:text-violet-400">Activé</span>
+                  <span className="text-xs font-medium text-primary-600 dark:text-primary-400">Activé</span>
                 )}
               </label>
             ))}
@@ -782,7 +782,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
             value={(attributes.activityDuration as string) || ''}
             onChange={(e) => onChange({ ...attributes, activityDuration: e.target.value })}
             placeholder="2h, Demi-journée..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -792,7 +792,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
             value={(attributes.minAge as number) || ''}
             onChange={(e) => onChange({ ...attributes, minAge: parseInt(e.target.value) || 0 })}
             placeholder="Aucun si vide"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -800,7 +800,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           <select
             value={(attributes.difficulty as string) || ''}
             onChange={(e) => onChange({ ...attributes, difficulty: e.target.value })}
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           >
             <option value="">Non spécifié</option>
             <option value="easy">Facile</option>
@@ -815,7 +815,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
             value={(attributes.maxGroupSize as number) || ''}
             onChange={(e) => onChange({ ...attributes, maxGroupSize: parseInt(e.target.value) || 0 })}
             placeholder="Illimité si vide"
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -825,7 +825,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           value={(attributes.equipmentProvided as string) || ''}
           onChange={(e) => onChange({ ...attributes, equipmentProvided: e.target.value })}
           placeholder="Casque, Vélo, Gilet..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
       <div>
@@ -834,7 +834,7 @@ function RecreationFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps
           value={(attributes.toBring as string) || ''}
           onChange={(e) => onChange({ ...attributes, toBring: e.target.value })}
           placeholder="Chaussures fermées, Bouteille d'eau..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
     </div>
@@ -858,7 +858,7 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             value={(attributes.skinType as string) || ''}
             onChange={(e) => onChange({ ...attributes, skinType: e.target.value })}
             placeholder="Tous types, Peau sèche, Peau grasse..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
         <div>
@@ -867,7 +867,7 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
             value={(attributes.volume as string) || ''}
             onChange={(e) => onChange({ ...attributes, volume: e.target.value })}
             placeholder="50ml, 100ml..."
-            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
         </div>
       </div>
@@ -877,7 +877,7 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
           value={ingredients.join(', ')}
           onChange={(e) => onChange({ ...attributes, ingredients: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
           placeholder="Acide hyaluronique, Vitamine C, Rétinol..."
-          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
       <div className="flex flex-wrap gap-4">
@@ -916,7 +916,7 @@ function BeautyFields({ attributes, onChange }: Omit<CommerceTypeFieldsProps, 'c
           onChange={(e) => onChange({ ...attributes, howToUse: e.target.value })}
           placeholder="Appliquer matin et soir sur peau propre..."
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
