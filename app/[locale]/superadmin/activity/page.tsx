@@ -34,11 +34,14 @@ import {
   Plus,
   Eye,
   Loader2,
-  Filter,
   Hash,
+  Download,
+  LogIn,
+  Globe,
+  Monitor,
 } from 'lucide-react'
 
-type EntityFilter = 'all' | 'User' | 'Store' | 'Product' | 'Order' | 'SuspensionAppeal'
+type EntityFilter = 'all' | 'User' | 'Store' | 'Product' | 'Order' | 'SuspensionAppeal' | 'Session'
 
 const entityConfig: Record<string, { icon: React.ReactNode; color: string; bgColor: string }> = {
   User: {
@@ -66,6 +69,11 @@ const entityConfig: Record<string, { icon: React.ReactNode; color: string; bgCol
     color: 'text-rose-600 dark:text-rose-400',
     bgColor: 'bg-rose-100 dark:bg-rose-500/20',
   },
+  Session: {
+    icon: <LogIn className="w-4 h-4" />,
+    color: 'text-cyan-600 dark:text-cyan-400',
+    bgColor: 'bg-cyan-100 dark:bg-cyan-500/20',
+  },
   default: {
     icon: <Settings className="w-4 h-4" />,
     color: 'text-slate-600 dark:text-slate-400',
@@ -74,6 +82,15 @@ const entityConfig: Record<string, { icon: React.ReactNode; color: string; bgCol
 }
 
 const getActionConfig = (action: string) => {
+  if (action === 'LOGIN') {
+    return { icon: <LogIn className="w-4 h-4" />, variant: 'success' as const, label: 'Connexion' }
+  }
+  if (action === 'LOGOUT') {
+    return { icon: <LogIn className="w-4 h-4" />, variant: 'info' as const, label: 'Déconnexion' }
+  }
+  if (action === 'LOGIN_FAILED') {
+    return { icon: <XCircle className="w-4 h-4" />, variant: 'danger' as const, label: 'Échec connexion' }
+  }
   if (action.includes('CREATE') || action.includes('CREATED')) {
     return { icon: <Plus className="w-4 h-4" />, variant: 'success' as const, label: 'Création' }
   }
@@ -102,12 +119,49 @@ const formatActionLabel = (action: string) => {
     .replace(/\b\w/g, (l) => l.toUpperCase())
 }
 
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function exportToCSV(logs: any[]) {
+  const headers = ['Date', 'Action', 'Entité', 'Utilisateur', 'Boutique', 'IP', 'User-Agent', 'Succès', 'Erreur', 'Métadonnées']
+  const rows = logs.map((log) => [
+    new Date(log.date).toISOString(),
+    log.action,
+    log.entity,
+    log.user,
+    log.store,
+    log.ipAddress,
+    `"${(log.userAgent || '').replace(/"/g, '""')}"`,
+    log.success ? 'Oui' : 'Non',
+    log.errorMessage || '',
+    `"${(log.metadata || '').replace(/"/g, '""')}"`,
+  ])
+  const csv = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n')
+  const date = new Date().toISOString().slice(0, 10)
+  downloadFile('\uFEFF' + csv, `audit-logs-${date}.csv`, 'text/csv;charset=utf-8')
+}
+
+function exportToJSON(logs: any[]) {
+  const date = new Date().toISOString().slice(0, 10)
+  downloadFile(JSON.stringify(logs, null, 2), `audit-logs-${date}.json`, 'application/json')
+}
+
 export default function SuperAdminActivityPage() {
   const [search, setSearch] = useState('')
   const [entityFilter, setEntityFilter] = useState<EntityFilter>('all')
   const [actionFilter, setActionFilter] = useState('')
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null)
   const [page, setPage] = useState(0)
+  const [isExporting, setIsExporting] = useState(false)
   const limit = 50
 
   const { data, isLoading, refetch } = trpc.superadmin.getAllActivity.useQuery({
@@ -119,6 +173,32 @@ export default function SuperAdminActivityPage() {
   })
 
   const { data: stats } = trpc.superadmin.getActivityStats.useQuery()
+
+  const exportQuery = trpc.superadmin.exportAuditLogs.useQuery(
+    {
+      search: search || undefined,
+      entity: entityFilter !== 'all' ? entityFilter : undefined,
+      action: actionFilter || undefined,
+      limit: 5000,
+    },
+    { enabled: false }
+  )
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    setIsExporting(true)
+    try {
+      const result = await exportQuery.refetch()
+      if (result.data) {
+        if (format === 'csv') {
+          exportToCSV(result.data)
+        } else {
+          exportToJSON(result.data)
+        }
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const activities = data?.activities || []
 
@@ -177,13 +257,31 @@ export default function SuperAdminActivityPage() {
             {data?.total || 0} action{(data?.total || 0) > 1 ? 's' : ''} enregistrée{(data?.total || 0) > 1 ? 's' : ''}
           </p>
         </div>
-        <AdminButton
-          variant="secondary"
-          icon={<RefreshCw className="w-4 h-4" />}
-          onClick={() => refetch()}
-        >
-          Actualiser
-        </AdminButton>
+        <div className="flex items-center gap-2">
+          <AdminButton
+            variant="secondary"
+            icon={isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            onClick={() => handleExport('csv')}
+            disabled={isExporting}
+          >
+            CSV
+          </AdminButton>
+          <AdminButton
+            variant="secondary"
+            icon={isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            onClick={() => handleExport('json')}
+            disabled={isExporting}
+          >
+            JSON
+          </AdminButton>
+          <AdminButton
+            variant="secondary"
+            icon={<RefreshCw className="w-4 h-4" />}
+            onClick={() => refetch()}
+          >
+            Actualiser
+          </AdminButton>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -345,6 +443,14 @@ export default function SuperAdminActivityPage() {
                           </div>
                         )}
 
+                        {/* IP Address */}
+                        {activity.ipAddress && (
+                          <div className="flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5" />
+                            <span className="font-mono text-xs">{activity.ipAddress}</span>
+                          </div>
+                        )}
+
                         {/* Timestamp */}
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
@@ -353,7 +459,7 @@ export default function SuperAdminActivityPage() {
                       </div>
 
                       {/* Expand/Collapse Metadata */}
-                      {activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                      {(activity.metadata && Object.keys(activity.metadata).length > 0 || activity.userAgent) && (
                         <button
                           onClick={() => setExpandedActivity(isExpanded ? null : activity.id)}
                           className="mt-3 flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
@@ -373,7 +479,22 @@ export default function SuperAdminActivityPage() {
                       )}
 
                       {/* Expanded Metadata */}
-                      {isExpanded && formatMetadata(activity.metadata)}
+                      {isExpanded && (
+                        <>
+                          {activity.userAgent && (
+                            <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-sm">
+                              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                <Monitor className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="font-medium">User-Agent:</span>
+                              </div>
+                              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 font-mono break-all">
+                                {activity.userAgent}
+                              </p>
+                            </div>
+                          )}
+                          {formatMetadata(activity.metadata)}
+                        </>
+                      )}
                     </div>
 
                     {/* Entity ID */}

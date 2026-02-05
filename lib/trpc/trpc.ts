@@ -11,14 +11,23 @@ import { getPlatformPermissions, type PlatformPermission } from '@/lib/platform/
 export type TRPCContext = {
   session: Session | null
   prisma: PrismaClient
+  ipAddress?: string
+  userAgent?: string
 }
 
-export const createTRPCContext = async (): Promise<TRPCContext> => {
+export const createTRPCContext = async (opts?: { req?: Request }): Promise<TRPCContext> => {
   const session = await getServerSession(authOptions)
+
+  const ipAddress = opts?.req?.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || opts?.req?.headers.get('x-real-ip')
+    || undefined
+  const userAgent = opts?.req?.headers.get('user-agent') || undefined
 
   return {
     session,
     prisma,
+    ipAddress,
+    userAgent,
   }
 }
 

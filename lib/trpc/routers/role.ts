@@ -111,6 +111,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'role.create',
           entity: 'Role',
           entityId: role.id,
@@ -193,6 +195,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'role.update',
           entity: 'Role',
           entityId: updatedRole.id,
@@ -261,6 +265,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'role.delete',
           entity: 'Role',
           entityId: role.id,
@@ -418,6 +424,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.assign_role',
           entity: 'StoreUser',
           entityId: storeUser.id,
@@ -529,6 +537,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.suspend',
           entity: 'StoreUser',
           entityId: storeUser.id,
@@ -595,6 +605,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.reactivate',
           entity: 'StoreUser',
           entityId: storeUser.id,
@@ -657,6 +669,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.remove',
           entity: 'StoreUser',
           entityId: storeUser.id,
@@ -827,6 +841,8 @@ export const roleRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.invite',
           entity: 'StoreUser',
           entityId: storeUser.id,
@@ -923,6 +939,8 @@ export const roleRouter = router({
         data: {
           storeId: storeUser.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'user.accept_invitation',
           entity: 'StoreUser',
           entityId: storeUser.id,

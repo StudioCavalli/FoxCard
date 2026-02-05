@@ -347,6 +347,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: input.storeId,
           action: `STORE_STATUS_${input.status}`,
           entity: 'Store',
@@ -430,6 +432,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: store.id,
           action: 'STORE_CREATE',
           entity: 'Store',
@@ -495,6 +499,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: storeId,
           action: 'STORE_UPDATE',
           entity: 'Store',
@@ -540,6 +546,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: input.storeId,
           action: 'STORE_DELETE',
           entity: 'Store',
@@ -686,6 +694,8 @@ export const superadminRouter = router({
         await ctx.prisma.auditLog.create({
           data: {
             userId: ctx.session.user.id,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
             storeId: firstStore.id,
             action: 'USER_CREATED',
             entity: 'User',
@@ -762,6 +772,8 @@ export const superadminRouter = router({
         await ctx.prisma.auditLog.create({
           data: {
             userId: ctx.session.user.id,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
             storeId: firstStore.id,
             action: 'USER_STATUS_UPDATED',
             entity: 'User',
@@ -839,6 +851,8 @@ export const superadminRouter = router({
         await ctx.prisma.auditLog.create({
           data: {
             userId: ctx.session.user.id,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
             storeId: firstStore.id,
             action: 'USER_DELETED',
             entity: 'User',
@@ -979,6 +993,8 @@ export const superadminRouter = router({
         await ctx.prisma.auditLog.create({
           data: {
             userId: ctx.session.user.id,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
             storeId: firstStore.id,
             action: 'USER_ROLE_UPDATE',
             entity: 'User',
@@ -1114,6 +1130,8 @@ export const superadminRouter = router({
         await ctx.prisma.auditLog.create({
           data: {
             userId: ctx.session.user.id,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
             storeId: appeal.storeId,
             action: 'STORE_REACTIVATED',
             entity: 'Store',
@@ -1133,6 +1151,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: appeal.storeId,
           action: 'APPEAL_REVIEWED',
           entity: 'SuspensionAppeal',
@@ -1181,10 +1201,15 @@ export const superadminRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const where: any = {}
+      const platformWhere: any = {}
 
       // Search in action, entity, or metadata
       if (input.search) {
         where.OR = [
+          { action: { contains: input.search, mode: 'insensitive' } },
+          { entity: { contains: input.search, mode: 'insensitive' } },
+        ]
+        platformWhere.OR = [
           { action: { contains: input.search, mode: 'insensitive' } },
           { entity: { contains: input.search, mode: 'insensitive' } },
         ]
@@ -1193,19 +1218,22 @@ export const superadminRouter = router({
       // Filter by action type
       if (input.action) {
         where.action = { contains: input.action, mode: 'insensitive' }
+        platformWhere.action = { contains: input.action, mode: 'insensitive' }
       }
 
       // Filter by entity type
       if (input.entity) {
         where.entity = input.entity
+        platformWhere.entity = input.entity
       }
 
       // Filter by user
       if (input.userId) {
         where.userId = input.userId
+        platformWhere.userId = input.userId
       }
 
-      // Filter by store
+      // Filter by store (only applies to store audit logs)
       if (input.storeId) {
         where.storeId = input.storeId
       }
@@ -1213,15 +1241,21 @@ export const superadminRouter = router({
       // Filter by date range
       if (input.startDate || input.endDate) {
         where.createdAt = {}
+        platformWhere.createdAt = {}
         if (input.startDate) {
           where.createdAt.gte = new Date(input.startDate)
+          platformWhere.createdAt.gte = new Date(input.startDate)
         }
         if (input.endDate) {
           where.createdAt.lte = new Date(input.endDate)
+          platformWhere.createdAt.lte = new Date(input.endDate)
         }
       }
 
-      const [activities, total, entityCounts, recentActions] = await Promise.all([
+      // Skip platform logs when filtering by store
+      const includePlatformLogs = !input.storeId
+
+      const [activities, platformActivities, total, platformTotal, entityCounts, platformEntityCounts, recentActions, platformActions] = await Promise.all([
         ctx.prisma.auditLog.findMany({
           where,
           include: {
@@ -1245,35 +1279,88 @@ export const superadminRouter = router({
           take: input.limit,
           skip: input.offset,
         }),
+        includePlatformLogs ? ctx.prisma.platformAuditLog.findMany({
+          where: platformWhere,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+          skip: input.offset,
+        }) : Promise.resolve([]),
         ctx.prisma.auditLog.count({ where }),
-        // Get counts by entity type
+        includePlatformLogs ? ctx.prisma.platformAuditLog.count({ where: platformWhere }) : Promise.resolve(0),
         ctx.prisma.auditLog.groupBy({
           by: ['entity'],
           _count: { id: true },
           orderBy: { _count: { id: 'desc' } },
           take: 10,
         }),
-        // Get most recent action types
+        includePlatformLogs ? ctx.prisma.platformAuditLog.groupBy({
+          by: ['entity'],
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }) : Promise.resolve([]),
         ctx.prisma.auditLog.groupBy({
           by: ['action'],
           _count: { id: true },
           orderBy: { _count: { id: 'desc' } },
           take: 20,
         }),
+        includePlatformLogs ? ctx.prisma.platformAuditLog.groupBy({
+          by: ['action'],
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 20,
+        }) : Promise.resolve([]),
       ])
 
+      // Merge and sort activities by date
+      const allActivities = [
+        ...activities.map((a) => ({ ...a, source: 'store' as const })),
+        ...platformActivities.map((a) => ({ ...a, store: null, source: 'platform' as const })),
+      ]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, input.limit)
+
+      const combinedTotal = total + platformTotal
+
+      // Merge entity counts
+      const entityMap = new Map<string, number>()
+      for (const e of entityCounts) {
+        entityMap.set(e.entity, (entityMap.get(e.entity) || 0) + e._count.id)
+      }
+      for (const e of platformEntityCounts) {
+        entityMap.set(e.entity, (entityMap.get(e.entity) || 0) + e._count.id)
+      }
+
+      // Merge action counts
+      const actionMap = new Map<string, number>()
+      for (const a of recentActions) {
+        actionMap.set(a.action, (actionMap.get(a.action) || 0) + a._count.id)
+      }
+      for (const a of platformActions) {
+        actionMap.set(a.action, (actionMap.get(a.action) || 0) + a._count.id)
+      }
+
       return {
-        activities,
-        total,
-        hasMore: input.offset + input.limit < total,
-        entityCounts: entityCounts.map((e) => ({
-          entity: e.entity,
-          count: e._count.id,
-        })),
-        actionCounts: recentActions.map((a) => ({
-          action: a.action,
-          count: a._count.id,
-        })),
+        activities: allActivities,
+        total: combinedTotal,
+        hasMore: input.offset + input.limit < combinedTotal,
+        entityCounts: Array.from(entityMap.entries())
+          .map(([entity, count]) => ({ entity, count }))
+          .sort((a, b) => b.count - a.count),
+        actionCounts: Array.from(actionMap.entries())
+          .map(([action, count]) => ({ action, count }))
+          .sort((a, b) => b.count - a.count),
       }
     }),
 
@@ -1284,20 +1371,138 @@ export const superadminRouter = router({
     const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const [totalActivities, todayCount, weekCount, monthCount] = await Promise.all([
+    const [totalActivities, todayCount, weekCount, monthCount, pTotal, pToday, pWeek, pMonth] = await Promise.all([
       ctx.prisma.auditLog.count(),
       ctx.prisma.auditLog.count({ where: { createdAt: { gte: today } } }),
       ctx.prisma.auditLog.count({ where: { createdAt: { gte: thisWeek } } }),
       ctx.prisma.auditLog.count({ where: { createdAt: { gte: thisMonth } } }),
+      ctx.prisma.platformAuditLog.count(),
+      ctx.prisma.platformAuditLog.count({ where: { createdAt: { gte: today } } }),
+      ctx.prisma.platformAuditLog.count({ where: { createdAt: { gte: thisWeek } } }),
+      ctx.prisma.platformAuditLog.count({ where: { createdAt: { gte: thisMonth } } }),
     ])
 
     return {
-      total: totalActivities,
-      today: todayCount,
-      thisWeek: weekCount,
-      thisMonth: monthCount,
+      total: totalActivities + pTotal,
+      today: todayCount + pToday,
+      thisWeek: weekCount + pWeek,
+      thisMonth: monthCount + pMonth,
     }
   }),
+
+  // Export audit logs for download
+  exportAuditLogs: superAdminProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        action: z.string().optional(),
+        entity: z.string().optional(),
+        userId: z.string().optional(),
+        storeId: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        limit: z.number().min(1).max(10000).default(1000),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+      const platformWhere: any = {}
+
+      if (input.search) {
+        where.OR = [
+          { action: { contains: input.search, mode: 'insensitive' } },
+          { entity: { contains: input.search, mode: 'insensitive' } },
+        ]
+        platformWhere.OR = [
+          { action: { contains: input.search, mode: 'insensitive' } },
+          { entity: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+      if (input.action) {
+        where.action = { contains: input.action, mode: 'insensitive' }
+        platformWhere.action = { contains: input.action, mode: 'insensitive' }
+      }
+      if (input.entity) {
+        where.entity = input.entity
+        platformWhere.entity = input.entity
+      }
+      if (input.userId) {
+        where.userId = input.userId
+        platformWhere.userId = input.userId
+      }
+      if (input.storeId) {
+        where.storeId = input.storeId
+      }
+      if (input.startDate || input.endDate) {
+        where.createdAt = {}
+        platformWhere.createdAt = {}
+        if (input.startDate) {
+          where.createdAt.gte = new Date(input.startDate)
+          platformWhere.createdAt.gte = new Date(input.startDate)
+        }
+        if (input.endDate) {
+          where.createdAt.lte = new Date(input.endDate)
+          platformWhere.createdAt.lte = new Date(input.endDate)
+        }
+      }
+
+      const includePlatformLogs = !input.storeId
+
+      const [storeLogs, platformLogs] = await Promise.all([
+        ctx.prisma.auditLog.findMany({
+          where,
+          include: {
+            user: { select: { name: true, email: true } },
+            store: { select: { name: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+        }),
+        includePlatformLogs ? ctx.prisma.platformAuditLog.findMany({
+          where: platformWhere,
+          include: {
+            user: { select: { name: true, email: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+        }) : Promise.resolve([]),
+      ])
+
+      // Normalize to a common format
+      const allLogs = [
+        ...storeLogs.map((log) => ({
+          id: log.id,
+          date: log.createdAt,
+          action: log.action,
+          entity: log.entity,
+          entityId: log.entityId,
+          user: log.user?.name || log.user?.email || '-',
+          store: log.store?.name || '-',
+          ipAddress: log.ipAddress || '-',
+          userAgent: log.userAgent || '-',
+          success: log.success,
+          errorMessage: log.errorMessage || '',
+          metadata: log.metadata ? JSON.stringify(log.metadata) : '',
+        })),
+        ...platformLogs.map((log) => ({
+          id: log.id,
+          date: log.createdAt,
+          action: log.action,
+          entity: log.entity,
+          entityId: log.entityId,
+          user: log.user?.name || log.user?.email || '-',
+          store: 'Platform',
+          ipAddress: log.ipAddress || '-',
+          userAgent: log.userAgent || '-',
+          success: log.success,
+          errorMessage: log.errorMessage || '',
+          metadata: log.metadata ? JSON.stringify(log.metadata) : '',
+        })),
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, input.limit)
+
+      return allLogs
+    }),
 
   // ============================================
   // PLATFORM SETTINGS
@@ -1800,6 +2005,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: input.storeId,
           action: 'STORE_SUSPENDED',
           entity: 'Store',
@@ -1851,6 +2058,8 @@ export const superadminRouter = router({
       await ctx.prisma.auditLog.create({
         data: {
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           storeId: input.storeId,
           action: 'STORE_REACTIVATED',
           entity: 'Store',

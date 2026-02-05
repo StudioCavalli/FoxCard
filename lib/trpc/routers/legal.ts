@@ -469,6 +469,8 @@ export const legalRouter = router({
         data: {
           storeId: input.storeId,
           userId: ctx.session.user.id,
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
           action: 'GDPR_DATA_DELETION',
           entity: 'USER',
           entityId: input.customerId,

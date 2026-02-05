@@ -132,6 +132,7 @@ model User {
   storeUsers    StoreUser[]
   invitedStoreUsers StoreUser[] @relation("InvitedStoreUsers")
   auditLogs     AuditLog[]
+  platformAuditLogs PlatformAuditLog[] @relation("PlatformAuditLogs")
   suspensionAppeals SuspensionAppeal[]
   supportTickets SupportTicket[]
 
@@ -1164,6 +1165,35 @@ model AuditLog {
   createdAt   DateTime @default(now())
 
   @@index([storeId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// Platform-level audit log (login/logout, platform events not tied to a store)
+model PlatformAuditLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Who performed the action (nullable for failed login attempts)
+  userId      String?  @db.ObjectId
+  user        User?    @relation("PlatformAuditLogs", fields: [userId], references: [id])
+
+  // Action details
+  action      String   // e.g., "LOGIN", "LOGOUT", "LOGIN_FAILED"
+  entity      String   // e.g., "Session"
+  entityId    String?
+
+  // Metadata
+  metadata    Json?    // Additional context (email for failed logins, etc.)
+  ipAddress   String?
+  userAgent   String?
+
+  // Result
+  success     Boolean  @default(true)
+  errorMessage String?
+
+  createdAt   DateTime @default(now())
+
   @@index([userId])
   @@index([action])
   @@index([createdAt])
