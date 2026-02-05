@@ -49,6 +49,11 @@
     "readMore": "Čítať viac",
     "showMore": "Zobraziť viac",
     "showLess": "Zobraziť menej",
+    "recentSearches": "Nedávne vyhľadávania",
+    "seeAllResults": "Zobraziť všetky výsledky pre",
+    "noResults": "Žiadne výsledky",
+    "categoriesResults": "Kategórie",
+    "productsResults": "Produkty",
     "timePicker": {
       "commonTimes": "Bežné časy",
       "confirm": "Potvrdiť"

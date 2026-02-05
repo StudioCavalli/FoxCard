@@ -19,6 +19,7 @@ function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
   const [showFilters, setShowFilters] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [minPrice, setMinPrice] = useState<number | undefined>()
   const [maxPrice, setMaxPrice] = useState<number | undefined>()
   const [sortBy, setSortBy] = useState<'createdAt' | 'price' | 'name' | 'featured'>('createdAt')
@@ -29,8 +30,17 @@ function ProductsContent() {
     const urlSearch = searchParams.get('search')
     if (urlSearch) {
       setSearchQuery(urlSearch)
+      setDebouncedSearch(urlSearch)
     }
   }, [searchParams])
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const { data: categories } = trpc.category.getAll.useQuery({
     storeId: selectedStore === 'all' ? undefined : selectedStore,
@@ -41,7 +51,7 @@ function ProductsContent() {
       storeId: selectedStore === 'all' ? undefined : selectedStore,
       status: 'ACTIVE',
       categoryId: selectedCategory,
-      search: searchQuery || undefined,
+      search: debouncedSearch || undefined,
       minPrice,
       maxPrice,
       sortBy,

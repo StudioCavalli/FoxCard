@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Menu, X, User, ShoppingBag, Search } from 'lucide-react'
+import { Menu, X, User } from 'lucide-react'
 import { useUIStore } from '@/lib/store/ui'
 import { CartButton } from './CartButton'
 import { SearchBar } from './SearchBar'
@@ -150,14 +150,7 @@ export function Header() {
             <div className="flex flex-col h-full p-6">
               {/* Search */}
               <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-text-muted" />
-                  <input
-                    type="text"
-                    placeholder={t('common.searchPlaceholder')}
-                    className="w-full pl-12 pr-4 py-3 bg-theme-background border border-theme-border rounded-xl text-theme-text placeholder:text-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-primary/20 focus:border-theme-primary transition-all"
-                  />
-                </div>
+                <SearchBar />
               </div>
 
               {/* Navigation - Mobile Simplified */}

@@ -49,6 +49,11 @@
     "readMore": "Read more",
     "showMore": "Show more",
     "showLess": "Show less",
+    "recentSearches": "Recent searches",
+    "seeAllResults": "See all results for",
+    "noResults": "No results found",
+    "categoriesResults": "Categories",
+    "productsResults": "Products",
     "timePicker": {
       "commonTimes": "Common times",
       "confirm": "Confirm"
