@@ -71,6 +71,7 @@ export function Header() {
               {[
                 { href: `/${locale}`, label: t('common.home') },
                 { href: `/${locale}/stores`, label: t('store.title') },
+                { href: `/${locale}/explore`, label: t('explore.title') },
                 { href: `/${locale}/categories`, label: t('common.categories') },
               ].map((item) => (
                 <Link
@@ -158,6 +159,7 @@ export function Header() {
                 {[
                   { href: `/${locale}`, label: t('common.home') },
                   { href: `/${locale}/stores`, label: t('store.title') },
+                  { href: `/${locale}/explore`, label: t('explore.title') },
                   { href: `/${locale}/categories`, label: t('common.categories') },
                   session ? { href: `/${locale}/account`, label: t('common.account') } : { href: `/${locale}/auth/login`, label: t('common.login') },
                 ].map((item) => (

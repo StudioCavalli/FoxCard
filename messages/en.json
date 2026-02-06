@@ -2349,6 +2349,16 @@
       "storeNotFound": "Store not found",
       "storeNotFoundDesc": "This store does not exist or has been deleted",
       "backToStores": "Back to stores"
+    },
+    "storesMap": {
+      "title": "Stores Map",
+      "description": "Visualize the geographic distribution of stores by country",
+      "loading": "Loading map...",
+      "totalStores": "Total stores",
+      "countriesWithStores": "Countries with stores",
+      "verifiedStores": "Verified stores",
+      "store": "store",
+      "stores": "stores"
     }
   },
   "about": {
@@ -2593,5 +2603,49 @@
     "continue": "Continue",
     "nights": "nights",
     "bookingError": "An error occurred. Please try again."
+  },
+  "explore": {
+    "title": "Explore Stores",
+    "subtitle": "Discover amazing stores from around the world",
+    "description": "Browse and discover stores on our platform",
+    "searchPlaceholder": "Search stores by name, description...",
+    "filters": "Filters",
+    "clearFilters": "Clear all filters",
+    "sortBy": {
+      "name": "Name (A-Z)",
+      "newest": "Newest",
+      "rating": "Best rated",
+      "popular": "Most popular"
+    },
+    "commerceType": "Store Type",
+    "commerceTypes": {
+      "all": "All types",
+      "general": "General",
+      "food": "Food & Beverage",
+      "alcohol": "Alcohol",
+      "fashion": "Fashion",
+      "electronics": "Electronics",
+      "beauty": "Beauty & Cosmetics",
+      "home": "Home & Garden",
+      "sports": "Sports",
+      "toys": "Toys & Games",
+      "automotive": "Automotive",
+      "books": "Books & Media",
+      "pets": "Pets",
+      "digital": "Digital Products",
+      "services": "Services",
+      "seasonal": "Seasonal",
+      "restaurant": "Restaurant",
+      "hotel": "Hotel",
+      "travel": "Travel",
+      "recreation": "Recreation"
+    },
+    "countries": "Countries",
+    "resultsCount": "{count, plural, =0 {No stores found} =1 {1 store found} other {# stores found}}",
+    "noStores": "No stores match your criteria",
+    "loadMore": "Load more stores",
+    "loading": "Loading...",
+    "products": "products",
+    "reviews": "reviews"
   }
 }

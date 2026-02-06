@@ -23,6 +23,7 @@ import {
   LogOut,
   ChevronRight,
   ShoppingBag,
+  Map as MapIcon,
 } from 'lucide-react'
 
 type TranslationFunction = (key: string) => string
@@ -30,6 +31,7 @@ type TranslationFunction = (key: string) => string
 const getNavigation = (t: TranslationFunction) => [
   { name: t('dashboard'), href: '/superadmin', icon: LayoutDashboard },
   { name: t('stores'), href: '/superadmin/stores', icon: Store },
+  { name: t('storesMap.title'), href: '/superadmin/stores-map', icon: MapIcon },
   { name: t('commerceTypes'), href: '/superadmin/commerce-types', icon: ShoppingBag },
   { name: t('appeals'), href: '/superadmin/appeals', icon: Gavel },
   { name: t('users'), href: '/superadmin/users', icon: Users },

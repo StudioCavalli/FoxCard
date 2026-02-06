@@ -206,6 +206,123 @@ export const storeRouter = router({
     })
   }),
 
+  // Get stores for explore page with map support
+  exploreStores: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(24),
+        offset: z.number().min(0).default(0),
+        search: z.string().optional(),
+        countries: z.array(z.string()).optional(),
+        commerceType: z.string().optional(),
+        sortBy: z.enum(['name', 'newest', 'rating', 'popular']).default('name'),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {
+        showOnDirectory: true,
+        status: 'ACTIVE',
+      }
+
+      // Search by name or description
+      if (input.search) {
+        where.OR = [
+          { name: { contains: input.search, mode: 'insensitive' } },
+          { description: { contains: input.search, mode: 'insensitive' } },
+          { tagline: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      // Filter by countries
+      if (input.countries && input.countries.length > 0) {
+        where.countries = { hasSome: input.countries }
+      }
+
+      // Filter by commerce type
+      if (input.commerceType && input.commerceType !== 'ALL') {
+        where.commerceType = input.commerceType
+      }
+
+      // Determine sort order
+      let orderBy: any = { name: 'asc' }
+      switch (input.sortBy) {
+        case 'newest':
+          orderBy = { createdAt: 'desc' }
+          break
+        case 'rating':
+          orderBy = [{ rating: 'desc' }, { reviewsCount: 'desc' }]
+          break
+        case 'popular':
+          orderBy = { reviewsCount: 'desc' }
+          break
+      }
+
+      const [stores, total, allCountries] = await Promise.all([
+        ctx.prisma.store.findMany({
+          where,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            logo: true,
+            tagline: true,
+            bannerImage: true,
+            countries: true,
+            commerceType: true,
+            rating: true,
+            reviewsCount: true,
+            createdAt: true,
+            _count: {
+              select: {
+                products: { where: { status: 'ACTIVE' } },
+              },
+            },
+          },
+          orderBy,
+          take: input.limit,
+          skip: input.offset,
+        }),
+        ctx.prisma.store.count({ where }),
+        // Get all unique countries for filter options
+        ctx.prisma.store.findMany({
+          where: { showOnDirectory: true, status: 'ACTIVE' },
+          select: { countries: true },
+        }),
+      ])
+
+      // Extract unique countries
+      const countriesSet = new Set<string>()
+      allCountries.forEach((store) => {
+        if (store.countries) {
+          store.countries.forEach((country) => {
+            countriesSet.add(country)
+          })
+        }
+      })
+
+      return {
+        stores: stores.map((store) => ({
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          description: store.description,
+          logo: store.logo,
+          tagline: store.tagline,
+          bannerImage: store.bannerImage,
+          countries: store.countries,
+          commerceType: store.commerceType,
+          rating: store.rating,
+          reviewsCount: store.reviewsCount,
+          productsCount: store._count.products,
+          createdAt: store.createdAt,
+        })),
+        total,
+        hasMore: input.offset + input.limit < total,
+        availableCountries: Array.from(countriesSet).sort(),
+      }
+    }),
+
   create: protectedProcedure
     .input(
       z.object({

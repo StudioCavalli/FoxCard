@@ -2282,6 +2282,16 @@
       "storeNotFound": "Obchod nenájdený",
       "storeNotFoundDesc": "Tento obchod neexistuje alebo bol odstránený",
       "backToStores": "Späť na obchody"
+    },
+    "storesMap": {
+      "title": "Mapa obchodov",
+      "description": "Vizualizujte geografické rozloženie obchodov podľa krajiny",
+      "loading": "Načítavanie mapy...",
+      "totalStores": "Celkový počet obchodov",
+      "countriesWithStores": "Krajiny s obchodmi",
+      "verifiedStores": "Overené obchody",
+      "store": "obchod",
+      "stores": "obchody"
     }
   },
   "about": {
@@ -2526,5 +2536,49 @@
     "continue": "Pokračovať",
     "nights": "nocí",
     "bookingError": "Vyskytla sa chyba. Skúste to znova."
+  },
+  "explore": {
+    "title": "Preskúmať obchody",
+    "subtitle": "Objavte úžasné obchody z celého sveta",
+    "description": "Prehľadávajte a objavte obchody na našej platforme",
+    "searchPlaceholder": "Hľadať obchody podľa názvu, popisu...",
+    "filters": "Filtre",
+    "clearFilters": "Vymazať všetky filtre",
+    "sortBy": {
+      "name": "Názov (A-Z)",
+      "newest": "Najnovšie",
+      "rating": "Najlepšie hodnotené",
+      "popular": "Najpopulárnejšie"
+    },
+    "commerceType": "Typ obchodu",
+    "commerceTypes": {
+      "all": "Všetky typy",
+      "general": "Všeobecné",
+      "food": "Jedlo a nápoje",
+      "alcohol": "Alkohol",
+      "fashion": "Móda",
+      "electronics": "Elektronika",
+      "beauty": "Krása a kozmetika",
+      "home": "Dom a záhrada",
+      "sports": "Šport",
+      "toys": "Hračky a hry",
+      "automotive": "Automobilový priemysel",
+      "books": "Knihy a médiá",
+      "pets": "Domáce zvieratá",
+      "digital": "Digitálne produkty",
+      "services": "Služby",
+      "seasonal": "Sezónne",
+      "restaurant": "Reštaurácia",
+      "hotel": "Hotel",
+      "travel": "Cestovanie",
+      "recreation": "Rekreácia"
+    },
+    "countries": "Krajiny",
+    "resultsCount": "{count, plural, =0 {Nenašli sa žiadne obchody} =1 {Našiel sa 1 obchod} other {Našlo sa # obchodov}}",
+    "noStores": "Žiadne obchody nezodpovedajú vašim kritériám",
+    "loadMore": "Načítať viac obchodov",
+    "loading": "Načítava sa...",
+    "products": "produkty",
+    "reviews": "recenzie"
   }
 }

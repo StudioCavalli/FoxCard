@@ -2081,4 +2081,34 @@ export const superadminRouter = router({
         store: updatedStore,
       }
     }),
+
+  // Get store locations for map visualization
+  getStoreLocations: superAdminProcedure.query(async ({ ctx }) => {
+    const stores = await ctx.prisma.store.findMany({
+      where: {
+        status: { in: ['ACTIVE', 'PENDING'] },
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        countries: true,
+        logo: true,
+        tagline: true,
+        rating: true,
+        reviewsCount: true,
+        _count: {
+          select: {
+            products: { where: { status: 'ACTIVE' } },
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    })
+
+    return stores.map((store) => ({
+      ...store,
+      productsCount: store._count.products,
+    }))
+  }),
 })

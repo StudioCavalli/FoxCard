@@ -2349,6 +2349,16 @@
       "storeNotFound": "Boutique introuvable",
       "storeNotFoundDesc": "Cette boutique n'existe pas ou a été supprimée",
       "backToStores": "Retour aux boutiques"
+    },
+    "storesMap": {
+      "title": "Carte des boutiques",
+      "description": "Visualisez la répartition géographique des boutiques par pays",
+      "loading": "Chargement de la carte...",
+      "totalStores": "Total des boutiques",
+      "countriesWithStores": "Pays avec boutiques",
+      "verifiedStores": "Boutiques vérifiées",
+      "store": "boutique",
+      "stores": "boutiques"
     }
   },
   "about": {
@@ -2593,5 +2603,49 @@
     "continue": "Continuer",
     "nights": "nuits",
     "bookingError": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "explore": {
+    "title": "Explorer les boutiques",
+    "subtitle": "Découvrez des boutiques incroyables du monde entier",
+    "description": "Parcourez et découvrez les boutiques de notre plateforme",
+    "searchPlaceholder": "Rechercher des boutiques par nom, description...",
+    "filters": "Filtres",
+    "clearFilters": "Effacer tous les filtres",
+    "sortBy": {
+      "name": "Nom (A-Z)",
+      "newest": "Plus récentes",
+      "rating": "Mieux notées",
+      "popular": "Plus populaires"
+    },
+    "commerceType": "Type de boutique",
+    "commerceTypes": {
+      "all": "Tous les types",
+      "general": "Général",
+      "food": "Alimentation & Boissons",
+      "alcohol": "Alcool",
+      "fashion": "Mode",
+      "electronics": "Électronique",
+      "beauty": "Beauté & Cosmétiques",
+      "home": "Maison & Jardin",
+      "sports": "Sport",
+      "toys": "Jouets & Jeux",
+      "automotive": "Automobile",
+      "books": "Livres & Médias",
+      "pets": "Animaux",
+      "digital": "Produits numériques",
+      "services": "Services",
+      "seasonal": "Saisonnier",
+      "restaurant": "Restaurant",
+      "hotel": "Hôtel",
+      "travel": "Voyage",
+      "recreation": "Loisirs"
+    },
+    "countries": "Pays",
+    "resultsCount": "{count, plural, =0 {Aucune boutique trouvée} =1 {1 boutique trouvée} other {# boutiques trouvées}}",
+    "noStores": "Aucune boutique ne correspond à vos critères",
+    "loadMore": "Charger plus de boutiques",
+    "loading": "Chargement...",
+    "products": "produits",
+    "reviews": "avis"
   }
 }

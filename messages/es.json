@@ -2282,6 +2282,16 @@
       "storeNotFound": "Tienda no encontrada",
       "storeNotFoundDesc": "Esta tienda no existe o ha sido eliminada",
       "backToStores": "Volver a tiendas"
+    },
+    "storesMap": {
+      "title": "Mapa de tiendas",
+      "description": "Visualiza la distribución geográfica de las tiendas por país",
+      "loading": "Cargando mapa...",
+      "totalStores": "Total de tiendas",
+      "countriesWithStores": "Países con tiendas",
+      "verifiedStores": "Tiendas verificadas",
+      "store": "tienda",
+      "stores": "tiendas"
     }
   },
   "about": {
@@ -2526,5 +2536,49 @@
     "continue": "Continuar",
     "nights": "noches",
     "bookingError": "Ha ocurrido un error. Por favor, inténtelo de nuevo."
+  },
+  "explore": {
+    "title": "Explorar tiendas",
+    "subtitle": "Descubre tiendas increíbles de todo el mundo",
+    "description": "Navega y descubre tiendas en nuestra plataforma",
+    "searchPlaceholder": "Buscar tiendas por nombre, descripción...",
+    "filters": "Filtros",
+    "clearFilters": "Borrar todos los filtros",
+    "sortBy": {
+      "name": "Nombre (A-Z)",
+      "newest": "Más recientes",
+      "rating": "Mejor valoradas",
+      "popular": "Más populares"
+    },
+    "commerceType": "Tipo de tienda",
+    "commerceTypes": {
+      "all": "Todos los tipos",
+      "general": "General",
+      "food": "Alimentación y Bebidas",
+      "alcohol": "Alcohol",
+      "fashion": "Moda",
+      "electronics": "Electrónica",
+      "beauty": "Belleza y Cosméticos",
+      "home": "Hogar y Jardín",
+      "sports": "Deportes",
+      "toys": "Juguetes y Juegos",
+      "automotive": "Automoción",
+      "books": "Libros y Medios",
+      "pets": "Mascotas",
+      "digital": "Productos digitales",
+      "services": "Servicios",
+      "seasonal": "Estacional",
+      "restaurant": "Restaurante",
+      "hotel": "Hotel",
+      "travel": "Viajes",
+      "recreation": "Recreación"
+    },
+    "countries": "Países",
+    "resultsCount": "{count, plural, =0 {No se encontraron tiendas} =1 {1 tienda encontrada} other {# tiendas encontradas}}",
+    "noStores": "No hay tiendas que coincidan con tus criterios",
+    "loadMore": "Cargar más tiendas",
+    "loading": "Cargando...",
+    "products": "productos",
+    "reviews": "reseñas"
   }
 }
