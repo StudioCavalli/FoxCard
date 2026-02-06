@@ -37,12 +37,12 @@ import {
 
 type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED'
 
-const statusConfig: Record<OrderStatus, { variant: 'warning' | 'info' | 'success' | 'danger' | 'default'; icon: React.ComponentType<{ className?: string }> }> = {
-  PENDING: { variant: 'warning', icon: Clock },
-  PROCESSING: { variant: 'info', icon: Package },
-  COMPLETED: { variant: 'success', icon: CheckCircle },
-  CANCELLED: { variant: 'danger', icon: XCircle },
-  REFUNDED: { variant: 'default', icon: RefreshCw },
+const statusConfig: Record<OrderStatus, { variant: 'warning' | 'info' | 'success' | 'danger' | 'default'; icon: React.ComponentType<{ className?: string }>; label: string }> = {
+  PENDING: { variant: 'warning', icon: Clock, label: 'pending' },
+  PROCESSING: { variant: 'info', icon: Package, label: 'processing' },
+  COMPLETED: { variant: 'success', icon: CheckCircle, label: 'completed' },
+  CANCELLED: { variant: 'danger', icon: XCircle, label: 'cancelled' },
+  REFUNDED: { variant: 'default', icon: RefreshCw, label: 'refunded' },
 }
 
 interface ShippingAddress {
@@ -301,7 +301,7 @@ export default function SuperAdminOrdersPage() {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <AdminBadge variant={status.variant}>
-                          {status.label}
+                          {t(`ordersPage.${status.label}`)}
                         </AdminBadge>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
@@ -381,7 +381,7 @@ export default function SuperAdminOrdersPage() {
                 </div>
                 <div>
                   <AdminBadge variant={statusConfig[selectedOrder.status]?.variant || 'default'}>
-                    {statusConfig[selectedOrder.status]?.label || selectedOrder.status}
+                    {statusConfig[selectedOrder.status]?.label ? t(`ordersPage.${statusConfig[selectedOrder.status].label}`) : selectedOrder.status}
                   </AdminBadge>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {new Date(selectedOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
