@@ -15,6 +15,9 @@ import {
   commerceTypeConfigs,
   type CommerceType,
 } from '@/lib/commerce-types'
+import { CountryMultiSelect } from '@/components/ui/CountryMultiSelect'
+import { getCountryFlag, getCountryLabel } from '@/lib/countries'
+import { useLocale } from 'next-intl'
 
 const iconMap: Record<CommerceType, React.ElementType> = {
   GENERAL: ShoppingBag,
@@ -39,6 +42,7 @@ const iconMap: Record<CommerceType, React.ElementType> = {
 }
 
 export default function MerchantStorePage() {
+  const locale = useLocale()
   const { storeId } = useStoreContext()
   const [isEditing, setIsEditing] = useState(false)
   const [showTypeSelector, setShowTypeSelector] = useState(false)
@@ -56,6 +60,7 @@ export default function MerchantStorePage() {
     publicEmail: '',
     publicPhone: '',
   })
+  const [editCountries, setEditCountries] = useState<string[]>([])
 
   useEffect(() => {
     if (store?.commerceType) {
@@ -92,6 +97,7 @@ export default function MerchantStorePage() {
         publicEmail: store.publicEmail || '',
         publicPhone: store.publicPhone || '',
       })
+      setEditCountries(store.countries || [])
       setIsEditing(true)
     }
   }
@@ -100,6 +106,7 @@ export default function MerchantStorePage() {
     updateStore.mutate({
       storeId: storeId!,
       ...formData,
+      countries: editCountries,
     })
   }
 
@@ -420,6 +427,17 @@ export default function MerchantStorePage() {
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Pays d&apos;activité
+                </label>
+                <CountryMultiSelect
+                  value={editCountries}
+                  onChange={setEditCountries}
+                  placeholder="Sélectionner des pays..."
+                />
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
@@ -452,6 +470,22 @@ export default function MerchantStorePage() {
                   </div>
                 )}
               </div>
+
+              {store?.countries && store.countries.length > 0 && (
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Pays d&apos;activité</p>
+                  <div className="flex flex-wrap gap-2">
+                    {store.countries.map((code: string) => (
+                      <span
+                        key={code}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
+                      >
+                        {getCountryFlag(code)} {getCountryLabel(code, locale)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 import {
   AdminCard,
   AdminStatCard,
@@ -36,12 +37,12 @@ import {
 
 type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED'
 
-const statusConfig: Record<OrderStatus, { label: string; variant: 'warning' | 'info' | 'success' | 'danger' | 'default' }> = {
-  PENDING: { label: 'En attente', variant: 'warning' },
-  PROCESSING: { label: 'En cours', variant: 'info' },
-  COMPLETED: { label: 'Complétée', variant: 'success' },
-  CANCELLED: { label: 'Annulée', variant: 'danger' },
-  REFUNDED: { label: 'Remboursée', variant: 'default' },
+const statusConfig: Record<OrderStatus, { variant: 'warning' | 'info' | 'success' | 'danger' | 'default'; icon: React.ComponentType<{ className?: string }> }> = {
+  PENDING: { variant: 'warning', icon: Clock },
+  PROCESSING: { variant: 'info', icon: Package },
+  COMPLETED: { variant: 'success', icon: CheckCircle },
+  CANCELLED: { variant: 'danger', icon: XCircle },
+  REFUNDED: { variant: 'default', icon: RefreshCw },
 }
 
 interface ShippingAddress {
@@ -77,6 +78,7 @@ interface Order {
 }
 
 export default function SuperAdminOrdersPage() {
+  const t = useTranslations('superadmin')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -92,11 +94,11 @@ export default function SuperAdminOrdersPage() {
   const stats = data?.stats || { pending: 0, processing: 0, completed: 0, cancelled: 0 }
 
   const tabItems = [
-    { value: 'all', label: 'Toutes', count: data?.total || 0 },
-    { value: 'PENDING', label: 'En attente', count: stats.pending, icon: <Clock className="w-4 h-4" /> },
-    { value: 'PROCESSING', label: 'En cours', count: stats.processing, icon: <Package className="w-4 h-4" /> },
-    { value: 'COMPLETED', label: 'Complétées', count: stats.completed, icon: <CheckCircle className="w-4 h-4" /> },
-    { value: 'CANCELLED', label: 'Annulées', count: stats.cancelled, icon: <XCircle className="w-4 h-4" /> },
+    { value: 'all', label: t('ordersPage.tabs.all'), count: data?.total || 0 },
+    { value: 'PENDING', label: t('ordersPage.tabs.pending'), count: stats.pending, icon: <Clock className="w-4 h-4" /> },
+    { value: 'PROCESSING', label: t('ordersPage.tabs.processing'), count: stats.processing, icon: <Package className="w-4 h-4" /> },
+    { value: 'COMPLETED', label: t('ordersPage.tabs.completed'), count: stats.completed, icon: <CheckCircle className="w-4 h-4" /> },
+    { value: 'CANCELLED', label: t('ordersPage.tabs.cancelled'), count: stats.cancelled, icon: <XCircle className="w-4 h-4" /> },
   ]
 
   const handleViewOrder = (order: Order) => {
@@ -112,10 +114,10 @@ export default function SuperAdminOrdersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Commandes Plateforme
+            {t('ordersPage.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            {data?.total || 0} commande{(data?.total || 0) > 1 ? 's' : ''} sur toutes les boutiques
+            {t('ordersPage.subtitle', { count: data?.total || 0 })}
           </p>
         </div>
         <AdminButton
@@ -123,43 +125,43 @@ export default function SuperAdminOrdersPage() {
           icon={<RefreshCw className="w-4 h-4" />}
           onClick={() => refetch()}
         >
-          Actualiser
+          {t('ordersPage.refresh')}
         </AdminButton>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminStatCard
-          title="En attente"
+          title={t('ordersPage.stats.pending.title')}
           value={stats.pending}
           icon={Clock}
           variant="amber"
           onClick={() => setStatusFilter('PENDING')}
-          subtitle="Nécessitent attention"
+          subtitle={t('ordersPage.stats.pending.subtitle')}
         />
         <AdminStatCard
-          title="En cours"
+          title={t('ordersPage.stats.processing.title')}
           value={stats.processing}
           icon={Package}
           variant="blue"
           onClick={() => setStatusFilter('PROCESSING')}
-          subtitle="En préparation"
+          subtitle={t('ordersPage.stats.processing.subtitle')}
         />
         <AdminStatCard
-          title="Complétées"
+          title={t('ordersPage.stats.completed.title')}
           value={stats.completed}
           icon={CheckCircle}
           variant="emerald"
           onClick={() => setStatusFilter('COMPLETED')}
-          subtitle="Livrées avec succès"
+          subtitle={t('ordersPage.stats.completed.subtitle')}
         />
         <AdminStatCard
-          title="Annulées"
+          title={t('ordersPage.stats.cancelled.title')}
           value={stats.cancelled}
           icon={XCircle}
           variant="rose"
           onClick={() => setStatusFilter('CANCELLED')}
-          subtitle="Commandes annulées"
+          subtitle={t('ordersPage.stats.cancelled.subtitle')}
         />
       </div>
 
@@ -179,7 +181,7 @@ export default function SuperAdminOrdersPage() {
           <AdminSearchInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher par numéro de commande, email ou nom client..."
+            placeholder={t('ordersPage.searchPlaceholder')}
           />
         </div>
       </AdminCard>
@@ -189,7 +191,7 @@ export default function SuperAdminOrdersPage() {
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des commandes...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('ordersPage.loading')}</p>
           </div>
         </div>
       )}
@@ -198,10 +200,10 @@ export default function SuperAdminOrdersPage() {
       {!isLoading && orders.length === 0 && (
         <AdminEmptyState
           icon={ShoppingCart}
-          title="Aucune commande trouvée"
+          title={t('ordersPage.empty.title')}
           description={search || statusFilter !== 'all'
-            ? "Aucune commande ne correspond à vos critères de recherche"
-            : "Les commandes de toutes les boutiques apparaîtront ici"
+            ? t('ordersPage.empty.descriptionFiltered')
+            : t('ordersPage.empty.description')
           }
           action={
             (search || statusFilter !== 'all') ? (
@@ -212,7 +214,7 @@ export default function SuperAdminOrdersPage() {
                   setStatusFilter('all')
                 }}
               >
-                Réinitialiser les filtres
+                {t('ordersPage.empty.resetFilters')}
               </AdminButton>
             ) : undefined
           }
@@ -227,25 +229,25 @@ export default function SuperAdminOrdersPage() {
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Commande
+                    {t('ordersPage.table.order')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Boutique
+                    {t('ordersPage.table.store')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Client
+                    {t('ordersPage.table.customer')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Total
+                    {t('ordersPage.table.total')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Statut
+                    {t('ordersPage.table.status')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Date
+                    {t('ordersPage.table.date')}
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Actions
+                    {t('ordersPage.table.actions')}
                   </th>
                 </tr>
               </thead>
@@ -267,7 +269,7 @@ export default function SuperAdminOrdersPage() {
                               #{order.orderNumber.length > 12 ? `${order.orderNumber.slice(0, 12)}...` : order.orderNumber}
                             </p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {order.items?.length || 0} article{(order.items?.length || 0) > 1 ? 's' : ''}
+                              {t('ordersPage.table.items', { count: order.items?.length || 0 })}
                             </p>
                           </div>
                         </div>
@@ -285,7 +287,7 @@ export default function SuperAdminOrdersPage() {
                       <td className="px-4 py-4">
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[140px]">
-                            {order.customerName || 'Client'}
+                            {order.customerName || t('ordersPage.table.customerPlaceholder')}
                           </p>
                           <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[140px]">
                             {order.customerEmail}
@@ -319,14 +321,14 @@ export default function SuperAdminOrdersPage() {
                           <button
                             onClick={() => handleViewOrder(order)}
                             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                            title="Voir les détails"
+                            title={t('ordersPage.table.viewDetails')}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <Link href={`/superadmin/stores/${order.storeId}`}>
                             <button
                               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                              title="Voir la boutique"
+                              title={t('ordersPage.table.viewStore')}
                             >
                               <ExternalLink className="w-4 h-4" />
                             </button>
@@ -343,11 +345,11 @@ export default function SuperAdminOrdersPage() {
           {/* Footer */}
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Affichage de {orders.length} sur {data?.total || 0} commandes
+              {t('ordersPage.table.showing', { count: orders.length, total: data?.total || 0 })}
             </p>
             {data?.hasMore && (
               <AdminButton variant="ghost" size="sm">
-                Charger plus
+                {t('ordersPage.table.loadMore')}
               </AdminButton>
             )}
           </div>
@@ -391,7 +393,7 @@ export default function SuperAdminOrdersPage() {
                   {formatPrice(selectedOrder.total)}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {selectedOrder.items?.length || 0} article{(selectedOrder.items?.length || 0) > 1 ? 's' : ''}
+                  {t('ordersPage.modal.items', { count: selectedOrder.items?.length || 0 })}
                 </p>
               </div>
             </div>
@@ -406,7 +408,7 @@ export default function SuperAdminOrdersPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {selectedOrder.customerName || 'Client'}
+                      {selectedOrder.customerName || t('ordersPage.modal.customer')}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                       {selectedOrder.customerEmail}
@@ -429,7 +431,7 @@ export default function SuperAdminOrdersPage() {
                       href={`/superadmin/stores/${selectedOrder.storeId}`}
                       className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                     >
-                      Voir la boutique →
+                      {t('ordersPage.modal.viewStore')}
                     </Link>
                   </div>
                 </div>
@@ -443,10 +445,10 @@ export default function SuperAdminOrdersPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-900 dark:text-white">
-                      Paiement
+                      {t('ordersPage.modal.payment')}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {selectedOrder.paymentMethod || 'Non spécifié'}
+                      {selectedOrder.paymentMethod || t('ordersPage.modal.notSpecified')}
                     </p>
                   </div>
                 </div>
@@ -460,7 +462,7 @@ export default function SuperAdminOrdersPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-900 dark:text-white">
-                      Livraison
+                      {t('ordersPage.modal.shipping')}
                     </p>
                     {selectedOrder.shippingAddress ? (
                       typeof selectedOrder.shippingAddress === 'string' ? (
@@ -471,7 +473,7 @@ export default function SuperAdminOrdersPage() {
                         </p>
                       )
                     ) : (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Non spécifié</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{t('ordersPage.modal.notSpecified')}</p>
                     )}
                   </div>
                 </div>
@@ -493,7 +495,7 @@ export default function SuperAdminOrdersPage() {
                     <p>{selectedOrder.shippingAddress.postalCode} {selectedOrder.shippingAddress.city}</p>
                     {selectedOrder.shippingAddress.country && <p>{selectedOrder.shippingAddress.country}</p>}
                     {selectedOrder.shippingAddress.phone && (
-                      <p className="text-slate-500">Tél: {selectedOrder.shippingAddress.phone}</p>
+                      <p className="text-slate-500">{t('ordersPage.modal.phone')}: {selectedOrder.shippingAddress.phone}</p>
                     )}
                   </div>
                 </div>
@@ -504,7 +506,7 @@ export default function SuperAdminOrdersPage() {
             <div>
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <Package className="w-4 h-4" />
-                Articles ({selectedOrder.items?.length || 0})
+                {t('ordersPage.modal.itemsTitle', { count: selectedOrder.items?.length || 0 })}
               </h4>
               <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
                 {selectedOrder.items && selectedOrder.items.length > 0 ? (
@@ -515,7 +517,7 @@ export default function SuperAdminOrdersPage() {
                         className="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-700 last:border-0"
                       >
                         <span className="text-sm text-slate-600 dark:text-slate-400">
-                          Article #{index + 1}
+                          {t('ordersPage.modal.item', { number: index + 1 })}
                         </span>
                         <span className="text-sm font-medium text-slate-900 dark:text-white">
                           × {item.quantity}
@@ -525,7 +527,7 @@ export default function SuperAdminOrdersPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
-                    Aucun détail d'article disponible
+                    {t('ordersPage.modal.noItemDetails')}
                   </p>
                 )}
               </div>
@@ -537,11 +539,11 @@ export default function SuperAdminOrdersPage() {
                 variant="secondary"
                 onClick={() => setShowDetailModal(false)}
               >
-                Fermer
+                {t('ordersPage.modal.close')}
               </AdminButton>
               <Link href={`/superadmin/stores/${selectedOrder.storeId}`}>
                 <AdminButton variant="primary" icon={<Store className="w-4 h-4" />}>
-                  Voir la boutique
+                  {t('ordersPage.modal.viewStoreButton')}
                 </AdminButton>
               </Link>
             </div>

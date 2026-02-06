@@ -13,6 +13,7 @@ import {
   AdminBadge,
   AdminEmptyState,
 } from '@/components/admin/ui'
+import { useTranslations } from 'next-intl'
 import {
   Activity,
   User,
@@ -81,35 +82,35 @@ const entityConfig: Record<string, { icon: React.ReactNode; color: string; bgCol
   },
 }
 
-const getActionConfig = (action: string) => {
+const getActionConfig = (action: string, t: any) => {
   if (action === 'LOGIN') {
-    return { icon: <LogIn className="w-4 h-4" />, variant: 'success' as const, label: 'Connexion' }
+    return { icon: <LogIn className="w-4 h-4" />, variant: 'success' as const, label: t('actionLogin') }
   }
   if (action === 'LOGOUT') {
-    return { icon: <LogIn className="w-4 h-4" />, variant: 'info' as const, label: 'Déconnexion' }
+    return { icon: <LogIn className="w-4 h-4" />, variant: 'info' as const, label: t('actionLogout') }
   }
   if (action === 'LOGIN_FAILED') {
-    return { icon: <XCircle className="w-4 h-4" />, variant: 'danger' as const, label: 'Échec connexion' }
+    return { icon: <XCircle className="w-4 h-4" />, variant: 'danger' as const, label: t('actionLoginFailed') }
   }
   if (action.includes('CREATE') || action.includes('CREATED')) {
-    return { icon: <Plus className="w-4 h-4" />, variant: 'success' as const, label: 'Création' }
+    return { icon: <Plus className="w-4 h-4" />, variant: 'success' as const, label: t('actionCreate') }
   }
   if (action.includes('UPDATE') || action.includes('UPDATED')) {
-    return { icon: <Edit className="w-4 h-4" />, variant: 'info' as const, label: 'Modification' }
+    return { icon: <Edit className="w-4 h-4" />, variant: 'info' as const, label: t('actionUpdate') }
   }
   if (action.includes('DELETE') || action.includes('DELETED')) {
-    return { icon: <Trash2 className="w-4 h-4" />, variant: 'danger' as const, label: 'Suppression' }
+    return { icon: <Trash2 className="w-4 h-4" />, variant: 'danger' as const, label: t('actionDelete') }
   }
   if (action.includes('SUSPEND') || action.includes('BAN')) {
-    return { icon: <XCircle className="w-4 h-4" />, variant: 'warning' as const, label: 'Suspension' }
+    return { icon: <XCircle className="w-4 h-4" />, variant: 'warning' as const, label: t('actionSuspend') }
   }
   if (action.includes('ACTIVE') || action.includes('APPROVED') || action.includes('REACTIVATED')) {
-    return { icon: <CheckCircle className="w-4 h-4" />, variant: 'success' as const, label: 'Activation' }
+    return { icon: <CheckCircle className="w-4 h-4" />, variant: 'success' as const, label: t('actionActivate') }
   }
   if (action.includes('REVIEW')) {
-    return { icon: <Eye className="w-4 h-4" />, variant: 'default' as const, label: 'Révision' }
+    return { icon: <Eye className="w-4 h-4" />, variant: 'default' as const, label: t('actionReview') }
   }
-  return { icon: <Activity className="w-4 h-4" />, variant: 'default' as const, label: 'Action' }
+  return { icon: <Activity className="w-4 h-4" />, variant: 'default' as const, label: t('actionDefault') }
 }
 
 const formatActionLabel = (action: string) => {
@@ -131,8 +132,19 @@ function downloadFile(content: string, filename: string, mimeType: string) {
   URL.revokeObjectURL(url)
 }
 
-function exportToCSV(logs: any[]) {
-  const headers = ['Date', 'Action', 'Entité', 'Utilisateur', 'Boutique', 'IP', 'User-Agent', 'Succès', 'Erreur', 'Métadonnées']
+function exportToCSV(logs: any[], t: any) {
+  const headers = [
+    t('csvHeaders.date'),
+    t('csvHeaders.action'),
+    t('csvHeaders.entity'),
+    t('csvHeaders.user'),
+    t('csvHeaders.store'),
+    t('csvHeaders.ip'),
+    t('csvHeaders.userAgent'),
+    t('csvHeaders.success'),
+    t('csvHeaders.error'),
+    t('csvHeaders.metadata')
+  ]
   const rows = logs.map((log) => [
     new Date(log.date).toISOString(),
     log.action,
@@ -141,7 +153,7 @@ function exportToCSV(logs: any[]) {
     log.store,
     log.ipAddress,
     `"${(log.userAgent || '').replace(/"/g, '""')}"`,
-    log.success ? 'Oui' : 'Non',
+    log.success ? t('yes') : t('no'),
     log.errorMessage || '',
     `"${(log.metadata || '').replace(/"/g, '""')}"`,
   ])
@@ -156,6 +168,7 @@ function exportToJSON(logs: any[]) {
 }
 
 export default function SuperAdminActivityPage() {
+  const t = useTranslations('superadmin')
   const [search, setSearch] = useState('')
   const [entityFilter, setEntityFilter] = useState<EntityFilter>('all')
   const [actionFilter, setActionFilter] = useState('')
@@ -190,7 +203,7 @@ export default function SuperAdminActivityPage() {
       const result = await exportQuery.refetch()
       if (result.data) {
         if (format === 'csv') {
-          exportToCSV(result.data)
+          exportToCSV(result.data, t)
         } else {
           exportToJSON(result.data)
         }
@@ -203,7 +216,7 @@ export default function SuperAdminActivityPage() {
   const activities = data?.activities || []
 
   const entityTabs = [
-    { value: 'all', label: 'Tout', count: data?.total || 0 },
+    { value: 'all', label: t('allEntities'), count: data?.total || 0 },
     ...(data?.entityCounts?.map((ec) => ({
       value: ec.entity,
       label: ec.entity,
@@ -213,7 +226,7 @@ export default function SuperAdminActivityPage() {
   ]
 
   const actionOptions = [
-    { value: '', label: 'Toutes les actions' },
+    { value: '', label: t('allActions') },
     ...(data?.actionCounts?.map((ac) => ({
       value: ac.action,
       label: `${formatActionLabel(ac.action)} (${ac.count})`,
@@ -251,10 +264,10 @@ export default function SuperAdminActivityPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Journal d'Activité
+            {t('activityLog')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            {data?.total || 0} action{(data?.total || 0) > 1 ? 's' : ''} enregistrée{(data?.total || 0) > 1 ? 's' : ''}
+            {t('actionsRecorded', { count: data?.total || 0 })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -264,7 +277,7 @@ export default function SuperAdminActivityPage() {
             onClick={() => handleExport('csv')}
             disabled={isExporting}
           >
-            CSV
+            {t('exportCSV')}
           </AdminButton>
           <AdminButton
             variant="secondary"
@@ -272,14 +285,14 @@ export default function SuperAdminActivityPage() {
             onClick={() => handleExport('json')}
             disabled={isExporting}
           >
-            JSON
+            {t('exportJSON')}
           </AdminButton>
           <AdminButton
             variant="secondary"
             icon={<RefreshCw className="w-4 h-4" />}
             onClick={() => refetch()}
           >
-            Actualiser
+            {t('refresh')}
           </AdminButton>
         </div>
       </div>
@@ -287,25 +300,25 @@ export default function SuperAdminActivityPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminStatCard
-          title="Aujourd'hui"
+          title={t('today')}
           value={stats?.today || 0}
           icon={Clock}
           variant="violet"
         />
         <AdminStatCard
-          title="Cette semaine"
+          title={t('thisWeek')}
           value={stats?.thisWeek || 0}
           icon={Calendar}
           variant="blue"
         />
         <AdminStatCard
-          title="Ce mois"
+          title={t('thisMonth')}
           value={stats?.thisMonth || 0}
           icon={Calendar}
           variant="emerald"
         />
         <AdminStatCard
-          title="Total"
+          title={t('total')}
           value={stats?.total || 0}
           icon={Activity}
           variant="amber"
@@ -336,7 +349,7 @@ export default function SuperAdminActivityPage() {
                   setSearch(e.target.value)
                   setPage(0)
                 }}
-                placeholder="Rechercher par action ou entité..."
+                placeholder={t('searchPlaceholder')}
               />
             </div>
             <div className="sm:w-64">
@@ -358,7 +371,7 @@ export default function SuperAdminActivityPage() {
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des activités...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('loadingActivities')}</p>
           </div>
         </div>
       )}
@@ -367,10 +380,10 @@ export default function SuperAdminActivityPage() {
       {!isLoading && activities.length === 0 && (
         <AdminEmptyState
           icon={Activity}
-          title="Aucune activité trouvée"
+          title={t('noActivityFound')}
           description={search || entityFilter !== 'all' || actionFilter
-            ? "Aucune activité ne correspond à vos critères de recherche"
-            : "Les activités de la plateforme apparaîtront ici"
+            ? t('noActivityMatchCriteria')
+            : t('activitiesWillAppear')
           }
           action={
             (search || entityFilter !== 'all' || actionFilter) ? (
@@ -382,7 +395,7 @@ export default function SuperAdminActivityPage() {
                   setActionFilter('')
                 }}
               >
-                Réinitialiser les filtres
+                {t('resetFilters')}
               </AdminButton>
             ) : undefined
           }
@@ -395,7 +408,7 @@ export default function SuperAdminActivityPage() {
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {activities.map((activity: any) => {
               const entity = entityConfig[activity.entity] || entityConfig.default
-              const action = getActionConfig(activity.action)
+              const action = getActionConfig(activity.action, t)
               const isExpanded = expandedActivity === activity.id
 
               return (
@@ -467,12 +480,12 @@ export default function SuperAdminActivityPage() {
                           {isExpanded ? (
                             <>
                               <ChevronUp className="w-4 h-4" />
-                              Masquer les détails
+                              {t('hideDetails')}
                             </>
                           ) : (
                             <>
                               <ChevronDown className="w-4 h-4" />
-                              Voir les détails
+                              {t('showDetails')}
                             </>
                           )}
                         </button>
@@ -485,7 +498,7 @@ export default function SuperAdminActivityPage() {
                             <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-sm">
                               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                                 <Monitor className="w-3.5 h-3.5 flex-shrink-0" />
-                                <span className="font-medium">User-Agent:</span>
+                                <span className="font-medium">{t('userAgent')}:</span>
                               </div>
                               <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 font-mono break-all">
                                 {activity.userAgent}
@@ -514,7 +527,7 @@ export default function SuperAdminActivityPage() {
           {data && data.total > limit && (
             <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Affichage {page * limit + 1} - {Math.min((page + 1) * limit, data.total)} sur {data.total}
+                {t('displayRange', { start: page * limit + 1, end: Math.min((page + 1) * limit, data.total), total: data.total })}
               </p>
               <div className="flex gap-2">
                 <AdminButton
@@ -523,7 +536,7 @@ export default function SuperAdminActivityPage() {
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
                 >
-                  Précédent
+                  {t('previous')}
                 </AdminButton>
                 <AdminButton
                   variant="outline"
@@ -531,7 +544,7 @@ export default function SuperAdminActivityPage() {
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!data.hasMore}
                 >
-                  Suivant
+                  {t('next')}
                 </AdminButton>
               </div>
             </div>

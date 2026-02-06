@@ -3,9 +3,11 @@
 import { use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Store, ArrowLeft, Calendar, MapPin, Mail, Phone } from 'lucide-react'
+import { Store, ArrowLeft, Calendar, MapPin, Mail, Phone, Globe } from 'lucide-react'
+import { getCountryFlag, getCountryLabel } from '@/lib/countries'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
+import { useLocale } from 'next-intl'
 
 interface PageProps {
   params: Promise<{
@@ -16,6 +18,7 @@ interface PageProps {
 
 export default function StoreAboutPage({ params }: PageProps) {
   const { slug } = use(params)
+  const locale = useLocale()
 
   const { data: store, isLoading } = trpc.store.getBySlug.useQuery({ slug })
 
@@ -165,6 +168,25 @@ export default function StoreAboutPage({ params }: PageProps) {
                       </div>
                     )}
                     {publicAddress.country && <div>{publicAddress.country}</div>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Countries */}
+            {store.countries && store.countries.length > 0 && (
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-cyan-50 rounded-lg">
+                  <Globe className="w-5 h-5 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Pays d&apos;activité</p>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {store.countries.map((code: string) => (
+                      <span key={code} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm text-gray-700">
+                        {getCountryFlag(code)} {getCountryLabel(code, locale)}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>

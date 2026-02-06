@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/client'
 import {
   AdminCard,
@@ -84,6 +85,7 @@ const categoryColors: Record<string, string> = {
 }
 
 export default function SuperAdminRolesPage() {
+  const t = useTranslations('superadmin')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRole, setEditingRole] = useState<any>(null)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
@@ -199,7 +201,7 @@ export default function SuperAdminRolesPage() {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des rôles...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('rolesPage.loading')}</p>
         </div>
       </div>
     )
@@ -211,10 +213,10 @@ export default function SuperAdminRolesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Rôles & Permissions
+            {t('rolesPage.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Gérez les rôles de la plateforme et leurs permissions
+            {t('rolesPage.subtitle')}
           </p>
         </div>
         <AdminButton
@@ -222,7 +224,7 @@ export default function SuperAdminRolesPage() {
           icon={<Plus className="w-4 h-4" />}
           onClick={() => handleOpenModal()}
         >
-          Nouveau rôle
+          {t('rolesPage.newRole')}
         </AdminButton>
       </div>
 
@@ -233,10 +235,9 @@ export default function SuperAdminRolesPage() {
             <Info className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold text-slate-900 dark:text-white">À propos des rôles système</p>
+            <p className="font-semibold text-slate-900 dark:text-white">{t('rolesPage.infoCard.title')}</p>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Les rôles marqués comme "Système" ne peuvent pas être supprimés.
-              Vous pouvez créer des rôles personnalisés pour des besoins spécifiques.
+              {t('rolesPage.infoCard.description')}
             </p>
           </div>
         </div>
@@ -246,15 +247,15 @@ export default function SuperAdminRolesPage() {
       {!roles || roles.length === 0 ? (
         <AdminEmptyState
           icon={Shield}
-          title="Aucun rôle défini"
-          description="Créez votre premier rôle pour gérer les permissions des utilisateurs"
+          title={t('rolesPage.empty.title')}
+          description={t('rolesPage.empty.description')}
           action={
             <AdminButton
               variant="primary"
               icon={<Plus className="w-4 h-4" />}
               onClick={() => handleOpenModal()}
             >
-              Créer le premier rôle
+              {t('rolesPage.empty.createFirst')}
             </AdminButton>
           }
         />
@@ -288,12 +289,12 @@ export default function SuperAdminRolesPage() {
                           </h3>
                           {role.isSystem && (
                             <AdminBadge variant="default" size="sm">
-                              Système
+                              {t('rolesPage.systemBadge')}
                             </AdminBadge>
                           )}
                         </div>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                          {role.description || 'Aucune description'}
+                          {role.description || t('rolesPage.noDescription')}
                         </p>
                       </div>
                     </div>
@@ -330,7 +331,7 @@ export default function SuperAdminRolesPage() {
                           {role.usersCount}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          utilisateur{role.usersCount !== 1 ? 's' : ''}
+                          {t('rolesPage.users', { count: role.usersCount })}
                         </p>
                       </div>
                     </div>
@@ -343,7 +344,7 @@ export default function SuperAdminRolesPage() {
                           {permCount}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          permission{permCount !== 1 ? 's' : ''}
+                          {t('rolesPage.permissions', { count: permCount })}
                         </p>
                       </div>
                     </div>
@@ -364,7 +365,7 @@ export default function SuperAdminRolesPage() {
                     })}
                     {permCount > 5 && (
                       <span className="px-2.5 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 rounded-lg">
-                        +{permCount - 5} autres
+                        {t('rolesPage.morePermissions', { count: permCount - 5 })}
                       </span>
                     )}
                   </div>
@@ -379,31 +380,31 @@ export default function SuperAdminRolesPage() {
       <AdminModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingRole ? 'Modifier le rôle' : 'Nouveau rôle'}
+        title={editingRole ? t('rolesPage.modal.editTitle') : t('rolesPage.modal.createTitle')}
         size="lg"
       >
         <div className="space-y-6">
           {/* Name & Description */}
           <div className="space-y-4">
             <AdminInput
-              label="Nom du rôle"
+              label={t('rolesPage.modal.nameLabel')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Modérateur"
+              placeholder={t('rolesPage.modal.namePlaceholder')}
               disabled={editingRole?.isSystem}
             />
             <AdminInput
-              label="Description"
+              label={t('rolesPage.modal.descriptionLabel')}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Ex: Gestion de la modération du contenu"
+              placeholder={t('rolesPage.modal.descriptionPlaceholder')}
             />
           </div>
 
           {/* Permissions */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-              Permissions ({formData.permissions.length} sélectionnées)
+              {t('rolesPage.modal.permissionsLabel', { count: formData.permissions.length })}
             </label>
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
               {Object.entries(permissionsByCategory).map(([category, permissions]) => {
@@ -524,7 +525,7 @@ export default function SuperAdminRolesPage() {
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
             <AdminButton variant="secondary" onClick={handleCloseModal}>
-              Annuler
+              {t('rolesPage.modal.cancel')}
             </AdminButton>
             <AdminButton
               variant="primary"
@@ -532,7 +533,7 @@ export default function SuperAdminRolesPage() {
               disabled={!formData.name || createRole.isPending || updateRole.isPending}
               loading={createRole.isPending || updateRole.isPending}
             >
-              {editingRole ? 'Enregistrer' : 'Créer le rôle'}
+              {editingRole ? t('rolesPage.modal.save') : t('rolesPage.modal.create')}
             </AdminButton>
           </div>
         </div>

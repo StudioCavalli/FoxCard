@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   ShoppingBag, Utensils, Wine, Shirt, Smartphone, Sparkles, Home as HomeIcon, Dumbbell,
   Gamepad2, Car, BookOpen, PawPrint, Download, CalendarCheck, Snowflake, ChefHat,
@@ -43,6 +44,7 @@ const iconMap: Record<CommerceType, React.ElementType> = {
 }
 
 export default function CommerceTypesPage() {
+  const t = useTranslations('superadmin')
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'physical' | 'digital' | 'services'>('all')
   const [selectedType, setSelectedType] = useState<CommerceType | null>(null)
@@ -79,42 +81,42 @@ export default function CommerceTypesPage() {
   const selectedConfig = selectedType ? commerceTypeConfigs[selectedType] : null
 
   const tabItems = [
-    { value: 'all', label: 'Tous', count: allTypes.length },
-    { value: 'physical', label: 'Physiques', count: categories.physical.length },
-    { value: 'digital', label: 'Digitaux', count: categories.digital.length },
-    { value: 'services', label: 'Services', count: categories.services.length },
+    { value: 'all', label: t('commerceTypesPage.all'), count: allTypes.length },
+    { value: 'physical', label: t('commerceTypesPage.physical'), count: categories.physical.length },
+    { value: 'digital', label: t('commerceTypesPage.digital'), count: categories.digital.length },
+    { value: 'services', label: t('commerceTypesPage.services'), count: categories.services.length },
   ]
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Types de commerce</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Vue d&apos;ensemble des 19 types de commerce supportés</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('commerceTypesPage.title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('commerceTypesPage.subtitle')}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminStatCard
-          title="Total types"
+          title={t('commerceTypesPage.totalTypes')}
           value={allTypes.length}
           icon={Layers}
           variant="violet"
         />
         <AdminStatCard
-          title="Produits physiques"
+          title={t('commerceTypesPage.physicalProducts')}
           value={categories.physical.length}
           icon={Package}
           variant="blue"
         />
         <AdminStatCard
-          title="Produits digitaux"
+          title={t('commerceTypesPage.digitalProducts')}
           value={categories.digital.length}
           icon={Download}
           variant="rose"
         />
         <AdminStatCard
-          title="Services & Réservations"
+          title={t('commerceTypesPage.servicesBookings')}
           value={categories.services.length}
           icon={Globe}
           variant="emerald"
@@ -126,7 +128,7 @@ export default function CommerceTypesPage() {
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           <div className="flex-1 w-full md:w-auto">
             <AdminSearchInput
-              placeholder="Rechercher un type..."
+              placeholder={t('commerceTypesPage.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch('')}
@@ -146,8 +148,8 @@ export default function CommerceTypesPage() {
       {filteredTypes.length === 0 && (
         <AdminEmptyState
           icon={Filter}
-          title="Aucun type trouvé"
-          description="Modifiez vos critères de recherche pour trouver des types de commerce."
+          title={t('commerceTypesPage.noTypesFound')}
+          description={t('commerceTypesPage.modifySearch')}
         />
       )}
 
@@ -187,23 +189,23 @@ export default function CommerceTypesPage() {
                           <span className="text-xl">{config.emoji}</span>
                           {storeCount > 0 && (
                             <AdminBadge variant="purple" size="sm">
-                              {storeCount} boutique{storeCount > 1 ? 's' : ''}
+                              {storeCount} {storeCount > 1 ? t('commerceTypesPage.stores') : t('commerceTypesPage.store')}
                             </AdminBadge>
                           )}
                         </div>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">{config.description}</p>
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {config.features.hasPhysicalProducts && (
-                            <AdminBadge variant="info" size="sm">Physique</AdminBadge>
+                            <AdminBadge variant="info" size="sm">{t('commerceTypesPage.physicalLabel')}</AdminBadge>
                           )}
                           {config.features.hasDigitalProducts && (
-                            <AdminBadge variant="purple" size="sm">Digital</AdminBadge>
+                            <AdminBadge variant="purple" size="sm">{t('commerceTypesPage.digitalLabel')}</AdminBadge>
                           )}
                           {config.features.hasBookings && (
-                            <AdminBadge variant="success" size="sm">Réservation</AdminBadge>
+                            <AdminBadge variant="success" size="sm">{t('commerceTypesPage.booking')}</AdminBadge>
                           )}
                           {config.features.requiresAgeVerification && (
-                            <AdminBadge variant="warning" size="sm">18+</AdminBadge>
+                            <AdminBadge variant="warning" size="sm">{t('commerceTypesPage.ageRestriction')}</AdminBadge>
                           )}
                         </div>
                       </div>
@@ -244,7 +246,7 @@ export default function CommerceTypesPage() {
 
                   {/* Features */}
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Fonctionnalités</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">{t('commerceTypesPage.features')}</h4>
                     <div className="grid grid-cols-1 gap-2">
                       {Object.entries(selectedConfig.features).map(([key, value]) => (
                         <div key={key} className="flex items-center gap-2 text-sm">
@@ -267,7 +269,7 @@ export default function CommerceTypesPage() {
 
                   {/* Checkout Steps */}
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Étapes checkout</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">{t('commerceTypesPage.checkoutSteps')}</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedConfig.checkoutSteps.map((step, i) => (
                         <span
@@ -285,7 +287,7 @@ export default function CommerceTypesPage() {
 
                   {/* Default Categories */}
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Catégories par défaut</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">{t('commerceTypesPage.defaultCategories')}</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedConfig.defaultCategories.map((cat) => (
                         <AdminBadge key={cat} variant="info" size="sm">{cat}</AdminBadge>
@@ -296,7 +298,7 @@ export default function CommerceTypesPage() {
                   {/* Regulations */}
                   {selectedConfig.regulations && selectedConfig.regulations.length > 0 && (
                     <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                      <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">Réglementations</h4>
+                      <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">{t('commerceTypesPage.regulations')}</h4>
                       <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1">
                         {selectedConfig.regulations.map((reg, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -312,7 +314,10 @@ export default function CommerceTypesPage() {
                   {(storesByType[selectedType!] ?? 0) > 0 && (
                     <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                       <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">
-                        {storesByType[selectedType!]} boutique{(storesByType[selectedType!] ?? 0) > 1 ? 's' : ''} utilise{(storesByType[selectedType!] ?? 0) > 1 ? 'nt' : ''} ce type
+                        {(storesByType[selectedType!] ?? 0) > 1
+                          ? t('commerceTypesPage.storesUsingTypePlural', { count: storesByType[selectedType!] })
+                          : t('commerceTypesPage.storesUsingType', { count: storesByType[selectedType!] })
+                        }
                       </h4>
                       <div className="space-y-2">
                         {stores
@@ -328,7 +333,7 @@ export default function CommerceTypesPage() {
                           ))}
                         {(storesByType[selectedType!] ?? 0) > 5 && (
                           <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-1">
-                            +{(storesByType[selectedType!] ?? 0) - 5} autres...
+                            +{(storesByType[selectedType!] ?? 0) - 5} {t('rolesPage.others')}
                           </p>
                         )}
                       </div>
@@ -339,8 +344,8 @@ export default function CommerceTypesPage() {
             ) : (
               <AdminEmptyState
                 icon={Filter}
-                title="Sélectionnez un type"
-                description="Cliquez sur un type de commerce pour voir les détails"
+                title={t('commerceTypesPage.selectType')}
+                description={t('commerceTypesPage.selectTypeDesc')}
               />
             )}
           </div>

@@ -2,16 +2,19 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Store, MapPin, Mail, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Star, Package, ShoppingBag } from 'lucide-react'
+import { Store, MapPin, Mail, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Star, Package, ShoppingBag, Globe } from 'lucide-react'
+import { getCountryFlag, getCountryLabel } from '@/lib/countries'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { ProductCard } from '@/components/products/ProductCard'
+import { useLocale } from 'next-intl'
 
 interface StoreHomepageClientProps {
   slug: string
 }
 
 export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
+  const locale = useLocale()
   const { data: store, isLoading: storeLoading } = trpc.store.getBySlug.useQuery({ slug })
   const { data: featuredProducts, isLoading: productsLoading } = trpc.store.getFeaturedProducts.useQuery(
     { storeId: store?.id || '' },
@@ -110,6 +113,19 @@ export function StoreHomepageClient({ slug }: StoreHomepageClientProps) {
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span>{stats.rating.toFixed(1)} ({stats.reviewsCount})</span>
+                    </div>
+                  )}
+                  {store.countries && store.countries.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Globe className="w-4 h-4" />
+                      <span className="flex items-center gap-0.5">
+                        {store.countries.slice(0, 4).map((c: string) => (
+                          <span key={c} title={getCountryLabel(c, locale)}>{getCountryFlag(c)}</span>
+                        ))}
+                        {store.countries.length > 4 && (
+                          <span className="text-xs text-gray-400 ml-0.5">+{store.countries.length - 4}</span>
+                        )}
+                      </span>
                     </div>
                   )}
                 </div>

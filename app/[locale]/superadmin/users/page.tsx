@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { AdminCard } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminBadge } from '@/components/admin/ui/AdminBadge'
@@ -18,8 +19,6 @@ import {
   Users,
   UserPlus,
   Shield,
-  ShieldAlert,
-  ShieldCheck,
   Ban,
   CheckCircle,
   XCircle,
@@ -27,9 +26,6 @@ import {
   Mail,
   Calendar,
   Store,
-  MoreVertical,
-  Edit,
-  Trash2,
   Crown,
   User,
   AlertTriangle,
@@ -40,19 +36,20 @@ import {
 type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'all'
 type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'BANNED' | 'all'
 
-const roleConfig: Record<string, { label: string; variant: 'default' | 'info' | 'purple'; icon: typeof User }> = {
-  USER: { label: 'Utilisateur', variant: 'default', icon: User },
-  ADMIN: { label: 'Admin', variant: 'info', icon: Shield },
-  SUPER_ADMIN: { label: 'Super Admin', variant: 'purple', icon: Crown },
-}
-
-const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'danger'; icon: typeof CheckCircle }> = {
-  ACTIVE: { label: 'Actif', variant: 'success', icon: CheckCircle },
-  SUSPENDED: { label: 'Suspendu', variant: 'warning', icon: Ban },
-  BANNED: { label: 'Banni', variant: 'danger', icon: XCircle },
-}
-
 export default function SuperAdminUsersPage() {
+  const t = useTranslations('superadmin.usersPage')
+
+  const roleConfig: Record<string, { label: string; variant: 'default' | 'info' | 'purple'; icon: typeof User }> = {
+    USER: { label: t('userRoleLabel'), variant: 'default', icon: User },
+    ADMIN: { label: t('adminRoleLabel'), variant: 'info', icon: Shield },
+    SUPER_ADMIN: { label: t('superAdminRoleLabel'), variant: 'purple', icon: Crown },
+  }
+
+  const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'danger'; icon: typeof CheckCircle }> = {
+    ACTIVE: { label: t('activeStatusLabel'), variant: 'success', icon: CheckCircle },
+    SUSPENDED: { label: t('suspendedStatusLabel'), variant: 'warning', icon: Ban },
+    BANNED: { label: t('bannedStatusLabel'), variant: 'danger', icon: XCircle },
+  }
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole>('all')
   const [statusFilter, setStatusFilter] = useState<UserStatus>('all')
@@ -116,10 +113,10 @@ export default function SuperAdminUsersPage() {
   }
 
   const statusTabs = [
-    { value: 'all', label: 'Tous', count: total },
-    { value: 'ACTIVE', label: 'Actifs', count: statusCounts.active, icon: <CheckCircle className="w-4 h-4" /> },
-    { value: 'SUSPENDED', label: 'Suspendus', count: statusCounts.suspended, icon: <Ban className="w-4 h-4" /> },
-    { value: 'BANNED', label: 'Bannis', count: statusCounts.banned, icon: <XCircle className="w-4 h-4" /> },
+    { value: 'all', label: t('allStatuses'), count: total },
+    { value: 'ACTIVE', label: t('activeStatus'), count: statusCounts.active, icon: <CheckCircle className="w-4 h-4" /> },
+    { value: 'SUSPENDED', label: t('suspendedStatus'), count: statusCounts.suspended, icon: <Ban className="w-4 h-4" /> },
+    { value: 'BANNED', label: t('bannedStatus'), count: statusCounts.banned, icon: <XCircle className="w-4 h-4" /> },
   ]
 
   return (
@@ -127,33 +124,33 @@ export default function SuperAdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Gestion des Utilisateurs</h1>
-          <p className="text-slate-500 dark:text-slate-400">{total} utilisateurs sur la plateforme</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('usersOnPlatform', { count: total })}</p>
         </div>
         <div className="flex items-center gap-3">
-          <AdminButton variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={() => refetch()}>Actualiser</AdminButton>
-          <AdminButton variant="primary" icon={<UserPlus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>Nouvel utilisateur</AdminButton>
+          <AdminButton variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={() => refetch()}>{t('refresh')}</AdminButton>
+          <AdminButton variant="primary" icon={<UserPlus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>{t('newUser')}</AdminButton>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <AdminStatCard title="Actifs" value={statusCounts.active} icon={CheckCircle} variant="emerald" />
-        <AdminStatCard title="Suspendus" value={statusCounts.suspended} icon={Ban} variant="amber" />
-        <AdminStatCard title="Bannis" value={statusCounts.banned} icon={XCircle} variant="rose" />
+        <AdminStatCard title={t('activeLabel')} value={statusCounts.active} icon={CheckCircle} variant="emerald" />
+        <AdminStatCard title={t('suspendedLabel')} value={statusCounts.suspended} icon={Ban} variant="amber" />
+        <AdminStatCard title={t('bannedLabel')} value={statusCounts.banned} icon={XCircle} variant="rose" />
       </div>
 
       {/* Filters */}
       <AdminCard padding="md">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
-            <AdminSearchInput placeholder="Rechercher par nom ou email..." value={search} onChange={(e) => setSearch(e.target.value)} onClear={() => setSearch('')} />
+            <AdminSearchInput placeholder={t('searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} onClear={() => setSearch('')} />
           </div>
           <AdminSelect value={roleFilter} onChange={(e) => setRoleFilter(e.target.value as UserRole)} options={[
-            { value: 'all', label: 'Tous les roles' },
-            { value: 'USER', label: 'Utilisateurs' },
-            { value: 'ADMIN', label: 'Admins' },
-            { value: 'SUPER_ADMIN', label: 'Super Admins' },
+            { value: 'all', label: t('allRoles') },
+            { value: 'USER', label: t('usersRole') },
+            { value: 'ADMIN', label: t('adminsRole') },
+            { value: 'SUPER_ADMIN', label: t('superAdminsRole') },
           ]} />
           <AdminTabs items={statusTabs} value={statusFilter} onChange={(v) => setStatusFilter(v as UserStatus)} variant="pills" size="sm" />
         </div>
@@ -168,7 +165,7 @@ export default function SuperAdminUsersPage() {
 
       {/* Empty State */}
       {!isLoading && users.length === 0 && (
-        <AdminEmptyState icon={Users} title="Aucun utilisateur trouve" description="Modifiez vos filtres ou creez un nouvel utilisateur." action={<AdminButton variant="primary" icon={<UserPlus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>Creer</AdminButton>} />
+        <AdminEmptyState icon={Users} title={t('noUserFound')} description={t('noUserDescription')} action={<AdminButton variant="primary" icon={<UserPlus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>{t('createButton')}</AdminButton>} />
       )}
 
       {/* Users List */}
@@ -198,7 +195,7 @@ export default function SuperAdminUsersPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-slate-900 dark:text-white truncate">{user.name || 'Sans nom'}</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white truncate">{user.name || t('noName')}</h3>
                         <AdminBadge variant={role.variant} icon={RoleIcon} size="sm">{role.label}</AdminBadge>
                         <AdminBadge variant={status.variant} icon={StatusIcon} size="sm">{status.label}</AdminBadge>
                       </div>
@@ -206,7 +203,7 @@ export default function SuperAdminUsersPage() {
                         <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{user.email}</span>
                         <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{formatDate(user.createdAt)}</span>
                         {user.stores && user.stores.length > 0 && (
-                          <span className="flex items-center gap-1"><Store className="w-3.5 h-3.5" />{user.stores.length} boutique(s)</span>
+                          <span className="flex items-center gap-1"><Store className="w-3.5 h-3.5" />{t('storesCount', { count: user.stores.length })}</span>
                         )}
                       </div>
                       {user.suspendedReason && user.status !== 'ACTIVE' && (
@@ -219,19 +216,19 @@ export default function SuperAdminUsersPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                      <AdminButton variant="ghost" size="sm" icon={<Eye className="w-4 h-4" />} onClick={() => { setSelectedUser(user); setIsDetailModalOpen(true) }}>Details</AdminButton>
-                      <AdminButton variant="ghost" size="sm" icon={<Shield className="w-4 h-4" />} onClick={() => openRoleModal(user)}>Role</AdminButton>
+                      <AdminButton variant="ghost" size="sm" icon={<Eye className="w-4 h-4" />} onClick={() => { setSelectedUser(user); setIsDetailModalOpen(true) }}>{t('detailsButton')}</AdminButton>
+                      <AdminButton variant="ghost" size="sm" icon={<Shield className="w-4 h-4" />} onClick={() => openRoleModal(user)}>{t('roleButton')}</AdminButton>
                       {user.status === 'ACTIVE' && (
-                        <AdminButton variant="ghost" size="sm" icon={<Ban className="w-4 h-4" />} className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10" onClick={() => openStatusModal(user, 'SUSPENDED')}>Suspendre</AdminButton>
+                        <AdminButton variant="ghost" size="sm" icon={<Ban className="w-4 h-4" />} className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10" onClick={() => openStatusModal(user, 'SUSPENDED')}>{t('suspendButton')}</AdminButton>
                       )}
                       {user.status === 'SUSPENDED' && (
                         <>
-                          <AdminButton variant="ghost" size="sm" icon={<CheckCircle className="w-4 h-4" />} className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10" onClick={() => openStatusModal(user, 'ACTIVE')}>Reactiver</AdminButton>
-                          <AdminButton variant="ghost" size="sm" icon={<XCircle className="w-4 h-4" />} className="text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => openStatusModal(user, 'BANNED')}>Bannir</AdminButton>
+                          <AdminButton variant="ghost" size="sm" icon={<CheckCircle className="w-4 h-4" />} className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10" onClick={() => openStatusModal(user, 'ACTIVE')}>{t('reactivateButton')}</AdminButton>
+                          <AdminButton variant="ghost" size="sm" icon={<XCircle className="w-4 h-4" />} className="text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => openStatusModal(user, 'BANNED')}>{t('banButton')}</AdminButton>
                         </>
                       )}
                       {user.status === 'BANNED' && (
-                        <AdminButton variant="ghost" size="sm" icon={<CheckCircle className="w-4 h-4" />} className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10" onClick={() => openStatusModal(user, 'ACTIVE')}>Debannir</AdminButton>
+                        <AdminButton variant="ghost" size="sm" icon={<CheckCircle className="w-4 h-4" />} className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10" onClick={() => openStatusModal(user, 'ACTIVE')}>{t('unbanButton')}</AdminButton>
                       )}
                     </div>
                   </div>
@@ -243,7 +240,7 @@ export default function SuperAdminUsersPage() {
       )}
 
       {/* Detail Modal */}
-      <AdminModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title="Details de l'utilisateur" size="lg">
+      <AdminModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title={t('userDetailsTitle')} size="lg">
         {selectedUser && (
           <div className="space-y-6">
             <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
@@ -255,7 +252,7 @@ export default function SuperAdminUsersPage() {
                 </div>
               )}
               <div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{selectedUser.name || 'Sans nom'}</h3>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{selectedUser.name || t('noName')}</h3>
                 <p className="text-slate-500 dark:text-slate-400">{selectedUser.email}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <AdminBadge variant={roleConfig[selectedUser.role]?.variant || 'default'}>{roleConfig[selectedUser.role]?.label || selectedUser.role}</AdminBadge>
@@ -266,18 +263,18 @@ export default function SuperAdminUsersPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Inscrit le</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('registeredOn')}</p>
                 <p className="font-medium text-slate-900 dark:text-white">{formatDate(selectedUser.createdAt)}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Email verifie</p>
-                <p className="font-medium text-slate-900 dark:text-white">{selectedUser.emailVerified ? 'Oui' : 'Non'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('emailVerified')}</p>
+                <p className="font-medium text-slate-900 dark:text-white">{selectedUser.emailVerified ? t('yes') : t('no')}</p>
               </div>
             </div>
 
             {selectedUser.stores && selectedUser.stores.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Boutiques ({selectedUser.stores.length})</h4>
+                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{t('storesTitle', { count: selectedUser.stores.length })}</h4>
                 <div className="space-y-2">
                   {selectedUser.stores.map((store: any) => (
                     <div key={store.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
@@ -294,7 +291,7 @@ export default function SuperAdminUsersPage() {
 
             {selectedUser.suspendedReason && selectedUser.status !== 'ACTIVE' && (
               <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">Raison de la suspension/ban</p>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">{t('suspensionBanReason')}</p>
                 <p className="text-sm text-amber-700 dark:text-amber-400">{selectedUser.suspendedReason}</p>
               </div>
             )}
@@ -303,11 +300,11 @@ export default function SuperAdminUsersPage() {
       </AdminModal>
 
       {/* Status Modal */}
-      <AdminModal isOpen={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)} title={statusAction === 'ACTIVE' ? "Réactiver l'utilisateur" : statusAction === 'SUSPENDED' ? "Suspendre l'utilisateur" : "Bannir l'utilisateur"} size="md" footer={
+      <AdminModal isOpen={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)} title={statusAction === 'ACTIVE' ? t('reactivateUserTitle') : statusAction === 'SUSPENDED' ? t('suspendUserTitle') : t('banUserTitle')} size="md" footer={
         <>
-          <AdminButton variant="outline" onClick={() => setIsStatusModalOpen(false)}>Annuler</AdminButton>
+          <AdminButton variant="outline" onClick={() => setIsStatusModalOpen(false)}>{t('cancel')}</AdminButton>
           <AdminButton variant={statusAction === 'ACTIVE' ? 'success' : statusAction === 'SUSPENDED' ? 'secondary' : 'danger'} onClick={handleStatusChange} loading={updateUserStatus.isPending}>
-            {statusAction === 'ACTIVE' ? 'Reactiver' : statusAction === 'SUSPENDED' ? 'Suspendre' : 'Bannir'}
+            {statusAction === 'ACTIVE' ? t('reactivate') : statusAction === 'SUSPENDED' ? t('suspend') : t('ban')}
           </AdminButton>
         </>
       }>
@@ -317,48 +314,48 @@ export default function SuperAdminUsersPage() {
               <div className="flex items-start gap-3">
                 <XCircle className="w-5 h-5 text-red-500 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-red-800 dark:text-red-300">Bannissement permanent</p>
-                  <p className="text-sm text-red-700 dark:text-red-400">L'utilisateur ne pourra plus se connecter ni creer de compte avec cet email.</p>
+                  <p className="text-sm font-medium text-red-800 dark:text-red-300">{t('permanentBan')}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">{t('permanentBanDescription')}</p>
                 </div>
               </div>
             </div>
           )}
-          <AdminTextarea label="Raison (optionnel)" value={actionReason} onChange={(e) => setActionReason(e.target.value)} placeholder="Expliquez la raison..." rows={3} />
+          <AdminTextarea label={t('reasonOptional')} value={actionReason} onChange={(e) => setActionReason(e.target.value)} placeholder={t('reasonPlaceholder')} rows={3} />
         </div>
       </AdminModal>
 
       {/* Role Modal */}
-      <AdminModal isOpen={isRoleModalOpen} onClose={() => setIsRoleModalOpen(false)} title="Modifier le role" size="md" footer={
+      <AdminModal isOpen={isRoleModalOpen} onClose={() => setIsRoleModalOpen(false)} title={t('changeRoleTitle')} size="md" footer={
         <>
-          <AdminButton variant="outline" onClick={() => setIsRoleModalOpen(false)}>Annuler</AdminButton>
-          <AdminButton variant="primary" onClick={handleRoleChange} loading={updateUserRole.isPending} disabled={!actionReason.trim()}>Modifier</AdminButton>
+          <AdminButton variant="outline" onClick={() => setIsRoleModalOpen(false)}>{t('cancel')}</AdminButton>
+          <AdminButton variant="primary" onClick={handleRoleChange} loading={updateUserRole.isPending} disabled={!actionReason.trim()}>{t('modify')}</AdminButton>
         </>
       }>
         <div className="space-y-4">
-          <AdminSelect label="Nouveau role" value={newRole} onChange={(e) => setNewRole(e.target.value as any)} options={[
-            { value: 'USER', label: 'Utilisateur' },
-            { value: 'ADMIN', label: 'Admin' },
-            { value: 'SUPER_ADMIN', label: 'Super Admin' },
+          <AdminSelect label={t('newRoleLabel')} value={newRole} onChange={(e) => setNewRole(e.target.value as any)} options={[
+            { value: 'USER', label: t('userRoleLabel') },
+            { value: 'ADMIN', label: t('adminRoleLabel') },
+            { value: 'SUPER_ADMIN', label: t('superAdminRoleLabel') },
           ]} />
-          <AdminTextarea label="Raison du changement *" value={actionReason} onChange={(e) => setActionReason(e.target.value)} placeholder="Expliquez pourquoi ce changement de role..." rows={3} />
+          <AdminTextarea label={t('changeReasonRequired')} value={actionReason} onChange={(e) => setActionReason(e.target.value)} placeholder={t('changeReasonPlaceholder')} rows={3} />
         </div>
       </AdminModal>
 
       {/* Create Modal */}
-      <AdminModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Creer un utilisateur" size="md" footer={
+      <AdminModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title={t('createUserTitle')} size="md" footer={
         <>
-          <AdminButton variant="outline" onClick={() => setIsCreateModalOpen(false)}>Annuler</AdminButton>
-          <AdminButton variant="primary" onClick={handleCreateUser} loading={createUser.isPending}>Creer</AdminButton>
+          <AdminButton variant="outline" onClick={() => setIsCreateModalOpen(false)}>{t('cancel')}</AdminButton>
+          <AdminButton variant="primary" onClick={handleCreateUser} loading={createUser.isPending}>{t('create')}</AdminButton>
         </>
       }>
         <form onSubmit={handleCreateUser} className="space-y-4">
-          <AdminInput label="Nom" value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} placeholder="Jean Dupont" required />
-          <AdminInput label="Email" type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} placeholder="jean@exemple.com" required />
-          <AdminInput label="Mot de passe" type="password" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} placeholder="********" required />
-          <AdminSelect label="Role" value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value as any })} options={[
-            { value: 'USER', label: 'Utilisateur' },
-            { value: 'ADMIN', label: 'Admin' },
-            { value: 'SUPER_ADMIN', label: 'Super Admin' },
+          <AdminInput label={t('nameLabel')} value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} placeholder={t('namePlaceholder')} required />
+          <AdminInput label={t('emailLabel')} type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} placeholder={t('emailPlaceholder')} required />
+          <AdminInput label={t('passwordLabel')} type="password" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} placeholder={t('passwordPlaceholder')} required />
+          <AdminSelect label={t('roleLabel')} value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value as any })} options={[
+            { value: 'USER', label: t('userRoleLabel') },
+            { value: 'ADMIN', label: t('adminRoleLabel') },
+            { value: 'SUPER_ADMIN', label: t('superAdminRoleLabel') },
           ]} />
           {createUser.error && <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400">{createUser.error.message}</div>}
         </form>

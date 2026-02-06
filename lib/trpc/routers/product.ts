@@ -17,12 +17,13 @@ export const productRouter = router({
         maxPrice: z.number().optional(),
         sortBy: z.enum(['createdAt', 'price', 'name', 'featured']).optional(),
         sortOrder: z.enum(['asc', 'desc']).optional(),
+        countries: z.array(z.string()).optional(),
         limit: z.number().min(1).max(100).default(20),
         cursor: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { storeId, categoryId, status, featured, search, tags, minPrice, maxPrice, sortBy, sortOrder, limit, cursor } = input
+      const { storeId, categoryId, status, featured, search, tags, minPrice, maxPrice, sortBy, sortOrder, countries, limit, cursor } = input
 
       // Build orderBy based on sortBy and sortOrder
       const orderBy: any = []
@@ -45,7 +46,10 @@ export const productRouter = router({
           // For public endpoint, only show active products unless status is explicitly provided
           status: status || ProductStatus.ACTIVE,
           // Only show products from active stores (not suspended, pending, or closed)
-          store: { status: 'ACTIVE' },
+          store: {
+            status: 'ACTIVE',
+            ...(countries && countries.length > 0 && { countries: { hasSome: countries } }),
+          },
           ...(featured !== undefined && { featured }),
           ...(tags && tags.length > 0 && {
             tags: {

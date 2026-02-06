@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
@@ -14,11 +15,9 @@ import {
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Store,
   ShoppingCart,
   Users,
-  Package,
   Loader2,
   ExternalLink,
   Trophy,
@@ -30,14 +29,8 @@ import {
 
 type Period = 'week' | 'month' | 'year' | 'all'
 
-const periodLabels: Record<Period, string> = {
-  week: 'Cette semaine',
-  month: 'Ce mois',
-  year: 'Cette année',
-  all: 'Tout le temps',
-}
-
 export default function SuperAdminAnalyticsPage() {
+  const t = useTranslations('superadmin.analyticsPage')
   const [period, setPeriod] = useState<Period>('month')
 
   const { data: platformStats } = trpc.superadmin.getPlatformStats.useQuery()
@@ -51,11 +44,18 @@ export default function SuperAdminAnalyticsPage() {
   const totalOrders = stores.reduce((sum, store) => sum + store.ordersCount, 0)
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
+  const periodLabels: Record<Period, string> = {
+    week: t('periodWeek'),
+    month: t('periodMonth'),
+    year: t('periodYear'),
+    all: t('periodAll'),
+  }
+
   const periodTabs = [
-    { value: 'week', label: 'Semaine', icon: <Calendar className="w-4 h-4" /> },
-    { value: 'month', label: 'Mois', icon: <Calendar className="w-4 h-4" /> },
-    { value: 'year', label: 'Année', icon: <Calendar className="w-4 h-4" /> },
-    { value: 'all', label: 'Tout', icon: <BarChart3 className="w-4 h-4" /> },
+    { value: 'week', label: t('tabWeek'), icon: <Calendar className="w-4 h-4" /> },
+    { value: 'month', label: t('tabMonth'), icon: <Calendar className="w-4 h-4" /> },
+    { value: 'year', label: t('tabYear'), icon: <Calendar className="w-4 h-4" /> },
+    { value: 'all', label: t('tabAll'), icon: <BarChart3 className="w-4 h-4" /> },
   ]
 
   const getRankIcon = (index: number) => {
@@ -102,10 +102,10 @@ export default function SuperAdminAnalyticsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Analytics Plateforme
+          {t('title')}
         </h1>
         <p className="text-slate-600 dark:text-slate-400 mt-1">
-          Performances détaillées et métriques de la plateforme
+          {t('description')}
         </p>
       </div>
 
@@ -113,29 +113,29 @@ export default function SuperAdminAnalyticsPage() {
       {platformStats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <AdminStatCard
-            title="Revenu Total"
+            title={t('totalRevenueCard')}
             value={formatPrice(platformStats.totalRevenue)}
             icon={DollarSign}
             variant="emerald"
             trend={platformStats.revenueGrowth ? {
               value: platformStats.revenueGrowth,
-              label: 'vs mois dernier'
+              label: t('vsLastMonth')
             } : undefined}
           />
           <AdminStatCard
-            title="Boutiques"
+            title={t('totalStoresCard')}
             value={platformStats.totalStores}
             icon={Store}
             variant="violet"
           />
           <AdminStatCard
-            title="Utilisateurs"
+            title={t('totalUsersCard')}
             value={platformStats.totalUsers}
             icon={Users}
             variant="blue"
           />
           <AdminStatCard
-            title="Commandes"
+            title={t('totalOrdersCard')}
             value={platformStats.totalOrders}
             icon={ShoppingCart}
             variant="amber"
@@ -149,7 +149,7 @@ export default function SuperAdminAnalyticsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Performance par période
+                {t('performanceByPeriod')}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {periodLabels[period]}
@@ -175,7 +175,7 @@ export default function SuperAdminAnalyticsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                Revenu {periodLabels[period].toLowerCase()}
+                {t('revenueForPeriod', { period: periodLabels[period].toLowerCase() })}
               </p>
               <p className="text-3xl font-bold text-slate-900 dark:text-white">
                 {formatPrice(totalRevenue)}
@@ -191,7 +191,7 @@ export default function SuperAdminAnalyticsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                Commandes
+                {t('ordersLabel')}
               </p>
               <p className="text-3xl font-bold text-slate-900 dark:text-white">
                 {totalOrders.toLocaleString('fr-FR')}
@@ -207,7 +207,7 @@ export default function SuperAdminAnalyticsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                Panier moyen
+                {t('averageCart')}
               </p>
               <p className="text-3xl font-bold text-slate-900 dark:text-white">
                 {formatPrice(avgOrderValue)}
@@ -222,7 +222,7 @@ export default function SuperAdminAnalyticsPage() {
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des données...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('loadingData')}</p>
           </div>
         </div>
       )}
@@ -231,8 +231,8 @@ export default function SuperAdminAnalyticsPage() {
       {!isLoading && stores.length === 0 && (
         <AdminEmptyState
           icon={BarChart3}
-          title="Aucune donnée disponible"
-          description={`Aucune vente enregistrée pour ${periodLabels[period].toLowerCase()}`}
+          title={t('noDataAvailable')}
+          description={t('noSalesForPeriod', { period: periodLabels[period].toLowerCase() })}
         />
       )}
 
@@ -246,10 +246,10 @@ export default function SuperAdminAnalyticsPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  Classement des boutiques
+                  {t('storesRanking')}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Top {stores.length} par revenu - {periodLabels[period]}
+                  {t('topStoresByRevenue', { count: stores.length, period: periodLabels[period] })}
                 </p>
               </div>
             </div>
@@ -289,11 +289,11 @@ export default function SuperAdminAnalyticsPage() {
                               {formatPrice(store.revenue)}
                             </p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {store.ordersCount} commande{store.ordersCount > 1 ? 's' : ''}
+                              {store.ordersCount} {store.ordersCount > 1 ? t('orders') : t('order')}
                             </p>
                           </div>
                           <Link href={`/superadmin/stores/${store.storeId}`}>
-                            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-primary-600 dark:hover:text-primary-400">
+                            <button type="button" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-primary-600 dark:hover:text-primary-400">
                               <ExternalLink className="w-4 h-4" />
                             </button>
                           </Link>
@@ -324,17 +324,17 @@ export default function SuperAdminAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <Store className="w-4 h-4" />
-                <span>{stores.length} boutique{stores.length > 1 ? 's' : ''} avec des ventes</span>
+                <span>{stores.length > 1 ? t('storesWithSalesPlural', { count: stores.length }) : t('storesWithSales', { count: stores.length })}</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <AdminBadge variant="success">
-                    {formatPrice(totalRevenue)} total
+                    {t('totalLabel', { amount: formatPrice(totalRevenue) })}
                   </AdminBadge>
                 </div>
                 <div className="flex items-center gap-2">
                   <AdminBadge variant="info">
-                    {totalOrders} commandes
+                    {t('ordersCount', { count: totalOrders })}
                   </AdminBadge>
                 </div>
               </div>
@@ -353,10 +353,10 @@ export default function SuperAdminAnalyticsPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  Évolution mensuelle
+                  {t('monthlyEvolution')}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Revenus des 12 derniers mois
+                  {t('revenueLastMonths')}
                 </p>
               </div>
             </div>

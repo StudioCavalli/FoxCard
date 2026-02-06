@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useStoreContext } from '@/lib/context/store-context'
 import { AdminCard, AdminCardHeader } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
@@ -37,21 +38,27 @@ import {
   ShoppingBag,
 } from 'lucide-react'
 import { commerceTypeConfigs, getAllCommerceTypes, type CommerceType } from '@/lib/commerce-types'
+import { CountryMultiSelect } from '@/components/ui/CountryMultiSelect'
+import { getCountryFlag } from '@/lib/countries'
 
 type StoreStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'CLOSED' | 'all'
 
-const statusConfig: Record<string, { label: string; variant: 'success' | 'danger' | 'warning' | 'default'; icon: typeof CheckCircle }> = {
-  ACTIVE: { label: 'Active', variant: 'success', icon: CheckCircle },
-  SUSPENDED: { label: 'Suspendue', variant: 'danger', icon: Ban },
-  PENDING: { label: 'En attente', variant: 'warning', icon: Clock },
-  CLOSED: { label: 'Fermée', variant: 'default', icon: XCircle },
-}
+const getStatusConfig = (t: (key: string) => string): Record<string, { label: string; variant: 'success' | 'danger' | 'warning' | 'default'; icon: typeof CheckCircle }> => ({
+  ACTIVE: { label: t('active'), variant: 'success', icon: CheckCircle },
+  SUSPENDED: { label: t('suspended'), variant: 'danger', icon: Ban },
+  PENDING: { label: t('pending'), variant: 'warning', icon: Clock },
+  CLOSED: { label: t('closed'), variant: 'default', icon: XCircle },
+})
 
 export default function SuperAdminStoresPage() {
+  const t = useTranslations('superadmin')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const params = useParams()
   const locale = params?.locale || 'fr'
   const { startImpersonation } = useStoreContext()
+
+  const statusConfig = getStatusConfig(t)
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StoreStatus>('all')
@@ -59,7 +66,7 @@ export default function SuperAdminStoresPage() {
   const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<any>(null)
   const [suspendReason, setSuspendReason] = useState('')
-  const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' as CommerceType })
+  const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' as CommerceType, countries: [] as string[] })
 
   const handleImpersonate = (storeId: string) => {
     startImpersonation(storeId)
@@ -71,7 +78,7 @@ export default function SuperAdminStoresPage() {
   })
 
   const createStore = trpc.superadmin.createStore.useMutation({
-    onSuccess: () => { setIsCreateModalOpen(false); setCreateForm({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL' }); refetch() },
+    onSuccess: () => { setIsCreateModalOpen(false); setCreateForm({ name: '', slug: '', description: '', ownerEmail: '', commerceType: 'GENERAL', countries: [] }); refetch() },
   })
 
   const updateStoreStatus = trpc.superadmin.updateStoreStatus.useMutation({
@@ -85,7 +92,7 @@ export default function SuperAdminStoresPage() {
 
   const handleCreateStore = async (e: React.FormEvent) => {
     e.preventDefault()
-    await createStore.mutateAsync({ ...createForm, status: 'ACTIVE', commerceType: createForm.commerceType })
+    await createStore.mutateAsync({ ...createForm, status: 'ACTIVE', commerceType: createForm.commerceType, countries: createForm.countries.length > 0 ? createForm.countries : undefined })
   }
 
   const commerceTypes = getAllCommerceTypes()
@@ -98,10 +105,10 @@ export default function SuperAdminStoresPage() {
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <AdminStatCard title="Actives" value={statusCounts.active} icon={CheckCircle} variant="emerald" className="cursor-pointer" onClick={() => setStatusFilter('ACTIVE')} />
-        <AdminStatCard title="Suspendues" value={statusCounts.suspended} icon={Ban} variant="rose" className="cursor-pointer" onClick={() => setStatusFilter('SUSPENDED')} />
-        <AdminStatCard title="En attente" value={statusCounts.pending} icon={Clock} variant="amber" className="cursor-pointer" onClick={() => setStatusFilter('PENDING')} />
-        <AdminStatCard title="Fermées" value={statusCounts.closed} icon={XCircle} variant="slate" className="cursor-pointer" onClick={() => setStatusFilter('CLOSED')} />
+        <AdminStatCard title={t('active')} value={statusCounts.active} icon={CheckCircle} variant="emerald" className="cursor-pointer" onClick={() => setStatusFilter('ACTIVE')} />
+        <AdminStatCard title={t('suspended')} value={statusCounts.suspended} icon={Ban} variant="rose" className="cursor-pointer" onClick={() => setStatusFilter('SUSPENDED')} />
+        <AdminStatCard title={t('pending')} value={statusCounts.pending} icon={Clock} variant="amber" className="cursor-pointer" onClick={() => setStatusFilter('PENDING')} />
+        <AdminStatCard title={t('closed')} value={statusCounts.closed} icon={XCircle} variant="slate" className="cursor-pointer" onClick={() => setStatusFilter('CLOSED')} />
       </div>
 
       {/* Filters */}
@@ -109,7 +116,7 @@ export default function SuperAdminStoresPage() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <AdminSearchInput
-              placeholder="Rechercher par nom, slug ou email..."
+              placeholder={t('searchStores')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch('')}
@@ -119,15 +126,15 @@ export default function SuperAdminStoresPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StoreStatus)}
             options={[
-              { value: 'all', label: 'Tous les statuts' },
-              { value: 'ACTIVE', label: 'Actives' },
-              { value: 'SUSPENDED', label: 'Suspendues' },
-              { value: 'PENDING', label: 'En attente' },
-              { value: 'CLOSED', label: 'Fermées' },
+              { value: 'all', label: t('allStatuses') },
+              { value: 'ACTIVE', label: t('active') },
+              { value: 'SUSPENDED', label: t('suspended') },
+              { value: 'PENDING', label: t('pending') },
+              { value: 'CLOSED', label: t('closed') },
             ]}
           />
           <AdminButton variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-            Nouvelle boutique
+            {t('newStore')}
           </AdminButton>
         </div>
       </AdminCard>
@@ -143,9 +150,9 @@ export default function SuperAdminStoresPage() {
       {!isLoading && stores.length === 0 && (
         <AdminEmptyState
           icon={Store}
-          title="Aucune boutique trouvée"
-          description="Créez une nouvelle boutique ou modifiez vos filtres de recherche."
-          action={<AdminButton variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>Créer une boutique</AdminButton>}
+          title={t('noStoresFound')}
+          description={t('noStoresDescription')}
+          action={<AdminButton variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>{t('createStore')}</AdminButton>}
         />
       )}
 
@@ -187,7 +194,7 @@ export default function SuperAdminStoresPage() {
                         <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
                           <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5" />
                           <div>
-                            <p className="text-sm font-medium text-red-700 dark:text-red-400">Raison de la suspension</p>
+                            <p className="text-sm font-medium text-red-700 dark:text-red-400">{t('suspensionReason')}</p>
                             <p className="text-sm text-red-600 dark:text-red-300">{store.suspendedReason}</p>
                           </div>
                         </div>
@@ -195,9 +202,19 @@ export default function SuperAdminStoresPage() {
 
                       {/* Owner Info */}
                       <div className="text-sm text-slate-500 dark:text-slate-400 space-y-0.5 mb-4">
-                        <p><span className="font-medium">Propriétaire:</span> {store.owner.name || store.owner.email}</p>
-                        <p><span className="font-medium">Email:</span> {store.owner.email}</p>
-                        <p><span className="font-medium">Créée le:</span> {formatDate(store.createdAt)}</p>
+                        <p><span className="font-medium">{t('owner')}:</span> {store.owner.name || store.owner.email}</p>
+                        <p><span className="font-medium">{t('email')}:</span> {store.owner.email}</p>
+                        <p><span className="font-medium">{t('createdOn')}:</span> {formatDate(store.createdAt)}</p>
+                        {store.countries && store.countries.length > 0 && (
+                          <p className="flex items-center gap-1.5">
+                            <span className="font-medium">{t('countries')}:</span>
+                            <span className="text-xl flex items-center gap-1">
+                              {store.countries.map((c: string) => (
+                                <span key={c}>{getCountryFlag(c)}</span>
+                              ))}
+                            </span>
+                          </p>
+                        )}
                       </div>
 
                       {/* Stats */}
@@ -207,7 +224,7 @@ export default function SuperAdminStoresPage() {
                             <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Produits</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('products')}</p>
                             <p className="text-sm font-semibold text-slate-900 dark:text-white">{store._count.products}</p>
                           </div>
                         </div>
@@ -216,7 +233,7 @@ export default function SuperAdminStoresPage() {
                             <ShoppingCart className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           </div>
                           <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Commandes</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('orders')}</p>
                             <p className="text-sm font-semibold text-slate-900 dark:text-white">{store._count.orders}</p>
                           </div>
                         </div>
@@ -225,7 +242,7 @@ export default function SuperAdminStoresPage() {
                             <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                           </div>
                           <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Clients</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('clients')}</p>
                             <p className="text-sm font-semibold text-slate-900 dark:text-white">{store._count.customers}</p>
                           </div>
                         </div>
@@ -234,7 +251,7 @@ export default function SuperAdminStoresPage() {
                             <DollarSign className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                           </div>
                           <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Revenu</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('revenue')}</p>
                             <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatPrice(store.revenue)}</p>
                           </div>
                         </div>
@@ -249,31 +266,31 @@ export default function SuperAdminStoresPage() {
                         icon={<ExternalLink className="w-4 h-4" />}
                         onClick={() => handleImpersonate(store.id)}
                       >
-                        Accéder
+                        {t('access')}
                       </AdminButton>
                       <Link href={`/superadmin/stores/${store.id}`}>
-                        <AdminButton variant="outline" size="sm" icon={<Eye className="w-4 h-4" />}>Détails</AdminButton>
+                        <AdminButton variant="outline" size="sm" icon={<Eye className="w-4 h-4" />}>{t('details')}</AdminButton>
                       </Link>
 
                       {store.status === 'ACTIVE' && (
                         <AdminButton variant="ghost" size="sm" icon={<Ban className="w-4 h-4" />}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-500/10"
                           onClick={() => { setSelectedStore(store); setIsSuspendModalOpen(true) }}>
-                          Suspendre
+                          {t('suspend')}
                         </AdminButton>
                       )}
 
                       {store.status === 'SUSPENDED' && (
                         <AdminButton variant="success" size="sm" icon={<Power className="w-4 h-4" />}
                           onClick={() => handleStatusChange(store.id, 'ACTIVE')} loading={updateStoreStatus.isPending}>
-                          Réactiver
+                          {t('reactivate')}
                         </AdminButton>
                       )}
 
                       {store.status === 'PENDING' && (
                         <AdminButton variant="success" size="sm" icon={<CheckCircle className="w-4 h-4" />}
                           onClick={() => handleStatusChange(store.id, 'ACTIVE')} loading={updateStoreStatus.isPending}>
-                          Approuver
+                          {t('approve')}
                         </AdminButton>
                       )}
                     </div>
@@ -286,39 +303,39 @@ export default function SuperAdminStoresPage() {
       )}
 
       {/* Create Modal */}
-      <AdminModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Créer une boutique" description="Remplissez les informations pour créer une nouvelle boutique." size="md"
+      <AdminModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title={t('createStoreTitle')} description={t('createStoreDescription')} size="md"
         footer={
           <>
-            <AdminButton variant="outline" onClick={() => setIsCreateModalOpen(false)}>Annuler</AdminButton>
-            <AdminButton variant="primary" onClick={handleCreateStore} loading={createStore.isPending}>Créer</AdminButton>
+            <AdminButton variant="outline" onClick={() => setIsCreateModalOpen(false)}>{tCommon('cancel')}</AdminButton>
+            <AdminButton variant="primary" onClick={handleCreateStore} loading={createStore.isPending}>{tCommon('add')}</AdminButton>
           </>
         }>
         <form onSubmit={handleCreateStore} className="space-y-4">
-          <AdminInput label="Nom de la boutique" value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value, slug: generateSlug(e.target.value) })} placeholder="Ma Boutique" required />
-          <AdminInput label="Slug (URL)" value={createForm.slug} onChange={(e) => setCreateForm({ ...createForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} placeholder="ma-boutique" hint="foxcard.io/votre-slug" required />
-          <AdminTextarea label="Description" value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} placeholder="Description..." rows={3} />
+          <AdminInput label={t('storeName')} value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value, slug: generateSlug(e.target.value) })} placeholder={t('storeNamePlaceholder')} required />
+          <AdminInput label={t('slug')} value={createForm.slug} onChange={(e) => setCreateForm({ ...createForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} placeholder={t('slugPlaceholder')} hint={t('slugHint')} required />
+          <AdminTextarea label={tCommon('description')} value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} placeholder={t('descriptionPlaceholder')} rows={3} />
           <AdminSelect
-            label="Type de commerce"
+            label={t('commerceTypeLabel')}
             value={createForm.commerceType}
             onChange={(e) => setCreateForm({ ...createForm, commerceType: e.target.value as CommerceType })}
             options={commerceTypes.map((type) => ({
               value: type,
               label: `${commerceTypeConfigs[type].emoji} ${commerceTypeConfigs[type].name}`,
             }))}
-            hint="Définit les fonctionnalités disponibles pour cette boutique"
+            hint={t('commerceTypeHint')}
           />
           {createForm.commerceType !== 'GENERAL' && (
             <div className="p-3 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
               <p className="text-sm text-primary-700 dark:text-primary-300">{commerceTypeConfigs[createForm.commerceType].description}</p>
               <div className="flex flex-wrap gap-1 mt-2">
                 {commerceTypeConfigs[createForm.commerceType].features.hasPhysicalProducts && (
-                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">Physique</span>
+                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">{t('physical')}</span>
                 )}
                 {commerceTypeConfigs[createForm.commerceType].features.hasDigitalProducts && (
-                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded">Digital</span>
+                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded">{t('digital')}</span>
                 )}
                 {commerceTypeConfigs[createForm.commerceType].features.hasBookings && (
-                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 text-xs rounded">Réservations</span>
+                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 text-xs rounded">{t('bookings')}</span>
                 )}
                 {commerceTypeConfigs[createForm.commerceType].features.requiresAgeVerification && (
                   <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs rounded">18+</span>
@@ -326,28 +343,32 @@ export default function SuperAdminStoresPage() {
               </div>
             </div>
           )}
-          <AdminInput label="Email du propriétaire" type="email" value={createForm.ownerEmail} onChange={(e) => setCreateForm({ ...createForm, ownerEmail: e.target.value })} placeholder="email@exemple.com" hint="L'utilisateur doit avoir un compte" required />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('activityCountries')}</label>
+            <CountryMultiSelect value={createForm.countries} onChange={(countries) => setCreateForm({ ...createForm, countries })} placeholder={t('selectCountries')} />
+          </div>
+          <AdminInput label={t('ownerEmail')} type="email" value={createForm.ownerEmail} onChange={(e) => setCreateForm({ ...createForm, ownerEmail: e.target.value })} placeholder={t('emailPlaceholder')} hint={t('userMustHaveAccount')} required />
           {createStore.error && <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400">{createStore.error.message}</div>}
         </form>
       </AdminModal>
 
       {/* Suspend Modal */}
-      <AdminModal isOpen={isSuspendModalOpen} onClose={() => setIsSuspendModalOpen(false)} title="Suspendre la boutique" size="md"
+      <AdminModal isOpen={isSuspendModalOpen} onClose={() => setIsSuspendModalOpen(false)} title={t('suspendStoreTitle')} size="md"
         footer={
           <>
-            <AdminButton variant="outline" onClick={() => setIsSuspendModalOpen(false)}>Annuler</AdminButton>
-            <AdminButton variant="danger" onClick={() => selectedStore && handleStatusChange(selectedStore.id, 'SUSPENDED', suspendReason)} loading={updateStoreStatus.isPending} disabled={!suspendReason.trim()}>Suspendre</AdminButton>
+            <AdminButton variant="outline" onClick={() => setIsSuspendModalOpen(false)}>{tCommon('cancel')}</AdminButton>
+            <AdminButton variant="danger" onClick={() => selectedStore && handleStatusChange(selectedStore.id, 'SUSPENDED', suspendReason)} loading={updateStoreStatus.isPending} disabled={!suspendReason.trim()}>{t('suspend')}</AdminButton>
           </>
         }>
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Attention</p>
-              <p className="text-sm text-amber-700 dark:text-amber-400">La suspension empêchera le marchand d'accéder à son espace et bloquera toutes les opérations.</p>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('warning')}</p>
+              <p className="text-sm text-amber-700 dark:text-amber-400">{t('suspendWarning')}</p>
             </div>
           </div>
-          <AdminTextarea label="Raison de la suspension" value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} placeholder="Expliquez la raison..." rows={3} required />
+          <AdminTextarea label={t('suspensionReasonLabel')} value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} placeholder={t('suspensionReasonPlaceholder')} rows={3} required />
         </div>
       </AdminModal>
     </div>

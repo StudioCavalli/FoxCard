@@ -17,7 +17,10 @@ const nextAuthHandler = NextAuth({
   },
 })
 
-async function handler(req: Request) {
+async function handler(
+  req: Request,
+  context: { params: { nextauth: string[] } }
+) {
   const { ip, userAgent } = getClientInfo(req)
   const url = new URL(req.url)
 
@@ -26,7 +29,7 @@ async function handler(req: Request) {
     // Clone the request to read body without consuming it
     const clonedReq = req.clone()
 
-    const response = await nextAuthHandler(req)
+    const response = await nextAuthHandler(req, context)
 
     // Check if login succeeded or failed by inspecting the response
     const location = response.headers.get('location') || ''
@@ -96,7 +99,7 @@ async function handler(req: Request) {
     const { getServerSession } = await import('next-auth/next')
     const session = await getServerSession(authOptions)
 
-    const response = await nextAuthHandler(req)
+    const response = await nextAuthHandler(req, context)
 
     if (session?.user?.id) {
       await prisma.platformAuditLog.create({
@@ -116,7 +119,7 @@ async function handler(req: Request) {
   }
 
   // All other auth requests pass through normally
-  return nextAuthHandler(req)
+  return nextAuthHandler(req, context)
 }
 
 export { handler as GET, handler as POST }

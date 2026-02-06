@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { AdminCard, AdminCardHeader } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminBadge } from '@/components/admin/ui/AdminBadge'
@@ -28,14 +29,16 @@ import {
 
 type AppealStatus = 'PENDING' | 'REVIEWING' | 'APPROVED' | 'REJECTED' | 'all'
 
-const statusConfig: Record<string, { label: string; variant: 'warning' | 'info' | 'success' | 'danger' | 'default'; icon: typeof Clock }> = {
-  PENDING: { label: 'En attente', variant: 'warning', icon: Clock },
-  REVIEWING: { label: 'En examen', variant: 'info', icon: Eye },
-  APPROVED: { label: 'Approuve', variant: 'success', icon: CheckCircle },
-  REJECTED: { label: 'Rejete', variant: 'danger', icon: XCircle },
-}
+const getStatusConfig = (t: any): Record<string, { label: string; variant: 'warning' | 'info' | 'success' | 'danger' | 'default'; icon: typeof Clock }> => ({
+  PENDING: { label: t('appealsPage.pending'), variant: 'warning', icon: Clock },
+  REVIEWING: { label: t('appealsPage.reviewing'), variant: 'info', icon: Eye },
+  APPROVED: { label: t('appealsPage.approved'), variant: 'success', icon: CheckCircle },
+  REJECTED: { label: t('appealsPage.rejected'), variant: 'danger', icon: XCircle },
+})
 
 export default function SuperAdminAppealsPage() {
+  const t = useTranslations('superadmin')
+  const statusConfig = getStatusConfig(t)
   const [statusFilter, setStatusFilter] = useState<AppealStatus>('all')
   const [selectedAppeal, setSelectedAppeal] = useState<any>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -86,11 +89,11 @@ export default function SuperAdminAppealsPage() {
   }
 
   const tabItems = [
-    { value: 'all', label: 'Tous', count: statusCounts.pending + statusCounts.reviewing + statusCounts.approved + statusCounts.rejected },
-    { value: 'PENDING', label: 'En attente', count: statusCounts.pending, icon: <Clock className="w-4 h-4" /> },
-    { value: 'REVIEWING', label: 'En examen', count: statusCounts.reviewing, icon: <Eye className="w-4 h-4" /> },
-    { value: 'APPROVED', label: 'Approuves', count: statusCounts.approved, icon: <CheckCircle className="w-4 h-4" /> },
-    { value: 'REJECTED', label: 'Rejetes', count: statusCounts.rejected, icon: <XCircle className="w-4 h-4" /> },
+    { value: 'all', label: t('appealsPage.all'), count: statusCounts.pending + statusCounts.reviewing + statusCounts.approved + statusCounts.rejected },
+    { value: 'PENDING', label: t('appealsPage.pending'), count: statusCounts.pending, icon: <Clock className="w-4 h-4" /> },
+    { value: 'REVIEWING', label: t('appealsPage.reviewing'), count: statusCounts.reviewing, icon: <Eye className="w-4 h-4" /> },
+    { value: 'APPROVED', label: t('appealsPage.approved'), count: statusCounts.approved, icon: <CheckCircle className="w-4 h-4" /> },
+    { value: 'REJECTED', label: t('appealsPage.rejected'), count: statusCounts.rejected, icon: <XCircle className="w-4 h-4" /> },
   ]
 
   return (
@@ -98,11 +101,11 @@ export default function SuperAdminAppealsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Appels de Suspension</h1>
-          <p className="text-slate-500 dark:text-slate-400">Gerez les demandes de reactivation des boutiques suspendues</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('appealsPage.title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('appealsPage.subtitle')}</p>
         </div>
         <AdminButton variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={() => refetch()}>
-          Actualiser
+          {t('appealsPage.refresh')}
         </AdminButton>
       </div>
 
@@ -125,8 +128,8 @@ export default function SuperAdminAppealsPage() {
       {!isLoading && appeals.length === 0 && (
         <AdminEmptyState
           icon={Gavel}
-          title="Aucun appel trouve"
-          description={statusFilter === 'all' ? "Il n'y a aucun appel de suspension pour le moment." : "Aucun appel avec ce statut."}
+          title={t('appealsPage.noAppealsFound')}
+          description={statusFilter === 'all' ? t('appealsPage.noAppealsNow') : t('appealsPage.noAppealsStatus')}
         />
       )}
 
@@ -155,7 +158,7 @@ export default function SuperAdminAppealsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{appeal.store?.name || 'Boutique inconnue'}</h3>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{appeal.store?.name || t('appealsPage.unknownStore')}</h3>
                         <AdminBadge variant={config.variant} icon={StatusIcon}>{config.label}</AdminBadge>
                       </div>
 
@@ -171,7 +174,7 @@ export default function SuperAdminAppealsPage() {
                       <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                         <div className="flex items-center gap-1.5">
                           <User className="w-4 h-4" />
-                          <span>{appeal.user?.name || appeal.user?.email || 'Utilisateur'}</span>
+                          <span>{appeal.user?.name || appeal.user?.email || t('appealsPage.user')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="w-4 h-4" />
@@ -180,7 +183,7 @@ export default function SuperAdminAppealsPage() {
                         {appeal.reviewedAt && (
                           <div className="flex items-center gap-1.5">
                             <CheckCircle className="w-4 h-4" />
-                            <span>Examine le {formatDate(appeal.reviewedAt)}</span>
+                            <span>{t('appealsPage.reviewedOn')} {formatDate(appeal.reviewedAt)}</span>
                           </div>
                         )}
                       </div>
@@ -188,7 +191,7 @@ export default function SuperAdminAppealsPage() {
                       {/* Admin Response (if any) */}
                       {appeal.adminResponse && (
                         <div className="mt-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
-                          <p className="text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">Reponse admin</p>
+                          <p className="text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">{t('appealsPage.adminResponse')}</p>
                           <p className="text-sm text-primary-600 dark:text-primary-400">{appeal.adminResponse}</p>
                         </div>
                       )}
@@ -197,21 +200,21 @@ export default function SuperAdminAppealsPage() {
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
                       <AdminButton variant="outline" size="sm" icon={<Eye className="w-4 h-4" />} onClick={() => openDetailModal(appeal)}>
-                        Details
+                        {t('appealsPage.details')}
                       </AdminButton>
 
                       {(appeal.status === 'PENDING' || appeal.status === 'REVIEWING') && (
                         <>
                           {appeal.status === 'PENDING' && (
                             <AdminButton variant="secondary" size="sm" icon={<Search className="w-4 h-4" />} onClick={() => openResponseModal(appeal, 'REVIEWING')}>
-                              Examiner
+                              {t('appealsPage.review')}
                             </AdminButton>
                           )}
                           <AdminButton variant="success" size="sm" icon={<CheckCircle className="w-4 h-4" />} onClick={() => openResponseModal(appeal, 'APPROVED')}>
-                            Approuver
+                            {t('appealsPage.approve')}
                           </AdminButton>
                           <AdminButton variant="danger" size="sm" icon={<XCircle className="w-4 h-4" />} onClick={() => openResponseModal(appeal, 'REJECTED')}>
-                            Rejeter
+                            {t('appealsPage.reject')}
                           </AdminButton>
                         </>
                       )}
@@ -228,7 +231,7 @@ export default function SuperAdminAppealsPage() {
       <AdminModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        title="Details de l'appel"
+        title={t('appealsPage.appealDetails')}
         size="lg"
       >
         {selectedAppeal && (
@@ -254,7 +257,7 @@ export default function SuperAdminAppealsPage() {
             {/* Suspension Reason */}
             {selectedAppeal.store?.suspendedReason && (
               <div>
-                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Raison de la suspension</h4>
+                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('appealsPage.suspensionReason')}</h4>
                 <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
@@ -266,7 +269,7 @@ export default function SuperAdminAppealsPage() {
 
             {/* Appeal Message */}
             <div>
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message d'appel</h4>
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('appealsPage.appealMessage')}</h4>
               <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
                 <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedAppeal.message}</p>
               </div>
@@ -274,14 +277,14 @@ export default function SuperAdminAppealsPage() {
 
             {/* Timeline */}
             <div>
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Chronologie</h4>
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('appealsPage.timeline')}</h4>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
                     <Gavel className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">Appel soumis</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t('appealsPage.appealSubmitted')}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{formatDate(selectedAppeal.createdAt)}</p>
                   </div>
                 </div>
@@ -298,7 +301,7 @@ export default function SuperAdminAppealsPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {selectedAppeal.status === 'APPROVED' ? 'Approuve' : selectedAppeal.status === 'REJECTED' ? 'Rejete' : 'En examen'}
+                        {selectedAppeal.status === 'APPROVED' ? t('appealsPage.approvedStatus') : selectedAppeal.status === 'REJECTED' ? t('appealsPage.rejectedStatus') : t('appealsPage.inReview')}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">{formatDate(selectedAppeal.reviewedAt)}</p>
                     </div>
@@ -310,7 +313,7 @@ export default function SuperAdminAppealsPage() {
             {/* Admin Response */}
             {selectedAppeal.adminResponse && (
               <div>
-                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Reponse de l'administrateur</h4>
+                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('appealsPage.adminResponseLabel')}</h4>
                 <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20">
                   <p className="text-sm text-primary-700 dark:text-primary-400 whitespace-pre-wrap">{selectedAppeal.adminResponse}</p>
                 </div>
@@ -325,20 +328,20 @@ export default function SuperAdminAppealsPage() {
         isOpen={isResponseModalOpen}
         onClose={() => setIsResponseModalOpen(false)}
         title={
-          responseAction === 'APPROVED' ? "Approuver l'appel" :
-          responseAction === 'REJECTED' ? "Rejeter l'appel" :
-          "Mettre en examen"
+          responseAction === 'APPROVED' ? t('appealsPage.approveAppeal') :
+          responseAction === 'REJECTED' ? t('appealsPage.rejectAppeal') :
+          t('appealsPage.setReviewing')
         }
         size="md"
         footer={
           <>
-            <AdminButton variant="outline" onClick={() => setIsResponseModalOpen(false)}>Annuler</AdminButton>
+            <AdminButton variant="outline" onClick={() => setIsResponseModalOpen(false)}>{t('appealsPage.cancel')}</AdminButton>
             <AdminButton
               variant={responseAction === 'APPROVED' ? 'success' : responseAction === 'REJECTED' ? 'danger' : 'primary'}
               onClick={handleSubmitResponse}
               loading={updateAppealStatus.isPending}
             >
-              {responseAction === 'APPROVED' ? 'Approuver' : responseAction === 'REJECTED' ? 'Rejeter' : 'Confirmer'}
+              {responseAction === 'APPROVED' ? t('appealsPage.approve') : responseAction === 'REJECTED' ? t('appealsPage.reject') : t('appealsPage.confirm')}
             </AdminButton>
           </>
         }
@@ -349,8 +352,8 @@ export default function SuperAdminAppealsPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Approbation de l'appel</p>
-                  <p className="text-sm text-emerald-700 dark:text-emerald-400">Le marchand sera notifie et pourra reprendre son activite.</p>
+                  <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">{t('appealsPage.approvalNotice')}</p>
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400">{t('appealsPage.approvalDesc')}</p>
                 </div>
               </div>
             </div>
@@ -361,18 +364,18 @@ export default function SuperAdminAppealsPage() {
               <div className="flex items-start gap-3">
                 <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-red-800 dark:text-red-300">Rejet de l'appel</p>
-                  <p className="text-sm text-red-700 dark:text-red-400">La suspension sera maintenue. Le marchand peut soumettre un nouvel appel.</p>
+                  <p className="text-sm font-medium text-red-800 dark:text-red-300">{t('appealsPage.rejectionNotice')}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">{t('appealsPage.rejectionDesc')}</p>
                 </div>
               </div>
             </div>
           )}
 
           <AdminTextarea
-            label="Reponse (optionnel)"
+            label={t('appealsPage.responseOptional')}
             value={adminResponse}
             onChange={(e) => setAdminResponse(e.target.value)}
-            placeholder="Expliquez votre decision..."
+            placeholder={t('appealsPage.responsePlaceholder')}
             rows={4}
           />
 
@@ -386,7 +389,7 @@ export default function SuperAdminAppealsPage() {
                 className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
               />
               <label htmlFor="reactivate" className="text-sm text-slate-700 dark:text-slate-300">
-                Reactiver la boutique immediatement
+                {t('appealsPage.reactivateImmediately')}
               </label>
             </div>
           )}

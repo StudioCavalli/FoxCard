@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/client'
 import {
   AdminCard,
@@ -36,22 +37,25 @@ import {
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'WAITING_CUSTOMER' | 'RESOLVED' | 'CLOSED'
 type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
 
-const statusConfig: Record<TicketStatus, { label: string; variant: 'warning' | 'info' | 'default' | 'success' | 'danger'; icon: any }> = {
-  OPEN: { label: 'Ouvert', variant: 'warning', icon: AlertCircle },
-  IN_PROGRESS: { label: 'En cours', variant: 'info', icon: Clock },
-  WAITING_CUSTOMER: { label: 'En attente client', variant: 'default', icon: Hourglass },
-  RESOLVED: { label: 'Résolu', variant: 'success', icon: CheckCircle },
-  CLOSED: { label: 'Fermé', variant: 'danger', icon: XCircle },
-}
+const getStatusConfig = (t: any): Record<TicketStatus, { label: string; variant: 'warning' | 'info' | 'default' | 'success' | 'danger'; icon: any }> => ({
+  OPEN: { label: t('supportPage.status.open'), variant: 'warning', icon: AlertCircle },
+  IN_PROGRESS: { label: t('supportPage.status.inProgress'), variant: 'info', icon: Clock },
+  WAITING_CUSTOMER: { label: t('supportPage.status.waitingCustomer'), variant: 'default', icon: Hourglass },
+  RESOLVED: { label: t('supportPage.status.resolved'), variant: 'success', icon: CheckCircle },
+  CLOSED: { label: t('supportPage.status.closed'), variant: 'danger', icon: XCircle },
+})
 
-const priorityConfig: Record<TicketPriority, { label: string; variant: 'default' | 'info' | 'warning' | 'danger' }> = {
-  LOW: { label: 'Basse', variant: 'default' },
-  MEDIUM: { label: 'Moyenne', variant: 'info' },
-  HIGH: { label: 'Haute', variant: 'warning' },
-  URGENT: { label: 'Urgente', variant: 'danger' },
-}
+const getPriorityConfig = (t: any): Record<TicketPriority, { label: string; variant: 'default' | 'info' | 'warning' | 'danger' }> => ({
+  LOW: { label: t('supportPage.low'), variant: 'default' },
+  MEDIUM: { label: t('supportPage.medium'), variant: 'info' },
+  HIGH: { label: t('supportPage.high'), variant: 'warning' },
+  URGENT: { label: t('supportPage.urgentPriority'), variant: 'danger' },
+})
 
 export default function SuperAdminSupportPage() {
+  const t = useTranslations('superadmin')
+  const statusConfig = getStatusConfig(t)
+  const priorityConfig = getPriorityConfig(t)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
@@ -124,27 +128,27 @@ export default function SuperAdminSupportPage() {
   }
 
   const statusTabs = [
-    { value: 'all', label: 'Tous', count: ticketsData?.total || 0 },
-    { value: 'OPEN', label: 'Ouverts', count: ticketsData?.statusCounts?.open || 0, icon: <AlertCircle className="w-4 h-4" /> },
-    { value: 'IN_PROGRESS', label: 'En cours', count: ticketsData?.statusCounts?.inProgress || 0, icon: <Clock className="w-4 h-4" /> },
-    { value: 'WAITING_CUSTOMER', label: 'En attente', count: ticketsData?.statusCounts?.waitingCustomer || 0, icon: <Hourglass className="w-4 h-4" /> },
-    { value: 'RESOLVED', label: 'Résolus', count: ticketsData?.statusCounts?.resolved || 0, icon: <CheckCircle className="w-4 h-4" /> },
+    { value: 'all', label: t('supportPage.all'), count: ticketsData?.total || 0 },
+    { value: 'OPEN', label: t('supportPage.opened'), count: ticketsData?.statusCounts?.open || 0, icon: <AlertCircle className="w-4 h-4" /> },
+    { value: 'IN_PROGRESS', label: t('supportPage.inProgressStatus'), count: ticketsData?.statusCounts?.inProgress || 0, icon: <Clock className="w-4 h-4" /> },
+    { value: 'WAITING_CUSTOMER', label: t('supportPage.waitingCustomer'), count: ticketsData?.statusCounts?.waitingCustomer || 0, icon: <Hourglass className="w-4 h-4" /> },
+    { value: 'RESOLVED', label: t('supportPage.resolvedStatus'), count: ticketsData?.statusCounts?.resolved || 0, icon: <CheckCircle className="w-4 h-4" /> },
   ]
 
   const priorityOptions = [
-    { value: 'all', label: 'Toutes priorités' },
-    { value: 'LOW', label: 'Basse' },
-    { value: 'MEDIUM', label: 'Moyenne' },
-    { value: 'HIGH', label: 'Haute' },
-    { value: 'URGENT', label: 'Urgente' },
+    { value: 'all', label: t('supportPage.allPriorities') },
+    { value: 'LOW', label: t('supportPage.low') },
+    { value: 'MEDIUM', label: t('supportPage.medium') },
+    { value: 'HIGH', label: t('supportPage.high') },
+    { value: 'URGENT', label: t('supportPage.urgentPriority') },
   ]
 
   const statusOptions = [
-    { value: 'OPEN', label: 'Ouvert' },
-    { value: 'IN_PROGRESS', label: 'En cours' },
-    { value: 'WAITING_CUSTOMER', label: 'En attente client' },
-    { value: 'RESOLVED', label: 'Résolu' },
-    { value: 'CLOSED', label: 'Fermé' },
+    { value: 'OPEN', label: t('supportPage.status.open') },
+    { value: 'IN_PROGRESS', label: t('supportPage.status.inProgress') },
+    { value: 'WAITING_CUSTOMER', label: t('supportPage.status.waitingCustomer') },
+    { value: 'RESOLVED', label: t('supportPage.status.resolved') },
+    { value: 'CLOSED', label: t('supportPage.status.closed') },
   ]
 
   // Detail view
@@ -154,7 +158,7 @@ export default function SuperAdminSupportPage() {
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement du ticket...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('supportPage.loadingTicket')}</p>
           </div>
         </div>
       )
@@ -172,7 +176,7 @@ export default function SuperAdminSupportPage() {
           className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Retour aux tickets</span>
+          <span className="font-medium">{t('supportPage.backToTickets')}</span>
         </button>
 
         {/* Ticket Header */}
@@ -238,7 +242,7 @@ export default function SuperAdminSupportPage() {
                   <p className="text-sm font-medium text-slate-900 dark:text-white">
                     {selectedTicket.store.name}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Boutique</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('supportPage.store')}</p>
                 </div>
               </div>
             )}
@@ -250,7 +254,7 @@ export default function SuperAdminSupportPage() {
                 <p className="text-sm font-medium text-slate-900 dark:text-white">
                   {selectedTicket.category}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Catégorie</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t('supportPage.category')}</p>
               </div>
             </div>
           </div>
@@ -275,9 +279,9 @@ export default function SuperAdminSupportPage() {
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Conversation</h2>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('supportPage.conversation')}</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {selectedTicket.messages.length} message{selectedTicket.messages.length !== 1 ? 's' : ''}
+                  {selectedTicket.messages.length} {selectedTicket.messages.length === 1 ? t('supportPage.messages') : t('supportPage.messagesPlural')}
                 </p>
               </div>
             </div>
@@ -287,7 +291,7 @@ export default function SuperAdminSupportPage() {
             {selectedTicket.messages.length === 0 ? (
               <div className="text-center py-12">
                 <MessageSquare className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-500 dark:text-slate-400">Aucun message dans ce ticket</p>
+                <p className="text-slate-500 dark:text-slate-400">{t('supportPage.noMessages')}</p>
               </div>
             ) : (
               selectedTicket.messages.map((message: any) => (
@@ -332,7 +336,7 @@ export default function SuperAdminSupportPage() {
                 <AdminInput
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Votre réponse..."
+                  placeholder={t('supportPage.yourReply')}
                   className="flex-1"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -349,7 +353,7 @@ export default function SuperAdminSupportPage() {
                   loading={addMessage.isPending}
                   icon={<Send className="w-4 h-4" />}
                 >
-                  Envoyer
+                  {t('supportPage.send')}
                 </AdminButton>
               </div>
               {addMessage.error && (
@@ -369,10 +373,10 @@ export default function SuperAdminSupportPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Support & Tickets
+            {t('supportPage.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Gérez les demandes de support des marchands
+            {t('supportPage.subtitle')}
           </p>
         </div>
         <AdminButton
@@ -380,42 +384,42 @@ export default function SuperAdminSupportPage() {
           icon={<RefreshCw className="w-4 h-4" />}
           onClick={() => refetchTickets()}
         >
-          Actualiser
+          {t('supportPage.refresh')}
         </AdminButton>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminStatCard
-          title="Ouverts"
+          title={t('supportPage.open')}
           value={ticketsData?.statusCounts?.open || 0}
           icon={AlertCircle}
           variant="amber"
           onClick={() => setStatusFilter('OPEN')}
         />
         <AdminStatCard
-          title="En cours"
+          title={t('supportPage.inProgress')}
           value={ticketsData?.statusCounts?.inProgress || 0}
           icon={Clock}
           variant="blue"
           onClick={() => setStatusFilter('IN_PROGRESS')}
         />
         <AdminStatCard
-          title="En attente"
+          title={t('supportPage.waiting')}
           value={ticketsData?.statusCounts?.waitingCustomer || 0}
           icon={Hourglass}
           variant="slate"
           onClick={() => setStatusFilter('WAITING_CUSTOMER')}
         />
         <AdminStatCard
-          title="Résolus"
+          title={t('supportPage.resolved')}
           value={ticketsData?.statusCounts?.resolved || 0}
           icon={CheckCircle}
           variant="emerald"
           onClick={() => setStatusFilter('RESOLVED')}
         />
         <AdminStatCard
-          title="Urgents"
+          title={t('supportPage.urgent')}
           value={stats?.urgent || 0}
           icon={AlertTriangle}
           variant="rose"
@@ -447,7 +451,7 @@ export default function SuperAdminSupportPage() {
                   setSearch(e.target.value)
                   setPage(0)
                 }}
-                placeholder="Rechercher par sujet, numéro ou email..."
+                placeholder={t('supportPage.searchPlaceholder')}
               />
             </div>
             <div className="sm:w-48">
@@ -469,7 +473,7 @@ export default function SuperAdminSupportPage() {
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des tickets...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('supportPage.loadingTickets')}</p>
           </div>
         </div>
       )}
@@ -478,10 +482,10 @@ export default function SuperAdminSupportPage() {
       {!isLoadingTickets && (!ticketsData?.tickets || ticketsData.tickets.length === 0) && (
         <AdminEmptyState
           icon={MessageSquare}
-          title="Aucun ticket trouvé"
+          title={t('supportPage.noTicketsFound')}
           description={search || statusFilter !== 'all' || priorityFilter !== 'all'
-            ? "Aucun ticket ne correspond à vos critères de recherche"
-            : "Les tickets de support apparaîtront ici"
+            ? t('supportPage.noMatchCriteria')
+            : t('supportPage.ticketsWillAppear')
           }
           action={
             (search || statusFilter !== 'all' || priorityFilter !== 'all') ? (
@@ -493,7 +497,7 @@ export default function SuperAdminSupportPage() {
                   setPriorityFilter('all')
                 }}
               >
-                Réinitialiser les filtres
+                {t('supportPage.resetFilters')}
               </AdminButton>
             ) : undefined
           }
@@ -544,14 +548,14 @@ export default function SuperAdminSupportPage() {
                         </span>
                         <span className="flex items-center gap-1.5">
                           <MessageSquare className="w-3.5 h-3.5" />
-                          {ticket.messagesCount} message{ticket.messagesCount !== 1 ? 's' : ''}
+                          {ticket.messagesCount} {ticket.messagesCount === 1 ? t('supportPage.messages') : t('supportPage.messagesPlural')}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4 flex-shrink-0">
                       <div className="text-right hidden sm:block">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Mis à jour</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{t('supportPage.updated')}</p>
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           {formatDate(ticket.updatedAt)}
                         </p>
@@ -568,7 +572,7 @@ export default function SuperAdminSupportPage() {
           {ticketsData.total > limit && (
             <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Affichage {page * limit + 1} - {Math.min((page + 1) * limit, ticketsData.total)} sur {ticketsData.total}
+                {t('supportPage.displaying', { start: page * limit + 1, end: Math.min((page + 1) * limit, ticketsData.total), total: ticketsData.total })}
               </p>
               <div className="flex gap-2">
                 <AdminButton
@@ -577,7 +581,7 @@ export default function SuperAdminSupportPage() {
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
                 >
-                  Précédent
+                  {t('supportPage.previous')}
                 </AdminButton>
                 <AdminButton
                   variant="outline"
@@ -585,7 +589,7 @@ export default function SuperAdminSupportPage() {
                   onClick={() => setPage((p) => p + 1)}
                   disabled={(page + 1) * limit >= ticketsData.total}
                 >
-                  Suivant
+                  {t('supportPage.next')}
                 </AdminButton>
               </div>
             </div>

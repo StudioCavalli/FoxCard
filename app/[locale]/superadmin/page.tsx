@@ -18,8 +18,10 @@ import {
   BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function SuperAdminDashboard() {
+  const t = useTranslations('superadmin')
   const { data: stats, isLoading } = trpc.superadmin.getPlatformStats.useQuery()
 
   if (isLoading) {
@@ -43,17 +45,17 @@ export default function SuperAdminDashboard() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Activity className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-          <p className="text-slate-600 dark:text-slate-400">Erreur de chargement</p>
+          <p className="text-slate-600 dark:text-slate-400">{t('loadingError')}</p>
         </div>
       </div>
     )
   }
 
   const statCards = [
-    { title: 'Boutiques', value: stats.totalStores, icon: Store, variant: 'violet' as const, href: '/superadmin/stores' },
-    { title: 'Utilisateurs', value: stats.totalUsers, icon: Users, variant: 'blue' as const, href: '/superadmin/users' },
-    { title: 'Produits', value: stats.totalProducts, icon: Package, variant: 'emerald' as const },
-    { title: 'Commandes', value: stats.totalOrders, icon: ShoppingCart, variant: 'amber' as const },
+    { title: t('stores'), value: stats.totalStores, icon: Store, variant: 'violet' as const, href: '/superadmin/stores' },
+    { title: t('users'), value: stats.totalUsers, icon: Users, variant: 'blue' as const, href: '/superadmin/users' },
+    { title: t('products'), value: stats.totalProducts, icon: Package, variant: 'emerald' as const },
+    { title: t('orders'), value: stats.totalOrders, icon: ShoppingCart, variant: 'amber' as const },
   ]
 
   const recentMonths = Object.entries(stats.monthlyStats).sort(([a], [b]) => a.localeCompare(b)).slice(-6)
@@ -69,9 +71,9 @@ export default function SuperAdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AdminCard className="lg:col-span-2" padding="lg">
-          <AdminCardHeader title="Revenu Total" description="Performance financière" action={
+          <AdminCardHeader title={t('totalRevenueTitle')} description={t('financialPerformance')} action={
             <Link href="/superadmin/analytics">
-              <AdminButton variant="ghost" size="sm" icon={<ArrowRight className="w-4 h-4" />} iconPosition="right">Analytics</AdminButton>
+              <AdminButton variant="ghost" size="sm" icon={<ArrowRight className="w-4 h-4" />} iconPosition="right">{t('analytics')}</AdminButton>
             </Link>
           } />
           <div className="flex items-baseline gap-4 mb-8">
@@ -94,7 +96,7 @@ export default function SuperAdminDashboard() {
                       <span className="text-xs font-semibold text-white whitespace-nowrap">{formatPrice(data.revenue)}</span>
                     </div>
                   </div>
-                  <span className="w-24 text-sm text-slate-500 dark:text-slate-400 text-right">{data.orders} cmd</span>
+                  <span className="w-24 text-sm text-slate-500 dark:text-slate-400 text-right">{data.orders} {t('ordersShort')}</span>
                 </div>
               )
             })}
@@ -102,12 +104,12 @@ export default function SuperAdminDashboard() {
         </AdminCard>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Actions Rapides</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t('quickActions')}</h3>
           {[
-            { href: '/superadmin/stores', icon: Store, title: 'Boutiques', desc: stats.totalStores + ' boutiques', gradient: 'from-primary-500 to-primary-600', shadow: 'violet' },
-            { href: '/superadmin/users', icon: Users, title: 'Utilisateurs', desc: stats.totalUsers + ' utilisateurs', gradient: 'from-blue-500 to-cyan-600', shadow: 'blue' },
-            { href: '/superadmin/settings', icon: Settings, title: 'Paramètres', desc: 'Configurer', gradient: 'from-slate-500 to-slate-600', shadow: 'slate' },
-            { href: '/superadmin/analytics', icon: BarChart3, title: 'Analytics', desc: 'Rapports', gradient: 'from-emerald-500 to-green-600', shadow: 'emerald' },
+            { href: '/superadmin/stores', icon: Store, title: t('stores'), desc: t('storesCount', { count: stats.totalStores }), gradient: 'from-primary-500 to-primary-600', shadow: 'violet' },
+            { href: '/superadmin/users', icon: Users, title: t('users'), desc: t('usersCount', { count: stats.totalUsers }), gradient: 'from-blue-500 to-cyan-600', shadow: 'blue' },
+            { href: '/superadmin/settings', icon: Settings, title: t('settings'), desc: t('configure'), gradient: 'from-slate-500 to-slate-600', shadow: 'slate' },
+            { href: '/superadmin/analytics', icon: BarChart3, title: t('analytics'), desc: t('reports'), gradient: 'from-emerald-500 to-green-600', shadow: 'emerald' },
           ].map((item) => (
             <Link key={item.href} href={item.href} className="block group">
               <AdminCard hover padding="md" className="flex items-center gap-4">
@@ -126,14 +128,19 @@ export default function SuperAdminDashboard() {
       </div>
 
       <AdminCard padding="lg">
-        <AdminCardHeader title="Santé de la Plateforme" description="État des services" />
+        <AdminCardHeader title={t('platformHealth')} description={t('servicesStatus')} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {['API', 'Base de données', 'Paiements', 'Stockage'].map((name) => (
-            <div key={name} className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+          {[
+            { key: 'api', label: t('api') },
+            { key: 'database', label: t('database') },
+            { key: 'payments', label: t('payments') },
+            { key: 'storage', label: t('storage') }
+          ].map((service) => (
+            <div key={service.key} className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
               <div>
-                <p className="font-medium text-slate-900 dark:text-white">{name}</p>
-                <p className="text-sm text-emerald-600 dark:text-emerald-400">Opérationnel</p>
+                <p className="font-medium text-slate-900 dark:text-white">{service.label}</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">{t('operational')}</p>
               </div>
             </div>
           ))}

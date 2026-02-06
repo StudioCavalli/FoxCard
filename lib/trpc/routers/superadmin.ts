@@ -384,6 +384,7 @@ export const superadminRouter = router({
           'TOYS', 'AUTOMOTIVE', 'BOOKS', 'PETS', 'DIGITAL', 'SERVICES', 'SEASONAL',
           'RESTAURANT', 'HOTEL', 'TRAVEL', 'RECREATION'
         ]).default('GENERAL'),
+        countries: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -420,6 +421,7 @@ export const superadminRouter = router({
           ownerId: owner.id,
           status: input.status,
           commerceType: input.commerceType,
+          countries: input.countries || [],
         },
         include: {
           owner: {
@@ -459,6 +461,7 @@ export const superadminRouter = router({
         slug: z.string().min(2).regex(/^[a-z0-9-]+$/).optional(),
         description: z.string().optional(),
         domain: z.string().optional(),
+        countries: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

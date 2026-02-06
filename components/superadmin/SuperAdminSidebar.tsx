@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import {
   LayoutDashboard,
   Store,
@@ -24,39 +25,32 @@ import {
   ShoppingBag,
 } from 'lucide-react'
 
-const navigation = [
-  { name: 'Dashboard', href: '/superadmin', icon: LayoutDashboard },
-  { name: 'Boutiques', href: '/superadmin/stores', icon: Store },
-  { name: 'Types Commerce', href: '/superadmin/commerce-types', icon: ShoppingBag },
-  { name: 'Appels', href: '/superadmin/appeals', icon: Gavel },
-  { name: 'Utilisateurs', href: '/superadmin/users', icon: Users },
-  { name: 'Commandes', href: '/superadmin/orders', icon: ShoppingCart },
-  { name: 'Analytics', href: '/superadmin/analytics', icon: BarChart3 },
-  { name: 'Activite', href: '/superadmin/activity', icon: Activity },
-  { name: 'Roles', href: '/superadmin/roles', icon: UserCog },
-  { name: 'Support', href: '/superadmin/support', icon: MessageSquare },
-  { name: 'Parametres', href: '/superadmin/settings', icon: Settings },
+type TranslationFunction = (key: string) => string
+
+const getNavigation = (t: TranslationFunction) => [
+  { name: t('dashboard'), href: '/superadmin', icon: LayoutDashboard },
+  { name: t('stores'), href: '/superadmin/stores', icon: Store },
+  { name: t('commerceTypes'), href: '/superadmin/commerce-types', icon: ShoppingBag },
+  { name: t('appeals'), href: '/superadmin/appeals', icon: Gavel },
+  { name: t('users'), href: '/superadmin/users', icon: Users },
+  { name: t('orders'), href: '/superadmin/orders', icon: ShoppingCart },
+  { name: t('analytics'), href: '/superadmin/analytics', icon: BarChart3 },
+  { name: t('activity'), href: '/superadmin/activity', icon: Activity },
+  { name: t('roles'), href: '/superadmin/roles', icon: UserCog },
+  { name: t('support'), href: '/superadmin/support', icon: MessageSquare },
+  { name: t('settings'), href: '/superadmin/settings', icon: Settings },
 ]
 
-export function SuperAdminSidebar() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+interface NavContentProps {
+  collapsed?: boolean
+  navigation: Array<{ name: string; href: string; icon: React.ComponentType<{ className?: string }> }>
+  isLinkActive: (href: string) => boolean
+  setIsMobileMenuOpen: (value: boolean) => void
+  session: any
+}
 
-  // Remove locale prefix from pathname for comparison
-  const pathnameWithoutLocale = pathname?.replace(/^\/[a-z]{2}(?=\/|$)/, '') || ''
-
-  const isLinkActive = (href: string) => {
-    // Exact match for dashboard
-    if (href === '/superadmin') {
-      return pathnameWithoutLocale === '/superadmin' || pathnameWithoutLocale === '/superadmin/'
-    }
-    // Starts with for other pages
-    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(href + '/')
-  }
-
-  const NavContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+function NavContent({ collapsed = false, navigation, isLinkActive, setIsMobileMenuOpen, session }: NavContentProps) {
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={`flex items-center h-16 px-4 border-b border-slate-700/50 ${collapsed ? 'justify-center' : ''}`}>
@@ -145,6 +139,28 @@ export function SuperAdminSidebar() {
       </div>
     </div>
   )
+}
+
+export function SuperAdminSidebar() {
+  const t = useTranslations('superadmin')
+  const pathname = usePathname()
+  const { data: session } = useSession()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  const navigation = getNavigation(t)
+
+  // Remove locale prefix from pathname for comparison
+  const pathnameWithoutLocale = pathname?.replace(/^\/[a-z]{2}(?=\/|$)/, '') || ''
+
+  const isLinkActive = (href: string) => {
+    // Exact match for dashboard
+    if (href === '/superadmin') {
+      return pathnameWithoutLocale === '/superadmin' || pathnameWithoutLocale === '/superadmin/'
+    }
+    // Starts with for other pages
+    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(`${href}/`)
+  }
 
   return (
     <>
@@ -171,14 +187,25 @@ export function SuperAdminSidebar() {
         }`}
       >
         <div className="h-full bg-slate-800 border-r border-slate-700/50">
-          <NavContent />
+          <NavContent
+            navigation={navigation}
+            isLinkActive={isLinkActive}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            session={session}
+          />
         </div>
       </div>
 
       {/* Desktop Sidebar */}
       <div className={`hidden lg:flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'}`}>
         <div className="h-full bg-slate-800 border-r border-slate-700/50 relative">
-          <NavContent collapsed={isCollapsed} />
+          <NavContent
+            collapsed={isCollapsed}
+            navigation={navigation}
+            isLinkActive={isLinkActive}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            session={session}
+          />
 
           {/* Collapse Toggle Button */}
           <button

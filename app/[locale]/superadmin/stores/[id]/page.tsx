@@ -2,6 +2,7 @@
 
 import { use, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
@@ -36,13 +37,18 @@ import {
   BarChart3,
   Tag,
 } from 'lucide-react'
+import { getCountryFlag, getCountryLabel } from '@/lib/countries'
+import { useParams } from 'next/navigation'
 
 export default function StoreDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  const t = useTranslations('superadmin')
   const { id } = use(params)
+  const routeParams = useParams()
+  const locale = (routeParams?.locale as string) || 'fr'
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showSuspendModal, setShowSuspendModal] = useState(false)
   const [deleteReason, setDeleteReason] = useState('')
@@ -93,7 +99,7 @@ export default function StoreDetailsPage({
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement de la boutique...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.loadingStore')}</p>
         </div>
       </div>
     )
@@ -103,12 +109,12 @@ export default function StoreDetailsPage({
     return (
       <AdminEmptyState
         icon={AlertTriangle}
-        title="Boutique introuvable"
-        description="Cette boutique n'existe pas ou a été supprimée"
+        title={t('storeDetailsPage.storeNotFound')}
+        description={t('storeDetailsPage.storeNotFoundDesc')}
         action={
           <Link href="/superadmin/stores">
             <AdminButton variant="primary" icon={<ArrowLeft className="w-4 h-4" />}>
-              Retour aux boutiques
+              {t('storeDetailsPage.backToStores')}
             </AdminButton>
           </Link>
         }
@@ -125,7 +131,7 @@ export default function StoreDetailsPage({
         <div className="flex items-center gap-4">
           <Link href="/superadmin/stores">
             <AdminButton variant="ghost" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
-              Retour
+              {t('storeDetailsPage.back')}
             </AdminButton>
           </Link>
           <div className="flex items-center gap-3">
@@ -138,9 +144,9 @@ export default function StoreDetailsPage({
                   {store.name}
                 </h1>
                 {isSuspended ? (
-                  <AdminBadge variant="danger">Suspendue</AdminBadge>
+                  <AdminBadge variant="danger">{t('storeDetailsPage.suspended')}</AdminBadge>
                 ) : (
-                  <AdminBadge variant="success">Active</AdminBadge>
+                  <AdminBadge variant="success">{t('storeDetailsPage.active')}</AdminBadge>
                 )}
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">/{store.slug}</p>
@@ -151,7 +157,7 @@ export default function StoreDetailsPage({
         <div className="flex items-center gap-2">
           <Link href={`/stores/${store.slug}`} target="_blank">
             <AdminButton variant="secondary" size="sm" icon={<ExternalLink className="w-4 h-4" />}>
-              Voir la boutique
+              {t('storeDetailsPage.viewStore')}
             </AdminButton>
           </Link>
           {isSuspended ? (
@@ -162,7 +168,7 @@ export default function StoreDetailsPage({
               onClick={handleUnsuspend}
               isLoading={unsuspendStore.isPending}
             >
-              Réactiver
+              {t('storeDetailsPage.reactivate')}
             </AdminButton>
           ) : (
             <AdminButton
@@ -171,7 +177,7 @@ export default function StoreDetailsPage({
               icon={<Ban className="w-4 h-4" />}
               onClick={() => setShowSuspendModal(true)}
             >
-              Suspendre
+              {t('storeDetailsPage.suspend')}
             </AdminButton>
           )}
           <AdminButton
@@ -180,7 +186,7 @@ export default function StoreDetailsPage({
             icon={<Trash2 className="w-4 h-4" />}
             onClick={() => setShowDeleteModal(true)}
           >
-            Supprimer
+            {t('storeDetailsPage.delete')}
           </AdminButton>
         </div>
       </div>
@@ -193,12 +199,12 @@ export default function StoreDetailsPage({
               <Ban className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             </div>
             <div>
-              <p className="font-semibold text-rose-900 dark:text-rose-300">Boutique suspendue</p>
+              <p className="font-semibold text-rose-900 dark:text-rose-300">{t('storeDetailsPage.storeSuspended')}</p>
               <p className="text-sm text-rose-700 dark:text-rose-400 mt-1">
-                {store.suspendedReason || 'Aucune raison spécifiée'}
+                {store.suspendedReason || t('storeDetailsPage.noReasonSpecified')}
               </p>
               <p className="text-xs text-rose-600 dark:text-rose-500 mt-2">
-                Suspendue le {new Date(store.suspendedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                {t('storeDetailsPage.suspendedOn')} {new Date(store.suspendedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
               </p>
             </div>
           </div>
@@ -208,25 +214,25 @@ export default function StoreDetailsPage({
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminStatCard
-          title="Produits"
+          title={t('storeDetailsPage.products')}
           value={store._count.products}
           icon={Package}
           variant="blue"
         />
         <AdminStatCard
-          title="Commandes"
+          title={t('storeDetailsPage.orders')}
           value={store._count.orders}
           icon={ShoppingCart}
           variant="emerald"
         />
         <AdminStatCard
-          title="Clients"
+          title={t('storeDetailsPage.customers')}
           value={store._count.customers}
           icon={Users}
           variant="violet"
         />
         <AdminStatCard
-          title="Catégories"
+          title={t('storeDetailsPage.categories')}
           value={store._count.categories}
           icon={Tag}
           variant="amber"
@@ -242,7 +248,7 @@ export default function StoreDetailsPage({
                 <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Revenu Total</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.totalRevenue')}</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                   {formatPrice(store.stats.totalRevenue)}
                 </p>
@@ -258,7 +264,7 @@ export default function StoreDetailsPage({
                 <BarChart3 className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Revenu en attente</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.pendingRevenue')}</p>
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                   {formatPrice(store.stats.pendingRevenue)}
                 </p>
@@ -273,7 +279,7 @@ export default function StoreDetailsPage({
         <div className="p-5">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-primary-500" />
-            Revenus mensuels
+            {t('storeDetailsPage.monthlyRevenue')}
           </h3>
           <div className="space-y-3">
             {Object.entries(store.stats.monthlyRevenue)
@@ -310,7 +316,7 @@ export default function StoreDetailsPage({
               })}
             {Object.keys(store.stats.monthlyRevenue).length === 0 && (
               <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
-                Aucune donnée de revenu disponible
+                {t('storeDetailsPage.noRevenueData')}
               </p>
             )}
           </div>
@@ -324,21 +330,21 @@ export default function StoreDetailsPage({
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <Store className="w-4 h-4 text-primary-500" />
-              Informations
+              {t('storeDetailsPage.information')}
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Slug</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.slug')}</span>
                 <span className="text-sm font-medium text-slate-900 dark:text-white">/{store.slug}</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Créée le</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.createdOn')}</span>
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {new Date(store.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Mise à jour</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.updatedOn')}</span>
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {new Date(store.updatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </span>
@@ -346,14 +352,14 @@ export default function StoreDetailsPage({
               {store.domain && (
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
                   <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5" /> Domaine
+                    <Globe className="w-3.5 h-3.5" /> {t('storeDetailsPage.domain')}
                   </span>
                   <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{store.domain}</span>
                 </div>
               )}
               {store.description && (
                 <div className="pt-2">
-                  <span className="text-sm text-slate-500 dark:text-slate-400">Description</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{t('storeDetailsPage.description')}</span>
                   <p className="text-sm text-slate-900 dark:text-white mt-1">{store.description}</p>
                 </div>
               )}
@@ -366,7 +372,7 @@ export default function StoreDetailsPage({
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <User className="w-4 h-4 text-primary-500" />
-              Propriétaire
+              {t('storeDetailsPage.owner')}
             </h3>
             <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold">
@@ -374,7 +380,7 @@ export default function StoreDetailsPage({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-slate-900 dark:text-white truncate">
-                  {store.owner.name || 'Sans nom'}
+                  {store.owner.name || t('storeDetailsPage.noName')}
                 </p>
                 <p className="text-sm text-slate-500 dark:text-slate-400 truncate flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5" />
@@ -387,12 +393,37 @@ export default function StoreDetailsPage({
               </div>
               <Link href={`/superadmin/users?search=${store.owner.email}`}>
                 <AdminButton variant="ghost" size="sm" icon={<Eye className="w-4 h-4" />}>
-                  Voir
+                  {t('storeDetailsPage.view')}
                 </AdminButton>
               </Link>
             </div>
           </div>
         </AdminCard>
+
+        {/* Countries */}
+        {store.countries && store.countries.length > 0 && (
+          <AdminCard>
+            <div className="p-5">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary-500" />
+                {t('storeDetailsPage.activityCountries')}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {store.countries.map((code: string) => (
+                  <div
+                    key={code}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700"
+                  >
+                    <span className="text-2xl">{getCountryFlag(code)}</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">
+                      {getCountryLabel(code, locale)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AdminCard>
+        )}
       </div>
 
       {/* Team */}
@@ -401,7 +432,7 @@ export default function StoreDetailsPage({
           <div className="p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <Users className="w-4 h-4 text-primary-500" />
-              Équipe ({store.storeUsers.length})
+              {t('storeDetailsPage.team')} ({store.storeUsers.length})
             </h3>
             <div className="space-y-2">
               {store.storeUsers.map((storeUser) => (
@@ -427,7 +458,7 @@ export default function StoreDetailsPage({
                     <AdminBadge
                       variant={storeUser.status === 'ACTIVE' ? 'success' : 'warning'}
                     >
-                      {storeUser.status === 'ACTIVE' ? 'Actif' : storeUser.status}
+                      {storeUser.status === 'ACTIVE' ? t('storeDetailsPage.activeStatus') : storeUser.status}
                     </AdminBadge>
                   </div>
                 </div>
@@ -441,7 +472,7 @@ export default function StoreDetailsPage({
       <AdminModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title="Supprimer la boutique"
+        title={t('storeDetailsPage.deleteStore')}
         size="md"
       >
         <div className="space-y-4">
@@ -449,25 +480,25 @@ export default function StoreDetailsPage({
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-rose-900 dark:text-rose-300">Action irréversible</p>
+                <p className="font-semibold text-rose-900 dark:text-rose-300">{t('storeDetailsPage.irreversibleAction')}</p>
                 <p className="text-sm text-rose-700 dark:text-rose-400 mt-1">
-                  Toutes les données de la boutique seront définitivement supprimées : produits, commandes, clients, etc.
+                  {t('storeDetailsPage.deleteWarning')}
                 </p>
               </div>
             </div>
           </div>
 
           <AdminTextarea
-            label="Raison de la suppression"
+            label={t('storeDetailsPage.deletionReason')}
             value={deleteReason}
             onChange={(e) => setDeleteReason(e.target.value)}
-            placeholder="Expliquez pourquoi cette boutique est supprimée..."
+            placeholder={t('storeDetailsPage.deletionReasonPlaceholder')}
             rows={3}
           />
 
           <div className="flex justify-end gap-3 pt-2">
             <AdminButton variant="secondary" onClick={() => setShowDeleteModal(false)}>
-              Annuler
+              {t('storeDetailsPage.cancel')}
             </AdminButton>
             <AdminButton
               variant="danger"
@@ -476,7 +507,7 @@ export default function StoreDetailsPage({
               isLoading={deleteStore.isPending}
               disabled={!deleteReason.trim()}
             >
-              Supprimer définitivement
+              {t('storeDetailsPage.deleteForever')}
             </AdminButton>
           </div>
         </div>
@@ -486,7 +517,7 @@ export default function StoreDetailsPage({
       <AdminModal
         isOpen={showSuspendModal}
         onClose={() => setShowSuspendModal(false)}
-        title="Suspendre la boutique"
+        title={t('storeDetailsPage.suspendStore')}
         size="md"
       >
         <div className="space-y-4">
@@ -494,25 +525,25 @@ export default function StoreDetailsPage({
             <div className="flex items-start gap-3">
               <Ban className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-amber-900 dark:text-amber-300">Suspension temporaire</p>
+                <p className="font-semibold text-amber-900 dark:text-amber-300">{t('storeDetailsPage.temporarySuspension')}</p>
                 <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                  La boutique sera inaccessible aux visiteurs. Le propriétaire pourra faire appel de cette décision.
+                  {t('storeDetailsPage.suspensionWarning')}
                 </p>
               </div>
             </div>
           </div>
 
           <AdminTextarea
-            label="Raison de la suspension"
+            label={t('storeDetailsPage.suspensionReason')}
             value={suspendReason}
             onChange={(e) => setSuspendReason(e.target.value)}
-            placeholder="Expliquez pourquoi cette boutique est suspendue..."
+            placeholder={t('storeDetailsPage.suspensionReasonPlaceholder')}
             rows={3}
           />
 
           <div className="flex justify-end gap-3 pt-2">
             <AdminButton variant="secondary" onClick={() => setShowSuspendModal(false)}>
-              Annuler
+              {t('storeDetailsPage.cancel')}
             </AdminButton>
             <AdminButton
               variant="warning"
@@ -521,7 +552,7 @@ export default function StoreDetailsPage({
               isLoading={suspendStore.isPending}
               disabled={!suspendReason.trim()}
             >
-              Suspendre la boutique
+              {t('storeDetailsPage.suspendStoreButton')}
             </AdminButton>
           </div>
         </div>

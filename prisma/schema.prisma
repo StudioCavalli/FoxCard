@@ -57,6 +57,9 @@ model Store {
   // Featured products for homepage
   featuredProductIds String[] @default([]) @db.ObjectId
 
+  // Countries where the store operates (ISO 3166-1 alpha-2 codes)
+  countries     String[]  @default([])
+
   // Directory visibility
   showOnDirectory    Boolean  @default(true) // Show in public store directory
 

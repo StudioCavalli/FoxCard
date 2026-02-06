@@ -8,15 +8,19 @@ import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useTranslations } from 'next-intl'
+import { CountryFilter } from '@/components/ui/CountryFilter'
+import { getCountryFlag } from '@/lib/countries'
 
 export default function StoresDirectoryPage() {
   const t = useTranslations()
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'newest' | 'rating' | 'products'>('name')
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([])
 
   const { data, isLoading, error } = trpc.store.getDirectory.useQuery({
     search,
     sortBy,
+    countries: selectedCountries.length > 0 ? selectedCountries : undefined,
     limit: 24,
     offset: 0,
   })
@@ -57,6 +61,10 @@ export default function StoresDirectoryPage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <CountryFilter
+              value={selectedCountries}
+              onChange={setSelectedCountries}
+            />
             <label className="text-sm font-medium text-gray-700">{t('store.sort')}:</label>
             <select
               value={sortBy}
@@ -136,6 +144,18 @@ export default function StoresDirectoryPage() {
                 <p className="text-sm text-gray-600 text-center mb-4 flex-grow line-clamp-2">
                   {store.tagline || store.description || t('store.discoverProducts')}
                 </p>
+
+                {/* Countries */}
+                {store.countries && store.countries.length > 0 && (
+                  <div className="flex items-center justify-center gap-1 mb-3 text-base">
+                    {store.countries.slice(0, 5).map((c: string) => (
+                      <span key={c} title={c}>{getCountryFlag(c)}</span>
+                    ))}
+                    {store.countries.length > 5 && (
+                      <span className="text-xs text-gray-400">+{store.countries.length - 5}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Stats */}
                 <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-4">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/client'
 import {
   AdminCard,
@@ -31,12 +32,12 @@ import {
 
 type TabId = 'general' | 'localization' | 'email' | 'payments' | 'security'
 
-const tabs: { id: TabId; label: string; icon: any; description: string }[] = [
-  { id: 'general', label: 'Général', icon: Settings, description: 'Paramètres de base' },
-  { id: 'localization', label: 'Localisation', icon: Globe, description: 'Langue et devise' },
-  { id: 'email', label: 'Email', icon: Mail, description: 'Configuration SMTP' },
-  { id: 'payments', label: 'Paiements', icon: CreditCard, description: 'Passerelles de paiement' },
-  { id: 'security', label: 'Sécurité', icon: Shield, description: 'Authentification' },
+const getTabs = (t: any): { id: TabId; label: string; icon: any; description: string }[] => [
+  { id: 'general', label: t('settingsPage.tabs.general.label'), icon: Settings, description: t('settingsPage.tabs.general.description') },
+  { id: 'localization', label: t('settingsPage.tabs.localization.label'), icon: Globe, description: t('settingsPage.tabs.localization.description') },
+  { id: 'email', label: t('settingsPage.tabs.email.label'), icon: Mail, description: t('settingsPage.tabs.email.description') },
+  { id: 'payments', label: t('settingsPage.tabs.payments.label'), icon: CreditCard, description: t('settingsPage.tabs.payments.description') },
+  { id: 'security', label: t('settingsPage.tabs.security.label'), icon: Shield, description: t('settingsPage.tabs.security.description') },
 ]
 
 const currencyOptions = [
@@ -55,6 +56,8 @@ const languageOptions = [
 ]
 
 export default function SuperAdminSettingsPage() {
+  const t = useTranslations('superadmin')
+  const tabs = getTabs(t)
   const [activeTab, setActiveTab] = useState<TabId>('general')
   const [hasChanges, setHasChanges] = useState(false)
 
@@ -134,7 +137,7 @@ export default function SuperAdminSettingsPage() {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des paramètres...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.loading')}</p>
         </div>
       </div>
     )
@@ -201,17 +204,17 @@ export default function SuperAdminSettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Paramètres Plateforme
+            {t('settingsPage.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Configuration globale de FoxCard
+            {t('settingsPage.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {updateSettings.isSuccess && (
             <AdminBadge variant="success">
               <CheckCircle className="w-3.5 h-3.5 mr-1" />
-              Enregistré
+              {t('settingsPage.saved')}
             </AdminBadge>
           )}
           <AdminButton
@@ -221,7 +224,7 @@ export default function SuperAdminSettingsPage() {
             disabled={!hasChanges || updateSettings.isPending}
             loading={updateSettings.isPending}
           >
-            Enregistrer
+            {t('settingsPage.save')}
           </AdminButton>
         </div>
       </div>
@@ -271,37 +274,37 @@ export default function SuperAdminSettingsPage() {
                     <Settings className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Paramètres généraux</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Informations de base de la plateforme</p>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('settingsPage.general.title')}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.general.subtitle')}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-5 space-y-5">
                 <AdminInput
-                  label="Nom de la plateforme"
+                  label={t('settingsPage.general.platformName')}
                   value={formData.platformName}
                   onChange={(e) => handleChange('platformName', e.target.value)}
                   placeholder="FoxCard"
                 />
                 <AdminInput
-                  label="URL de la plateforme"
+                  label={t('settingsPage.general.platformUrl')}
                   value={formData.platformUrl}
                   onChange={(e) => handleChange('platformUrl', e.target.value)}
                   placeholder="https://foxcard.io"
                 />
                 <AdminInput
-                  label="Email de support"
+                  label={t('settingsPage.general.supportEmail')}
                   type="email"
                   value={formData.supportEmail}
                   onChange={(e) => handleChange('supportEmail', e.target.value)}
                   placeholder="support@foxcard.io"
                 />
                 <AdminInput
-                  label="Boutiques max par utilisateur"
+                  label={t('settingsPage.general.maxStores')}
                   type="number"
                   value={formData.maxStoresPerUser}
-                  onChange={(e) => handleChange('maxStoresPerUser', parseInt(e.target.value))}
+                  onChange={(e) => handleChange('maxStoresPerUser', parseInt(e.target.value, 10))}
                 />
 
                 {/* Maintenance Mode */}
@@ -321,10 +324,10 @@ export default function SuperAdminSettingsPage() {
                       </div>
                       <div>
                         <p className={`font-medium ${formData.maintenanceMode ? 'text-red-900 dark:text-red-300' : 'text-slate-900 dark:text-white'}`}>
-                          Mode maintenance
+                          {t('settingsPage.general.maintenanceMode')}
                         </p>
                         <p className={`text-sm ${formData.maintenanceMode ? 'text-red-700 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                          Désactive l'accès public à la plateforme
+                          {t('settingsPage.general.maintenanceDescription')}
                         </p>
                       </div>
                     </div>
@@ -337,10 +340,10 @@ export default function SuperAdminSettingsPage() {
                   {formData.maintenanceMode && (
                     <div className="mt-4 pt-4 border-t border-red-200 dark:border-red-500/30">
                       <AdminTextarea
-                        label="Message de maintenance"
+                        label={t('settingsPage.general.maintenanceMessage')}
                         value={formData.maintenanceMessage}
                         onChange={(e) => handleChange('maintenanceMessage', e.target.value)}
-                        placeholder="Site en maintenance, veuillez revenir plus tard..."
+                        placeholder={t('settingsPage.general.maintenancePlaceholder')}
                         rows={3}
                       />
                     </div>
@@ -359,21 +362,21 @@ export default function SuperAdminSettingsPage() {
                     <Globe className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Localisation</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Langue et devise par défaut</p>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('settingsPage.localization.title')}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.localization.subtitle')}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-5 space-y-5">
                 <AdminSelect
-                  label="Devise par défaut"
+                  label={t('settingsPage.localization.defaultCurrency')}
                   value={formData.defaultCurrency}
                   onChange={(value) => handleChange('defaultCurrency', value)}
                   options={currencyOptions}
                 />
                 <AdminSelect
-                  label="Langue par défaut"
+                  label={t('settingsPage.localization.defaultLanguage')}
                   value={formData.defaultLanguage}
                   onChange={(value) => handleChange('defaultLanguage', value)}
                   options={languageOptions}
@@ -391,8 +394,8 @@ export default function SuperAdminSettingsPage() {
                     <Mail className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Configuration Email (SMTP)</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Paramètres du serveur mail</p>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('settingsPage.email.title')}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.email.subtitle')}</p>
                   </div>
                 </div>
               </div>
@@ -400,42 +403,42 @@ export default function SuperAdminSettingsPage() {
               <div className="p-5 space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <AdminInput
-                    label="Serveur SMTP"
+                    label={t('settingsPage.email.smtpHost')}
                     value={formData.smtpHost}
                     onChange={(e) => handleChange('smtpHost', e.target.value)}
                     placeholder="smtp.example.com"
                   />
                   <AdminInput
-                    label="Port SMTP"
+                    label={t('settingsPage.email.smtpPort')}
                     type="number"
                     value={formData.smtpPort}
-                    onChange={(e) => handleChange('smtpPort', parseInt(e.target.value))}
+                    onChange={(e) => handleChange('smtpPort', parseInt(e.target.value, 10))}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <AdminInput
-                    label="Utilisateur SMTP"
+                    label={t('settingsPage.email.smtpUser')}
                     value={formData.smtpUser}
                     onChange={(e) => handleChange('smtpUser', e.target.value)}
                   />
                   <AdminInput
-                    label="Mot de passe SMTP"
+                    label={t('settingsPage.email.smtpPassword')}
                     type="password"
                     value={formData.smtpPassword}
                     onChange={(e) => handleChange('smtpPassword', e.target.value)}
-                    placeholder="Laisser vide pour ne pas changer"
+                    placeholder={t('settingsPage.email.passwordPlaceholder')}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <AdminInput
-                    label="Email expéditeur"
+                    label={t('settingsPage.email.fromEmail')}
                     type="email"
                     value={formData.smtpFromEmail}
                     onChange={(e) => handleChange('smtpFromEmail', e.target.value)}
                     placeholder="noreply@foxcard.io"
                   />
                   <AdminInput
-                    label="Nom expéditeur"
+                    label={t('settingsPage.email.fromName')}
                     value={formData.smtpFromName}
                     onChange={(e) => handleChange('smtpFromName', e.target.value)}
                     placeholder="FoxCard"
@@ -454,8 +457,8 @@ export default function SuperAdminSettingsPage() {
                     <CreditCard className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Passerelles de paiement</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Activez les méthodes de paiement</p>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('settingsPage.payments.title')}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.payments.subtitle')}</p>
                   </div>
                 </div>
               </div>
@@ -464,8 +467,8 @@ export default function SuperAdminSettingsPage() {
                 <SettingRow
                   icon={CreditCard}
                   iconBg="bg-gradient-to-br from-primary-500 to-primary-600"
-                  title="Stripe"
-                  description="Cartes bancaires et plus"
+                  title={t('settingsPage.payments.stripe')}
+                  description={t('settingsPage.payments.stripeDescription')}
                 >
                   <ToggleSwitch
                     checked={formData.stripeEnabled}
@@ -476,8 +479,8 @@ export default function SuperAdminSettingsPage() {
                 <SettingRow
                   icon={CreditCard}
                   iconBg="bg-gradient-to-br from-blue-500 to-cyan-600"
-                  title="PayPal"
-                  description="Paiement PayPal"
+                  title={t('settingsPage.payments.paypal')}
+                  description={t('settingsPage.payments.paypalDescription')}
                 >
                   <ToggleSwitch
                     checked={formData.paypalEnabled}
@@ -488,8 +491,8 @@ export default function SuperAdminSettingsPage() {
                 <SettingRow
                   icon={Banknote}
                   iconBg="bg-gradient-to-br from-emerald-500 to-green-600"
-                  title="Virement bancaire"
-                  description="Paiement par virement"
+                  title={t('settingsPage.payments.bankTransfer')}
+                  description={t('settingsPage.payments.bankTransferDescription')}
                 >
                   <ToggleSwitch
                     checked={formData.bankTransferEnabled}
@@ -509,8 +512,8 @@ export default function SuperAdminSettingsPage() {
                     <Shield className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Sécurité</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Authentification et sessions</p>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('settingsPage.security.title')}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.security.subtitle')}</p>
                   </div>
                 </div>
               </div>
@@ -519,8 +522,8 @@ export default function SuperAdminSettingsPage() {
                 <SettingRow
                   icon={UserPlus}
                   iconBg="bg-gradient-to-br from-primary-500 to-primary-600"
-                  title="Autoriser les inscriptions"
-                  description="Permettre aux nouveaux utilisateurs de s'inscrire"
+                  title={t('settingsPage.security.allowRegistration')}
+                  description={t('settingsPage.security.allowRegistrationDescription')}
                 >
                   <ToggleSwitch
                     checked={formData.allowRegistration}
@@ -531,8 +534,8 @@ export default function SuperAdminSettingsPage() {
                 <SettingRow
                   icon={Mail}
                   iconBg="bg-gradient-to-br from-blue-500 to-cyan-600"
-                  title="Vérification email obligatoire"
-                  description="Les utilisateurs doivent vérifier leur email"
+                  title={t('settingsPage.security.emailVerification')}
+                  description={t('settingsPage.security.emailVerificationDescription')}
                 >
                   <ToggleSwitch
                     checked={formData.requireEmailVerification}
@@ -546,19 +549,19 @@ export default function SuperAdminSettingsPage() {
                       <Clock className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Timeout de session</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Durée d'inactivité avant déconnexion</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{t('settingsPage.security.sessionTimeout')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('settingsPage.security.sessionTimeoutDescription')}</p>
                     </div>
                   </div>
                   <AdminInput
                     type="number"
                     value={formData.sessionTimeout}
-                    onChange={(e) => handleChange('sessionTimeout', parseInt(e.target.value))}
+                    onChange={(e) => handleChange('sessionTimeout', parseInt(e.target.value, 10))}
                     min={5}
                     max={1440}
                   />
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                    Valeur en minutes (5-1440)
+                    {t('settingsPage.security.sessionTimeoutHint')}
                   </p>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import { trpc } from '@/lib/trpc/client'
 import { usePublicStore } from '@/lib/context/public-store-context'
 import { Filter, X, Search, ExternalLink, Store } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { CountryFilter } from '@/components/ui/CountryFilter'
 
 function ProductsContent() {
   const t = useTranslations()
@@ -24,6 +25,7 @@ function ProductsContent() {
   const [maxPrice, setMaxPrice] = useState<number | undefined>()
   const [sortBy, setSortBy] = useState<'createdAt' | 'price' | 'name' | 'featured'>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([])
 
   // Initialize search query from URL
   useEffect(() => {
@@ -56,6 +58,7 @@ function ProductsContent() {
       maxPrice,
       sortBy,
       sortOrder,
+      countries: selectedCountries.length > 0 ? selectedCountries : undefined,
       limit: 12,
     },
     {
@@ -122,6 +125,12 @@ function ProductsContent() {
               </button>
             )}
           </div>
+
+          {/* Country Filter */}
+          <CountryFilter
+            value={selectedCountries}
+            onChange={setSelectedCountries}
+          />
 
           {/* Sort Dropdown */}
           <select

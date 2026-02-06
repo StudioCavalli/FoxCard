@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
+import { CountryMultiSelect } from '@/components/ui/CountryMultiSelect'
 
 // Commerce types with icons and descriptions
 const COMMERCE_TYPES = [
@@ -141,6 +142,7 @@ export default function MerchantOnboardingPage() {
     publicEmail: '',
     publicPhone: '',
   })
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([])
   const [typeConfig, setTypeConfig] = useState<Record<string, string | boolean>>({})
   const [selectedTheme, setSelectedTheme] = useState('modern')
 
@@ -194,6 +196,7 @@ export default function MerchantOnboardingPage() {
         commerceConfig: typeConfig,
         publicEmail: storeData.publicEmail || undefined,
         publicPhone: storeData.publicPhone || undefined,
+        countries: selectedCountries.length > 0 ? selectedCountries : undefined,
       })
 
       // 2. Seed default themes and create custom theme
@@ -494,6 +497,20 @@ export default function MerchantOnboardingPage() {
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Pays d&apos;activité
+                  </label>
+                  <CountryMultiSelect
+                    value={selectedCountries}
+                    onChange={setSelectedCountries}
+                    placeholder="Dans quels pays opérez-vous ?"
+                  />
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Sélectionnez les pays où votre boutique est active
+                  </p>
                 </div>
               </div>
             </div>

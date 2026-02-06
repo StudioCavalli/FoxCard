@@ -5,20 +5,7 @@ import { usePathname, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Bell, Search, ChevronRight, Home, ExternalLink } from 'lucide-react'
 import { LanguageSelector } from '@/components/i18n/LanguageSelector'
-
-// Map paths to readable names
-const pathNames: Record<string, string> = {
-  '/superadmin': 'Dashboard',
-  '/superadmin/stores': 'Boutiques',
-  '/superadmin/appeals': 'Appels',
-  '/superadmin/users': 'Utilisateurs',
-  '/superadmin/orders': 'Commandes',
-  '/superadmin/analytics': 'Analytics',
-  '/superadmin/activity': 'Activité',
-  '/superadmin/roles': 'Rôles',
-  '/superadmin/support': 'Support',
-  '/superadmin/settings': 'Paramètres',
-}
+import { useTranslations } from 'next-intl'
 
 // Check if a segment looks like an ID (MongoDB ObjectId, UUID, or long alphanumeric)
 const isIdSegment = (segment: string): boolean => {
@@ -32,10 +19,25 @@ const isIdSegment = (segment: string): boolean => {
 }
 
 export function SuperAdminHeader() {
+  const t = useTranslations('superadmin')
   const { data: session } = useSession()
   const pathname = usePathname()
   const params = useParams()
   const locale = (params?.locale as string) || 'fr'
+
+  // Map paths to translation keys
+  const pathNameKeys: Record<string, string> = {
+    '/superadmin': 'dashboard',
+    '/superadmin/stores': 'stores',
+    '/superadmin/appeals': 'appeals',
+    '/superadmin/users': 'users',
+    '/superadmin/orders': 'orders',
+    '/superadmin/analytics': 'analytics',
+    '/superadmin/activity': 'activity',
+    '/superadmin/roles': 'roles',
+    '/superadmin/support': 'support',
+    '/superadmin/settings': 'settings',
+  }
 
   // Generate breadcrumbs
   const getBreadcrumbs = () => {
@@ -56,7 +58,8 @@ export function SuperAdminHeader() {
         return // Don't add ID to breadcrumbs
       }
 
-      const name = pathNames[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1)
+      const translationKey = pathNameKeys[currentPath]
+      const name = translationKey ? t(translationKey as any) : segment.charAt(0).toUpperCase() + segment.slice(1)
       breadcrumbs.push({ name, href: currentPath })
     })
 
@@ -71,11 +74,12 @@ export function SuperAdminHeader() {
   const lastSegment = segments[segments.length - 1] || ''
   const parentSection = segments.length > 1 ? segments[segments.length - 2] : ''
 
-  // If last segment is an ID, use parent section name + "Détails"
-  let pageTitle = breadcrumbs[breadcrumbs.length - 1]?.name || 'Dashboard'
+  // If last segment is an ID, use parent section name + "Details"
+  let pageTitle = breadcrumbs[breadcrumbs.length - 1]?.name || t('dashboard')
   if (isIdSegment(lastSegment) && parentSection) {
-    const parentName = pathNames[`/superadmin/${parentSection}`] || parentSection
-    pageTitle = `Détails ${parentName.toLowerCase()}`
+    const parentKey = pathNameKeys[`/superadmin/${parentSection}`]
+    const parentName = parentKey ? t(parentKey as any) : parentSection
+    pageTitle = `${t('details')} ${parentName.toLowerCase()}`
   }
 
   return (
@@ -97,11 +101,10 @@ export function SuperAdminHeader() {
                 <span className="text-slate-700 dark:text-slate-200 font-medium">{crumb.name}</span>
               ) : (
                 <Link
-                  href={crumb.href}
+                  href={`/${locale}${crumb.href}`}
                   className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                 >
-                  {crumb.name}
-                </Link>
+                  {crumb.name}</Link>
               )}
             </div>
           ))}
@@ -119,7 +122,7 @@ export function SuperAdminHeader() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder={t('search')}
             className="w-64 pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-600 rounded border border-slate-200 dark:border-slate-500">
@@ -137,7 +140,7 @@ export function SuperAdminHeader() {
           className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
-          <span>Voir le site</span>
+          <span>{t('viewSite')}</span>
         </Link>
 
         {/* Language Selector */}

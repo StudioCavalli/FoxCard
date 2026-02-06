@@ -11,6 +11,7 @@ export const storeRouter = router({
         limit: z.number().min(1).max(100).default(20),
         offset: z.number().min(0).default(0),
         search: z.string().optional(),
+        countries: z.array(z.string()).optional(),
         sortBy: z.enum(['name', 'newest', 'rating', 'products']).default('name'),
       })
     )
@@ -26,6 +27,11 @@ export const storeRouter = router({
           { name: { contains: input.search, mode: 'insensitive' } },
           { description: { contains: input.search, mode: 'insensitive' } },
         ]
+      }
+
+      // Filter by countries
+      if (input.countries && input.countries.length > 0) {
+        where.countries = { hasSome: input.countries }
       }
 
       // Determine sort order
@@ -74,6 +80,7 @@ export const storeRouter = router({
           description: store.description,
           logo: store.logo,
           tagline: store.tagline,
+          countries: store.countries,
           rating: store.rating,
           reviewsCount: store.reviewsCount,
           productsCount: store._count.products,
@@ -215,6 +222,7 @@ export const storeRouter = router({
         commerceConfig: z.record(z.string(), z.unknown()).optional(),
         publicEmail: z.string().email().optional().or(z.literal('')),
         publicPhone: z.string().optional(),
+        countries: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -245,6 +253,7 @@ export const storeRouter = router({
             commerceConfig: input.commerceConfig as any,
             publicEmail: input.publicEmail || null,
             publicPhone: input.publicPhone,
+            countries: input.countries || [],
             ownerId: ctx.session.user.id,
           },
         })
@@ -300,6 +309,7 @@ export const storeRouter = router({
         domain: z.string().optional(),
         settings: z.any().optional(),
         theme: z.any().optional(),
+        countries: z.array(z.string()).optional(),
         // Restaurant/Business hours
         openingHours: z.any().optional(),
         specialDates: z.any().optional(),
@@ -495,6 +505,7 @@ export const storeRouter = router({
           .optional(),
         featuredProductIds: z.array(z.string()).max(6).optional(),
         showOnDirectory: z.boolean().optional(),
+        countries: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

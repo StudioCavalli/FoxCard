@@ -1,8 +1,9 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { useRef, useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useRef, useState, useEffect, useTransition } from 'react'
 import { locales, localeLabels, localeFlags, type Locale } from '@/lib/i18n/config'
 import { usePlatformSettings } from '@/lib/platform/PlatformSettingsProvider'
 import { Globe } from 'lucide-react'
@@ -43,14 +44,19 @@ export function LanguageSelector({ position = 'bottom', variant = 'default' }: L
     }
   }, [isOpen])
 
+  const [isPending, startTransition] = useTransition()
+
   const switchLocale = (newLocale: Locale) => {
     // Save locale preference in cookie (expires in 1 year)
     Cookies.set('NEXT_LOCALE', newLocale, { expires: 365, path: '/', sameSite: 'lax' })
 
-    // Get the current path without the locale prefix
-    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
-    // Navigate to the new locale path
-    router.push(`/${newLocale}${pathWithoutLocale}`)
+    startTransition(() => {
+      // pathname includes locale prefix (e.g., /fr/merchant/dashboard)
+      // Replace the locale segment with the new one
+      const segments = pathname.split('/')
+      segments[1] = newLocale // Replace locale segment at index 1
+      router.replace(segments.join('/'))
+    })
     setIsOpen(false)
   }
 
@@ -65,9 +71,11 @@ export function LanguageSelector({ position = 'bottom', variant = 'default' }: L
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={buttonClasses}
         aria-label="Select language"
+        disabled={isPending}
       >
         <Globe className={variant === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
         <span>{localeLabels[locale]}</span>
@@ -77,13 +85,15 @@ export function LanguageSelector({ position = 'bottom', variant = 'default' }: L
         <div className={dropdownClasses}>
           {supportedLocales.map((loc) => (
             <button
+              type="button"
               key={loc}
               onClick={() => switchLocale(loc)}
+              disabled={isPending}
               className={`flex items-center gap-3 w-full px-4 py-2.5 text-left transition-colors text-sm ${
                 loc === locale
                   ? 'bg-theme-primary/10 text-theme-primary font-medium'
                   : 'text-theme-text hover:bg-theme-card'
-              }`}
+              } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span className="text-lg">{localeFlags[loc]}</span>
               <span>{localeLabels[loc]}</span>
