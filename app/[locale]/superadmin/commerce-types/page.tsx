@@ -315,8 +315,8 @@ export default function CommerceTypesPage() {
                     <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                       <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">
                         {(storesByType[selectedType!] ?? 0) > 1
-                          ? t('commerceTypesPage.storesUsingTypePlural', { count: storesByType[selectedType!] })
-                          : t('commerceTypesPage.storesUsingType', { count: storesByType[selectedType!] })
+                          ? t('commerceTypesPage.storesUsingTypePlural', { count: storesByType[selectedType!] ?? 0 })
+                          : t('commerceTypesPage.storesUsingType', { count: storesByType[selectedType!] ?? 0 })
                         }
                       </h4>
                       <div className="space-y-2">
