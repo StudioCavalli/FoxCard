@@ -19,17 +19,21 @@ const nextAuthHandler = NextAuth({
 
 async function handler(
   req: Request,
-  context: { params: { nextauth: string[] } }
+  context: { params: Promise<{ nextauth: string[] }> }
 ) {
   const { ip, userAgent } = getClientInfo(req)
   const url = new URL(req.url)
+
+  // Await params for Next.js 15 compatibility
+  const params = await context.params
+  const resolvedContext = { params }
 
   // For POST requests to credentials callback, we intercept to log login events
   if (req.method === 'POST' && url.pathname.includes('callback/credentials')) {
     // Clone the request to read body without consuming it
     const clonedReq = req.clone()
 
-    const response = await nextAuthHandler(req, context)
+    const response = await nextAuthHandler(req, resolvedContext)
 
     // Check if login succeeded or failed by inspecting the response
     const location = response.headers.get('location') || ''
@@ -99,7 +103,7 @@ async function handler(
     const { getServerSession } = await import('next-auth/next')
     const session = await getServerSession(authOptions)
 
-    const response = await nextAuthHandler(req, context)
+    const response = await nextAuthHandler(req, resolvedContext)
 
     if (session?.user?.id) {
       await prisma.platformAuditLog.create({
@@ -119,7 +123,7 @@ async function handler(
   }
 
   // All other auth requests pass through normally
-  return nextAuthHandler(req, context)
+  return nextAuthHandler(req, resolvedContext)
 }
 
 export { handler as GET, handler as POST }
