@@ -35,7 +35,7 @@ export function Header() {
   const getDashboardUrl = () => {
     if (!session?.user) return null
     if (session.user.role === 'SUPER_ADMIN') return `/${locale}/superadmin`
-    if (session.user.role === 'MERCHANT') return `/${locale}/admin`
+    if (session.user.role === 'ADMIN') return `/${locale}/admin`
     return null // Regular users don't have a dashboard
   }
 
