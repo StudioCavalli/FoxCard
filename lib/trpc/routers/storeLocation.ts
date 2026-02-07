@@ -110,6 +110,11 @@ export const storeLocationRouter = router({
               tagline: true,
               rating: true,
               reviewsCount: true,
+              _count: {
+                select: {
+                  products: { where: { status: 'ACTIVE' } },
+                },
+              },
             },
           },
         },
