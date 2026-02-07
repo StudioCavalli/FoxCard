@@ -237,7 +237,7 @@ export function ExploreStores() {
 
   if (!isMounted) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="flex items-center justify-center h-screen bg-slate-50">
         <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
       </div>
     )
@@ -246,7 +246,7 @@ export function ExploreStores() {
   return (
     <div className="relative h-screen flex flex-col">
       {/* Header with Search and Filters */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm z-10">
+      <div className="bg-white border-b border-slate-200 shadow-sm z-10">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
@@ -258,7 +258,7 @@ export function ExploreStores() {
                   placeholder={t('searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-slate-700 dark:text-white placeholder:text-slate-400 transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-slate-400 transition-all"
                 />
               </div>
             </div>
@@ -267,7 +267,7 @@ export function ExploreStores() {
             <select
               value={commerceType}
               onChange={(e) => setCommerceType(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-slate-700 dark:text-white font-medium transition-all"
+              className="px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium transition-all"
             >
               {COMMERCE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -294,10 +294,10 @@ export function ExploreStores() {
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-5 pt-5 border-t border-slate-200 dark:border-slate-700">
+            <div className="mt-5 pt-5 border-t border-slate-200">
               <div className="flex flex-col gap-4">
                 <div>
-                  <div className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                  <div className="block text-sm font-semibold text-slate-900 mb-3">
                     {t('countries')}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -309,7 +309,7 @@ export function ExploreStores() {
                         className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           selectedCountries.includes(country)
                             ? 'bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-md shadow-primary-500/25'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                         }`}
                       >
                         {getCountryFlag(country)} {getCountryLabel(country, locale)}
@@ -322,7 +322,7 @@ export function ExploreStores() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors self-start"
+                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors self-start"
                   >
                     <X className="w-4 h-4" />
                     {t('clearFilters')}
@@ -333,16 +333,16 @@ export function ExploreStores() {
           )}
 
           {/* Stats */}
-          <div className="mt-5 flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+          <div className="mt-5 flex items-center gap-6 text-sm text-slate-600">
             <div className="flex items-center gap-2 font-medium">
               <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
-                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                <Store className="w-4 h-4 text-primary-600" />
               </div>
               <span>{t('resultsCount', { count: stores.length })}</span>
             </div>
             <div className="flex items-center gap-2 font-medium">
               <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <MapPin className="w-4 h-4 text-green-600" />
               </div>
               <span>{locationMarkers.length} {locationMarkers.length === 1 ? t('location') : t('locations')}</span>
             </div>
@@ -353,18 +353,18 @@ export function ExploreStores() {
       {/* Map */}
       <div className="flex-1 relative">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full bg-slate-50 dark:bg-slate-900">
+          <div className="flex items-center justify-center h-full bg-slate-50">
             <div className="text-center">
               <Loader2 className="w-10 h-10 animate-spin text-primary-600 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('loading')}</p>
+              <p className="text-sm font-medium text-slate-600">{t('loading')}</p>
             </div>
           </div>
         ) : stores.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full bg-slate-50 dark:bg-slate-900">
-            <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center h-full bg-slate-50">
+            <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
               <Store className="w-10 h-10 text-slate-400" />
             </div>
-            <p className="text-xl font-semibold text-slate-900 dark:text-white mb-2">{t('noStores')}</p>
+            <p className="text-xl font-semibold text-slate-900 mb-2">{t('noStores')}</p>
             {hasActiveFilters && (
               <button
                 type="button"

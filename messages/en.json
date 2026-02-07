@@ -2367,7 +2367,13 @@
       "shops": "shops",
       "otherLocations": "other locations",
       "zoomForDetails": "Zoom in to see precise addresses",
-      "viewStore": "View store"
+      "viewStore": "View store",
+      "locationTypes": {
+        "legalAddress": "Legal Address",
+        "physicalStore": "Physical Store",
+        "pickupPoint": "Pickup Point",
+        "warehouse": "Warehouse"
+      }
     }
   },
   "about": {
@@ -2650,6 +2656,15 @@
       "recreation": "Recreation"
     },
     "countries": "Countries",
+    "locationTypes": {
+      "legalAddress": "Legal Address",
+      "physicalStore": "Physical Store",
+      "pickupPoint": "Pickup Point",
+      "warehouse": "Warehouse",
+      "office": "Office",
+      "showroom": "Showroom",
+      "eventLocation": "Event Location"
+    },
     "resultsCount": "{count, plural, =0 {No stores found} =1 {1 store found} other {# stores found}}",
     "noStores": "No stores match your criteria",
     "loadMore": "Load more stores",

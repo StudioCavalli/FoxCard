@@ -2300,7 +2300,13 @@
       "shops": "Geschäfte",
       "otherLocations": "andere Standorte",
       "zoomForDetails": "Zoomen Sie, um genaue Adressen zu sehen",
-      "viewStore": "Geschäft anzeigen"
+      "viewStore": "Geschäft anzeigen",
+      "locationTypes": {
+        "legalAddress": "Rechtsanschrift",
+        "physicalStore": "Physisches Geschäft",
+        "pickupPoint": "Abholpunkt",
+        "warehouse": "Lager"
+      }
     }
   },
   "about": {
@@ -2583,6 +2589,15 @@
       "recreation": "Erholung"
     },
     "countries": "Länder",
+    "locationTypes": {
+      "legalAddress": "Rechtliche Adresse",
+      "physicalStore": "Ladengeschäft",
+      "pickupPoint": "Abholpunkt",
+      "warehouse": "Lager",
+      "office": "Büro",
+      "showroom": "Ausstellungsraum",
+      "eventLocation": "Veranstaltungsort"
+    },
     "resultsCount": "{count, plural, =0 {Keine Geschäfte gefunden} =1 {1 Geschäft gefunden} other {# Geschäfte gefunden}}",
     "noStores": "Keine Geschäfte entsprechen Ihren Kriterien",
     "loadMore": "Mehr Geschäfte laden",

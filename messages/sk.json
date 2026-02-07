@@ -2300,7 +2300,13 @@
       "shops": "obchody",
       "otherLocations": "ďalšie miesta",
       "zoomForDetails": "Priblížte si pre zobrazenie presných adries",
-      "viewStore": "Zobraziť obchod"
+      "viewStore": "Zobraziť obchod",
+      "locationTypes": {
+        "legalAddress": "Právna adresa",
+        "physicalStore": "Fyzický obchod",
+        "pickupPoint": "Výdajné miesto",
+        "warehouse": "Sklad"
+      }
     }
   },
   "about": {
@@ -2583,6 +2589,15 @@
       "recreation": "Rekreácia"
     },
     "countries": "Krajiny",
+    "locationTypes": {
+      "legalAddress": "Právna adresa",
+      "physicalStore": "Kamenný obchod",
+      "pickupPoint": "Miesto vyzdvihnutia",
+      "warehouse": "Sklad",
+      "office": "Kancelária",
+      "showroom": "Predvádzacia miestnosť",
+      "eventLocation": "Miesto podujatia"
+    },
     "resultsCount": "{count, plural, =0 {Nenašli sa žiadne obchody} =1 {Našiel sa 1 obchod} other {Našlo sa # obchodov}}",
     "noStores": "Žiadne obchody nezodpovedajú vašim kritériám",
     "loadMore": "Načítať viac obchodov",

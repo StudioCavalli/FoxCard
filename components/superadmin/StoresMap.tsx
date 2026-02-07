@@ -229,7 +229,7 @@ export function StoresMap() {
               <p className="text-2xl font-bold text-slate-900 dark:text-white">
                 {uniqueCountries}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{t('common.countries') || 'Pays'}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{t('countries')}</p>
             </div>
           </div>
         </div>

@@ -2367,7 +2367,13 @@
       "shops": "boutiques",
       "otherLocations": "autres emplacements",
       "zoomForDetails": "Zoomez pour voir les adresses précises",
-      "viewStore": "Voir la boutique"
+      "viewStore": "Voir la boutique",
+      "locationTypes": {
+        "legalAddress": "Adresse légale",
+        "physicalStore": "Boutique physique",
+        "pickupPoint": "Point de retrait",
+        "warehouse": "Entrepôt"
+      }
     }
   },
   "about": {
@@ -2650,6 +2656,15 @@
       "recreation": "Loisirs"
     },
     "countries": "Pays",
+    "locationTypes": {
+      "legalAddress": "Adresse légale",
+      "physicalStore": "Boutique physique",
+      "pickupPoint": "Point de retrait",
+      "warehouse": "Entrepôt",
+      "office": "Bureau",
+      "showroom": "Showroom",
+      "eventLocation": "Lieu d'événement"
+    },
     "resultsCount": "{count, plural, =0 {Aucune boutique trouvée} =1 {1 boutique trouvée} other {# boutiques trouvées}}",
     "noStores": "Aucune boutique ne correspond à vos critères",
     "loadMore": "Charger plus de boutiques",

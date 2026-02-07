@@ -2300,7 +2300,13 @@
       "shops": "tiendas",
       "otherLocations": "otras ubicaciones",
       "zoomForDetails": "Amplíe para ver las direcciones exactas",
-      "viewStore": "Ver tienda"
+      "viewStore": "Ver tienda",
+      "locationTypes": {
+        "legalAddress": "Dirección legal",
+        "physicalStore": "Tienda física",
+        "pickupPoint": "Punto de recogida",
+        "warehouse": "Almacén"
+      }
     }
   },
   "about": {
@@ -2583,6 +2589,15 @@
       "recreation": "Recreación"
     },
     "countries": "Países",
+    "locationTypes": {
+      "legalAddress": "Dirección legal",
+      "physicalStore": "Tienda física",
+      "pickupPoint": "Punto de recogida",
+      "warehouse": "Almacén",
+      "office": "Oficina",
+      "showroom": "Showroom",
+      "eventLocation": "Lugar de eventos"
+    },
     "resultsCount": "{count, plural, =0 {No se encontraron tiendas} =1 {1 tienda encontrada} other {# tiendas encontradas}}",
     "noStores": "No hay tiendas que coincidan con tus criterios",
     "loadMore": "Cargar más tiendas",
