@@ -145,6 +145,12 @@ export default function MerchantOnboardingPage() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([])
   const [typeConfig, setTypeConfig] = useState<Record<string, string | boolean>>({})
   const [selectedTheme, setSelectedTheme] = useState('modern')
+  const [addressData, setAddressData] = useState({
+    street: '',
+    city: '',
+    postalCode: '',
+    country: 'FR',
+  })
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -168,6 +174,7 @@ export default function MerchantOnboardingPage() {
   const createStore = trpc.store.create.useMutation()
   const createTheme = trpc.theme.create.useMutation()
   const seedThemes = trpc.theme.seedSystemThemes.useMutation()
+  const createLocation = trpc.storeLocation.create.useMutation()
 
   const handleNext = async () => {
     if (currentStep === 0 && !selectedCommerceType) return
@@ -198,6 +205,38 @@ export default function MerchantOnboardingPage() {
         publicPhone: storeData.publicPhone || undefined,
         countries: selectedCountries.length > 0 ? selectedCountries : undefined,
       })
+
+      // 1.5. Create location if address data is provided
+      if (addressData.street && addressData.city && addressData.postalCode) {
+        // Simple geocoding approximation based on country
+        const countryCoordinates: Record<string, [number, number]> = {
+          FR: [48.8566, 2.3522], DE: [52.5200, 13.4050], ES: [40.4168, -3.7038],
+          IT: [41.9028, 12.4964], GB: [51.5074, -0.1278], BE: [50.8503, 4.3517],
+          NL: [52.3676, 4.9041], CH: [46.9480, 7.4474], US: [38.9072, -77.0369],
+          HU: [47.4979, 19.0402], LT: [54.6872, 25.2797], SI: [46.0569, 14.5058],
+          RO: [44.4268, 26.1025], BG: [42.6977, 23.3219], HR: [45.8150, 15.9819],
+          LV: [56.9496, 24.1052], PL: [52.2297, 21.0122],
+        }
+        const coords = countryCoordinates[addressData.country] || [48.8566, 2.3522]
+        const offset = (Math.random() - 0.5) * 0.1
+
+        await createLocation.mutateAsync({
+          storeId: store.id,
+          data: {
+            type: 'LEGAL_ADDRESS',
+            name: `${storeData.name} - Siège Social`,
+            street: addressData.street,
+            city: addressData.city,
+            postalCode: addressData.postalCode,
+            country: addressData.country,
+            latitude: Number((coords[0] + offset).toFixed(6)),
+            longitude: Number((coords[1] + offset).toFixed(6)),
+            isPrimary: true,
+            isPublic: true,
+            isActive: true,
+          },
+        })
+      }
 
       // 2. Seed default themes and create custom theme
       await seedThemes.mutateAsync({ storeId: store.id })
@@ -511,6 +550,75 @@ export default function MerchantOnboardingPage() {
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Sélectionnez les pays où votre boutique est active
                   </p>
+                </div>
+
+                {/* Address (Optional) */}
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                    Adresse principale (optionnel)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                    Ajoutez votre adresse légale ou commerciale. Vous pourrez gérer plusieurs adresses dans les paramètres.
+                  </p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        Rue
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="123 Rue de la République"
+                        value={addressData.street}
+                        onChange={(e) => setAddressData({ ...addressData, street: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                          Ville
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Paris"
+                          value={addressData.city}
+                          onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                          Code postal
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="75001"
+                          value={addressData.postalCode}
+                          onChange={(e) => setAddressData({ ...addressData, postalCode: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        Pays
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="FR"
+                        value={addressData.country}
+                        onChange={(e) => setAddressData({ ...addressData, country: e.target.value.toUpperCase() })}
+                        maxLength={2}
+                        className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/50 border border-transparent rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                      />
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Code pays à 2 lettres (FR, DE, ES, etc.)
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

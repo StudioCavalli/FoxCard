@@ -6,6 +6,7 @@ import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { SingleImageUpload } from '@/components/ui/SingleImageUpload'
+import { LocationManager } from '@/components/admin/LocationManager'
 import { Store, Save, Eye, Image as ImageIcon, Globe, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Star } from 'lucide-react'
 
 export default function StoreSettingsPage() {
@@ -217,6 +218,11 @@ export default function StoreSettingsPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Location Management */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <LocationManager storeId={storeId} />
         </div>
 
         {/* Storefront Content */}
