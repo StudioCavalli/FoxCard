@@ -148,21 +148,21 @@ export function ExploreStores() {
   const defaultCenter: LatLngExpression = [50.5, 10.5]
   const defaultZoom = 4
 
-  // Custom marker icon
+  // Beautiful custom marker with shadow and modern design
   const createCustomIcon = (count: number) => {
-    const size = Math.min(40 + count * 2, 60)
+    const size = Math.min(45 + count * 3, 70)
     return new Icon({
-      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1' opacity='0.2'/%3E%3Ccircle cx='12' cy='12' r='8' fill='%236366f1'/%3E%3Ctext x='12' y='16' text-anchor='middle' font-size='10' font-weight='bold' fill='white'%3E${count}%3C/text%3E%3C/svg%3E`,
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -size / 2],
+      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size + 10}' viewBox='0 0 32 42'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='2'/%3E%3CfeOffset dx='0' dy='2' result='offsetblur'/%3E%3CfeFlood flood-color='%23000000' flood-opacity='0.3'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23shadow)'%3E%3Cpath d='M16 2 C10 2 5 7 5 13 C5 20 16 30 16 30 S27 20 27 13 C27 7 22 2 16 2 Z' fill='url(%23grad)' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='13' r='8' fill='white' fill-opacity='0.3'/%3E%3Ctext x='16' y='17' text-anchor='middle' font-family='Inter, system-ui, sans-serif' font-size='9' font-weight='700' fill='white'%3E${count}%3C/text%3E%3C/g%3E%3C/svg%3E`,
+      iconSize: [size, size + 10],
+      iconAnchor: [size / 2, size + 10],
+      popupAnchor: [0, -(size + 5)],
     })
   }
 
   if (!isMounted) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
-        <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
+      <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-900">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
       </div>
     )
   }
@@ -170,19 +170,19 @@ export function ExploreStores() {
   return (
     <div className="relative h-screen flex flex-col">
       {/* Header with Search and Filters */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm z-10">
+        <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder={t('searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full pl-11 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-slate-700 dark:text-white placeholder:text-slate-400 transition-all"
                 />
               </div>
             </div>
@@ -191,7 +191,7 @@ export function ExploreStores() {
             <select
               value={commerceType}
               onChange={(e) => setCommerceType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-slate-700 dark:text-white font-medium transition-all"
             >
               {COMMERCE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -204,12 +204,12 @@ export function ExploreStores() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-theme-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl hover:from-primary-700 hover:to-purple-700 shadow-lg shadow-primary-500/25 transition-all font-medium"
             >
               <Filter className="w-5 h-5" />
-              {t('filters')}
+              <span>{t('filters')}</span>
               {hasActiveFilters && (
-                <span className="bg-black/20 text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full font-semibold">
                   {[search, ...selectedCountries, commerceType !== 'ALL' ? commerceType : null].filter(Boolean).length}
                 </span>
               )}
@@ -218,10 +218,10 @@ export function ExploreStores() {
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-5 pt-5 border-t border-slate-200 dark:border-slate-700">
               <div className="flex flex-col gap-4">
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
                     {t('countries')}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -230,10 +230,10 @@ export function ExploreStores() {
                         key={country}
                         type="button"
                         onClick={() => toggleCountry(country)}
-                        className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                        className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           selectedCountries.includes(country)
-                            ? 'bg-theme-primary text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            ? 'bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-md shadow-primary-500/25'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
                         }`}
                       >
                         {getCountryFlag(country)} {getCountryLabel(country, locale)}
@@ -246,7 +246,7 @@ export function ExploreStores() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="flex items-center gap-2 text-sm text-theme-primary hover:underline self-start"
+                    className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors self-start"
                   >
                     <X className="w-4 h-4" />
                     {t('clearFilters')}
@@ -257,13 +257,17 @@ export function ExploreStores() {
           )}
 
           {/* Stats */}
-          <div className="mt-4 flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <Store className="w-4 h-4" />
+          <div className="mt-5 flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-2 font-medium">
+              <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              </div>
               <span>{t('resultsCount', { count: stores.length })}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
+            <div className="flex items-center gap-2 font-medium">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </div>
               <span>{markers.length} {markers.length === 1 ? 'country' : 'countries'}</span>
             </div>
           </div>
@@ -273,21 +277,23 @@ export function ExploreStores() {
       {/* Map */}
       <div className="flex-1 relative">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
+          <div className="flex items-center justify-center h-full bg-slate-50 dark:bg-slate-900">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-theme-primary mx-auto mb-2" />
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('loading')}</p>
+              <Loader2 className="w-10 h-10 animate-spin text-primary-600 mx-auto mb-3" />
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('loading')}</p>
             </div>
           </div>
         ) : stores.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
-            <Store className="w-16 h-16 text-gray-400 mb-4" />
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">{t('noStores')}</p>
+          <div className="flex flex-col items-center justify-center h-full bg-slate-50 dark:bg-slate-900">
+            <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+              <Store className="w-10 h-10 text-slate-400" />
+            </div>
+            <p className="text-xl font-semibold text-slate-900 dark:text-white mb-2">{t('noStores')}</p>
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-theme-primary hover:underline"
+                className="mt-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-lg hover:from-primary-700 hover:to-purple-700 transition-all font-medium"
               >
                 {t('clearFilters')}
               </button>
@@ -313,85 +319,68 @@ export function ExploreStores() {
                 position={marker.position}
                 icon={createCustomIcon(marker.stores.length)}
               >
-                <Popup maxWidth={320} className="custom-popup">
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
-                      <span className="text-2xl">{getCountryFlag(marker.country)}</span>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">
+                <Popup maxWidth={280} className="map-popup">
+                  <div className="p-0">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-3 py-2.5 flex items-center gap-2">
+                      <span className="text-xl">{getCountryFlag(marker.country)}</span>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold text-white truncate">
                           {getCountryLabel(marker.country, locale)}
-                        </h4>
-                        <p className="text-xs text-gray-600">
-                          {marker.stores.length} {marker.stores.length === 1 ? 'store' : 'stores'}
+                        </h3>
+                        <p className="text-xs text-primary-100">
+                          {marker.stores.length} {marker.stores.length === 1 ? 'boutique' : 'boutiques'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                      {marker.stores.map(store => (
-                        <Link
-                          key={store.id}
-                          href={`/${locale}/store/${store.slug}`}
-                          className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-md transition-colors group border border-transparent hover:border-slate-200 hover:shadow-sm"
-                        >
-                          {/* Logo */}
-                          <div className="flex-shrink-0">
+                    {/* Stores list */}
+                    <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
+                      <div className="space-y-1.5">
+                        {marker.stores.map(store => (
+                          <Link
+                            key={store.id}
+                            href={`/${locale}/stores/${store.slug}`}
+                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                          >
+                            {/* Logo */}
                             {store.logo ? (
                               <Image
                                 src={store.logo}
                                 alt={store.name}
-                                width={36}
-                                height={36}
-                                className="w-9 h-9 rounded-md object-cover"
+                                width={32}
+                                height={32}
+                                className="w-8 h-8 rounded-md object-cover flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-9 h-9 bg-theme-primary/10 rounded-md flex items-center justify-center">
-                                <Store className="w-4 h-4 text-theme-primary" />
+                              <div className="w-8 h-8 rounded-md bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+                                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                               </div>
                             )}
-                          </div>
 
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 group-hover:text-theme-primary transition-colors truncate">
-                              {store.name}
-                            </p>
-                            {store.tagline && (
-                              <p className="text-xs text-gray-500 truncate mt-0.5">
-                                {store.tagline}
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate leading-tight">
+                                {store.name}
                               </p>
-                            )}
 
-                            {/* Stats & Countries */}
-                            <div className="flex items-center gap-2 mt-1">
-                              {store.rating && store.rating > 0 && (
-                                <>
-                                  <div className="flex items-center gap-0.5 text-xs text-gray-600">
-                                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                                    <span className="font-medium">{store.rating.toFixed(1)}</span>
+                              {/* Stats */}
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {store.rating && store.rating > 0 && (
+                                  <div className="flex items-center gap-0.5">
+                                    <Star className="w-2.5 h-2.5 text-amber-500 fill-current" />
+                                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.rating.toFixed(1)}</span>
                                   </div>
-                                  <span className="text-gray-300">•</span>
-                                </>
-                              )}
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                <Package className="w-3 h-3" />
-                                <span>{store.productsCount}</span>
-                              </div>
-                              <span className="text-gray-300">•</span>
-                              <div className="flex items-center gap-0.5">
-                                {store.countries?.slice(0, 3).map(c => (
-                                  <span key={c} className="text-sm leading-none">
-                                    {getCountryFlag(c)}
-                                  </span>
-                                ))}
-                                {store.countries && store.countries.length > 3 && (
-                                  <span className="text-xs text-gray-500 ml-0.5">+{store.countries.length - 3}</span>
                                 )}
+                                <div className="flex items-center gap-0.5">
+                                  <Package className="w-2.5 h-2.5 text-slate-400" />
+                                  <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.productsCount}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      ))}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </Popup>

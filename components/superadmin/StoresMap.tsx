@@ -168,14 +168,14 @@ export function StoresMap() {
   const defaultCenter: LatLngExpression = [50.5, 10.5]
   const defaultZoom = 4
 
-  // Custom marker icon
+  // Beautiful custom marker with shadow and modern design
   const createCustomIcon = (count: number) => {
-    const size = Math.min(40 + count * 2, 60)
+    const size = Math.min(45 + count * 3, 70)
     return new Icon({
-      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1' opacity='0.2'/%3E%3Ccircle cx='12' cy='12' r='8' fill='%236366f1'/%3E%3Ctext x='12' y='16' text-anchor='middle' font-size='10' font-weight='bold' fill='white'%3E${count}%3C/text%3E%3C/svg%3E`,
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -size / 2],
+      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size + 10}' viewBox='0 0 32 42'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='2'/%3E%3CfeOffset dx='0' dy='2' result='offsetblur'/%3E%3CfeFlood flood-color='%23000000' flood-opacity='0.3'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23shadow)'%3E%3Cpath d='M16 2 C10 2 5 7 5 13 C5 20 16 30 16 30 S27 20 27 13 C27 7 22 2 16 2 Z' fill='url(%23grad)' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='13' r='8' fill='white' fill-opacity='0.3'/%3E%3Ctext x='16' y='17' text-anchor='middle' font-family='Inter, system-ui, sans-serif' font-size='9' font-weight='700' fill='white'%3E${count}%3C/text%3E%3C/g%3E%3C/svg%3E`,
+      iconSize: [size, size + 10],
+      iconAnchor: [size / 2, size + 10],
+      popupAnchor: [0, -(size + 5)],
     })
   }
 
@@ -240,85 +240,68 @@ export function StoresMap() {
                 position={marker.position}
                 icon={createCustomIcon(marker.stores.length)}
               >
-                <Popup maxWidth={300}>
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200">
-                      <span className="text-2xl">{getCountryFlag(marker.country)}</span>
-                      <div>
-                        <h4 className="font-semibold text-slate-900">
+                <Popup maxWidth={280} className="map-popup">
+                  <div className="p-0">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-3 py-2.5 flex items-center gap-2">
+                      <span className="text-xl">{getCountryFlag(marker.country)}</span>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold text-white truncate">
                           {getCountryLabel(marker.country, locale)}
-                        </h4>
-                        <p className="text-xs text-slate-600">
+                        </h3>
+                        <p className="text-xs text-primary-100">
                           {marker.stores.length} {marker.stores.length === 1 ? tMap('store') : tMap('stores')}
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                      {marker.stores.map(store => (
-                        <a
-                          key={store.id}
-                          href={`/${locale}/superadmin/stores/${store.id}`}
-                          className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-md transition-colors group border border-transparent hover:border-slate-200 hover:shadow-sm"
-                        >
-                          {/* Logo */}
-                          <div className="flex-shrink-0">
+                    {/* Stores list */}
+                    <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
+                      <div className="space-y-1.5">
+                        {marker.stores.map(store => (
+                          <a
+                            key={store.id}
+                            href={`/${locale}/superadmin/stores/${store.id}`}
+                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                          >
+                            {/* Logo */}
                             {store.logo ? (
                               <Image
                                 src={store.logo}
                                 alt={store.name}
-                                width={36}
-                                height={36}
-                                className="w-9 h-9 rounded-md object-cover"
+                                width={32}
+                                height={32}
+                                className="w-8 h-8 rounded-md object-cover flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-9 h-9 bg-primary-500/10 rounded-md flex items-center justify-center">
-                                <Store className="w-4 h-4 text-primary-500" />
+                              <div className="w-8 h-8 rounded-md bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+                                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                               </div>
                             )}
-                          </div>
 
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-900 group-hover:text-primary-500 transition-colors truncate">
-                              {store.name}
-                            </p>
-                            {store.tagline && (
-                              <p className="text-xs text-slate-500 truncate mt-0.5">
-                                {store.tagline}
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate leading-tight">
+                                {store.name}
                               </p>
-                            )}
 
-                            {/* Stats & Countries */}
-                            <div className="flex items-center gap-2 mt-1">
-                              {store.rating && store.rating > 0 && (
-                                <>
-                                  <div className="flex items-center gap-0.5 text-xs text-slate-600">
-                                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                                    <span className="font-medium">{store.rating.toFixed(1)}</span>
+                              {/* Stats */}
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {store.rating && store.rating > 0 && (
+                                  <div className="flex items-center gap-0.5">
+                                    <Star className="w-2.5 h-2.5 text-amber-500 fill-current" />
+                                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.rating.toFixed(1)}</span>
                                   </div>
-                                  <span className="text-slate-300">•</span>
-                                </>
-                              )}
-                              <div className="flex items-center gap-1 text-xs text-slate-500">
-                                <Package className="w-3 h-3" />
-                                <span>{store.productsCount}</span>
-                              </div>
-                              <span className="text-slate-300">•</span>
-                              <div className="flex items-center gap-0.5">
-                                {store.countries.slice(0, 3).map(c => (
-                                  <span key={c} className="text-sm leading-none">
-                                    {getCountryFlag(c)}
-                                  </span>
-                                ))}
-                                {store.countries.length > 3 && (
-                                  <span className="text-xs text-slate-500 ml-0.5">+{store.countries.length - 3}</span>
                                 )}
+                                <div className="flex items-center gap-0.5">
+                                  <Package className="w-2.5 h-2.5 text-slate-400" />
+                                  <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.productsCount}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </a>
-                      ))}
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </Popup>
