@@ -77,58 +77,49 @@ export function ExploreStores() {
   const [commerceType, setCommerceType] = useState('ALL')
   const [showFilters, setShowFilters] = useState(false)
 
-  const { data: storesData, isLoading } = trpc.store.exploreStores.useQuery({
+  const { data: storesData, isLoading: isLoadingStores } = trpc.store.exploreStores.useQuery({
     limit: 100,
     search: search || undefined,
     countries: selectedCountries.length > 0 ? selectedCountries : undefined,
     commerceType: commerceType !== 'ALL' ? commerceType : undefined,
   })
 
+  // Get locations with GPS coordinates
+  const { data: locationsData, isLoading: isLoadingLocations } = trpc.storeLocation.getPublicLocations.useQuery({
+    type: undefined, // Show all types of locations
+    country: selectedCountries.length === 1 ? selectedCountries[0] : undefined,
+  })
+
   const stores = storesData?.stores || []
   const availableCountries = storesData?.availableCountries || []
+  const locations = locationsData || []
+  const isLoading = isLoadingStores || isLoadingLocations
 
   // Only render map on client side
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Create markers for each country with stores
+  // Create markers for each location with GPS coordinates
   const markers = useMemo(() => {
-    const result: Array<{
-      position: [number, number]
-      country: string
-      stores: StoreLocation[]
-    }> = []
+    if (!locations || locations.length === 0) return []
 
-    if (stores.length > 0) {
-      const storesByCountry = new Map<string, StoreLocation[]>()
+    // Filter locations based on search if applicable
+    const filtered = search
+      ? locations.filter((loc) =>
+          loc.store?.name.toLowerCase().includes(search.toLowerCase()) ||
+          loc.name.toLowerCase().includes(search.toLowerCase()) ||
+          loc.city.toLowerCase().includes(search.toLowerCase())
+        )
+      : locations
 
-      stores.forEach(store => {
-        store.countries?.forEach(country => {
-          if (!storesByCountry.has(country)) {
-            storesByCountry.set(country, [])
-          }
-          const countryStores = storesByCountry.get(country)
-          if (countryStores) {
-            countryStores.push(store)
-          }
-        })
-      })
-
-      storesByCountry.forEach((countryStores, country) => {
-        const coordinates = COUNTRY_COORDINATES[country]
-        if (coordinates) {
-          result.push({
-            position: coordinates,
-            country,
-            stores: countryStores,
-          })
-        }
-      })
-    }
-
-    return result
-  }, [stores])
+    return filtered.map((location) => ({
+      id: location.id,
+      position: [location.latitude, location.longitude] as [number, number],
+      location,
+      store: location.store,
+    }))
+  }, [locations, search])
 
   const toggleCountry = (country: string) => {
     setSelectedCountries((prev) =>
@@ -149,10 +140,10 @@ export function ExploreStores() {
   const defaultZoom = 4
 
   // Beautiful custom marker with shadow and modern design
-  const createCustomIcon = (count: number) => {
-    const size = Math.min(45 + count * 3, 70)
+  const createCustomIcon = () => {
+    const size = 40
     return new Icon({
-      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size + 10}' viewBox='0 0 32 42'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='2'/%3E%3CfeOffset dx='0' dy='2' result='offsetblur'/%3E%3CfeFlood flood-color='%23000000' flood-opacity='0.3'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23shadow)'%3E%3Cpath d='M16 2 C10 2 5 7 5 13 C5 20 16 30 16 30 S27 20 27 13 C27 7 22 2 16 2 Z' fill='url(%23grad)' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='13' r='8' fill='white' fill-opacity='0.3'/%3E%3Ctext x='16' y='17' text-anchor='middle' font-family='Inter, system-ui, sans-serif' font-size='9' font-weight='700' fill='white'%3E${count}%3C/text%3E%3C/g%3E%3C/svg%3E`,
+      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size + 10}' viewBox='0 0 32 42'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='2'/%3E%3CfeOffset dx='0' dy='2' result='offsetblur'/%3E%3CfeFlood flood-color='%23000000' flood-opacity='0.3'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23shadow)'%3E%3Cpath d='M16 2 C10 2 5 7 5 13 C5 20 16 30 16 30 S27 20 27 13 C27 7 22 2 16 2 Z' fill='url(%23grad)' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='13' r='6' fill='white' fill-opacity='0.4'/%3E%3C/g%3E%3C/svg%3E`,
       iconSize: [size, size + 10],
       iconAnchor: [size / 2, size + 10],
       popupAnchor: [0, -(size + 5)],
@@ -313,73 +304,81 @@ export function ExploreStores() {
 
             <MapCenterAdjuster center={defaultCenter} />
 
-            {markers.map((marker, idx) => (
+            {markers.map((marker) => (
               <Marker
-                key={`${marker.country}-${idx}`}
+                key={marker.id}
                 position={marker.position}
-                icon={createCustomIcon(marker.stores.length)}
+                icon={createCustomIcon()}
               >
                 <Popup maxWidth={280} className="map-popup">
                   <div className="p-0">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-3 py-2.5 flex items-center gap-2">
-                      <span className="text-xl">{getCountryFlag(marker.country)}</span>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-white truncate">
-                          {getCountryLabel(marker.country, locale)}
-                        </h3>
-                        <p className="text-xs text-primary-100">
-                          {marker.stores.length} {marker.stores.length === 1 ? 'boutique' : 'boutiques'}
-                        </p>
-                      </div>
+                    <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-3 py-2.5">
+                      <Link href={`/${locale}/stores/${marker.store?.slug}`} className="block hover:opacity-90 transition-opacity">
+                        <div className="flex items-center gap-2">
+                          {/* Store logo */}
+                          {marker.store?.logo ? (
+                            <Image
+                              src={marker.store.logo}
+                              alt={marker.store.name || ''}
+                              width={32}
+                              height={32}
+                              className="w-8 h-8 rounded-md object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-md bg-white/20 flex items-center justify-center flex-shrink-0">
+                              <Store className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-bold text-white truncate">
+                              {marker.store?.name}
+                            </h3>
+                            <p className="text-xs text-primary-100 truncate">
+                              {marker.location.name}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
                     </div>
 
-                    {/* Stores list */}
-                    <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
-                      <div className="space-y-1.5">
-                        {marker.stores.map(store => (
-                          <Link
-                            key={store.id}
-                            href={`/${locale}/stores/${store.slug}`}
-                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
-                          >
-                            {/* Logo */}
-                            {store.logo ? (
-                              <Image
-                                src={store.logo}
-                                alt={store.name}
-                                width={32}
-                                height={32}
-                                className="w-8 h-8 rounded-md object-cover flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-md bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
-                                <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                              </div>
-                            )}
+                    {/* Location details */}
+                    <div className="p-3">
+                      <div className="space-y-2 text-xs">
+                        {/* Address */}
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0 text-slate-600 dark:text-slate-400">
+                            <p>{marker.location.street}</p>
+                            <p>{marker.location.postalCode} {marker.location.city}</p>
+                            <p>{getCountryLabel(marker.location.country, locale)}</p>
+                          </div>
+                        </div>
 
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate leading-tight">
-                                {store.name}
-                              </p>
+                        {/* Phone */}
+                        {marker.location.phone && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">📞</span>
+                            <a href={`tel:${marker.location.phone}`} className="text-primary-600 hover:underline">
+                              {marker.location.phone}
+                            </a>
+                          </div>
+                        )}
 
-                              {/* Stats */}
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {store.rating && store.rating > 0 && (
-                                  <div className="flex items-center gap-0.5">
-                                    <Star className="w-2.5 h-2.5 text-amber-500 fill-current" />
-                                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.rating.toFixed(1)}</span>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-0.5">
-                                  <Package className="w-2.5 h-2.5 text-slate-400" />
-                                  <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{store.productsCount}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
+                        {/* Type badge */}
+                        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                          <span className="inline-block px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded text-[10px] font-medium">
+                            {marker.location.type.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+
+                        {/* View store button */}
+                        <Link
+                          href={`/${locale}/stores/${marker.store?.slug}`}
+                          className="block w-full text-center px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-xs font-medium mt-2"
+                        >
+                          Voir la boutique
+                        </Link>
                       </div>
                     </div>
                   </div>

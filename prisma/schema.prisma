@@ -109,6 +109,9 @@ model Store {
   timeSlots        TimeSlot[]
   blockedDates     BlockedDate[]
 
+  // Store Locations (multiple addresses with GPS)
+  locations        StoreLocation[] @relation("StoreLocations")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -4344,4 +4347,70 @@ enum VerificationStatus {
   APPROVED
   REJECTED
   EXPIRED
+}
+
+// Store Locations - Multiple addresses per store with precise GPS coordinates
+model StoreLocation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation("StoreLocations", fields: [storeId], references: [id], onDelete: Cascade)
+
+  // Location type
+  type        StoreLocationType
+
+  // Basic info
+  name        String   // e.g., "Main Store", "Warehouse Paris", "Pickup Point Lyon"
+  description String?
+
+  // Complete address
+  street      String
+  street2     String?  // Additional address line
+  city        String
+  state       String?  // State/Province
+  postalCode  String
+  country     String   @default("FR") // ISO 3166-1 alpha-2
+
+  // GPS coordinates (precise location)
+  latitude    Float
+  longitude   Float
+
+  // Contact
+  phone       String?
+  email       String?
+  contactName String?  // Manager/Contact person
+
+  // Operating hours
+  openingHours Json?   // { monday: { open: "09:00", close: "18:00", closed: false }, ... }
+  specialDates Json?   // Special dates/holidays
+
+  // Settings
+  isActive    Boolean  @default(true)
+  isPrimary   Boolean  @default(false) // Primary location for this type
+  isPublic    Boolean  @default(true)  // Show on public map/directory
+
+  // Display order
+  displayOrder Int     @default(0)
+
+  // Additional info
+  instructions String? // Pickup/delivery instructions
+  notes       String? // Internal notes
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([type])
+  @@index([isActive])
+  @@index([isPublic])
+  @@index([latitude, longitude]) // For geospatial queries
+}
+
+enum StoreLocationType {
+  LEGAL_ADDRESS       // Registered business address (siège social)
+  PHYSICAL_STORE      // Physical retail store
+  PICKUP_POINT        // Click & Collect / Pickup location
+  WAREHOUSE           // Storage/fulfillment center
+  OFFICE              // Administrative office
+  SHOWROOM            // Display/showroom only
+  EVENT_LOCATION      // Temporary event location
 }

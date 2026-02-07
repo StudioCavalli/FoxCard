@@ -2084,31 +2084,48 @@ export const superadminRouter = router({
 
   // Get store locations for map visualization
   getStoreLocations: superAdminProcedure.query(async ({ ctx }) => {
-    const stores = await ctx.prisma.store.findMany({
+    // Get all locations with GPS coordinates
+    const locations = await ctx.prisma.storeLocation.findMany({
       where: {
-        status: { in: ['ACTIVE', 'PENDING'] },
+        isActive: true,
+        store: {
+          status: { in: ['ACTIVE', 'PENDING'] },
+        },
       },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        countries: true,
-        logo: true,
-        tagline: true,
-        rating: true,
-        reviewsCount: true,
-        _count: {
+      include: {
+        store: {
           select: {
-            products: { where: { status: 'ACTIVE' } },
+            id: true,
+            name: true,
+            slug: true,
+            logo: true,
+            tagline: true,
+            rating: true,
+            reviewsCount: true,
+            _count: {
+              select: {
+                products: { where: { status: 'ACTIVE' } },
+              },
+            },
           },
         },
       },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'asc' },
     })
 
-    return stores.map((store) => ({
-      ...store,
-      productsCount: store._count.products,
+    return locations.map((location) => ({
+      id: location.id,
+      type: location.type,
+      name: location.name,
+      street: location.street,
+      city: location.city,
+      country: location.country,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      store: {
+        ...location.store,
+        productsCount: location.store._count.products,
+      },
     }))
   }),
 })
