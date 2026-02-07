@@ -51,16 +51,6 @@ function ZoomHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void })
   return null
 }
 
-// Custom map center adjuster component
-function MapCenterAdjuster({ center }: { center: LatLngExpression }) {
-  const map = useMap()
-
-  useEffect(() => {
-    map.setView(center, map.getZoom())
-  }, [center, map])
-
-  return null
-}
 
 // Get location type icon and color
 function getLocationTypeInfo(type: string) {
@@ -264,7 +254,6 @@ export function StoresMap() {
             />
 
             <ZoomHandler onZoomChange={setCurrentZoom} />
-            <MapCenterAdjuster center={defaultCenter} />
 
             {/* Show country clusters when zoomed out */}
             {showClusters && countryMarkers.map((cluster) => (
