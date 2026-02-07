@@ -2291,7 +2291,16 @@
       "countriesWithStores": "Krajiny s obchodmi",
       "verifiedStores": "Overené obchody",
       "store": "obchod",
-      "stores": "obchody"
+      "stores": "obchody",
+      "locations": "miesta",
+      "location": "miesto",
+      "place": "miesto",
+      "places": "miesta",
+      "shop": "obchod",
+      "shops": "obchody",
+      "otherLocations": "ďalšie miesta",
+      "zoomForDetails": "Priblížte si pre zobrazenie presných adries",
+      "viewStore": "Zobraziť obchod"
     }
   },
   "about": {
@@ -2579,6 +2588,15 @@
     "loadMore": "Načítať viac obchodov",
     "loading": "Načítava sa...",
     "products": "produkty",
-    "reviews": "recenzie"
+    "reviews": "recenzie",
+    "locations": "miesta",
+    "location": "miesto",
+    "place": "miesto",
+    "places": "miesta",
+    "shop": "obchod",
+    "shops": "obchody",
+    "otherLocations": "ďalšie miesta",
+    "zoomForDetails": "Priblížte si pre zobrazenie presných adries",
+    "viewStore": "Zobraziť obchod"
   }
 }

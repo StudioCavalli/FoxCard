@@ -2291,7 +2291,16 @@
       "countriesWithStores": "Países con tiendas",
       "verifiedStores": "Tiendas verificadas",
       "store": "tienda",
-      "stores": "tiendas"
+      "stores": "tiendas",
+      "locations": "ubicaciones",
+      "location": "ubicación",
+      "place": "lugar",
+      "places": "lugares",
+      "shop": "tienda",
+      "shops": "tiendas",
+      "otherLocations": "otras ubicaciones",
+      "zoomForDetails": "Amplíe para ver las direcciones exactas",
+      "viewStore": "Ver tienda"
     }
   },
   "about": {
@@ -2579,6 +2588,15 @@
     "loadMore": "Cargar más tiendas",
     "loading": "Cargando...",
     "products": "productos",
-    "reviews": "reseñas"
+    "reviews": "reseñas",
+    "locations": "ubicaciones",
+    "location": "ubicación",
+    "place": "lugar",
+    "places": "lugares",
+    "shop": "tienda",
+    "shops": "tiendas",
+    "otherLocations": "otras ubicaciones",
+    "zoomForDetails": "Amplíe para ver las direcciones exactas",
+    "viewStore": "Ver tienda"
   }
 }

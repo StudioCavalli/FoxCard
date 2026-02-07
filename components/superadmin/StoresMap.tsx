@@ -53,16 +53,16 @@ function ZoomHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void })
 
 
 // Get location type icon and color
-function getLocationTypeInfo(type: string) {
+function getLocationTypeInfo(type: string, tMap: any) {
   switch (type) {
     case 'LEGAL_ADDRESS':
-      return { icon: Building2, color: 'bg-amber-500', label: 'Adresse légale' }
+      return { icon: Building2, color: 'bg-amber-500', label: tMap('locationTypes.legalAddress') }
     case 'PHYSICAL_STORE':
-      return { icon: Store, color: 'bg-primary-500', label: 'Boutique physique' }
+      return { icon: Store, color: 'bg-primary-500', label: tMap('locationTypes.physicalStore') }
     case 'PICKUP_POINT':
-      return { icon: Package, color: 'bg-green-500', label: 'Point de retrait' }
+      return { icon: Package, color: 'bg-green-500', label: tMap('locationTypes.pickupPoint') }
     case 'WAREHOUSE':
-      return { icon: Package, color: 'bg-slate-500', label: 'Entrepôt' }
+      return { icon: Package, color: 'bg-slate-500', label: tMap('locationTypes.warehouse') }
     default:
       return { icon: MapPin, color: 'bg-slate-500', label: type }
   }
@@ -149,6 +149,7 @@ export function StoresMap() {
 
   // Create cluster icon with count
   const createClusterIcon = (count: number, storeCount: number) => {
+    const placeLabel = count === 1 ? tMap('place') : tMap('places')
     return new DivIcon({
       html: `
         <div class="flex flex-col items-center">
@@ -156,7 +157,7 @@ export function StoresMap() {
             <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 shadow-lg flex items-center justify-center border-4 border-white">
               <div class="text-center">
                 <div class="text-white font-bold text-lg">${storeCount}</div>
-                <div class="text-white text-[9px] font-medium -mt-1">${count === 1 ? 'lieu' : 'lieux'}</div>
+                <div class="text-white text-[9px] font-medium -mt-1">${placeLabel}</div>
               </div>
             </div>
             <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-white"></div>
@@ -214,7 +215,7 @@ export function StoresMap() {
               <p className="text-2xl font-bold text-slate-900 dark:text-white">
                 {markers.length}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Emplacements</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{tMap('locations')}</p>
             </div>
           </div>
         </div>
@@ -228,7 +229,7 @@ export function StoresMap() {
               <p className="text-2xl font-bold text-slate-900 dark:text-white">
                 {uniqueCountries}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Pays</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{t('common.countries') || 'Pays'}</p>
             </div>
           </div>
         </div>
@@ -272,7 +273,7 @@ export function StoresMap() {
                             {getCountryLabel(cluster.country, locale)}
                           </h3>
                           <p className="text-sm text-primary-100">
-                            {cluster.storeCount} {cluster.storeCount === 1 ? 'boutique' : 'boutiques'}
+                            {cluster.storeCount} {cluster.storeCount === 1 ? tMap('shop') : tMap('shops')}
                           </p>
                         </div>
                       </div>
@@ -308,12 +309,12 @@ export function StoresMap() {
                         ))}
                         {cluster.locations.length > 3 && (
                           <p className="text-xs text-center text-slate-500 pt-2 border-t">
-                            +{cluster.locations.length - 3} autres emplacements
+                            +{cluster.locations.length - 3} {tMap('otherLocations')}
                           </p>
                         )}
                       </div>
                       <p className="text-xs text-center text-slate-500 mt-3 pt-3 border-t">
-                        💡 Zoomez pour voir les adresses précises
+                        💡 {tMap('zoomForDetails')}
                       </p>
                     </div>
                   </div>
@@ -323,7 +324,7 @@ export function StoresMap() {
 
             {/* Show individual locations when zoomed in */}
             {!showClusters && markers.map((marker: any) => {
-              const typeInfo = getLocationTypeInfo(marker.location.type)
+              const typeInfo = getLocationTypeInfo(marker.location.type, tMap)
               const TypeIcon = typeInfo.icon
 
               return (
@@ -402,7 +403,7 @@ export function StoresMap() {
                             href={`/${locale}/superadmin/stores/${marker.store.id}`}
                             className={`block w-full text-center px-4 py-2.5 ${typeInfo.color} text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold shadow-sm`}
                           >
-                            Voir la boutique
+                            {tMap('viewStore')}
                           </a>
                         </div>
                       </div>

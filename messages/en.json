@@ -2358,7 +2358,16 @@
       "countriesWithStores": "Countries with stores",
       "verifiedStores": "Verified stores",
       "store": "store",
-      "stores": "stores"
+      "stores": "stores",
+      "locations": "locations",
+      "location": "location",
+      "place": "place",
+      "places": "places",
+      "shop": "shop",
+      "shops": "shops",
+      "otherLocations": "other locations",
+      "zoomForDetails": "Zoom in to see precise addresses",
+      "viewStore": "View store"
     }
   },
   "about": {
@@ -2646,6 +2655,15 @@
     "loadMore": "Load more stores",
     "loading": "Loading...",
     "products": "products",
-    "reviews": "reviews"
+    "reviews": "reviews",
+    "locations": "locations",
+    "location": "location",
+    "place": "place",
+    "places": "places",
+    "shop": "shop",
+    "shops": "shops",
+    "otherLocations": "other locations",
+    "zoomForDetails": "Zoom in to see precise addresses",
+    "viewStore": "View store"
   }
 }
