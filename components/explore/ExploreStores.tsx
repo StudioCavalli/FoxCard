@@ -244,9 +244,9 @@ export function ExploreStores() {
   }
 
   return (
-    <div className="relative h-screen flex flex-col">
+    <div className="space-y-6 py-8">
       {/* Header with Search and Filters */}
-      <div className="bg-white border-b border-slate-200 shadow-sm z-10">
+      <div className="bg-white border-b border-slate-200 shadow-sm rounded-xl overflow-hidden">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
@@ -351,7 +351,8 @@ export function ExploreStores() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 relative">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="h-[700px] relative">
         {isLoading ? (
           <div className="flex items-center justify-center h-full bg-slate-50">
             <div className="text-center">
@@ -489,16 +490,37 @@ export function ExploreStores() {
                       <div className="p-4 bg-white">
                         <div className="space-y-3">
                           {/* Address */}
-                          <div>
-                            <div className="flex items-start gap-2 text-slate-700">
-                              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
-                              <div className="text-sm leading-relaxed">
-                                <p className="font-medium">{marker.location.street}</p>
-                                <p>{marker.location.postalCode} {marker.location.city}</p>
-                                <p>{getCountryLabel(marker.location.country, locale)}</p>
+                          <div className="text-slate-700 text-sm">
+                            <p className="font-medium flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                              {marker.location.street}
+                            </p>
+                            <p className="pl-6">{marker.location.postalCode} {marker.location.city}</p>
+                            <p className="pl-6">{getCountryLabel(marker.location.country, locale)}</p>
+                          </div>
+
+                          {/* Store Stats */}
+                          {(marker.store?.rating || (marker.store as any)?._count?.products) && (
+                            <div className="pt-3 border-t border-slate-100">
+                              <div className="flex items-center gap-4 text-sm">
+                                {marker.store?.rating && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-base">⭐</span>
+                                    <span className="font-semibold text-slate-900">{marker.store.rating.toFixed(1)}</span>
+                                    {marker.store?.reviewsCount && (
+                                      <span className="text-slate-500">({marker.store.reviewsCount})</span>
+                                    )}
+                                  </div>
+                                )}
+                                {(marker.store as any)?._count?.products > 0 && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-base">📦</span>
+                                    <span className="font-semibold text-slate-900">{(marker.store as any)._count.products}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          </div>
+                          )}
 
                           {/* Contact Info */}
                           {(marker.location.phone || marker.location.email) && (
@@ -534,7 +556,7 @@ export function ExploreStores() {
                           {/* View store button */}
                           <Link
                             href={`/${locale}/stores/${marker.store?.slug}`}
-                            className={`block w-full text-center px-4 py-2.5 ${typeInfo.color} text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold shadow-sm`}
+                            className={`block w-full text-center px-4 py-2.5 ${typeInfo.color} rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold shadow-sm !text-white`}
                           >
                             {t('viewStore')}
                           </Link>
@@ -547,6 +569,7 @@ export function ExploreStores() {
             })}
           </MapContainer>
         )}
+        </div>
       </div>
     </div>
   )
