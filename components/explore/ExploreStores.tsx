@@ -1,15 +1,15 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
-import { Icon } from 'leaflet'
+import { Icon, DivIcon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { trpc } from '@/lib/trpc/client'
 import { useTranslations } from 'next-intl'
 import { getCountryFlag, getCountryLabel } from '@/lib/countries'
 import { useLocale } from 'next-intl'
-import { Search, Filter, X, Store, MapPin, Star, Package, Loader2 } from 'lucide-react'
+import { Search, Filter, X, Store, MapPin, Star, Package, Loader2, Phone, Mail, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -57,6 +57,21 @@ interface StoreLocation {
   commerceType?: string | null
 }
 
+// Zoom level handler component
+function ZoomHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom())
+    },
+  })
+
+  useEffect(() => {
+    onZoomChange(map.getZoom())
+  }, [map, onZoomChange])
+
+  return null
+}
+
 // Custom map center adjuster component
 function MapCenterAdjuster({ center }: { center: LatLngExpression }) {
   const map = useMap()
@@ -68,6 +83,22 @@ function MapCenterAdjuster({ center }: { center: LatLngExpression }) {
   return null
 }
 
+// Get location type icon and color
+function getLocationTypeInfo(type: string) {
+  switch (type) {
+    case 'LEGAL_ADDRESS':
+      return { icon: Building2, color: 'bg-amber-500', label: 'Adresse légale' }
+    case 'PHYSICAL_STORE':
+      return { icon: Store, color: 'bg-primary-500', label: 'Boutique physique' }
+    case 'PICKUP_POINT':
+      return { icon: Package, color: 'bg-green-500', label: 'Point de retrait' }
+    case 'WAREHOUSE':
+      return { icon: Package, color: 'bg-slate-500', label: 'Entrepôt' }
+    default:
+      return { icon: MapPin, color: 'bg-slate-500', label: type }
+  }
+}
+
 export function ExploreStores() {
   const t = useTranslations('explore')
   const locale = useLocale()
@@ -76,6 +107,7 @@ export function ExploreStores() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([])
   const [commerceType, setCommerceType] = useState('ALL')
   const [showFilters, setShowFilters] = useState(false)
+  const [currentZoom, setCurrentZoom] = useState(4)
 
   const { data: storesData, isLoading: isLoadingStores } = trpc.store.exploreStores.useQuery({
     limit: 100,
@@ -86,7 +118,7 @@ export function ExploreStores() {
 
   // Get locations with GPS coordinates
   const { data: locationsData, isLoading: isLoadingLocations } = trpc.storeLocation.getPublicLocations.useQuery({
-    type: undefined, // Show all types of locations
+    type: undefined,
     country: selectedCountries.length === 1 ? selectedCountries[0] : undefined,
   })
 
@@ -100,11 +132,47 @@ export function ExploreStores() {
     setIsMounted(true)
   }, [])
 
-  // Create markers for each location with GPS coordinates
-  const markers = useMemo(() => {
-    if (!locations || locations.length === 0) return []
+  // Group locations by country
+  const locationsByCountry = useMemo(() => {
+    const grouped: Record<string, any[]> = {}
 
-    // Filter locations based on search if applicable
+    const filtered = search
+      ? locations.filter((loc) =>
+          loc.store?.name.toLowerCase().includes(search.toLowerCase()) ||
+          loc.name.toLowerCase().includes(search.toLowerCase()) ||
+          loc.city.toLowerCase().includes(search.toLowerCase())
+        )
+      : locations
+
+    filtered.forEach((location) => {
+      if (!grouped[location.country]) {
+        grouped[location.country] = []
+      }
+      grouped[location.country].push(location)
+    })
+
+    return grouped
+  }, [locations, search])
+
+  // Create country cluster markers (shown when zoomed out)
+  const countryMarkers = useMemo(() => {
+    return Object.entries(locationsByCountry).map(([country, locs]) => {
+      const coords = COUNTRY_COORDINATES[country] || [48.8566, 2.3522]
+      const uniqueStores = new Set(locs.map(l => l.store?.id)).size
+
+      return {
+        id: `country-${country}`,
+        country,
+        position: coords as [number, number],
+        count: locs.length,
+        storeCount: uniqueStores,
+        locations: locs,
+      }
+    })
+  }, [locationsByCountry])
+
+  // Create individual location markers (shown when zoomed in)
+  const locationMarkers = useMemo(() => {
     const filtered = search
       ? locations.filter((loc) =>
           loc.store?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -139,14 +207,40 @@ export function ExploreStores() {
   const defaultCenter: LatLngExpression = [50.5, 10.5]
   const defaultZoom = 4
 
+  // Determine whether to show clusters or individual markers based on zoom
+  const showClusters = currentZoom < 7
+
   // Beautiful custom marker with shadow and modern design
-  const createCustomIcon = () => {
+  const createLocationIcon = () => {
     const size = 40
     return new Icon({
       iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size + 10}' viewBox='0 0 32 42'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='2'/%3E%3CfeOffset dx='0' dy='2' result='offsetblur'/%3E%3CfeFlood flood-color='%23000000' flood-opacity='0.3'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23shadow)'%3E%3Cpath d='M16 2 C10 2 5 7 5 13 C5 20 16 30 16 30 S27 20 27 13 C27 7 22 2 16 2 Z' fill='url(%23grad)' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='13' r='6' fill='white' fill-opacity='0.4'/%3E%3C/g%3E%3C/svg%3E`,
       iconSize: [size, size + 10],
       iconAnchor: [size / 2, size + 10],
       popupAnchor: [0, -(size + 5)],
+    })
+  }
+
+  // Create cluster icon with count
+  const createClusterIcon = (count: number, storeCount: number) => {
+    return new DivIcon({
+      html: `
+        <div class="flex flex-col items-center">
+          <div class="relative">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 shadow-lg flex items-center justify-center border-4 border-white">
+              <div class="text-center">
+                <div class="text-white font-bold text-lg">${storeCount}</div>
+                <div class="text-white text-[9px] font-medium -mt-1">${count === 1 ? 'lieu' : 'lieux'}</div>
+              </div>
+            </div>
+            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-white"></div>
+          </div>
+        </div>
+      `,
+      className: 'custom-cluster-icon',
+      iconSize: [56, 66],
+      iconAnchor: [28, 66],
+      popupAnchor: [0, -60],
     })
   }
 
@@ -259,7 +353,7 @@ export function ExploreStores() {
               <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
               </div>
-              <span>{markers.length} {markers.length === 1 ? 'country' : 'countries'}</span>
+              <span>{locationMarkers.length} emplacements</span>
             </div>
           </div>
         </div>
@@ -302,89 +396,165 @@ export function ExploreStores() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
+            <ZoomHandler onZoomChange={setCurrentZoom} />
             <MapCenterAdjuster center={defaultCenter} />
 
-            {markers.map((marker) => (
+            {/* Show country clusters when zoomed out */}
+            {showClusters && countryMarkers.map((cluster) => (
               <Marker
-                key={marker.id}
-                position={marker.position}
-                icon={createCustomIcon()}
+                key={cluster.id}
+                position={cluster.position}
+                icon={createClusterIcon(cluster.count, cluster.storeCount)}
               >
-                <Popup maxWidth={280} className="map-popup">
+                <Popup maxWidth={300} className="country-cluster-popup">
                   <div className="p-0">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-3 py-2.5">
-                      <Link href={`/${locale}/stores/${marker.store?.slug}`} className="block hover:opacity-90 transition-opacity">
-                        <div className="flex items-center gap-2">
-                          {/* Store logo */}
-                          {marker.store?.logo ? (
-                            <Image
-                              src={marker.store.logo}
-                              alt={marker.store.name || ''}
-                              width={32}
-                              height={32}
-                              className="w-8 h-8 rounded-md object-cover flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-md bg-white/20 flex items-center justify-center flex-shrink-0">
-                              <Store className="w-4 h-4 text-white" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-bold text-white truncate">
-                              {marker.store?.name}
-                            </h3>
-                            <p className="text-xs text-primary-100 truncate">
-                              {marker.location.name}
-                            </p>
-                          </div>
+                    <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="text-4xl">{getCountryFlag(cluster.country)}</div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-white">
+                            {getCountryLabel(cluster.country, locale)}
+                          </h3>
+                          <p className="text-sm text-primary-100">
+                            {cluster.storeCount} {cluster.storeCount === 1 ? 'boutique' : 'boutiques'}
+                          </p>
                         </div>
-                      </Link>
-                    </div>
-
-                    {/* Location details */}
-                    <div className="p-3">
-                      <div className="space-y-2 text-xs">
-                        {/* Address */}
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
-                          <div className="flex-1 min-w-0 text-slate-600 dark:text-slate-400">
-                            <p>{marker.location.street}</p>
-                            <p>{marker.location.postalCode} {marker.location.city}</p>
-                            <p>{getCountryLabel(marker.location.country, locale)}</p>
-                          </div>
-                        </div>
-
-                        {/* Phone */}
-                        {marker.location.phone && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-400">📞</span>
-                            <a href={`tel:${marker.location.phone}`} className="text-primary-600 hover:underline">
-                              {marker.location.phone}
-                            </a>
-                          </div>
-                        )}
-
-                        {/* Type badge */}
-                        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                          <span className="inline-block px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded text-[10px] font-medium">
-                            {marker.location.type.replace(/_/g, ' ')}
-                          </span>
-                        </div>
-
-                        {/* View store button */}
-                        <Link
-                          href={`/${locale}/stores/${marker.store?.slug}`}
-                          className="block w-full text-center px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-xs font-medium mt-2"
-                        >
-                          Voir la boutique
-                        </Link>
                       </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <div className="space-y-2">
+                        {cluster.locations.slice(0, 3).map((loc: any) => (
+                          <Link
+                            key={loc.id}
+                            href={`/${locale}/stores/${loc.store?.slug}`}
+                            className="block p-2 hover:bg-slate-50 rounded-lg transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              {loc.store?.logo ? (
+                                <Image
+                                  src={loc.store.logo}
+                                  alt={loc.store.name}
+                                  width={32}
+                                  height={32}
+                                  className="w-8 h-8 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-slate-100 rounded flex items-center justify-center">
+                                  <Store className="w-4 h-4 text-slate-400" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-slate-900 truncate">{loc.store?.name}</p>
+                                <p className="text-xs text-slate-500 truncate">{loc.city}</p>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                        {cluster.locations.length > 3 && (
+                          <p className="text-xs text-center text-slate-500 pt-2 border-t">
+                            +{cluster.locations.length - 3} autres emplacements
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-xs text-center text-slate-500 mt-3 pt-3 border-t">
+                        💡 Zoomez pour voir les adresses précises
+                      </p>
                     </div>
                   </div>
                 </Popup>
               </Marker>
             ))}
+
+            {/* Show individual locations when zoomed in */}
+            {!showClusters && locationMarkers.map((marker) => {
+              const typeInfo = getLocationTypeInfo(marker.location.type)
+              const TypeIcon = typeInfo.icon
+
+              return (
+                <Marker
+                  key={marker.id}
+                  position={marker.position}
+                  icon={createLocationIcon()}
+                >
+                  <Popup maxWidth={320} className="location-popup">
+                    <div className="overflow-hidden rounded-lg">
+                      {/* Header with gradient background */}
+                      <div className={`${typeInfo.color} px-4 py-3`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0">
+                            <TypeIcon className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-bold text-white leading-snug">
+                              {marker.store?.name}
+                            </h3>
+                            <p className="text-xs text-white/80 truncate leading-snug">
+                              {marker.location.name}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4 bg-white">
+                        <div className="space-y-3">
+                          {/* Address */}
+                          <div>
+                            <div className="flex items-start gap-2 text-slate-700">
+                              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                              <div className="text-sm leading-relaxed">
+                                <p className="font-medium">{marker.location.street}</p>
+                                <p>{marker.location.postalCode} {marker.location.city}</p>
+                                <p>{getCountryLabel(marker.location.country, locale)}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Contact Info */}
+                          {(marker.location.phone || marker.location.email) && (
+                            <div className="pt-3 border-t border-slate-100 space-y-2">
+                              {marker.location.phone && (
+                                <a
+                                  href={`tel:${marker.location.phone}`}
+                                  className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 transition-colors"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                  <span>{marker.location.phone}</span>
+                                </a>
+                              )}
+                              {marker.location.email && (
+                                <a
+                                  href={`mailto:${marker.location.email}`}
+                                  className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 transition-colors"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                  <span className="truncate">{marker.location.email}</span>
+                                </a>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Type badge */}
+                          <div className="pt-3 border-t border-slate-100">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">
+                              {typeInfo.label.toUpperCase()}
+                            </span>
+                          </div>
+
+                          {/* View store button */}
+                          <Link
+                            href={`/${locale}/stores/${marker.store?.slug}`}
+                            className={`block w-full text-center px-4 py-2.5 ${typeInfo.color} text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold shadow-sm`}
+                          >
+                            Voir la boutique
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
           </MapContainer>
         )}
       </div>
