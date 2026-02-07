@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Menu, X, User } from 'lucide-react'
+import { Menu, X, User, LayoutDashboard } from 'lucide-react'
 import { useUIStore } from '@/lib/store/ui'
 import { CartButton } from './CartButton'
 import { SearchBar } from './SearchBar'
@@ -30,6 +30,16 @@ export function Header() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Determine dashboard URL based on user role
+  const getDashboardUrl = () => {
+    if (!session?.user) return null
+    if (session.user.role === 'SUPER_ADMIN') return `/${locale}/superadmin`
+    if (session.user.role === 'MERCHANT') return `/${locale}/admin`
+    return null // Regular users don't have a dashboard
+  }
+
+  const dashboardUrl = getDashboardUrl()
 
   return (
     <>
@@ -100,6 +110,16 @@ export function Header() {
                 <PublicStoreSelector />
               </div>
 
+              {/* Dashboard - Only for merchants and super admins */}
+              {dashboardUrl && (
+                <Link href={dashboardUrl} className="hidden md:block">
+                  <button className="relative px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-theme-primary to-theme-accent hover:shadow-lg hover:shadow-theme-primary/25 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <LayoutDashboard className="w-4 h-4" strokeWidth={2} />
+                    <span>Dashboard</span>
+                  </button>
+                </Link>
+              )}
+
               {/* User */}
               {session ? (
                 <Link href={`/${locale}/account`} className="hidden md:block">
@@ -161,14 +181,20 @@ export function Header() {
                   { href: `/${locale}/stores`, label: t('store.title') },
                   { href: `/${locale}/explore`, label: t('explore.title') },
                   { href: `/${locale}/categories`, label: t('common.categories') },
+                  ...(dashboardUrl ? [{ href: dashboardUrl, label: 'Dashboard', isDashboard: true }] : []),
                   session ? { href: `/${locale}/account`, label: t('common.account') } : { href: `/${locale}/auth/login`, label: t('common.login') },
                 ].map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={toggleMobileMenu}
-                    className="flex items-center gap-3 px-4 py-3 text-theme-text hover:text-theme-primary bg-transparent hover:bg-theme-primary/5 rounded-xl font-medium transition-all duration-200"
+                    className={`flex items-center gap-3 px-4 py-3 font-medium transition-all duration-200 rounded-xl ${
+                      item.isDashboard
+                        ? 'text-white bg-gradient-to-r from-theme-primary to-theme-accent hover:shadow-lg'
+                        : 'text-theme-text hover:text-theme-primary bg-transparent hover:bg-theme-primary/5'
+                    }`}
                   >
+                    {item.isDashboard && <LayoutDashboard className="w-4 h-4" strokeWidth={2} />}
                     {item.label}
                   </Link>
                 ))}
