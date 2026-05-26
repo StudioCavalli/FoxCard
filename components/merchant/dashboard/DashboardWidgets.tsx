@@ -9,11 +9,6 @@ import { formatPrice } from '@/lib/utils'
 import {
   StatWidget,
   StatGrid,
-  MerchantCard,
-  MerchantCardHeader,
-  SimpleBarChart,
-  SimpleLineChart,
-  DonutChart,
 } from '../ui'
 import {
   DollarSign,

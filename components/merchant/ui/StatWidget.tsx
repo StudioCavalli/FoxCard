@@ -3,7 +3,6 @@
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { MerchantCard } from './MerchantCard'
 
 interface StatWidgetProps {
   title: string
@@ -55,20 +54,25 @@ export function StatWidget({
     return 'text-slate-400'
   }
 
+  const cardClasses = cn(
+    'rounded-xl border backdrop-blur-sm bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 p-4',
+    className
+  )
+
   if (loading) {
     return (
-      <MerchantCard variant="stat" className={className}>
+      <div className={cardClasses}>
         <div className="animate-pulse">
           <div className="h-4 bg-slate-700 rounded w-1/2 mb-3" />
           <div className="h-8 bg-slate-700 rounded w-3/4 mb-2" />
           <div className="h-3 bg-slate-700 rounded w-1/3" />
         </div>
-      </MerchantCard>
+      </div>
     )
   }
 
   return (
-    <MerchantCard variant="stat" className={className}>
+    <div className={cardClasses}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-slate-400 mb-1">{title}</p>
@@ -100,7 +104,7 @@ export function StatWidget({
           <Sparkline data={sparkline} />
         </div>
       )}
-    </MerchantCard>
+    </div>
   )
 }
 
