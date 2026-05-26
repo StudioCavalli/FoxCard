@@ -95,6 +95,7 @@ export function Footer() {
             <ul className="space-y-3">
               {[
                 { label: t('footer.about'), href: `/${locale}/about` },
+                { label: t('footer.goldenera'), href: `/${locale}/goldenera` },
                 { label: t('footer.blog'), href: `/${locale}/blog` },
                 { label: t('footer.careers'), href: `/${locale}/careers` },
                 { label: t('footer.contact'), href: `/${locale}/contact` },

@@ -112,6 +112,10 @@ model Store {
   // Store Locations (multiple addresses with GPS)
   locations        StoreLocation[] @relation("StoreLocations")
 
+  // SunPay - GoldenEra Blockchain Payments
+  sunPayConfig     SunPayConfig?
+  sunPayTransactions SunPayTransaction[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -4419,4 +4423,64 @@ enum StoreLocationType {
   OFFICE              // Administrative office
   SHOWROOM            // Display/showroom only
   EVENT_LOCATION      // Temporary event location
+}
+
+// ============================================
+// SUNPAY - GoldenEra Blockchain Payments
+// ============================================
+
+model SunPayConfig {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @unique @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  isEnabled       Boolean  @default(false)
+  walletAddress   String?
+  autoConvert     Boolean  @default(false)
+  minAmount       Float?
+  displayName     String   @default("SunCoin (SCGE)")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SunPayTransaction {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String   @db.ObjectId
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderId     String?  @db.ObjectId
+
+  txHash          String?  @unique
+  status          SunPayTransactionStatus @default(PENDING)
+
+  amountSCGE      Float
+  amountFiat      Float
+  fiatCurrency    String   @default("EUR")
+  exchangeRate    Float
+
+  senderAddress   String?
+  receiverAddress String
+
+  blockHeight     Int?
+  confirmations   Int      @default(0)
+
+  expiresAt       DateTime?
+  confirmedAt     DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SunPayTransactionStatus {
+  PENDING
+  CONFIRMING
+  CONFIRMED
+  FAILED
+  EXPIRED
+  REFUNDED
 }

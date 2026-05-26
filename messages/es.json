@@ -84,6 +84,7 @@
     "allRightsReserved": "Todos los derechos reservados",
     "company": "Empresa",
     "about": "Acerca de",
+    "goldenera": "GoldenEra Blockchain",
     "blog": "Blog",
     "careers": "Empleo",
     "contact": "Contacto",
@@ -901,7 +902,8 @@
       "wines": "Wines",
       "vintages": "Vintages",
       "inventory": "Inventory",
-      "compliance": "Compliance"
+      "compliance": "Compliance",
+      "sunpay": "SunPay"
     },
     "stats": {
       "occupancyRate": "Tasa de ocupación",
@@ -2645,6 +2647,107 @@
       "nameAsc": "Nombre A-Z",
       "nameDesc": "Nombre Z-A",
       "popular": "Populares"
+    }
+  },
+  "goldenera": {
+    "meta": {
+      "description": "Descubra GoldenEra Blockchain y SunPay, el futuro de los pagos descentralizados en GoldenEra Marketplace."
+    },
+    "hero": {
+      "badge": "Pagos impulsados por blockchain",
+      "subtitle": "El futuro de los pagos en GoldenEra Marketplace",
+      "description": "GoldenEra Blockchain es una infraestructura financiera descentralizada respaldada por activos reales. SunPay permite a comerciantes y clientes realizar transacciones en SunCoin (SCGE) con liquidacion instantanea y comisiones minimas.",
+      "discoverSunPay": "Descubrir SunPay",
+      "visitWebsite": "Visitar goldenera.global"
+    },
+    "about": {
+      "title": "Que es GoldenEra Blockchain?",
+      "description": "Una infraestructura financiera descentralizada disenada para el comercio. GoldenEra Blockchain combina la seguridad del proof-of-work con gobernanza autorizada para transacciones rapidas, fiables y transparentes.",
+      "goldBacked": {
+        "title": "SunCoin respaldado por oro",
+        "description": "Cada SunCoin (SCGE) esta respaldado por 0,25g de oro fisico, proporcionando estabilidad de valor real y proteccion contra la volatilidad."
+      },
+      "permissioned": {
+        "title": "Proof-of-Work autorizado",
+        "description": "Una red de mineria controlada que garantiza la integridad de las transacciones mientras mantiene un alto rendimiento y eficiencia energetica."
+      },
+      "decentralized": {
+        "title": "Infraestructura descentralizada",
+        "description": "Una red distribuida sin punto unico de fallo, asegurando que sus transacciones esten siempre disponibles y sean resistentes a la censura."
+      }
+    },
+    "sunpay": {
+      "title": "Integracion SunPay",
+      "description": "SunPay trae pagos blockchain a GoldenEra Marketplace. Los comerciantes activan SunPay en su panel, los clientes pagan en SCGE en el checkout y la liquidacion es instantanea con bajas comisiones.",
+      "step1": {
+        "title": "Seleccionar SunPay",
+        "description": "En el checkout, el cliente elige SunPay como metodo de pago."
+      },
+      "step2": {
+        "title": "Escanear y enviar SCGE",
+        "description": "El cliente escanea el codigo QR o envia SCGE desde su GoldenEra Wallet."
+      },
+      "step3": {
+        "title": "Pedido confirmado",
+        "description": "La transaccion se confirma on-chain y el pedido se valida al instante."
+      }
+    },
+    "benefits": {
+      "title": "Por que SunPay?",
+      "subtitle": "Beneficios para comerciantes y clientes por igual.",
+      "merchants": {
+        "title": "Para comerciantes",
+        "zeroChargebacks": "Cero contracargos — las transacciones blockchain son definitivas",
+        "lowFees": "Comisiones bajas comparadas con procesadores de pago tradicionales",
+        "crossBorder": "Pagos transfronterizos sin conversion de divisas",
+        "instantSettlement": "Liquidacion instantanea — reciba fondos inmediatamente"
+      },
+      "customers": {
+        "title": "Para clientes",
+        "assetBacked": "Pagos respaldados por activos con SunCoin respaldado por oro",
+        "transparent": "Transacciones totalmente transparentes en un registro publico",
+        "privacy": "Mayor privacidad sin intermediarios de terceros",
+        "fast": "Pagos rapidos y seguros en segundos"
+      }
+    },
+    "ecosystem": {
+      "title": "El ecosistema GoldenEra",
+      "description": "Un conjunto completo de herramientas construidas sobre GoldenEra Blockchain.",
+      "wallet": {
+        "title": "GoldenEra Wallet",
+        "description": "Billetera segura para almacenar, enviar y recibir SunCoin."
+      },
+      "scan": {
+        "title": "GoldenEra Scan",
+        "description": "Explorador de bloques para rastrear transacciones y direcciones."
+      },
+      "exchange": {
+        "title": "GoldenEra Exchange",
+        "description": "Intercambie SunCoin y otros activos en el exchange descentralizado."
+      },
+      "sunchat": {
+        "title": "SunChat",
+        "description": "Mensajeria cifrada con pagos SCGE integrados."
+      }
+    },
+    "roadmap": {
+      "title": "Hoja de ruta de integracion",
+      "subtitle": "Siga el progreso de la integracion de SunPay en GoldenEra Marketplace.",
+      "done": "Completado",
+      "inProgress": "En progreso",
+      "comingSoon": "Proximamente",
+      "items": {
+        "architecture": "Arquitectura de pagos",
+        "dashboard": "Panel del comerciante",
+        "checkout": "Integracion checkout",
+        "api": "Conexion API",
+        "mainnet": "En vivo en mainnet"
+      }
+    },
+    "cta": {
+      "title": "Unase al ecosistema GoldenEra",
+      "description": "Conozca mas sobre GoldenEra Blockchain, SunCoin y el futuro del comercio descentralizado.",
+      "button": "Visitar goldenera.global"
     }
   },
   "storeAbout": {

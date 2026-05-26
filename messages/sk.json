@@ -84,6 +84,7 @@
     "allRightsReserved": "Všetky práva vyhradené",
     "company": "Spoločnosť",
     "about": "O nás",
+    "goldenera": "GoldenEra Blockchain",
     "blog": "Blog",
     "careers": "Kariéra",
     "contact": "Kontakt",
@@ -901,7 +902,8 @@
       "wines": "Wines",
       "vintages": "Vintages",
       "inventory": "Inventory",
-      "compliance": "Compliance"
+      "compliance": "Compliance",
+      "sunpay": "SunPay"
     },
     "stats": {
       "occupancyRate": "Obsadenosť",
@@ -2645,6 +2647,107 @@
       "nameAsc": "Názov A-Z",
       "nameDesc": "Názov Z-A",
       "popular": "Obľúbené"
+    }
+  },
+  "goldenera": {
+    "meta": {
+      "description": "Objavte GoldenEra Blockchain a SunPay, buducnost decentralizovanych platieb na GoldenEra Marketplace."
+    },
+    "hero": {
+      "badge": "Platby pohanane blockchainom",
+      "subtitle": "Buducnost platieb na GoldenEra Marketplace",
+      "description": "GoldenEra Blockchain je decentralizovana financna infrastruktura kryta realymi aktivami. SunPay umoznuje obchodnikom a zakaznikom realizovat transakcie v SunCoin (SCGE) s okamzitym zuctovanim a minimalnymi poplatkami.",
+      "discoverSunPay": "Objavit SunPay",
+      "visitWebsite": "Navstivit goldenera.global"
+    },
+    "about": {
+      "title": "Co je GoldenEra Blockchain?",
+      "description": "Decentralizovana financna infrastruktura navrhnuta pre obchod. GoldenEra Blockchain kombinuje bezpecnost proof-of-work s povolenou spravou pre rychle, spolahlive a transparentne transakcie.",
+      "goldBacked": {
+        "title": "SunCoin kryty zlatom",
+        "description": "Kazdy SunCoin (SCGE) je kryty 0,25g fyzickeho zlata, co poskytuje stabilitu realnej hodnoty a ochranu pred volatilitou."
+      },
+      "permissioned": {
+        "title": "Povoleny Proof-of-Work",
+        "description": "Kontrolovana tazobna siet, ktora zabezpecuje integritu transakcii pri zachovani vysokej priepustnosti a energetickej efektivity."
+      },
+      "decentralized": {
+        "title": "Decentralizovana infrastruktura",
+        "description": "Distribuovana siet bez jedneho bodu zlyhania, ktora zaistuje nepretrzitu dostupnost a odolnost vasich transakcii voci cenzure."
+      }
+    },
+    "sunpay": {
+      "title": "Integracia SunPay",
+      "description": "SunPay prinasa blockchainove platby na GoldenEra Marketplace. Obchodnici aktivuju SunPay vo svojom paneli, zakaznici platia v SCGE pri pokladni a zuctovanie je okamzite s nizkymi poplatkami.",
+      "step1": {
+        "title": "Vybrat SunPay",
+        "description": "Pri pokladni si zakaznik zvoli SunPay ako sposob platby."
+      },
+      "step2": {
+        "title": "Naskenovat a poslat SCGE",
+        "description": "Zakaznik naskenuje QR kod alebo posle SCGE zo svojho GoldenEra Wallet."
+      },
+      "step3": {
+        "title": "Objednavka potvrdena",
+        "description": "Transakcia je potvrdena on-chain a objednavka je okamzite overena."
+      }
+    },
+    "benefits": {
+      "title": "Preco SunPay?",
+      "subtitle": "Vyhody pre obchodnikov aj zakaznikov.",
+      "merchants": {
+        "title": "Pre obchodnikov",
+        "zeroChargebacks": "Ziadne spatne uhrady — blockchainove transakcie su konecne",
+        "lowFees": "Nizke transakcne poplatky v porovnani s tradicnymi platobnymi procesormi",
+        "crossBorder": "Bezproblémove cezhranicne platby bez konverzie mien",
+        "instantSettlement": "Okamzite zuctovanie — prostriedky obdrzite ihned"
+      },
+      "customers": {
+        "title": "Pre zakaznikov",
+        "assetBacked": "Platby kryte aktivami s SunCoin krytym zlatom",
+        "transparent": "Uplne transparentne transakcie na verejnom registri",
+        "privacy": "Zvysene sukromie bez sprostredkovatelov tretich stran",
+        "fast": "Rychle a bezpecne platby v priebehu sekund"
+      }
+    },
+    "ecosystem": {
+      "title": "Ekosystem GoldenEra",
+      "description": "Kompletna sada nastrojov postavenych na GoldenEra Blockchain.",
+      "wallet": {
+        "title": "GoldenEra Wallet",
+        "description": "Bezpecna penazenka na ukladanie, odosielanie a prijimanie SunCoin."
+      },
+      "scan": {
+        "title": "GoldenEra Scan",
+        "description": "Prieskumnik blokov na sledovanie transakcii a adries."
+      },
+      "exchange": {
+        "title": "GoldenEra Exchange",
+        "description": "Obchodujte so SunCoin a dalsimi aktivami na decentralizovanej burze."
+      },
+      "sunchat": {
+        "title": "SunChat",
+        "description": "Sifrovane spravy s integrovanymi platbami SCGE."
+      }
+    },
+    "roadmap": {
+      "title": "Cestovna mapa integracie",
+      "subtitle": "Sledujte pokrok integracie SunPay na GoldenEra Marketplace.",
+      "done": "Hotovo",
+      "inProgress": "Prebieha",
+      "comingSoon": "Coskoro",
+      "items": {
+        "architecture": "Platobna architektura",
+        "dashboard": "Panel obchodnika",
+        "checkout": "Integracia pokladne",
+        "api": "Pripojenie API",
+        "mainnet": "Spustenie na mainnet"
+      }
+    },
+    "cta": {
+      "title": "Pridajte sa k ekosystemu GoldenEra",
+      "description": "Zistite viac o GoldenEra Blockchain, SunCoin a buducnosti decentralizovaneho obchodu.",
+      "button": "Navstivit goldenera.global"
     }
   },
   "storeAbout": {

@@ -37,6 +37,7 @@ import {
   Globe,
   Star,
   Layers,
+  Coins,
   type LucideIcon,
 } from 'lucide-react'
 import { CommerceType } from '@/lib/commerce-types'
@@ -127,6 +128,7 @@ const ecommerceNavigation: NavigationConfig = [
     icon: CreditCard,
     items: [
       { key: 'transactions', href: '/payments', icon: CreditCard, labelKey: 'merchant.navigation.transactions', hidden: true },
+      { key: 'sunpay', href: '/sunpay', icon: Coins, labelKey: 'merchant.navigation.sunpay' },
     ],
   },
   {
