@@ -82,6 +82,7 @@ export default function EditProductPage({
 
     updateProduct.mutate({
       id,
+      storeId: storeId!,
       name: formData.name,
       slug: formData.slug,
       description: formData.description || undefined,

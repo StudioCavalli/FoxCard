@@ -250,7 +250,7 @@ export default function MerchantProductsPage() {
                           size="sm"
                           onClick={() => {
                             if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-                              deleteProduct.mutate({ id: product.id })
+                              deleteProduct.mutate({ id: product.id, storeId: storeId! })
                             }
                           }}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"

@@ -20,6 +20,7 @@ import {
   Edit,
   Package
 } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 const statusLabels: Record<string, string> = {
   PENDING: 'En attente',
@@ -32,6 +33,7 @@ const statusLabels: Record<string, string> = {
 export default function CustomerDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { storeId } = useStoreContext()
   const customerId = params?.id as string
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
@@ -52,7 +54,7 @@ export default function CustomerDetailPage() {
 
   const handleDelete = () => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.')) {
-      deleteCustomer.mutate({ id: customerId })
+      deleteCustomer.mutate({ id: customerId, storeId: storeId! })
     }
   }
 

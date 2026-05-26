@@ -20,9 +20,16 @@ export default function OrderConfirmationPage({
   const [isCapturingPayment, setIsCapturingPayment] = useState(false)
   const [paymentError, setPaymentError] = useState('')
   const [bankTransferDetails, setBankTransferDetails] = useState<any>(null)
+  const [hasAttemptedCapture, setHasAttemptedCapture] = useState(false)
+  const [hasAttemptedBankTransfer, setHasAttemptedBankTransfer] = useState(false)
+
+  const customerEmail = searchParams.get('email') || ''
 
   const { data: order, isLoading, refetch } = trpc.order.getByOrderNumber.useQuery({
     orderNumber,
+    customerEmail,
+  }, {
+    enabled: !!customerEmail,
   })
 
   const capturePayPalOrder = trpc.payment.capturePayPalOrder.useMutation()
@@ -30,10 +37,13 @@ export default function OrderConfirmationPage({
 
   // Handle PayPal return
   useEffect(() => {
+    if (hasAttemptedCapture) return
+
     const isPayPalReturn = searchParams.get('paypal') === 'true'
     const paypalToken = searchParams.get('token')
 
     if (isPayPalReturn && paypalToken && order && order.paymentIntentId && order.paymentStatus !== 'PAID') {
+      setHasAttemptedCapture(true)
       setIsCapturingPayment(true)
 
       capturePayPalOrder.mutate(
@@ -53,13 +63,18 @@ export default function OrderConfirmationPage({
         }
       )
     }
-  }, [order, searchParams, capturePayPalOrder, refetch])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, searchParams, hasAttemptedCapture])
 
   // Handle Bank Transfer return
   useEffect(() => {
+    if (hasAttemptedBankTransfer) return
+
     const isBankTransfer = searchParams.get('bank_transfer') === 'true'
 
     if (isBankTransfer && order && !bankTransferDetails) {
+      setHasAttemptedBankTransfer(true)
+
       generateBankTransferInstructions.mutate(
         {
           orderId: order.id,
@@ -75,7 +90,8 @@ export default function OrderConfirmationPage({
         }
       )
     }
-  }, [order, searchParams, bankTransferDetails, generateBankTransferInstructions])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, searchParams, hasAttemptedBankTransfer, bankTransferDetails])
 
   if (isLoading) {
     return (
@@ -133,8 +149,8 @@ export default function OrderConfirmationPage({
     phone?: string
   } | null
 
-  const shipping = order.subtotal > 50 ? 0 : 5.99
-  const total = order.subtotal + shipping
+  const shipping = order.shipping ?? 0
+  const total = order.total
 
   if (isCapturingPayment) {
     return (

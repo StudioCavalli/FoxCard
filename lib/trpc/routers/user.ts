@@ -1,4 +1,4 @@
-import { router, publicProcedure } from '../trpc'
+import { router, publicProcedure, protectedProcedure } from '../trpc'
 import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
 import { TRPCError } from '@trpc/server'
@@ -63,16 +63,9 @@ export const userRouter = router({
       }
     }),
 
-  getProfile: publicProcedure.query(async ({ ctx }) => {
-    if (!ctx.session?.user?.email) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'Vous devez être connecté',
-      })
-    }
-
+  getProfile: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
-      where: { email: ctx.session.user.email },
+      where: { id: ctx.session.user.id },
       select: {
         id: true,
         name: true,
@@ -93,7 +86,7 @@ export const userRouter = router({
     return user
   }),
 
-  updateProfile: publicProcedure
+  updateProfile: protectedProcedure
     .input(
       z.object({
         name: z.string().min(2).optional(),
@@ -101,15 +94,8 @@ export const userRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.session?.user?.email) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Vous devez être connecté',
-        })
-      }
-
       const user = await ctx.prisma.user.update({
-        where: { email: ctx.session.user.email },
+        where: { id: ctx.session.user.id },
         data: input,
         select: {
           id: true,
@@ -123,7 +109,7 @@ export const userRouter = router({
       return user
     }),
 
-  changePassword: publicProcedure
+  changePassword: protectedProcedure
     .input(
       z.object({
         currentPassword: z.string(),
@@ -131,15 +117,8 @@ export const userRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.session?.user?.email) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Vous devez être connecté',
-        })
-      }
-
       const user = await ctx.prisma.user.findUnique({
-        where: { email: ctx.session.user.email },
+        where: { id: ctx.session.user.id },
       })
 
       if (!user) {
@@ -162,7 +141,7 @@ export const userRouter = router({
       const hashedPassword = await bcrypt.hash(input.newPassword, 10)
 
       await ctx.prisma.user.update({
-        where: { email: ctx.session.user.email },
+        where: { id: ctx.session.user.id },
         data: { password: hashedPassword },
       })
 

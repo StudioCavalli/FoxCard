@@ -4,7 +4,8 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { locales, type Locale } from '@/lib/i18n/config'
-import { getSeoTranslations, getAlternateLinks } from '@/lib/i18n/seo'
+import { getSeoTranslations, getAlternateLinks, getOrganizationJsonLd } from '@/lib/i18n/seo'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { TRPCProvider } from '@/lib/trpc/Provider'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -121,9 +122,22 @@ export default async function LocaleLayout({
   // Get messages for the locale
   const messages = await getMessages()
 
+  // Get platform settings for JSON-LD
+  const settings = await getPlatformSettings()
+  const platformName = settings.platformName || 'GoldenEra Marketplace'
+  const platformUrl = settings.platformUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+  const organizationJsonLd = getOrganizationJsonLd({
+    name: platformName,
+    url: platformUrl,
+    logo: `${platformUrl}/icon-512x512.png`,
+    description: getSeoTranslations(locale as Locale).home.description,
+  })
+
   return (
     <html lang={locale}>
       <body className={inter.className}>
+        <JsonLd data={organizationJsonLd} />
         <NextIntlClientProvider messages={messages}>
           <TRPCProvider>
             <PlatformSettingsProvider>

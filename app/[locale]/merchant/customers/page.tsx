@@ -206,7 +206,7 @@ export default function MerchantCustomersPage() {
                                 'Êtes-vous sûr de vouloir supprimer ce client ? Cela supprimera également toutes ses commandes.'
                               )
                             ) {
-                              deleteCustomer.mutate({ id: customer.id })
+                              deleteCustomer.mutate({ id: customer.id, storeId: storeId! })
                             }
                           }}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"

@@ -100,7 +100,6 @@ export const storeRouter = router({
           owner: {
             select: {
               name: true,
-              email: true,
             },
           },
           categories: {
@@ -192,8 +191,8 @@ export const storeRouter = router({
   getPublicStores: publicProcedure.query(async ({ ctx }) => {
     return ctx.prisma.store.findMany({
       where: {
-        // Add conditions for public visibility if needed
-        // For now, return all stores for "All Stores" mode
+        status: 'ACTIVE',
+        showOnDirectory: true,
       },
       select: {
         id: true,

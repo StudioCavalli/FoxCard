@@ -162,7 +162,7 @@ export default function AdminProductsPage() {
                           size="sm"
                           onClick={() => {
                             if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-                              deleteProduct.mutate({ id: product.id })
+                              deleteProduct.mutate({ id: product.id, storeId: storeId! })
                             }
                           }}
                         >

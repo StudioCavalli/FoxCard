@@ -25,11 +25,17 @@ import { prisma } from '@/lib/prisma'
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify cron secret (optional but recommended)
-    const authHeader = request.headers.get('authorization')
+    // Verify cron secret
     const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: 'Cron secret not configured' },
+        { status: 503 }
+      )
+    }
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    const authHeader = request.headers.get('authorization')
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

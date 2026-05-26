@@ -609,7 +609,17 @@ export const superadminRouter = router({
       const [users, total, statusCounts] = await Promise.all([
         ctx.prisma.user.findMany({
           where,
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            suspendedAt: true,
+            suspendedReason: true,
             stores: {
               select: {
                 id: true,
@@ -689,6 +699,14 @@ export const superadminRouter = router({
           role: input.role,
           status: 'ACTIVE',
         },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true,
+        },
       })
 
       // Audit log
@@ -759,6 +777,17 @@ export const superadminRouter = router({
           status: input.status,
           suspendedAt: input.status !== 'ACTIVE' ? new Date() : null,
           suspendedReason: input.status !== 'ACTIVE' ? input.reason : null,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          suspendedAt: true,
+          suspendedReason: true,
+          createdAt: true,
+          updatedAt: true,
         },
       })
 

@@ -147,7 +147,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Propriétaire</p>
-                  <p className="text-gray-600">{store.owner.name || store.owner.email}</p>
+                  <p className="text-gray-600">{store.owner.name || 'Propriétaire'}</p>
                 </div>
               </div>
             )}

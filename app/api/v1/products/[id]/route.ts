@@ -8,7 +8,7 @@ import { withApiAuth, apiSuccess, apiError, ApiContext } from '@/lib/api/auth'
  */
 export const GET = withApiAuth(
   async (request: NextRequest, context: ApiContext) => {
-    const id = request.url.split('/').pop()
+    const id = new URL(request.url).pathname.split('/').pop()
 
     if (!id) {
       return apiError('Product ID is required', 400)

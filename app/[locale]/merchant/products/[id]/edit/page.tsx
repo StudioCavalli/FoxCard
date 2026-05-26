@@ -157,6 +157,7 @@ export default function EditProductPage() {
 
     updateProduct.mutate({
       id: productId,
+      storeId: storeId!,
       name: formData.name,
       slug: formData.slug,
       description: formData.description || undefined,
@@ -182,7 +183,7 @@ export default function EditProductPage() {
 
   const handleDelete = () => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      deleteProduct.mutate({ id: productId })
+      deleteProduct.mutate({ id: productId, storeId: storeId! })
     }
   }
 

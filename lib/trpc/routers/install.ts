@@ -4,17 +4,38 @@ import { PrismaClient } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import fs from 'fs'
 import path from 'path'
+import { TRPCError } from '@trpc/server'
+import { prisma } from '@/lib/prisma'
 
-// Détecte si l'installation est complète
+// Détecte si l'installation est complète (checks database for existing admin)
 async function isInstalled(): Promise<boolean> {
-  const envPath = path.join(process.cwd(), '.env')
+  try {
+    // Primary check: does a SUPER_ADMIN user exist in the database?
+    const superAdmin = await prisma.user.findFirst({
+      where: { role: 'SUPER_ADMIN' },
+      select: { id: true },
+    })
+    if (superAdmin) {
+      return true
+    }
 
-  // Vérifier si .env existe
+    // Fallback: check if PlatformSettings exist
+    const settings = await prisma.platformSettings.findFirst({
+      select: { id: true },
+    })
+    if (settings) {
+      return true
+    }
+  } catch {
+    // Database may not be reachable yet during initial install - fall through to .env check
+  }
+
+  // Secondary check: does .env exist with required keys?
+  const envPath = path.join(process.cwd(), '.env')
   if (!fs.existsSync(envPath)) {
     return false
   }
 
-  // Vérifier si DATABASE_URL et NEXTAUTH_SECRET existent dans .env
   const envContent = fs.readFileSync(envPath, 'utf-8')
   const hasDbUrl = envContent.includes('DATABASE_URL=')
   const hasNextAuthSecret = envContent.includes('NEXTAUTH_SECRET=')
@@ -22,10 +43,21 @@ async function isInstalled(): Promise<boolean> {
   return hasDbUrl && hasNextAuthSecret
 }
 
+// Enforce that the platform is NOT already installed (throws FORBIDDEN if it is)
+async function enforceNotInstalled(): Promise<void> {
+  const installed = await isInstalled()
+  if (installed) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Platform already installed',
+    })
+  }
+}
+
 // Test de connexion à la base de données
 async function testDbConnection(url: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const prisma = new PrismaClient({
+    const testPrisma = new PrismaClient({
       datasources: {
         db: {
           url
@@ -34,8 +66,8 @@ async function testDbConnection(url: string): Promise<{ success: boolean; error?
     })
 
     // Tester la connexion
-    await prisma.$connect()
-    await prisma.$disconnect()
+    await testPrisma.$connect()
+    await testPrisma.$disconnect()
 
     return { success: true }
   } catch (error: any) {
@@ -84,6 +116,9 @@ export const installRouter = router({
       databaseUrl: z.string().min(1, 'L\'URL de la base de données est requise')
     }))
     .mutation(async ({ input }) => {
+      // Block if already installed
+      await enforceNotInstalled()
+
       return await testDbConnection(input.databaseUrl)
     }),
 
@@ -103,11 +138,8 @@ export const installRouter = router({
     }))
     .mutation(async ({ input }) => {
       try {
-        // Vérifier si déjà installé
-        const installed = await isInstalled()
-        if (installed) {
-          throw new Error('GoldenEra Marketplace est déjà installé')
-        }
+        // Block if already installed
+        await enforceNotInstalled()
 
         // Tester la connexion DB
         const dbTest = await testDbConnection(input.databaseUrl)
@@ -146,11 +178,18 @@ NODE_ENV="production"
         const envPath = path.join(process.cwd(), '.env')
         fs.writeFileSync(envPath, envContent, 'utf-8')
 
-        // Initialiser Prisma (générer le client et push le schéma)
-        const { execSync } = require('child_process')
+        // Initialiser Prisma using programmatic API instead of execSync
         try {
-          execSync('npx prisma generate', { stdio: 'inherit' })
-          execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' })
+          const installPrisma = new PrismaClient({
+            datasources: {
+              db: { url: input.databaseUrl },
+            },
+          })
+          await installPrisma.$connect()
+          await installPrisma.$disconnect()
+          // Note: Schema push should be handled via a migration script or deployment step,
+          // not via execSync in a web request handler.
+          console.log('[Install] Database connection verified. Run `npx prisma db push` to initialize the schema.')
         } catch (error) {
           console.error('Erreur lors de l\'initialisation de Prisma:', error)
         }
@@ -158,7 +197,6 @@ NODE_ENV="production"
         return {
           success: true,
           message: 'Installation terminée avec succès !',
-          nextAuthSecret: nextAuthSecret
         }
       } catch (error: any) {
         throw new Error(error.message || 'Erreur lors de l\'installation')

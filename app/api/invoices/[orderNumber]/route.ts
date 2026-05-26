@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { pdfService } from '@/lib/pdf/service'
 
 /**
  * Download invoice PDF by order number
- * Public endpoint - anyone with the order number can download
+ * Requires authentication: user must be the store owner, a store member, or the customer
  */
 export async function GET(
   request: NextRequest,
@@ -13,11 +15,25 @@ export async function GET(
   const { orderNumber } = await params
 
   try {
+    // Require authentication
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
     // Find order by order number
     const order = await prisma.order.findUnique({
       where: { orderNumber },
       include: {
         invoice: true,
+        store: {
+          select: {
+            ownerId: true,
+          },
+        },
       },
     })
 
@@ -25,6 +41,32 @@ export async function GET(
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
+      )
+    }
+
+    // Check authorization: store owner, store member, or the customer
+    const userId = session.user.id
+    const isStoreOwner = order.store.ownerId === userId
+    const isCustomer = order.customerEmail === session.user.email
+
+    let isStoreMember = false
+    if (!isStoreOwner && !isCustomer) {
+      const storeUser = await prisma.storeUser.findUnique({
+        where: {
+          userId_storeId: {
+            userId,
+            storeId: order.storeId,
+          },
+        },
+        select: { status: true },
+      })
+      isStoreMember = storeUser?.status === 'ACTIVE'
+    }
+
+    if (!isStoreOwner && !isStoreMember && !isCustomer) {
+      return NextResponse.json(
+        { error: 'Access denied' },
+        { status: 403 }
       )
     }
 

@@ -74,10 +74,10 @@ export const orderRouter = router({
     }),
 
   getByOrderNumber: publicProcedure
-    .input(z.object({ orderNumber: z.string() }))
+    .input(z.object({ orderNumber: z.string(), customerEmail: z.string().email() }))
     .query(async ({ ctx, input }) => {
       return ctx.prisma.order.findUnique({
-        where: { orderNumber: input.orderNumber },
+        where: { orderNumber: input.orderNumber, customerEmail: input.customerEmail },
         include: {
           items: {
             include: {

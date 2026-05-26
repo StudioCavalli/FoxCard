@@ -256,7 +256,7 @@ export default function RoomsPage() {
                       size="sm"
                       onClick={() => {
                         if (confirm('Supprimer cette chambre ?')) {
-                          deleteProduct.mutate({ id: product.id })
+                          deleteProduct.mutate({ id: product.id, storeId: storeId! })
                         }
                       }}
                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"

@@ -116,6 +116,8 @@ model Store {
   updatedAt   DateTime @updatedAt
 
   @@index([ownerId])
+  @@index([status])
+  @@index([showOnDirectory])
 }
 
 model User {
@@ -244,6 +246,7 @@ model Product {
   @@index([storeId])
   @@index([categoryId])
   @@index([status])
+  @@index([featured])
 }
 
 model ProductVariant {
@@ -601,6 +604,9 @@ model Order {
   @@index([storeId])
   @@index([customerId])
   @@index([status])
+  @@index([customerEmail])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {

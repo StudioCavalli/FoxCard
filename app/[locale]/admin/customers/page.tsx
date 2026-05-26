@@ -144,7 +144,7 @@ export default function AdminCustomersPage() {
                                 'Etes-vous sur de vouloir supprimer ce client ? Cela supprimera egalement toutes ses commandes.'
                               )
                             ) {
-                              deleteCustomer.mutate({ id: customer.id })
+                              deleteCustomer.mutate({ id: customer.id, storeId: storeId! })
                             }
                           }}
                         >

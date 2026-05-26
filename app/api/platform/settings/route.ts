@@ -1,23 +1,26 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { getPlatformSettings } from '@/lib/platform/settings'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  // Only allow internal requests from middleware
-  const isInternal = request.headers.get('x-internal-request') === 'true'
-
   try {
     const settings = await getPlatformSettings()
 
-    // For internal requests, return full settings
-    if (isInternal) {
+    // Check for authenticated session
+    const session = await getServerSession(authOptions)
+
+    // For SUPER_ADMIN users, return full settings (including sensitive fields)
+    if (session?.user?.role === 'SUPER_ADMIN') {
       return NextResponse.json(settings)
     }
 
-    // For public requests, return only safe public settings
+    // For unauthenticated or non-admin requests, return only public settings
     return NextResponse.json({
       platformName: settings.platformName,
+      platformUrl: settings.platformUrl,
       maintenanceMode: settings.maintenanceMode,
       maintenanceMessage: settings.maintenanceMessage,
       defaultCurrency: settings.defaultCurrency,

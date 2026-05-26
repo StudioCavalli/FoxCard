@@ -15,10 +15,13 @@ import { triggerAbandonedCartAutomation } from '@/lib/email/automation'
 export async function GET(request: NextRequest) {
   try {
     // Verify cron secret
-    const authHeader = request.headers.get('authorization')
-    const expectedSecret = `Bearer ${process.env.CRON_SECRET || 'dev-secret'}`
+    const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret) {
+      return NextResponse.json({ error: 'Cron secret not configured' }, { status: 503 })
+    }
 
-    if (authHeader !== expectedSecret) {
+    const authHeader = request.headers.get('authorization')
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

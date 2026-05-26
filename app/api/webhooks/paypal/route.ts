@@ -9,15 +9,106 @@ import { createDigitalDownloadsForOrder } from '@/lib/digital/download-manager'
  * Setup: Add this URL to your PayPal webhook settings:
  * https://yourdomain.com/api/webhooks/paypal
  */
+
+async function getPayPalAccessToken(): Promise<string> {
+  const clientId = process.env.PAYPAL_CLIENT_ID
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET
+  const baseUrl = process.env.PAYPAL_API_URL || 'https://api-m.paypal.com'
+
+  if (!clientId || !clientSecret) {
+    throw new Error('PayPal credentials not configured')
+  }
+
+  const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+    },
+    body: 'grant_type=client_credentials',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to obtain PayPal access token')
+  }
+
+  const data = await response.json()
+  return data.access_token
+}
+
+async function verifyPayPalWebhookSignature(
+  request: NextRequest,
+  body: any
+): Promise<boolean> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID
+  if (!webhookId) {
+    console.error('[PayPal Webhook] PAYPAL_WEBHOOK_ID is not configured')
+    return false
+  }
+
+  const transmissionId = request.headers.get('PAYPAL-TRANSMISSION-ID')
+  const transmissionTime = request.headers.get('PAYPAL-TRANSMISSION-TIME')
+  const transmissionSig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
+  const certUrl = request.headers.get('PAYPAL-CERT-URL')
+  const authAlgo = request.headers.get('PAYPAL-AUTH-ALGO')
+
+  if (!transmissionId || !transmissionTime || !transmissionSig || !certUrl || !authAlgo) {
+    console.error('[PayPal Webhook] Missing required signature headers')
+    return false
+  }
+
+  try {
+    const accessToken = await getPayPalAccessToken()
+    const baseUrl = process.env.PAYPAL_API_URL || 'https://api-m.paypal.com'
+
+    const verifyResponse = await fetch(
+      `${baseUrl}/v1/notifications/verify-webhook-signature`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          auth_algo: authAlgo,
+          cert_url: certUrl,
+          transmission_id: transmissionId,
+          transmission_sig: transmissionSig,
+          transmission_time: transmissionTime,
+          webhook_id: webhookId,
+          webhook_event: body,
+        }),
+      }
+    )
+
+    if (!verifyResponse.ok) {
+      console.error('[PayPal Webhook] Verification API returned error:', verifyResponse.status)
+      return false
+    }
+
+    const verifyData = await verifyResponse.json()
+    return verifyData.verification_status === 'SUCCESS'
+  } catch (error) {
+    console.error('[PayPal Webhook] Signature verification failed:', error)
+    return false
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
     console.log('[PayPal Webhook] Received event:', body.event_type)
 
-    // Verify webhook signature (recommended for production)
-    // TODO: Implement webhook signature verification
-    // See: https://developer.paypal.com/api/rest/webhooks/#verify-webhook-signature
+    // Verify webhook signature
+    const isValid = await verifyPayPalWebhookSignature(request, body)
+    if (!isValid) {
+      console.error('[PayPal Webhook] Signature verification failed, rejecting event')
+      return NextResponse.json(
+        { error: 'Webhook signature verification failed' },
+        { status: 401 }
+      )
+    }
 
     const eventType = body.event_type
     const resource = body.resource

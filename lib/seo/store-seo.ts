@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { locales } from '@/lib/i18n/config'
 
 interface StoreSeoData {
   name: string
@@ -68,10 +69,9 @@ export function generateStoreMetadata(store: StoreSeoData, locale: string = 'fr'
     },
     alternates: {
       canonical: url,
-      languages: {
-        'fr': `${BASE_URL}/fr/stores/${store.slug}`,
-        'en': `${BASE_URL}/en/stores/${store.slug}`,
-      },
+      languages: Object.fromEntries(
+        locales.map((l) => [l, `${BASE_URL}/${l}/stores/${store.slug}`])
+      ),
     },
   }
 }
@@ -111,6 +111,9 @@ export function generateProductMetadata(product: ProductSeoData, locale: string 
     },
     alternates: {
       canonical: url,
+      languages: Object.fromEntries(
+        locales.map((l) => [l, `${BASE_URL}/${l}/stores/${product.storeSlug}/products/${product.slug}`])
+      ),
     },
   }
 }

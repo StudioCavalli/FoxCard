@@ -6,42 +6,138 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting seed...')
 
-  // Create admin user
-  const hashedPassword = await hash('admin123', 10)
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@goldenera.com' },
-    update: {},
+  const adminPassword = await hash('admin123', 10)
+  const merchantPassword = await hash('merchant123', 10)
+
+  // ============================================
+  // SUPER ADMIN
+  // ============================================
+  const superAdmin = await prisma.user.upsert({
+    where: { email: 'admin@foxcard.com' },
+    update: { password: adminPassword, role: 'SUPER_ADMIN' },
     create: {
-      email: 'admin@goldenera.com',
-      name: 'Admin User',
-      password: hashedPassword,
+      email: 'admin@foxcard.com',
+      name: 'Super Admin',
+      password: adminPassword,
       role: 'SUPER_ADMIN',
     },
   })
+  console.log('✅ Super Admin created:', superAdmin.email)
 
-  console.log('✅ Admin user created:', adminUser.email)
+  // ============================================
+  // MERCHANT ACCOUNTS + STORES
+  // ============================================
+  const merchants = [
+    {
+      email: 'admin@techzone.com',
+      name: 'TechZone Admin',
+      store: {
+        name: 'TechZone',
+        slug: 'techzone',
+        domain: 'techzone.foxcard.local',
+        description: 'Your premium electronics destination',
+        commerceType: 'ELECTRONICS' as const,
+      },
+    },
+    {
+      email: 'admin@fashionhub.com',
+      name: 'FashionHub Admin',
+      store: {
+        name: 'FashionHub',
+        slug: 'fashionhub',
+        domain: 'fashionhub.foxcard.local',
+        description: 'Trendy fashion for everyone',
+        commerceType: 'FASHION' as const,
+      },
+    },
+    {
+      email: 'admin@grandhotel.com',
+      name: 'Grand Hotel Admin',
+      store: {
+        name: 'Grand Hotel',
+        slug: 'grand-hotel',
+        domain: 'grandhotel.foxcard.local',
+        description: 'Luxury hotel & accommodations',
+        commerceType: 'HOTEL' as const,
+      },
+    },
+    {
+      email: 'admin@labelletable.com',
+      name: 'La Belle Table Admin',
+      store: {
+        name: 'La Belle Table',
+        slug: 'la-belle-table',
+        domain: 'labelletable.foxcard.local',
+        description: 'Fine dining restaurant',
+        commerceType: 'RESTAURANT' as const,
+      },
+    },
+    {
+      email: 'admin@worldtraveler.com',
+      name: 'World Traveler Admin',
+      store: {
+        name: 'World Traveler',
+        slug: 'world-traveler',
+        domain: 'worldtraveler.foxcard.local',
+        description: 'Travel agency & tour operator',
+        commerceType: 'TRAVEL' as const,
+      },
+    },
+  ]
 
-  // Create demo store
-  const store = await prisma.store.upsert({
+  for (const m of merchants) {
+    const user = await prisma.user.upsert({
+      where: { email: m.email },
+      update: { password: merchantPassword },
+      create: {
+        email: m.email,
+        name: m.name,
+        password: merchantPassword,
+        role: 'ADMIN',
+      },
+    })
+
+    await prisma.store.upsert({
+      where: { slug: m.store.slug },
+      update: {},
+      create: {
+        name: m.store.name,
+        slug: m.store.slug,
+        domain: m.store.domain,
+        description: m.store.description,
+        commerceType: m.store.commerceType,
+        ownerId: user.id,
+      },
+    })
+
+    console.log(`✅ Merchant ${m.email} + store "${m.store.name}" (${m.store.commerceType})`)
+  }
+
+  // ============================================
+  // DEMO STORE (General) owned by Super Admin
+  // ============================================
+  const demoStore = await prisma.store.upsert({
     where: { slug: 'demo' },
     update: {},
     create: {
-      id: '000000000000000000000001',
-      name: 'GoldenEra Marketplace Demo Store',
+      name: 'FoxCard Demo Store',
       slug: 'demo',
-      description: 'Boutique de démonstration GoldenEra Marketplace',
-      ownerId: adminUser.id,
+      domain: 'demo.foxcard.local',
+      description: 'Boutique de démonstration FoxCard',
+      ownerId: superAdmin.id,
+      commerceType: 'GENERAL',
     },
   })
+  console.log('✅ Demo store created:', demoStore.name)
 
-  console.log('✅ Store created:', store.name)
-
-  // Create categories
+  // ============================================
+  // CATEGORIES for demo store
+  // ============================================
   const electronics = await prisma.category.upsert({
-    where: { storeId_slug: { storeId: store.id, slug: 'electronics' } },
+    where: { storeId_slug: { storeId: demoStore.id, slug: 'electronics' } },
     update: {},
     create: {
-      storeId: store.id,
+      storeId: demoStore.id,
       name: 'Électronique',
       slug: 'electronics',
       description: 'Appareils et accessoires électroniques',
@@ -49,41 +145,43 @@ async function main() {
   })
 
   const fashion = await prisma.category.upsert({
-    where: { storeId_slug: { storeId: store.id, slug: 'fashion' } },
+    where: { storeId_slug: { storeId: demoStore.id, slug: 'fashion' } },
     update: {},
     create: {
-      storeId: store.id,
+      storeId: demoStore.id,
       name: 'Mode',
       slug: 'fashion',
       description: 'Vêtements et accessoires de mode',
     },
   })
 
-  const home = await prisma.category.upsert({
-    where: { storeId_slug: { storeId: store.id, slug: 'home' } },
-    update: {},
-    create: {
-      storeId: store.id,
-      name: 'Maison',
-      slug: 'home',
-      description: 'Articles pour la maison',
-    },
-  })
-
   const beauty = await prisma.category.upsert({
-    where: { storeId_slug: { storeId: store.id, slug: 'beauty' } },
+    where: { storeId_slug: { storeId: demoStore.id, slug: 'beauty' } },
     update: {},
     create: {
-      storeId: store.id,
+      storeId: demoStore.id,
       name: 'Beauté',
       slug: 'beauty',
       description: 'Produits de beauté et cosmétiques',
     },
   })
 
+  await prisma.category.upsert({
+    where: { storeId_slug: { storeId: demoStore.id, slug: 'home' } },
+    update: {},
+    create: {
+      storeId: demoStore.id,
+      name: 'Maison',
+      slug: 'home',
+      description: 'Articles pour la maison',
+    },
+  })
+
   console.log('✅ Categories created')
 
-  // Create demo products
+  // ============================================
+  // PRODUCTS for demo store
+  // ============================================
   const products = [
     {
       name: 'Écouteurs Sans Fil Premium',
@@ -186,18 +284,25 @@ async function main() {
 
   for (const product of products) {
     await prisma.product.upsert({
-      where: { storeId_slug: { storeId: store.id, slug: product.slug } },
+      where: { storeId_slug: { storeId: demoStore.id, slug: product.slug } },
       update: {},
       create: {
         ...product,
-        storeId: store.id,
+        storeId: demoStore.id,
       },
     })
   }
 
   console.log(`✅ ${products.length} products created`)
 
-  console.log('🎉 Seed completed successfully!')
+  console.log('\n🎉 Seed completed successfully!')
+  console.log('\n📋 Login credentials:')
+  console.log('  Super Admin:  admin@foxcard.com / admin123')
+  console.log('  Merchants:    admin@techzone.com / merchant123')
+  console.log('                admin@fashionhub.com / merchant123')
+  console.log('                admin@grandhotel.com / merchant123')
+  console.log('                admin@labelletable.com / merchant123')
+  console.log('                admin@worldtraveler.com / merchant123')
 }
 
 main()

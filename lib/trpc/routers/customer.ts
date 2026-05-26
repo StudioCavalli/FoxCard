@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { router, publicProcedure, adminProcedure } from '../trpc'
+import { router, publicProcedure, adminProcedure, requireStoreAccess } from '../trpc'
 
 export const customerRouter = router({
-  getAll: adminProcedure
+  getAll: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -109,8 +109,8 @@ export const customerRouter = router({
       }
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+  delete: requireStoreAccess
+    .input(z.object({ storeId: z.string(), id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.prisma.customer.delete({
         where: { id: input.id },

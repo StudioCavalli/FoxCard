@@ -10,6 +10,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 })
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set')
+    return NextResponse.json({ error: 'Stripe webhook secret not configured' }, { status: 503 })
+  }
+
   const body = await req.text()
   const signature = (await headers()).get('stripe-signature')
 
@@ -23,7 +29,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)

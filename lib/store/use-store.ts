@@ -24,7 +24,7 @@ export const useStore = create<StoreState>()(
       clearCurrentStore: () => set({ currentStore: null }),
     }),
     {
-      name: 'goldenera-store',
+      name: 'foxcard-store',
     }
   )
 )

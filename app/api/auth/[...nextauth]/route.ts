@@ -24,9 +24,9 @@ async function handler(
   const { ip, userAgent } = getClientInfo(req)
   const url = new URL(req.url)
 
-  // Await params for Next.js 15 compatibility
-  const params = await context.params
-  const resolvedContext = { params }
+  // Await params for Next.js 16 compatibility, then re-wrap in Promise for NextAuth
+  const resolvedParams = await context.params
+  const resolvedContext = { params: Promise.resolve(resolvedParams) }
 
   // For POST requests to credentials callback, we intercept to log login events
   if (req.method === 'POST' && url.pathname.includes('callback/credentials')) {

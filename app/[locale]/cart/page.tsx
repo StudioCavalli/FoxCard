@@ -17,8 +17,6 @@ export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, getTotalPrice, getTotalItems, getItemsByStore, getStoreSubtotal, getUniqueStoresCount } = useCartStore()
 
   const subtotal = getTotalPrice()
-  const shipping = subtotal > 50 ? 0 : 5.99
-  const total = subtotal + shipping
 
   if (items.length === 0) {
     return (
@@ -117,7 +115,7 @@ export default function CartPage() {
                         </p>
                       </div>
                       <button
-                        onClick={() => removeItem(item.productId)}
+                        onClick={() => removeItem(item.productId, item.variantId)}
                         className="p-2 text-theme-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                         aria-label={t('cart.removeItem')}
                       >
@@ -129,7 +127,7 @@ export default function CartPage() {
                       {/* Quantity Controls */}
                       <div className="flex items-center bg-theme-background border border-theme-border rounded-xl overflow-hidden">
                         <button
-                          onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
+                          onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1), item.variantId)}
                           className="p-2.5 text-theme-text hover:bg-theme-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={item.quantity <= 1}
                         >
@@ -139,7 +137,7 @@ export default function CartPage() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.productId, item.maxQuantity ? Math.min(item.maxQuantity, item.quantity + 1) : item.quantity + 1)}
+                          onClick={() => updateQuantity(item.productId, item.maxQuantity ? Math.min(item.maxQuantity, item.quantity + 1) : item.quantity + 1, item.variantId)}
                           className="p-2.5 text-theme-text hover:bg-theme-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={item.maxQuantity !== undefined && item.quantity >= item.maxQuantity}
                         >
@@ -202,19 +200,10 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center justify-between text-theme-text-secondary">
                   <span>{t('cart.shipping')}</span>
-                  <span className="font-semibold">
-                    {shipping === 0 ? (
-                      <span className="text-green-600">{t('cart.free')}</span>
-                    ) : (
-                      <span className="text-theme-text">{formatPrice(shipping)}</span>
-                    )}
+                  <span className="text-sm font-medium text-theme-text-secondary italic">
+                    {t('cart.shippingCalculatedAtCheckout', { defaultValue: 'Calculé à l’étape suivante' })}
                   </span>
                 </div>
-                {subtotal > 0 && subtotal < 50 && (
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-600 font-medium">
-                    {t('cart.almostFreeShipping', { amount: formatPrice(50 - subtotal) })}
-                  </div>
-                )}
                 <div className="border-t border-theme-border pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-theme-text" style={{ fontFamily: 'var(--theme-font-heading)' }}>
@@ -224,7 +213,7 @@ export default function CartPage() {
                       className="text-3xl font-bold text-theme-text"
                       style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
                     >
-                      {formatPrice(total)}
+                      {formatPrice(subtotal)}
                     </span>
                   </div>
                 </div>

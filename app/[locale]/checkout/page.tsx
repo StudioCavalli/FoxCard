@@ -162,7 +162,7 @@ export default function CheckoutPage() {
 
   // Load saved checkout data from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('goldenera-checkout')
+    const saved = localStorage.getItem('foxcard-checkout')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
       paymentMethod,
       timestamp: new Date().toISOString(),
     }
-    localStorage.setItem('goldenera-checkout', JSON.stringify(saveData))
+    localStorage.setItem('foxcard-checkout', JSON.stringify(saveData))
   }, [formData, currentStep, paymentMethod])
 
   const createOrder = trpc.order.createFromCart.useMutation({
@@ -210,11 +210,11 @@ export default function CheckoutPage() {
             )
           )
           // Redirect to first order confirmation (will show all orders)
-          router.push(`/order-confirmation/${primaryOrder.orderNumber}?bank_transfer=true&multi_store=true`)
+          router.push(`/order-confirmation/${primaryOrder.orderNumber}?bank_transfer=true&multi_store=true&email=${encodeURIComponent(formData.email)}`)
         } else if (paymentMethod === 'paypal') {
           const paypalOrder = await createPayPalOrder.mutateAsync({
             orderId: primaryOrder.id,
-            returnUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?paypal=true&token={TOKEN}&multi_store=true`,
+            returnUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?paypal=true&token={TOKEN}&multi_store=true&email=${encodeURIComponent(formData.email)}`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
           if (paypalOrder.approvalUrl) {
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
         } else {
           const session = await createCheckoutSession.mutateAsync({
             orderId: primaryOrder.id,
-            successUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?session_id={CHECKOUT_SESSION_ID}&multi_store=true`,
+            successUrl: `${window.location.origin}/order-confirmation/${primaryOrder.orderNumber}?session_id={CHECKOUT_SESSION_ID}&multi_store=true&email=${encodeURIComponent(formData.email)}`,
             cancelUrl: `${window.location.origin}/checkout?canceled=true`,
           })
           if (session.url) {
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
           }
         }
         // Clear saved checkout data on success
-        localStorage.removeItem('goldenera-checkout')
+        localStorage.removeItem('foxcard-checkout')
       } catch (err) {
         console.error('Failed to create payment session:', err)
         setCheckoutState(prev => ({ ...prev, error: t('checkout.errorPaymentSession'), isProcessing: false }))

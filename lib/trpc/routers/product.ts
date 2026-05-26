@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
+import { router, publicProcedure, protectedProcedure, adminProcedure, requireStoreAccess } from '../trpc'
 import { ProductStatus, ProductType } from '@prisma/client'
 import { createHookExecutor } from '@/lib/plugins/hook-executor'
 
@@ -168,7 +168,7 @@ export const productRouter = router({
       })
     }),
 
-  create: adminProcedure
+  create: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -218,9 +218,10 @@ export const productRouter = router({
       return product
     }),
 
-  update: adminProcedure
+  update: requireStoreAccess
     .input(
       z.object({
+        storeId: z.string(),
         id: z.string(),
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
@@ -245,7 +246,7 @@ export const productRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input
+      const { id, storeId, ...data } = input
       const product = await ctx.prisma.product.update({
         where: { id },
         data,
@@ -264,8 +265,8 @@ export const productRouter = router({
       return product
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+  delete: requireStoreAccess
+    .input(z.object({ storeId: z.string(), id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Get product before deletion for hook data
       const product = await ctx.prisma.product.findUnique({

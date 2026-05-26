@@ -88,7 +88,6 @@ export default function InstallPage() {
     try {
       const result = await install.mutateAsync(installData)
       if (result.success) {
-        setGeneratedSecret(result.nextAuthSecret)
         setCurrentStep('success')
       }
     } catch (err: any) {

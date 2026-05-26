@@ -252,33 +252,35 @@ function LoginForm() {
             </p>
           </div>
 
-          {/* Demo Accounts */}
-          <div className="mt-6 space-y-3">
-            {/* Super Admin */}
-            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-              <p className="text-xs text-purple-600 font-semibold mb-1" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-                Super Admin
-              </p>
-              <p className="text-xs text-purple-600 font-mono">
-                admin@foxcard.com / admin123
-              </p>
-            </div>
+          {/* Demo Accounts - only shown in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-6 space-y-3">
+              {/* Super Admin */}
+              <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                <p className="text-xs text-purple-600 font-semibold mb-1" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                  Super Admin
+                </p>
+                <p className="text-xs text-purple-600 font-mono">
+                  admin@foxcard.com / admin123
+                </p>
+              </div>
 
-            {/* Merchant Accounts */}
-            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-              <p className="text-xs text-blue-600 font-semibold mb-1" style={{ fontFamily: 'var(--theme-font-heading)' }}>
-                {t('auth.demoAccount')} Marchands
-              </p>
-              <div className="text-xs text-blue-600 font-mono space-y-0.5">
-                <p>admin@techzone.com (Electronics)</p>
-                <p>admin@fashionhub.com (Fashion)</p>
-                <p>admin@grandhotel.com (Hotel)</p>
-                <p>admin@labelletable.com (Restaurant)</p>
-                <p>admin@worldtraveler.com (Travel)</p>
-                <p className="text-blue-500 pt-1">Password: merchant123</p>
+              {/* Merchant Accounts */}
+              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                <p className="text-xs text-blue-600 font-semibold mb-1" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                  {t('auth.demoAccount')} Marchands
+                </p>
+                <div className="text-xs text-blue-600 font-mono space-y-0.5">
+                  <p>admin@techzone.com (Electronics)</p>
+                  <p>admin@fashionhub.com (Fashion)</p>
+                  <p>admin@grandhotel.com (Hotel)</p>
+                  <p>admin@labelletable.com (Restaurant)</p>
+                  <p>admin@worldtraveler.com (Travel)</p>
+                  <p className="text-blue-500 pt-1">Password: merchant123</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
