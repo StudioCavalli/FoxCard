@@ -3,6 +3,9 @@ import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
 import { TRPCError } from '@trpc/server'
 import { isRegistrationAllowed, getMaxStoresPerUser } from '@/lib/platform/settings'
+import { checkRateLimit } from '@/lib/rate-limit'
+
+const passwordSchema = z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number')
 
 export const userRouter = router({
   register: publicProcedure
@@ -10,11 +13,21 @@ export const userRouter = router({
       z.object({
         name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
         email: z.string().email('Email invalide'),
-        password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+        password: passwordSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
       const { name, email, password } = input
+
+      // Rate limit: 5 registrations per IP per hour
+      const ip = ctx.ipAddress || 'unknown'
+      const { allowed } = checkRateLimit(`register:${ip}`, 5, 60 * 60 * 1000)
+      if (!allowed) {
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: 'Too many registration attempts. Please try again later.',
+        })
+      }
 
       // Check if registration is allowed by platform settings
       const registrationAllowed = await isRegistrationAllowed()
@@ -113,10 +126,19 @@ export const userRouter = router({
     .input(
       z.object({
         currentPassword: z.string(),
-        newPassword: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+        newPassword: passwordSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Rate limit: 5 password change attempts per user per hour
+      const { allowed } = checkRateLimit(`changePassword:${ctx.session.user.id}`, 5, 60 * 60 * 1000)
+      if (!allowed) {
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: 'Too many password change attempts. Please try again later.',
+        })
+      }
+
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session.user.id },
       })

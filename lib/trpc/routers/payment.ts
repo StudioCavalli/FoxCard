@@ -219,6 +219,11 @@ export const paymentRouter = router({
         })
       }
 
+      // Validate redirect URLs to prevent open redirects
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const returnUrl = validateRedirectUrl(input.returnUrl, appUrl)
+      const cancelUrl = validateRedirectUrl(input.cancelUrl, appUrl)
+
       try {
         // Get the order with items
         const order = await ctx.prisma.order.findUnique({
@@ -302,8 +307,8 @@ export const paymentRouter = router({
               landingPage: OrderApplicationContextLandingPage.Billing,
               shippingPreference: OrderApplicationContextShippingPreference.SetProvidedAddress,
               userAction: OrderApplicationContextUserAction.PayNow,
-              returnUrl: input.returnUrl,
-              cancelUrl: input.cancelUrl,
+              returnUrl: returnUrl,
+              cancelUrl: cancelUrl,
             },
           },
           prefer: 'return=representation',

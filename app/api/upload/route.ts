@@ -4,6 +4,8 @@ import path from 'path'
 import { optimizeImage, isValidImage } from '@/lib/utils/image-optimizer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/upload
@@ -18,6 +20,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Rate limit: 20 uploads per minute per user
+    const userId = (session.user as any).id
+    const { allowed } = checkRateLimit(`upload:${userId}`, 20, 60 * 1000)
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many uploads. Please try again later.' }, { status: 429 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const storeId = formData.get('storeId') as string | null
@@ -29,6 +38,33 @@ export async function POST(request: NextRequest) {
 
     if (!storeId) {
       return NextResponse.json({ error: 'Store ID required' }, { status: 400 })
+    }
+
+    // Verify user has access to this store
+    const store = await prisma.store.findUnique({
+      where: { id: storeId },
+      select: { ownerId: true },
+    })
+
+    if (!store) {
+      return NextResponse.json({ error: 'Store not found' }, { status: 404 })
+    }
+
+    if (store.ownerId !== userId) {
+      // Check if user is an active StoreUser
+      const storeUser = await prisma.storeUser.findUnique({
+        where: {
+          userId_storeId: {
+            userId: userId,
+            storeId: storeId,
+          },
+        },
+        select: { status: true },
+      })
+
+      if (!storeUser || storeUser.status !== 'ACTIVE') {
+        return NextResponse.json({ error: 'Access denied to this store' }, { status: 403 })
+      }
     }
 
     // Validate file type

@@ -11,6 +11,13 @@ import {
 } from '@react-email/components'
 import { BaseLayout, BaseLayoutProps } from './layouts/Base'
 
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\bon\w+\s*=\s*(['"]?).*?\1/gi, '')
+    .replace(/javascript:/gi, '')
+}
+
 export interface NewsletterCampaignProps extends BaseLayoutProps {
   firstName?: string
   htmlContent: string
@@ -34,7 +41,7 @@ export const NewsletterCampaign = ({
       <Text style={greeting}>Bonjour {firstName},</Text>
 
       {/* Custom HTML content from campaign */}
-      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }} />
 
       <Hr style={hr} />
 

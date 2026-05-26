@@ -1,9 +1,22 @@
 import { z } from 'zod'
+import { randomBytes } from 'crypto'
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
 import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@prisma/client'
 import { emailService } from '@/lib/email/service'
 import { pdfService } from '@/lib/pdf/service'
 import { createHookExecutor } from '@/lib/plugins/hook-executor'
+
+const addressSchema = z.object({
+  firstName: z.string().max(100),
+  lastName: z.string().max(100),
+  address: z.string().max(200),
+  address2: z.string().max(200).optional(),
+  city: z.string().max(100),
+  state: z.string().max(100).optional(),
+  postalCode: z.string().max(20),
+  country: z.string().max(100),
+  phone: z.string().max(30).optional(),
+}).optional()
 
 export const orderRouter = router({
   getAll: adminProcedure
@@ -117,8 +130,8 @@ export const orderRouter = router({
             specialInstructions: z.string().optional(),
           })
         ),
-        shippingAddress: z.any().optional(), // Optional for digital/booking only orders
-        billingAddress: z.any().optional(),
+        shippingAddress: addressSchema, // Optional for digital/booking only orders
+        billingAddress: addressSchema,
         notes: z.string().optional(),
         // Booking data for reservation-type orders
         bookingData: z.object({
@@ -150,7 +163,7 @@ export const orderRouter = router({
       const orders = await Promise.all(
         Object.entries(itemsByStore).map(async ([storeId, storeItems]) => {
           // Generate order number
-          const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
+          const orderNumber = 'ORD-' + randomBytes(8).toString('hex').toUpperCase()
 
           // Calculate totals for this store
           const productsData = await ctx.prisma.product.findMany({
@@ -285,8 +298,8 @@ export const orderRouter = router({
             variantName: z.string().optional(),
           })
         ),
-        shippingAddress: z.any().optional(), // Optional for digital/booking only orders
-        billingAddress: z.any().optional(),
+        shippingAddress: addressSchema, // Optional for digital/booking only orders
+        billingAddress: addressSchema,
         notes: z.string().optional(),
         discountCodeId: z.string().optional(),
         // Booking data for reservation-type orders
@@ -307,7 +320,7 @@ export const orderRouter = router({
       const { items, discountCodeId, ...orderData } = input
 
       // Generate order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
+      const orderNumber = 'ORD-' + randomBytes(8).toString('hex').toUpperCase()
 
       // Calculate totals
       const productsData = await ctx.prisma.product.findMany({

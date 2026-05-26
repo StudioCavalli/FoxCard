@@ -670,7 +670,7 @@ export const superadminRouter = router({
       z.object({
         name: z.string().min(1),
         email: z.string().email(),
-        password: z.string().min(6),
+        password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
         role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN']).default('USER'),
       })
     )
