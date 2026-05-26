@@ -1,69 +1,30 @@
 'use client'
 
-import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { Eye, RefreshCw, Store } from 'lucide-react'
 import Link from 'next/link'
 import { useStoreContext } from '@/lib/context/store-context'
+import { useOrdersManagement } from '@/hooks/useOrdersManagement'
 
 export default function AdminOrdersPage() {
   const { storeId } = useStoreContext()
 
-  const [refundModalOpen, setRefundModalOpen] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
-  const [refundAmount, setRefundAmount] = useState('')
-  const [refundReason, setRefundReason] = useState('')
-
-  const { data, isLoading, refetch } = trpc.order.getAll.useQuery(
-    {
-      storeId: storeId!,
-      limit: 50,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const refundMutation = trpc.payment.refundPayment.useMutation({
-    onSuccess: () => {
-      alert('Remboursement effectué avec succès')
-      setRefundModalOpen(false)
-      setSelectedOrder(null)
-      setRefundAmount('')
-      setRefundReason('')
-      refetch()
-    },
-    onError: (error) => {
-      alert(`Erreur: ${error.message}`)
-    },
-  })
-
-  const handleRefund = () => {
-    if (!selectedOrder) return
-
-    const isPartial = refundAmount && parseFloat(refundAmount) > 0
-    const amount = isPartial ? parseFloat(refundAmount) : undefined
-
-    if (isPartial && amount! > selectedOrder.total) {
-      alert('Le montant du remboursement ne peut pas dépasser le total de la commande')
-      return
-    }
-
-    if (confirm(
-      `Confirmez-vous le remboursement ${isPartial ? 'partiel de ' + amount + '€' : 'total de ' + selectedOrder.total + '€'} pour la commande #${selectedOrder.orderNumber} ?`
-    )) {
-      refundMutation.mutate({
-        orderId: selectedOrder.id,
-        amount,
-        reason: refundReason || undefined,
-      })
-    }
-  }
-
-  const orders = data?.orders || []
+  const {
+    orders,
+    isLoading,
+    refundModalOpen,
+    selectedOrder,
+    refundAmount,
+    setRefundAmount,
+    refundReason,
+    setRefundReason,
+    handleRefund,
+    openRefundModal,
+    closeRefundModal,
+    refundMutation,
+  } = useOrdersManagement(storeId)
 
   return (
     <div className="space-y-6">
@@ -157,10 +118,7 @@ export default function AdminOrdersPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {
-                              setSelectedOrder(order)
-                              setRefundModalOpen(true)
-                            }}
+                            onClick={() => openRefundModal(order)}
                             title="Rembourser"
                           >
                             <RefreshCw className="w-4 h-4" />
@@ -250,12 +208,7 @@ export default function AdminOrdersPage() {
 
               <div className="flex items-center gap-3 pt-4">
                 <Button
-                  onClick={() => {
-                    setRefundModalOpen(false)
-                    setSelectedOrder(null)
-                    setRefundAmount('')
-                    setRefundReason('')
-                  }}
+                  onClick={closeRefundModal}
                   variant="ghost"
                   className="flex-1"
                 >

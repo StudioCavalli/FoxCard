@@ -1,92 +1,32 @@
 'use client'
 
-import { useState } from 'react'
 import { AdminCard, AdminCardHeader } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
-import { trpc } from '@/lib/trpc/client'
 import { Plus, Edit, Trash2, FolderTree, Package, X } from 'lucide-react'
 import { generateSlug } from '@/lib/utils'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useTranslations } from 'next-intl'
+import { useCategoriesCRUD } from '@/hooks/useCategoriesCRUD'
 
 export default function MerchantCategoriesPage() {
   const { storeId } = useStoreContext()
-  const [isCreating, setIsCreating] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
   const t = useTranslations('common')
 
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-  })
-
-  const { data: categories, refetch, isLoading } = trpc.category.getAll.useQuery(
-    {
-      storeId: storeId!,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const createCategory = trpc.category.create.useMutation({
-    onSuccess: () => {
-      refetch()
-      setIsCreating(false)
-      setFormData({ name: '', slug: '', description: '' })
-    },
-  })
-
-  const updateCategory = trpc.category.update.useMutation({
-    onSuccess: () => {
-      refetch()
-      setEditingId(null)
-      setFormData({ name: '', slug: '', description: '' })
-    },
-  })
-
-  const deleteCategory = trpc.category.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (editingId) {
-      updateCategory.mutate({
-        id: editingId,
-        name: formData.name,
-        slug: formData.slug || generateSlug(formData.name),
-        description: formData.description || undefined,
-      })
-    } else {
-      createCategory.mutate({
-        storeId: storeId!,
-        name: formData.name,
-        slug: formData.slug || generateSlug(formData.name),
-        description: formData.description || undefined,
-      })
-    }
-  }
-
-  const startEdit = (category: any) => {
-    setEditingId(category.id)
-    setFormData({
-      name: category.name,
-      slug: category.slug,
-      description: category.description || '',
-    })
-    setIsCreating(true)
-  }
-
-  const cancelForm = () => {
-    setIsCreating(false)
-    setEditingId(null)
-    setFormData({ name: '', slug: '', description: '' })
-  }
+  const {
+    categories,
+    isLoading,
+    isCreating,
+    setIsCreating,
+    editingId,
+    formData,
+    setFormData,
+    createCategory,
+    updateCategory,
+    handleSubmit,
+    startEdit,
+    cancelForm,
+    handleDelete,
+  } = useCategoriesCRUD(storeId)
 
   const totalProducts = categories?.reduce((sum, cat) => sum + (cat._count?.products || 0), 0) || 0
 
@@ -237,11 +177,7 @@ export default function MerchantCategoriesPage() {
                   <AdminButton
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-                        deleteCategory.mutate({ id: category.id })
-                      }
-                    }}
+                    onClick={() => handleDelete(category.id)}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                   >
                     <Trash2 className="w-4 h-4" />

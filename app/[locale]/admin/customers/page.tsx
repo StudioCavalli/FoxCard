@@ -1,41 +1,27 @@
 'use client'
 
-import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Mail, Calendar, ShoppingBag, Search, Trash2 } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
+import { useCustomersCRUD } from '@/hooks/useCustomersCRUD'
 
 export default function AdminCustomersPage() {
   const { storeId } = useStoreContext()
-  const [searchQuery, setSearchQuery] = useState('')
 
-  const { data, isLoading, refetch } = trpc.customer.getAll.useQuery(
-    {
-      storeId: storeId!,
-      limit: 50,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const deleteCustomer = trpc.customer.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const customers = data?.customers || []
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const {
+    customers,
+    filteredCustomers,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    handleDelete,
+    totalRevenue,
+    totalOrders,
+    avgOrderValue,
+  } = useCustomersCRUD(storeId)
 
   return (
     <div className="space-y-6">
@@ -138,15 +124,7 @@ export default function AdminCustomersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            if (
-                              confirm(
-                                'Etes-vous sur de vouloir supprimer ce client ? Cela supprimera egalement toutes ses commandes.'
-                              )
-                            ) {
-                              deleteCustomer.mutate({ id: customer.id, storeId: storeId! })
-                            }
-                          }}
+                          onClick={() => handleDelete(customer.id)}
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
@@ -180,7 +158,7 @@ export default function AdminCustomersPage() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Revenu total</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {formatPrice(customers.reduce((sum, c) => sum + c.totalSpent, 0))}
+                  {formatPrice(totalRevenue)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center">
@@ -194,10 +172,7 @@ export default function AdminCustomersPage() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Panier moyen</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {formatPrice(
-                    customers.reduce((sum, c) => sum + c.totalSpent, 0) /
-                      Math.max(customers.reduce((sum, c) => sum + c._count.orders, 0), 1)
-                  )}
+                  {formatPrice(avgOrderValue)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">

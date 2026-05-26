@@ -1,91 +1,29 @@
 'use client'
 
-import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { trpc } from '@/lib/trpc/client'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { generateSlug } from '@/lib/utils'
 import { useStoreContext } from '@/lib/context/store-context'
+import { useCategoriesCRUD } from '@/hooks/useCategoriesCRUD'
 
 export default function AdminCategoriesPage() {
   const { storeId } = useStoreContext()
-  const [isCreating, setIsCreating] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-  })
-
-  const { data: categories, refetch } = trpc.category.getAll.useQuery(
-    {
-      storeId: storeId!,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const createCategory = trpc.category.create.useMutation({
-    onSuccess: () => {
-      refetch()
-      setIsCreating(false)
-      setFormData({ name: '', slug: '', description: '' })
-    },
-  })
-
-  const updateCategory = trpc.category.update.useMutation({
-    onSuccess: () => {
-      refetch()
-      setEditingId(null)
-      setFormData({ name: '', slug: '', description: '' })
-    },
-  })
-
-  const deleteCategory = trpc.category.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (editingId) {
-      updateCategory.mutate({
-        id: editingId,
-        name: formData.name,
-        slug: formData.slug || generateSlug(formData.name),
-        description: formData.description || undefined,
-      })
-    } else {
-      createCategory.mutate({
-        storeId: storeId!,
-        name: formData.name,
-        slug: formData.slug || generateSlug(formData.name),
-        description: formData.description || undefined,
-      })
-    }
-  }
-
-  const startEdit = (category: any) => {
-    setEditingId(category.id)
-    setFormData({
-      name: category.name,
-      slug: category.slug,
-      description: category.description || '',
-    })
-    setIsCreating(true)
-  }
-
-  const cancelForm = () => {
-    setIsCreating(false)
-    setEditingId(null)
-    setFormData({ name: '', slug: '', description: '' })
-  }
+  const {
+    categories,
+    isCreating,
+    setIsCreating,
+    editingId,
+    formData,
+    setFormData,
+    createCategory,
+    updateCategory,
+    handleSubmit,
+    startEdit,
+    cancelForm,
+    handleDelete,
+  } = useCategoriesCRUD(storeId)
 
   return (
     <div className="space-y-6">
@@ -172,11 +110,7 @@ export default function AdminCategoriesPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-                      deleteCategory.mutate({ id: category.id })
-                    }
-                  }}
+                  onClick={() => handleDelete(category.id)}
                 >
                   <Trash2 className="w-4 h-4 text-red-600" />
                 </Button>

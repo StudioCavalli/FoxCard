@@ -1,41 +1,24 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
+import { useProductsCRUD } from '@/hooks/useProductsCRUD'
 
 export default function AdminProductsPage() {
   const { storeId } = useStoreContext()
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const { data, isLoading, refetch } = trpc.product.getAll.useQuery(
-    {
-      storeId: storeId!,
-      limit: 50,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const deleteProduct = trpc.product.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const products = data?.products || []
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const {
+    filteredProducts,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    handleDelete,
+  } = useProductsCRUD(storeId)
 
   return (
     <div className="space-y-6">
@@ -160,11 +143,7 @@ export default function AdminProductsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-                              deleteProduct.mutate({ id: product.id, storeId: storeId! })
-                            }
-                          }}
+                          onClick={() => handleDelete(product.id)}
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>

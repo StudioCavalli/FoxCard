@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -12,10 +11,10 @@ import { formatPrice } from '@/lib/utils'
 import { Plus, Search, Edit, Trash2, Eye, Package, Filter, Box, AlertTriangle, Archive } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useTranslations } from 'next-intl'
+import { useProductsCRUD } from '@/hooks/useProductsCRUD'
 
 export default function MerchantProductsPage() {
   const { storeId } = useStoreContext()
-  const [searchQuery, setSearchQuery] = useState('')
   const params = useParams()
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
@@ -26,32 +25,17 @@ export default function MerchantProductsPage() {
     { enabled: !!storeId }
   )
 
-  const { data, isLoading, refetch } = trpc.product.getAll.useQuery(
-    {
-      storeId: storeId!,
-      limit: 50,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const deleteProduct = trpc.product.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const products = data?.products || []
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const activeCount = products.filter(p => p.status === 'ACTIVE').length
-  const draftCount = products.filter(p => p.status === 'DRAFT').length
-  const lowStockCount = products.filter(p => p.quantity <= 5 && p.quantity > 0).length
-  const outOfStockCount = products.filter(p => p.quantity === 0).length
+  const {
+    products,
+    filteredProducts,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    handleDelete,
+    activeCount,
+    lowStockCount,
+    outOfStockCount,
+  } = useProductsCRUD(storeId)
 
   return (
     <div className="space-y-6">
@@ -248,11 +232,7 @@ export default function MerchantProductsPage() {
                         <AdminButton
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-                              deleteProduct.mutate({ id: product.id, storeId: storeId! })
-                            }
-                          }}
+                          onClick={() => handleDelete(product.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4" />

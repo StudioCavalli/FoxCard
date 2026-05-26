@@ -1,51 +1,33 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { AdminCard } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
-import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Mail, Calendar, ShoppingBag, Search, Trash2, Users, DollarSign, TrendingUp, Eye } from 'lucide-react'
 import { useStoreContext } from '@/lib/context/store-context'
 import { useTranslations } from 'next-intl'
+import { useCustomersCRUD } from '@/hooks/useCustomersCRUD'
 
 export default function MerchantCustomersPage() {
   const { storeId } = useStoreContext()
   const params = useParams()
   const locale = params?.locale || 'fr'
   const basePath = `/${locale}/merchant`
-  const [searchQuery, setSearchQuery] = useState('')
   const t = useTranslations('merchant')
 
-  const { data, isLoading, refetch } = trpc.customer.getAll.useQuery(
-    {
-      storeId: storeId!,
-      limit: 50,
-    },
-    {
-      enabled: !!storeId,
-    }
-  )
-
-  const deleteCustomer = trpc.customer.delete.useMutation({
-    onSuccess: () => {
-      refetch()
-    },
-  })
-
-  const customers = data?.customers || []
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0)
-  const totalOrders = customers.reduce((sum, c) => sum + c._count.orders, 0)
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
+  const {
+    customers,
+    filteredCustomers,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    handleDelete,
+    totalRevenue,
+    totalOrders,
+    avgOrderValue,
+  } = useCustomersCRUD(storeId)
 
   return (
     <div className="space-y-6">
@@ -200,15 +182,7 @@ export default function MerchantCustomersPage() {
                         <AdminButton
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            if (
-                              confirm(
-                                'Êtes-vous sûr de vouloir supprimer ce client ? Cela supprimera également toutes ses commandes.'
-                              )
-                            ) {
-                              deleteCustomer.mutate({ id: customer.id, storeId: storeId! })
-                            }
-                          }}
+                          onClick={() => handleDelete(customer.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4" />
