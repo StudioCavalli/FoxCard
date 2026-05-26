@@ -40,3 +40,4 @@ next-env.d.ts
 prisma/migrations
 prisma/schema.prisma.mongo.bak
 whitepaper
+whitepaper.pdf
