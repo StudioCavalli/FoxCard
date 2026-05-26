@@ -80,18 +80,25 @@ export function AdaptiveSidebar() {
             ))}
           </div>
         ) : (
-          navigation.map((item) =>
-            isNavGroup(item) ? (
-              <NavGroupComponent
-                key={item.key}
-                group={item}
-                basePath={basePath}
-                pathname={pathname}
-                onItemClick={close}
-                t={t}
-                collapsed={collapsed}
-              />
-            ) : (
+          navigation.map((item) => {
+            if (isNavGroup(item)) {
+              // Filter out hidden items from the group
+              const visibleItems = item.items.filter((i) => !i.hidden)
+              if (visibleItems.length === 0) return null
+              return (
+                <NavGroupComponent
+                  key={item.key}
+                  group={{ ...item, items: visibleItems }}
+                  basePath={basePath}
+                  pathname={pathname}
+                  onItemClick={close}
+                  t={t}
+                  collapsed={collapsed}
+                />
+              )
+            }
+            if (item.hidden) return null
+            return (
               <NavItemComponent
                 key={item.key}
                 item={item}
@@ -102,7 +109,7 @@ export function AdaptiveSidebar() {
                 collapsed={collapsed}
               />
             )
-          )
+          })
         )}
       </nav>
 

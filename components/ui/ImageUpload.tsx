@@ -24,7 +24,7 @@ export function ImageUpload({
   value = [],
   onChange,
   maxImages = 5,
-  storeId = '000000000000000000000001', // Demo store ID
+  storeId = '',
   disabled = false,
 }: ImageUploadProps) {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])

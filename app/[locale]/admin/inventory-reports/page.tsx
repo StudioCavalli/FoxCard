@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useStore } from '@/lib/store/use-store'
+import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
@@ -18,34 +18,34 @@ import {
 } from 'lucide-react'
 
 export default function InventoryReportsPage() {
-  const { currentStore } = useStore()
+  const { storeId } = useStoreContext()
   const [activeReport, setActiveReport] = useState<'value' | 'turnover' | 'obsolete' | 'abc'>('value')
   const [period, setPeriod] = useState(90)
 
   // Queries
   const { data: stockValue, isLoading: loadingValue } = trpc.inventoryReport.getStockValue.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore && activeReport === 'value' }
+    { storeId: storeId || '' },
+    { enabled: !!storeId && activeReport === 'value' }
   )
 
   const { data: turnover, isLoading: loadingTurnover } = trpc.inventoryReport.getTurnoverRate.useQuery(
-    { storeId: currentStore?.id || '', days: period },
-    { enabled: !!currentStore && activeReport === 'turnover' }
+    { storeId: storeId || '', days: period },
+    { enabled: !!storeId && activeReport === 'turnover' }
   )
 
   const { data: obsolete, isLoading: loadingObsolete } = trpc.inventoryReport.getObsoleteProducts.useQuery(
-    { storeId: currentStore?.id || '', days: period },
-    { enabled: !!currentStore && activeReport === 'obsolete' }
+    { storeId: storeId || '', days: period },
+    { enabled: !!storeId && activeReport === 'obsolete' }
   )
 
   const { data: abc, isLoading: loadingABC } = trpc.inventoryReport.getABCAnalysis.useQuery(
-    { storeId: currentStore?.id || '', days: period },
-    { enabled: !!currentStore && activeReport === 'abc' }
+    { storeId: storeId || '', days: period },
+    { enabled: !!storeId && activeReport === 'abc' }
   )
 
   const { data: recommendations } = trpc.inventoryReport.getRecommendations.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const isLoading = loadingValue || loadingTurnover || loadingObsolete || loadingABC
@@ -139,7 +139,7 @@ export default function InventoryReportsPage() {
     URL.revokeObjectURL(url)
   }
 
-  if (!currentStore) {
+  if (!storeId) {
     return (
       <div className="p-6">
         <p className="text-gray-500">Veuillez sélectionner une boutique</p>

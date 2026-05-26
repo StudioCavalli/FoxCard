@@ -1,3 +1,8 @@
+/**
+ * @deprecated This Zustand store has no remaining consumers.
+ * All pages now use useStoreContext() from '@/lib/context/store-context' instead.
+ * This file can be safely deleted in a future cleanup pass.
+ */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useStore } from '@/lib/store/use-store'
+import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import {
   FlaskConical,
@@ -32,7 +32,7 @@ interface VariantInput {
 }
 
 export default function ABTestingPage() {
-  const { currentStore } = useStore()
+  const { storeId } = useStoreContext()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedTest, setSelectedTest] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<TestStatus | 'all'>('all')
@@ -58,20 +58,20 @@ export default function ABTestingPage() {
   // Queries
   const { data: tests, isLoading } = trpc.abtest.list.useQuery(
     {
-      storeId: currentStore?.id || '',
+      storeId: storeId || '',
       ...(statusFilter !== 'all' && { status: statusFilter }),
     },
-    { enabled: !!currentStore }
+    { enabled: !!storeId }
   )
 
   const { data: dashboard } = trpc.abtest.getDashboard.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const { data: testDetails } = trpc.abtest.get.useQuery(
-    { testId: selectedTest || '', storeId: currentStore?.id || '' },
-    { enabled: !!selectedTest && !!currentStore }
+    { testId: selectedTest || '', storeId: storeId || '' },
+    { enabled: !!selectedTest && !!storeId }
   )
 
   // Mutations
@@ -134,9 +134,9 @@ export default function ABTestingPage() {
   }
 
   const handleCreateTest = () => {
-    if (!currentStore) return
+    if (!storeId) return
     createTest.mutate({
-      storeId: currentStore.id,
+      storeId: storeId!,
       ...formData,
     })
   }
@@ -190,7 +190,7 @@ export default function ABTestingPage() {
     }
   }
 
-  if (!currentStore) {
+  if (!storeId) {
     return (
       <div className="p-6">
         <p className="text-gray-500">Veuillez sélectionner une boutique</p>
@@ -381,7 +381,7 @@ export default function ABTestingPage() {
               {testDetails.status === 'DRAFT' && (
                 <button
                   onClick={() =>
-                    startTest.mutate({ testId: testDetails.id, storeId: currentStore.id })
+                    startTest.mutate({ testId: testDetails.id, storeId: storeId! })
                   }
                   className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
@@ -393,7 +393,7 @@ export default function ABTestingPage() {
                 <>
                   <button
                     onClick={() =>
-                      pauseTest.mutate({ testId: testDetails.id, storeId: currentStore.id })
+                      pauseTest.mutate({ testId: testDetails.id, storeId: storeId! })
                     }
                     className="flex items-center gap-1 px-3 py-1.5 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm"
                   >
@@ -402,7 +402,7 @@ export default function ABTestingPage() {
                   </button>
                   <button
                     onClick={() =>
-                      completeTest.mutate({ testId: testDetails.id, storeId: currentStore.id })
+                      completeTest.mutate({ testId: testDetails.id, storeId: storeId! })
                     }
                     className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
                   >
@@ -414,7 +414,7 @@ export default function ABTestingPage() {
               {testDetails.status === 'PAUSED' && (
                 <button
                   onClick={() =>
-                    startTest.mutate({ testId: testDetails.id, storeId: currentStore.id })
+                    startTest.mutate({ testId: testDetails.id, storeId: storeId! })
                   }
                   className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
@@ -425,7 +425,7 @@ export default function ABTestingPage() {
               <button
                 onClick={() => {
                   if (confirm('Êtes-vous sûr de vouloir supprimer ce test ?')) {
-                    deleteTest.mutate({ testId: testDetails.id, storeId: currentStore.id })
+                    deleteTest.mutate({ testId: testDetails.id, storeId: storeId! })
                   }
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm"

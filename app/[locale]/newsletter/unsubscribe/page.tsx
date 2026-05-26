@@ -13,7 +13,7 @@ export default function NewsletterUnsubscribePage() {
   const t = useTranslations()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
-  const storeId = searchParams.get('storeId') || '000000000000000000000001'
+  const storeId = searchParams.get('storeId') || ''
 
   const [isUnsubscribed, setIsUnsubscribed] = useState(false)
   const [reason, setReason] = useState('')
@@ -22,7 +22,7 @@ export default function NewsletterUnsubscribePage() {
   const unsubscribeMutation = trpc.newsletter.unsubscribe.useMutation()
 
   const handleUnsubscribe = async () => {
-    if (!email) {
+    if (!email || !storeId) {
       setError(t('newsletter.invalidEmail'))
       return
     }

@@ -47,6 +47,7 @@ export interface NavItem {
   icon: LucideIcon
   labelKey: string // i18n key
   badge?: string | number
+  hidden?: boolean // Hide from navigation (stub/upcoming features)
 }
 
 export interface NavGroup {
@@ -78,7 +79,7 @@ const ecommerceNavigation: NavigationConfig = [
     items: [
       { key: 'products', href: '/products', icon: Box, labelKey: 'merchant.navigation.products' },
       { key: 'categories', href: '/categories', icon: FolderTree, labelKey: 'merchant.navigation.categories' },
-      { key: 'warehouses', href: '/warehouses', icon: Warehouse, labelKey: 'merchant.navigation.warehouses' },
+      { key: 'warehouses', href: '/warehouses', icon: Warehouse, labelKey: 'merchant.navigation.warehouses', hidden: true },
     ],
   },
   {
@@ -88,7 +89,7 @@ const ecommerceNavigation: NavigationConfig = [
     items: [
       { key: 'orders', href: '/orders', icon: Package, labelKey: 'merchant.navigation.orders' },
       { key: 'customers', href: '/customers', icon: Users, labelKey: 'merchant.navigation.customers' },
-      { key: 'abandoned', href: '/abandoned-carts', icon: ShoppingCart, labelKey: 'merchant.navigation.abandonedCarts' },
+      { key: 'abandoned', href: '/abandoned-carts', icon: ShoppingCart, labelKey: 'merchant.navigation.abandonedCarts', hidden: true },
       { key: 'discounts', href: '/discounts', icon: Percent, labelKey: 'merchant.navigation.discounts' },
     ],
   },
@@ -97,8 +98,8 @@ const ecommerceNavigation: NavigationConfig = [
     labelKey: 'merchant.navigation.shipping',
     icon: Truck,
     items: [
-      { key: 'zones', href: '/shipping', icon: MapPin, labelKey: 'merchant.navigation.shippingZones' },
-      { key: 'taxes', href: '/taxes', icon: Receipt, labelKey: 'merchant.navigation.taxes' },
+      { key: 'zones', href: '/shipping', icon: MapPin, labelKey: 'merchant.navigation.shippingZones', hidden: true },
+      { key: 'taxes', href: '/taxes', icon: Receipt, labelKey: 'merchant.navigation.taxes', hidden: true },
     ],
   },
   {
@@ -106,9 +107,9 @@ const ecommerceNavigation: NavigationConfig = [
     labelKey: 'merchant.navigation.marketing',
     icon: Megaphone,
     items: [
-      { key: 'emails', href: '/emails', icon: Mail, labelKey: 'merchant.navigation.emails' },
-      { key: 'newsletter', href: '/newsletter', icon: Send, labelKey: 'merchant.navigation.newsletter' },
-      { key: 'ab-testing', href: '/ab-testing', icon: TestTube, labelKey: 'merchant.navigation.abTesting' },
+      { key: 'emails', href: '/emails', icon: Mail, labelKey: 'merchant.navigation.emails', hidden: true },
+      { key: 'newsletter', href: '/newsletter', icon: Send, labelKey: 'merchant.navigation.newsletter', hidden: true },
+      { key: 'ab-testing', href: '/ab-testing', icon: TestTube, labelKey: 'merchant.navigation.abTesting', hidden: true },
     ],
   },
   {
@@ -125,7 +126,7 @@ const ecommerceNavigation: NavigationConfig = [
     labelKey: 'merchant.navigation.payments',
     icon: CreditCard,
     items: [
-      { key: 'transactions', href: '/payments', icon: CreditCard, labelKey: 'merchant.navigation.transactions' },
+      { key: 'transactions', href: '/payments', icon: CreditCard, labelKey: 'merchant.navigation.transactions', hidden: true },
     ],
   },
   {
@@ -340,8 +341,8 @@ const digitalNavigation: NavigationConfig = [
     labelKey: 'merchant.navigation.marketing',
     icon: Megaphone,
     items: [
-      { key: 'emails', href: '/emails', icon: Mail, labelKey: 'merchant.navigation.emails' },
-      { key: 'newsletter', href: '/newsletter', icon: Send, labelKey: 'merchant.navigation.newsletter' },
+      { key: 'emails', href: '/emails', icon: Mail, labelKey: 'merchant.navigation.emails', hidden: true },
+      { key: 'newsletter', href: '/newsletter', icon: Send, labelKey: 'merchant.navigation.newsletter', hidden: true },
     ],
   },
   {
@@ -437,8 +438,8 @@ const alcoholNavigation: NavigationConfig = [
     labelKey: 'merchant.navigation.shipping',
     icon: Truck,
     items: [
-      { key: 'zones', href: '/shipping', icon: MapPin, labelKey: 'merchant.navigation.shippingZones' },
-      { key: 'taxes', href: '/taxes', icon: Receipt, labelKey: 'merchant.navigation.taxes' },
+      { key: 'zones', href: '/shipping', icon: MapPin, labelKey: 'merchant.navigation.shippingZones', hidden: true },
+      { key: 'taxes', href: '/taxes', icon: Receipt, labelKey: 'merchant.navigation.taxes', hidden: true },
     ],
   },
   {

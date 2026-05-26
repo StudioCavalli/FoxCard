@@ -20,7 +20,13 @@ export default function NewsletterConfirmPage() {
   useEffect(() => {
     const token = searchParams.get('token')
     const email = searchParams.get('email')
-    const storeId = searchParams.get('storeId') || '000000000000000000000001'
+    const storeId = searchParams.get('storeId')
+
+    if (!storeId) {
+      setStatus('error')
+      setMessage(t('newsletter.invalidLink'))
+      return
+    }
 
     if (!token || !email) {
       setStatus('error')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useStore } from '@/lib/store/use-store'
+import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice } from '@/lib/utils'
 import {
@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 
 export default function WarehousesPage() {
-  const { currentStore } = useStore()
+  const { storeId } = useStoreContext()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(null)
@@ -58,23 +58,23 @@ export default function WarehousesPage() {
 
   // Queries
   const { data: warehouses, isLoading } = trpc.warehouse.list.useQuery(
-    { storeId: currentStore?.id || '', includeInactive: true },
-    { enabled: !!currentStore }
+    { storeId: storeId || '', includeInactive: true },
+    { enabled: !!storeId }
   )
 
   const { data: dashboard } = trpc.warehouse.getDashboard.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const { data: transfers } = trpc.warehouse.listTransfers.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const { data: warehouseDetails } = trpc.warehouse.get.useQuery(
-    { warehouseId: selectedWarehouse || '', storeId: currentStore?.id || '' },
-    { enabled: !!selectedWarehouse && !!currentStore }
+    { warehouseId: selectedWarehouse || '', storeId: storeId || '' },
+    { enabled: !!selectedWarehouse && !!storeId }
   )
 
   // Mutations
@@ -157,18 +157,18 @@ export default function WarehousesPage() {
   }
 
   const handleCreate = () => {
-    if (!currentStore) return
+    if (!storeId) return
     createWarehouse.mutate({
-      storeId: currentStore.id,
+      storeId: storeId!,
       ...formData,
     })
   }
 
   const handleUpdate = () => {
-    if (!currentStore || !editingWarehouse) return
+    if (!storeId || !editingWarehouse) return
     updateWarehouse.mutate({
       warehouseId: editingWarehouse.id,
-      storeId: currentStore.id,
+      storeId: storeId!,
       ...formData,
     })
   }
@@ -225,7 +225,7 @@ export default function WarehousesPage() {
     }
   }
 
-  if (!currentStore) {
+  if (!storeId) {
     return (
       <div className="p-6">
         <p className="text-gray-500">Veuillez sélectionner une boutique</p>
@@ -389,7 +389,7 @@ export default function WarehousesPage() {
                     if (confirm('Êtes-vous sûr de vouloir supprimer cet entrepôt ?')) {
                       deleteWarehouse.mutate({
                         warehouseId: warehouseDetails.id,
-                        storeId: currentStore.id,
+                        storeId: storeId!,
                       })
                     }
                   }}
@@ -505,7 +505,7 @@ export default function WarehousesPage() {
                         onClick={() =>
                           approveTransfer.mutate({
                             transferId: transfer.id,
-                            storeId: currentStore.id,
+                            storeId: storeId!,
                           })
                         }
                         className="mt-2 text-xs text-primary-600 hover:text-primary-700"
@@ -518,7 +518,7 @@ export default function WarehousesPage() {
                         onClick={() =>
                           shipTransfer.mutate({
                             transferId: transfer.id,
-                            storeId: currentStore.id,
+                            storeId: storeId!,
                           })
                         }
                         className="mt-2 text-xs text-primary-600 hover:text-primary-700"
@@ -531,7 +531,7 @@ export default function WarehousesPage() {
                         onClick={() =>
                           receiveTransfer.mutate({
                             transferId: transfer.id,
-                            storeId: currentStore.id,
+                            storeId: storeId!,
                             items: transfer.items.map((i) => ({
                               productId: i.productId,
                               received: i.quantity,
@@ -821,7 +821,7 @@ export default function WarehousesPage() {
                 onClick={() => {
                   // For now, create empty transfer - items would be added in a separate step
                   createTransfer.mutate({
-                    storeId: currentStore.id,
+                    storeId: storeId!,
                     ...transferData,
                     items: [{ productId: '', productName: 'Test', quantity: 1 }], // Placeholder
                   })

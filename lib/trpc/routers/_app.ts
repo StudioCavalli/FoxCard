@@ -8,10 +8,6 @@ import { customerRouter } from './customer'
 import { paymentRouter } from './payment'
 import { discountRouter } from './discount'
 import { shippingRouter } from './shipping'
-import { mediaRouter } from './media'
-import { exportRouter } from './export'
-import { webhookRouter } from './webhook'
-import { apiKeyRouter } from './apiKey'
 import { themeRouter } from './theme'
 import { installRouter } from './install'
 import { envVariableRouter } from './envVariable'
@@ -26,7 +22,6 @@ import { forecastRouter } from './forecast'
 import { abtestRouter } from './abtest'
 import { warehouseRouter } from './warehouse'
 import { allocationRouter } from './allocation'
-import { inventoryRouter } from './inventory'
 import { inventoryReportRouter } from './inventory-report'
 import { abandonedCartRouter } from './abandoned-cart'
 import { loyaltyRouter } from './loyalty'
@@ -43,9 +38,6 @@ import { bookingRouter } from './booking'
 import { restaurantRouter } from './restaurant'
 import { hotelRouter } from './hotel'
 import { travelRouter } from './travel'
-import { subscriptionRouter } from './subscription'
-import { legalRouter } from './legal'
-import { recreationRouter } from './recreation'
 import { alcoholRouter } from './alcohol'
 import { storeLocationRouter } from './storeLocation'
 
@@ -59,10 +51,6 @@ export const appRouter = router({
   payment: paymentRouter,
   discount: discountRouter,
   shipping: shippingRouter,
-  media: mediaRouter,
-  export: exportRouter,
-  webhook: webhookRouter,
-  apiKey: apiKeyRouter,
   theme: themeRouter,
   install: installRouter,
   envVariable: envVariableRouter,
@@ -77,7 +65,6 @@ export const appRouter = router({
   abtest: abtestRouter,
   warehouse: warehouseRouter,
   allocation: allocationRouter,
-  inventory: inventoryRouter,
   inventoryReport: inventoryReportRouter,
   abandonedCart: abandonedCartRouter,
   loyalty: loyaltyRouter,
@@ -94,9 +81,6 @@ export const appRouter = router({
   restaurant: restaurantRouter,
   hotel: hotelRouter,
   travel: travelRouter,
-  subscription: subscriptionRouter,
-  legal: legalRouter,
-  recreation: recreationRouter,
   alcohol: alcoholRouter,
   storeLocation: storeLocationRouter,
 })

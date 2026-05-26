@@ -18,7 +18,7 @@ interface SingleImageUploadProps {
 export function SingleImageUpload({
   value = '',
   onChange,
-  storeId = '000000000000000000000001',
+  storeId = '',
   disabled = false,
   label,
   aspectRatio = 'square',

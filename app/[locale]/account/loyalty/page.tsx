@@ -1,23 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Card } from '@/components/ui/Card'
 import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Trophy, Star, TrendingUp, Clock, Gift, ChevronRight, Award, Zap } from 'lucide-react'
 
 export default function LoyaltyDashboardPage() {
-  // TODO: Get actual customer ID from session
-  const DEMO_CUSTOMER_ID = '000000000000000000000001'
+  const { data: session } = useSession()
+  const customerId = session?.user?.id
 
   const { data: loyaltyData, isLoading } = trpc.loyalty.getBalance.useQuery({
-    customerId: DEMO_CUSTOMER_ID,
-  })
+    customerId: customerId!,
+  }, { enabled: !!customerId })
 
   const { data: historyData } = trpc.loyalty.getHistory.useQuery({
-    customerId: DEMO_CUSTOMER_ID,
+    customerId: customerId!,
     limit: 20,
-  })
+  }, { enabled: !!customerId })
 
   const getTierColor = (tier: string) => {
     switch (tier) {

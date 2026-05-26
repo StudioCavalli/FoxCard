@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { trpc } from '@/lib/trpc/client'
 import { Settings, Database, Mail, CreditCard, Cloud, Lock, Plus, Trash2, Eye, EyeOff } from 'lucide-react'
+import { useStoreContext } from '@/lib/context/store-context'
 
 type EnvCategory = 'DATABASE' | 'SMTP' | 'STRIPE' | 'R2' | 'AUTH' | 'GENERAL'
 
@@ -19,6 +20,7 @@ const categoryConfig = {
 }
 
 export default function EnvVariablesPage() {
+  const { storeId } = useStoreContext()
   const [selectedCategory, setSelectedCategory] = useState<EnvCategory>('DATABASE')
   const [showNewForm, setShowNewForm] = useState(false)
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
@@ -30,8 +32,8 @@ export default function EnvVariablesPage() {
   })
 
   const { data: variables, refetch } = trpc.envVariable.getAll.useQuery({
-    storeId: '000000000000000000000001',
-  })
+    storeId: storeId!,
+  }, { enabled: !!storeId })
 
   const upsertVariable = trpc.envVariable.upsert.useMutation({
     onSuccess: () => {
@@ -54,7 +56,7 @@ export default function EnvVariablesPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     upsertVariable.mutate({
-      storeId: '000000000000000000000001',
+      storeId: storeId!,
       category: selectedCategory,
       ...formData,
     })

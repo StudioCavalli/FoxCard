@@ -8,21 +8,23 @@ import { trpc } from '@/lib/trpc/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { DollarSign, CheckCircle, Clock, XCircle, TrendingUp, Search, Filter } from 'lucide-react'
 import Link from 'next/link'
+import { useStoreContext } from '@/lib/context/store-context'
 
 export default function AdminPaymentsPage() {
+  const { storeId } = useStoreContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'PENDING' | 'PAID' | 'FAILED'>('all')
 
   // Get payment statistics
   const { data: stats } = trpc.payment.getPaymentStats.useQuery({
-    storeId: '000000000000000000000001',
-  })
+    storeId: storeId!,
+  }, { enabled: !!storeId })
 
   // Get all orders with pagination
   const { data: ordersData, isLoading, refetch } = trpc.order.getAll.useQuery({
-    storeId: '000000000000000000000001',
+    storeId: storeId!,
     limit: 100,
-  })
+  }, { enabled: !!storeId })
 
   const confirmPayment = trpc.payment.adminConfirmPayment.useMutation({
     onSuccess: () => {

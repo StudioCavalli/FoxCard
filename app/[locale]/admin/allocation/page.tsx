@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useStore } from '@/lib/store/use-store'
+import { useStoreContext } from '@/lib/context/store-context'
 import { trpc } from '@/lib/trpc/client'
 import {
   Settings,
@@ -22,7 +22,7 @@ import {
 type RuleType = 'DISTANCE' | 'STOCK_LEVEL' | 'COST' | 'PRIORITY' | 'ZONE' | 'SPLIT_ALLOWED'
 
 export default function AllocationPage() {
-  const { currentStore } = useStore()
+  const { storeId } = useStoreContext()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingRule, setEditingRule] = useState<any>(null)
 
@@ -40,18 +40,18 @@ export default function AllocationPage() {
 
   // Queries
   const { data: rules, isLoading } = trpc.allocation.listRules.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const { data: stats } = trpc.allocation.getStats.useQuery(
-    { storeId: currentStore?.id || '' },
-    { enabled: !!currentStore }
+    { storeId: storeId || '' },
+    { enabled: !!storeId }
   )
 
   const { data: history } = trpc.allocation.getHistory.useQuery(
-    { storeId: currentStore?.id || '', limit: 20 },
-    { enabled: !!currentStore }
+    { storeId: storeId || '', limit: 20 },
+    { enabled: !!storeId }
   )
 
   // Mutations
@@ -89,18 +89,18 @@ export default function AllocationPage() {
   }
 
   const handleCreate = () => {
-    if (!currentStore) return
+    if (!storeId) return
     createRule.mutate({
-      storeId: currentStore.id,
+      storeId: storeId!,
       ...formData,
     })
   }
 
   const handleUpdate = () => {
-    if (!currentStore || !editingRule) return
+    if (!storeId || !editingRule) return
     updateRule.mutate({
       ruleId: editingRule.id,
-      storeId: currentStore.id,
+      storeId: storeId!,
       ...formData,
     })
   }
@@ -155,7 +155,7 @@ export default function AllocationPage() {
     }
   }
 
-  if (!currentStore) {
+  if (!storeId) {
     return (
       <div className="p-6">
         <p className="text-gray-500">Veuillez sélectionner une boutique</p>
@@ -271,7 +271,7 @@ export default function AllocationPage() {
                       <button
                         onClick={() => {
                           if (confirm('Supprimer cette règle ?')) {
-                            deleteRule.mutate({ ruleId: rule.id, storeId: currentStore.id })
+                            deleteRule.mutate({ ruleId: rule.id, storeId: storeId! })
                           }
                         }}
                         className="p-2 text-red-500 hover:bg-red-50 rounded"
