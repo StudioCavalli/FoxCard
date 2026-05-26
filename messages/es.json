@@ -2613,5 +2613,59 @@
     "otherLocations": "otras ubicaciones",
     "zoomForDetails": "Amplíe para ver las direcciones exactas",
     "viewStore": "Ver tienda"
+  },
+  "categoriesPage": {
+    "title": "Categorías",
+    "subtitle": "Descubre nuestros productos por categoría",
+    "productCount": "{count} producto(s)",
+    "noCategory": "No hay categorías disponibles",
+    "noCategorySoon": "Las categorías estarán disponibles pronto",
+    "viewAllProducts": "Ver todos los productos"
+  },
+  "categoryPage": {
+    "notFound": "Categoría no encontrada",
+    "notFoundDescription": "Esta categoría no existe o ha sido eliminada.",
+    "viewAllProducts": "Ver todos los productos",
+    "backToProducts": "Volver a productos",
+    "productCount": "{count} producto(s)",
+    "searchPlaceholder": "Buscar en esta categoría...",
+    "filters": "Filtros",
+    "price": "Precio",
+    "priceMin": "Precio mín.",
+    "priceMax": "Precio máx.",
+    "resetPrice": "Restablecer precio",
+    "applyFilters": "Aplicar filtros",
+    "noProducts": "No se encontraron productos en esta categoría",
+    "resetFilters": "Restablecer filtros",
+    "loadMore": "Cargar más productos",
+    "sort": {
+      "newest": "Más recientes",
+      "priceAsc": "Precio: menor a mayor",
+      "priceDesc": "Precio: mayor a menor",
+      "nameAsc": "Nombre A-Z",
+      "nameDesc": "Nombre Z-A",
+      "popular": "Populares"
+    }
+  },
+  "storeAbout": {
+    "notFound": "Tienda no encontrada",
+    "notFoundDescription": "La tienda que buscas no existe",
+    "backToStores": "Volver a tiendas",
+    "breadcrumbStores": "Tiendas",
+    "breadcrumbAbout": "Acerca de",
+    "aboutSubtitle": "Acerca de nuestra tienda",
+    "backToStore": "Volver a la tienda",
+    "ourStory": "Nuestra Historia",
+    "information": "Información",
+    "foundedIn": "Fundada en",
+    "owner": "Propietario",
+    "defaultOwner": "Propietario",
+    "location": "Ubicación",
+    "operatingCountries": "Países de operación",
+    "contactUs": "Contáctenos",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "sendMessage": "Enviar un mensaje",
+    "bannerAlt": "Banner {storeName}"
   }
 }

@@ -5,9 +5,11 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Folder, ArrowRight } from 'lucide-react'
 import { usePublicStore } from '@/lib/context/public-store-context'
+import { useTranslations } from 'next-intl'
 
 export default function CategoriesPage() {
   const { selectedStore, stores } = usePublicStore()
+  const t = useTranslations('categoriesPage')
 
   // Use selected store or first available store
   const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
@@ -27,10 +29,10 @@ export default function CategoriesPage() {
             className="text-4xl md:text-5xl font-bold text-theme-text mb-3"
             style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
           >
-            Catégories
+            {t('title')}
           </h1>
           <p className="text-xl text-theme-text-secondary">
-            Découvrez nos produits par catégorie
+            {t('subtitle')}
           </p>
         </div>
 
@@ -76,7 +78,7 @@ export default function CategoriesPage() {
                   {/* Product Count */}
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-theme-border">
                     <span className="text-sm text-theme-text-muted">
-                      {category._count?.products || 0} produit(s)
+                      {t('productCount', { count: category._count?.products || 0 })}
                     </span>
                     <ArrowRight className="w-5 h-5 text-theme-primary opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
@@ -96,14 +98,14 @@ export default function CategoriesPage() {
               className="text-2xl font-bold text-theme-text mb-3"
               style={{ fontFamily: 'var(--theme-font-heading)' }}
             >
-              Aucune catégorie disponible
+              {t('noCategory')}
             </h2>
             <p className="text-theme-text-secondary mb-6">
-              Les catégories seront bientôt disponibles
+              {t('noCategorySoon')}
             </p>
             <Link href="/products">
               <button className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200">
-                Voir tous les produits
+                {t('viewAllProducts')}
               </button>
             </Link>
           </Card>

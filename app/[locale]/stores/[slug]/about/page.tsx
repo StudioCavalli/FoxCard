@@ -7,7 +7,7 @@ import { Store, ArrowLeft, Calendar, MapPin, Mail, Phone, Globe } from 'lucide-r
 import { getCountryFlag, getCountryLabel } from '@/lib/countries'
 import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/Button'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface PageProps {
   params: Promise<{
@@ -19,6 +19,7 @@ interface PageProps {
 export default function StoreAboutPage({ params }: PageProps) {
   const { slug } = use(params)
   const locale = useLocale()
+  const t = useTranslations('storeAbout')
 
   const { data: store, isLoading } = trpc.store.getBySlug.useQuery({ slug })
 
@@ -47,10 +48,10 @@ export default function StoreAboutPage({ params }: PageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Boutique introuvable</h1>
-          <p className="text-gray-600 mb-6">La boutique que vous recherchez n'existe pas</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('notFound')}</h1>
+          <p className="text-gray-600 mb-6">{t('notFoundDescription')}</p>
           <Link href="/stores">
-            <Button>Retour aux boutiques</Button>
+            <Button>{t('backToStores')}</Button>
           </Link>
         </div>
       </div>
@@ -67,14 +68,14 @@ export default function StoreAboutPage({ params }: PageProps) {
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link href="/stores" className="hover:text-primary-600">
-              Boutiques
+              {t('breadcrumbStores')}
             </Link>
             <span>/</span>
             <Link href={`/stores/${slug}`} className="hover:text-primary-600">
               {store.name}
             </Link>
             <span>/</span>
-            <span className="text-gray-900 font-medium">À propos</span>
+            <span className="text-gray-900 font-medium">{t('breadcrumbAbout')}</span>
           </nav>
 
           {/* Store Header */}
@@ -91,14 +92,14 @@ export default function StoreAboutPage({ params }: PageProps) {
               )}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
-                <p className="text-gray-600">À propos de notre boutique</p>
+                <p className="text-gray-600">{t('aboutSubtitle')}</p>
               </div>
             </div>
 
             <Link href={`/stores/${slug}`}>
               <Button variant="outline" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour à la boutique
+                {t('backToStore')}
               </Button>
             </Link>
           </div>
@@ -110,7 +111,7 @@ export default function StoreAboutPage({ params }: PageProps) {
         {/* Main Story */}
         {store.story || store.description ? (
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Notre histoire</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('ourStory')}</h2>
             <div className="prose prose-lg max-w-none text-gray-700 whitespace-pre-line">
               {store.story || store.description}
             </div>
@@ -119,7 +120,7 @@ export default function StoreAboutPage({ params }: PageProps) {
 
         {/* Store Information */}
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Informations</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('information')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Founded Date */}
             {store.foundedAt && (
@@ -128,9 +129,9 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Calendar className="w-5 h-5 text-primary-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Fondée en</p>
+                  <p className="font-medium text-gray-900">{t('foundedIn')}</p>
                   <p className="text-gray-600">
-                    {new Date(store.foundedAt).toLocaleDateString('fr-FR', {
+                    {new Date(store.foundedAt).toLocaleDateString(locale, {
                       year: 'numeric',
                       month: 'long',
                     })}
@@ -146,8 +147,8 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Store className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Propriétaire</p>
-                  <p className="text-gray-600">{store.owner.name || 'Propriétaire'}</p>
+                  <p className="font-medium text-gray-900">{t('owner')}</p>
+                  <p className="text-gray-600">{store.owner.name || t('defaultOwner')}</p>
                 </div>
               </div>
             )}
@@ -159,7 +160,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <MapPin className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Localisation</p>
+                  <p className="font-medium text-gray-900">{t('location')}</p>
                   <div className="text-gray-600">
                     {publicAddress.street && <div>{publicAddress.street}</div>}
                     {(publicAddress.city || publicAddress.postalCode) && (
@@ -180,7 +181,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Globe className="w-5 h-5 text-cyan-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Pays d&apos;activité</p>
+                  <p className="font-medium text-gray-900">{t('operatingCountries')}</p>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {store.countries.map((code: string) => (
                       <span key={code} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm text-gray-700">
@@ -196,7 +197,7 @@ export default function StoreAboutPage({ params }: PageProps) {
 
         {/* Contact Information */}
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Nous contacter</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('contactUs')}</h2>
           <div className="space-y-4">
             {store.publicEmail && (
               <div className="flex items-center gap-3">
@@ -204,7 +205,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Mail className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Email</p>
+                  <p className="font-medium text-gray-900">{t('email')}</p>
                   <a
                     href={`mailto:${store.publicEmail}`}
                     className="text-primary-600 hover:underline"
@@ -221,7 +222,7 @@ export default function StoreAboutPage({ params }: PageProps) {
                   <Phone className="w-5 h-5 text-teal-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Téléphone</p>
+                  <p className="font-medium text-gray-900">{t('phone')}</p>
                   <a
                     href={`tel:${store.publicPhone}`}
                     className="text-primary-600 hover:underline"
@@ -234,7 +235,7 @@ export default function StoreAboutPage({ params }: PageProps) {
 
             <div className="pt-4">
               <Link href={`/stores/${slug}/contact`}>
-                <Button className="w-full md:w-auto">Envoyer un message</Button>
+                <Button className="w-full md:w-auto">{t('sendMessage')}</Button>
               </Link>
             </div>
           </div>
@@ -246,7 +247,7 @@ export default function StoreAboutPage({ params }: PageProps) {
             <div className="relative w-full h-64">
               <Image
                 src={store.bannerImage}
-                alt={`Bannière ${store.name}`}
+                alt={t('bannerAlt', { storeName: store.name })}
                 fill
                 className="object-cover"
               />

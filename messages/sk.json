@@ -2613,5 +2613,59 @@
     "otherLocations": "ďalšie miesta",
     "zoomForDetails": "Priblížte si pre zobrazenie presných adries",
     "viewStore": "Zobraziť obchod"
+  },
+  "categoriesPage": {
+    "title": "Kategórie",
+    "subtitle": "Objavte naše produkty podľa kategórie",
+    "productCount": "{count} produkt(ov)",
+    "noCategory": "Žiadne kategórie nie sú k dispozícii",
+    "noCategorySoon": "Kategórie budú čoskoro k dispozícii",
+    "viewAllProducts": "Zobraziť všetky produkty"
+  },
+  "categoryPage": {
+    "notFound": "Kategória nenájdená",
+    "notFoundDescription": "Táto kategória neexistuje alebo bola odstránená.",
+    "viewAllProducts": "Zobraziť všetky produkty",
+    "backToProducts": "Späť na produkty",
+    "productCount": "{count} produkt(ov)",
+    "searchPlaceholder": "Hľadať v tejto kategórii...",
+    "filters": "Filtre",
+    "price": "Cena",
+    "priceMin": "Min. cena",
+    "priceMax": "Max. cena",
+    "resetPrice": "Obnoviť cenu",
+    "applyFilters": "Použiť filtre",
+    "noProducts": "V tejto kategórii sa nenašli žiadne produkty",
+    "resetFilters": "Obnoviť filtre",
+    "loadMore": "Načítať ďalšie produkty",
+    "sort": {
+      "newest": "Najnovšie",
+      "priceAsc": "Cena: vzostupne",
+      "priceDesc": "Cena: zostupne",
+      "nameAsc": "Názov A-Z",
+      "nameDesc": "Názov Z-A",
+      "popular": "Obľúbené"
+    }
+  },
+  "storeAbout": {
+    "notFound": "Obchod nenájdený",
+    "notFoundDescription": "Obchod, ktorý hľadáte, neexistuje",
+    "backToStores": "Späť na obchody",
+    "breadcrumbStores": "Obchody",
+    "breadcrumbAbout": "O nás",
+    "aboutSubtitle": "O našom obchode",
+    "backToStore": "Späť na obchod",
+    "ourStory": "Náš príbeh",
+    "information": "Informácie",
+    "foundedIn": "Založená",
+    "owner": "Vlastník",
+    "defaultOwner": "Vlastník",
+    "location": "Poloha",
+    "operatingCountries": "Krajiny pôsobenia",
+    "contactUs": "Kontaktujte nás",
+    "email": "E-mail",
+    "phone": "Telefón",
+    "sendMessage": "Odoslať správu",
+    "bannerAlt": "Banner {storeName}"
   }
 }

@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/products/ProductCard'
 import { trpc } from '@/lib/trpc/client'
 import { Filter, X, Search, ArrowLeft, Sparkles } from 'lucide-react'
 import { usePublicStore } from '@/lib/context/public-store-context'
+import { useTranslations } from 'next-intl'
 
 export default function CategoryPage({
   params,
@@ -14,6 +15,7 @@ export default function CategoryPage({
 }) {
   const { slug } = use(params)
   const { selectedStore, stores } = usePublicStore()
+  const t = useTranslations('categoryPage')
 
   // Use selected store or first available store
   const currentStoreId = selectedStore !== 'all' ? selectedStore : stores[0]?.id
@@ -81,14 +83,14 @@ export default function CategoryPage({
               className="text-3xl font-bold text-theme-text mb-4"
               style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
             >
-              Catégorie introuvable
+              {t('notFound')}
             </h1>
             <p className="text-theme-text-secondary mb-8 text-lg">
-              Cette catégorie n'existe pas ou a été supprimée.
+              {t('notFoundDescription')}
             </p>
             <Link href="/products">
               <button className="px-8 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200">
-                Voir tous les produits
+                {t('viewAllProducts')}
               </button>
             </Link>
           </div>
@@ -105,7 +107,7 @@ export default function CategoryPage({
           className="group inline-flex items-center text-theme-text-secondary hover:text-theme-primary mb-6 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" />
-          Retour aux produits
+          {t('backToProducts')}
         </Link>
 
         <div className="mb-10">
@@ -118,7 +120,7 @@ export default function CategoryPage({
           {category.description && (
             <p className="text-xl text-theme-text-secondary mb-2">{category.description}</p>
           )}
-          <p className="text-sm text-theme-text-muted">{products.length} produit(s)</p>
+          <p className="text-sm text-theme-text-muted">{t('productCount', { count: products.length })}</p>
         </div>
 
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
@@ -128,7 +130,7 @@ export default function CategoryPage({
             </div>
             <input
               type="text"
-              placeholder="Rechercher dans cette catégorie..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-theme-surface border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
@@ -152,12 +154,12 @@ export default function CategoryPage({
             }}
             className="px-4 py-3.5 rounded-xl bg-theme-surface border border-theme-border text-theme-text focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
           >
-            <option value="createdAt-desc">Plus récents</option>
-            <option value="price-asc">Prix croissant</option>
-            <option value="price-desc">Prix décroissant</option>
-            <option value="name-asc">Nom A-Z</option>
-            <option value="name-desc">Nom Z-A</option>
-            <option value="featured-desc">Populaires</option>
+            <option value="createdAt-desc">{t('sort.newest')}</option>
+            <option value="price-asc">{t('sort.priceAsc')}</option>
+            <option value="price-desc">{t('sort.priceDesc')}</option>
+            <option value="name-asc">{t('sort.nameAsc')}</option>
+            <option value="name-desc">{t('sort.nameDesc')}</option>
+            <option value="featured-desc">{t('sort.popular')}</option>
           </select>
         </div>
 
@@ -168,7 +170,7 @@ export default function CategoryPage({
                 className="text-xl font-bold text-theme-text"
                 style={{ fontFamily: 'var(--theme-font-heading)' }}
               >
-                Filtres
+                {t('filters')}
               </h2>
 
               <div>
@@ -176,12 +178,12 @@ export default function CategoryPage({
                   className="font-semibold text-theme-text mb-3"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Prix
+                  {t('price')}
                 </h3>
                 <div className="space-y-3">
                   <input
                     type="number"
-                    placeholder="Prix min"
+                    placeholder={t('priceMin')}
                     value={minPrice?.toString() || ''}
                     onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
                     min="0"
@@ -189,7 +191,7 @@ export default function CategoryPage({
                   />
                   <input
                     type="number"
-                    placeholder="Prix max"
+                    placeholder={t('priceMax')}
                     value={maxPrice?.toString() || ''}
                     onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
                     min="0"
@@ -203,7 +205,7 @@ export default function CategoryPage({
                       }}
                       className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-semibold text-sm transform hover:scale-105 active:scale-95 transition-all duration-200"
                     >
-                      Réinitialiser le prix
+                      {t('resetPrice')}
                     </button>
                   )}
                 </div>
@@ -217,7 +219,7 @@ export default function CategoryPage({
               className="px-6 py-3.5 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-full font-semibold shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2"
             >
               <Filter className="w-5 h-5" />
-              Filtres
+              {t('filters')}
             </button>
           </div>
 
@@ -233,7 +235,7 @@ export default function CategoryPage({
                     className="text-2xl font-bold text-theme-text"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Filtres
+                    {t('filters')}
                   </h2>
                   <button
                     onClick={() => setShowFilters(false)}
@@ -248,12 +250,12 @@ export default function CategoryPage({
                     className="font-semibold text-theme-text mb-3"
                     style={{ fontFamily: 'var(--theme-font-heading)' }}
                   >
-                    Prix
+                    {t('price')}
                   </h3>
                   <div className="space-y-3">
                     <input
                       type="number"
-                      placeholder="Prix min"
+                      placeholder={t('priceMin')}
                       value={minPrice?.toString() || ''}
                       onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
                       min="0"
@@ -261,7 +263,7 @@ export default function CategoryPage({
                     />
                     <input
                       type="number"
-                      placeholder="Prix max"
+                      placeholder={t('priceMax')}
                       value={maxPrice?.toString() || ''}
                       onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
                       min="0"
@@ -275,7 +277,7 @@ export default function CategoryPage({
                         }}
                         className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-semibold text-sm transform hover:scale-105 active:scale-95 transition-all duration-200"
                       >
-                        Réinitialiser le prix
+                        {t('resetPrice')}
                       </button>
                     )}
                   </div>
@@ -286,7 +288,7 @@ export default function CategoryPage({
                   className="w-full px-8 py-4 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold text-lg shadow-lg shadow-theme-primary/30 hover:shadow-xl hover:shadow-theme-primary/40 transform hover:scale-105 active:scale-95 transition-all duration-200"
                   style={{ fontFamily: 'var(--theme-font-heading)' }}
                 >
-                  Appliquer les filtres
+                  {t('applyFilters')}
                 </button>
               </div>
             </>
@@ -305,7 +307,7 @@ export default function CategoryPage({
                   <Sparkles className="w-12 h-12 text-theme-primary" />
                 </div>
                 <p className="text-theme-text text-lg font-medium mb-2">
-                  Aucun produit trouvé dans cette catégorie
+                  {t('noProducts')}
                 </p>
                 {(searchQuery || minPrice !== undefined || maxPrice !== undefined) && (
                   <button
@@ -316,7 +318,7 @@ export default function CategoryPage({
                     }}
                     className="mt-6 px-8 py-3.5 bg-theme-surface hover:bg-theme-background border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200"
                   >
-                    Réinitialiser les filtres
+                    {t('resetFilters')}
                   </button>
                 )}
               </div>
@@ -335,7 +337,7 @@ export default function CategoryPage({
                       className="px-8 py-3.5 bg-theme-surface hover:bg-theme-background border border-theme-border hover:border-theme-border-light text-theme-text rounded-xl font-semibold transform hover:scale-105 active:scale-95 transition-all duration-200"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      Voir plus de produits
+                      {t('loadMore')}
                     </button>
                   </div>
                 )}
