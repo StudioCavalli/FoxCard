@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, adminProcedure, requireStoreAccess } from '../trpc'
 import { ProductStatus, ProductType } from '@prisma/client'
 import { createHookExecutor } from '@/lib/plugins/hook-executor'
+import { withCache } from '@/lib/cache'
 
 export const productRouter = router({
   getAll: publicProcedure
@@ -25,6 +26,11 @@ export const productRouter = router({
     .query(async ({ ctx, input }) => {
       const { storeId, categoryId, status, featured, search, tags, minPrice, maxPrice, sortBy, sortOrder, countries, limit, cursor } = input
 
+      // Cache public/active product queries (default status is ACTIVE)
+      const isPublicQuery = !status || status === ProductStatus.ACTIVE
+      const cacheKey = isPublicQuery ? `products:${JSON.stringify(input)}` : null
+
+      const fetchProducts = async () => {
       // Build orderBy based on sortBy and sortOrder
       const orderBy: any = []
       if (sortBy) {
@@ -101,6 +107,12 @@ export const productRouter = router({
         products,
         nextCursor,
       }
+      }
+
+      if (cacheKey) {
+        return withCache(cacheKey, 30_000, fetchProducts)
+      }
+      return fetchProducts()
     }),
 
   getById: publicProcedure

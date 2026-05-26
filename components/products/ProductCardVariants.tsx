@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
@@ -67,7 +67,7 @@ interface ProductCardVariantProps {
 }
 
 // Fashion Card - Size selector, color swatches, wishlist
-export function FashionProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const FashionProductCard = memo(function FashionProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [hoveredImageIdx, setHoveredImageIdx] = useState(0)
@@ -178,10 +178,12 @@ export function FashionProductCard({ product, showStoreName }: ProductCardVarian
       </article>
     </Link>
   )
-}
+})
+
+FashionProductCard.displayName = 'FashionProductCard'
 
 // Electronics Card - Specs, rating, compare
-export function ElectronicsProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const ElectronicsProductCard = memo(function ElectronicsProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
   const isOutOfStock = product.quantity <= 0
   const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price
@@ -270,10 +272,12 @@ export function ElectronicsProductCard({ product, showStoreName }: ProductCardVa
       </article>
     </Link>
   )
-}
+})
+
+ElectronicsProductCard.displayName = 'ElectronicsProductCard'
 
 // Food Card - Badges, price/kg, allergens
-export function FoodProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const FoodProductCard = memo(function FoodProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
   const isOutOfStock = product.quantity <= 0
 
@@ -348,10 +352,12 @@ export function FoodProductCard({ product, showStoreName }: ProductCardVariantPr
       </article>
     </Link>
   )
-}
+})
+
+FoodProductCard.displayName = 'FoodProductCard'
 
 // Hotel Card - Gallery, stars, amenities
-export function HotelProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const HotelProductCard = memo(function HotelProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const [currentImage, setCurrentImage] = useState(0)
 
   const images = product.images.length > 0 ? product.images : [product.thumbnail || '/placeholder-product.png']
@@ -464,10 +470,12 @@ export function HotelProductCard({ product, showStoreName }: ProductCardVariantP
       </article>
     </Link>
   )
-}
+})
+
+HotelProductCard.displayName = 'HotelProductCard'
 
 // Travel Card - Dates, duration, from price
-export function TravelProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const TravelProductCard = memo(function TravelProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
 
   const destination = product.attributes?.destination as string
@@ -529,10 +537,12 @@ export function TravelProductCard({ product, showStoreName }: ProductCardVariant
       </article>
     </Link>
   )
-}
+})
+
+TravelProductCard.displayName = 'TravelProductCard'
 
 // Recreation Card - Duration, difficulty, age
-export function RecreationProductCard({ product, showStoreName }: ProductCardVariantProps) {
+export const RecreationProductCard = memo(function RecreationProductCard({ product, showStoreName }: ProductCardVariantProps) {
   const imageUrl = product.thumbnail || product.images[0] || '/placeholder-product.png'
 
   const duration = product.attributes?.activityDuration as string
@@ -594,7 +604,9 @@ export function RecreationProductCard({ product, showStoreName }: ProductCardVar
       </article>
     </Link>
   )
-}
+})
+
+RecreationProductCard.displayName = 'RecreationProductCard'
 
 /**
  * Get the appropriate product card component based on commerce type

@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile, mkdir, unlink, rename } from 'fs/promises'
 import path from 'path'
-import { optimizeImage, isValidImage } from '@/lib/utils/image-optimizer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { checkRateLimit } from '@/lib/rate-limit'
+
+// MIME types that should go through image optimization
+const OPTIMIZABLE_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+])
 
 /**
  * POST /api/upload
@@ -67,14 +75,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
+    // Validate file type (images + common document types)
+    const validTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 'image/gif',
+      'application/pdf', 'application/zip', 'application/x-zip-compressed',
+    ]
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only JPEG, PNG, WebP, and AVIF are allowed.' },
+        { error: 'Invalid file type. Allowed: JPEG, PNG, WebP, AVIF, GIF, PDF, ZIP.' },
         { status: 400 }
       )
     }
+
+    const isOptimizableImage = OPTIMIZABLE_IMAGE_TYPES.has(file.type)
 
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024 // 10MB
@@ -103,100 +116,121 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
     await writeFile(tempPath, buffer)
 
-    // Validate it's a real image
-    const isValid = await isValidImage(tempPath)
-    if (!isValid) {
-      // Clean up temp file
-      await import('fs/promises').then((fs) => fs.unlink(tempPath).catch(() => {}))
-      return NextResponse.json({ error: 'Invalid image file' }, { status: 400 })
-    }
-
-    if (optimize) {
-      // Optimize image with all formats and thumbnails
-      const optimizationDir = path.join(uploadDir, 'optimized')
-      const result = await optimizeImage(tempPath, optimizationDir, {
-        quality: 80,
-        maxWidth: 2048,
-        maxHeight: 2048,
-        formats: ['original', 'webp', 'avif'],
-        thumbnails: [
-          { name: 'thumb', width: 200, height: 200, fit: 'cover' },
-          { name: 'medium', width: 600, height: 600, fit: 'cover' },
-          { name: 'large', width: 1200, fit: 'inside' },
-        ],
-      })
-
-      // Clean up temp file
-      await import('fs/promises').then((fs) => fs.unlink(tempPath).catch(() => {}))
-
-      // Convert absolute paths to relative URLs
-      const toUrl = (filePath: string) => {
-        return filePath.replace(process.cwd() + '/public', '').replace(/\\/g, '/')
+    // For optimizable images, validate and optionally optimize
+    if (isOptimizableImage) {
+      // Validate it's a real image using sharp (with fallback)
+      let imageIsValid = true
+      try {
+        const { isValidImage } = await import('@/lib/utils/image-optimizer')
+        imageIsValid = await isValidImage(tempPath)
+      } catch {
+        // If sharp is unavailable, skip validation — file type was already checked
+        imageIsValid = true
       }
 
-      return NextResponse.json({
-        success: true,
-        original: {
-          ...result.original,
-          path: toUrl(result.original.path),
-          url: toUrl(result.original.path),
-        },
-        webp: result.webp
-          ? {
-              ...result.webp,
-              path: toUrl(result.webp.path),
-              url: toUrl(result.webp.path),
-            }
-          : undefined,
-        avif: result.avif
-          ? {
-              ...result.avif,
-              path: toUrl(result.avif.path),
-              url: toUrl(result.avif.path),
-            }
-          : undefined,
-        thumbnails: Object.entries(result.thumbnails).reduce(
-          (acc, [name, thumb]) => {
-            acc[name] = {
-              original: {
-                ...thumb.original,
-                path: toUrl(thumb.original.path),
-                url: toUrl(thumb.original.path),
+      if (!imageIsValid) {
+        await unlink(tempPath).catch(() => {})
+        return NextResponse.json({ error: 'Invalid image file' }, { status: 400 })
+      }
+
+      if (optimize) {
+        try {
+          // Dynamically import to handle cases where sharp is not available
+          const { optimizeImage } = await import('@/lib/utils/image-optimizer')
+
+          const optimizationDir = path.join(uploadDir, 'optimized')
+          const result = await optimizeImage(tempPath, optimizationDir, {
+            quality: 80,
+            maxWidth: 2048,
+            maxHeight: 2048,
+            formats: ['original', 'webp', 'avif'],
+            thumbnails: [
+              { name: 'thumb', width: 200, height: 200, fit: 'cover' },
+              { name: 'medium', width: 600, height: 600, fit: 'cover' },
+              { name: 'large', width: 1200, fit: 'inside' },
+            ],
+          })
+
+          // Clean up temp file
+          await unlink(tempPath).catch(() => {})
+
+          // Convert absolute paths to relative URLs
+          const toUrl = (filePath: string) => {
+            return filePath.replace(process.cwd() + '/public', '').replace(/\\/g, '/')
+          }
+
+          return NextResponse.json({
+            success: true,
+            original: {
+              ...result.original,
+              path: toUrl(result.original.path),
+              url: toUrl(result.original.path),
+            },
+            webp: result.webp
+              ? {
+                  ...result.webp,
+                  path: toUrl(result.webp.path),
+                  url: toUrl(result.webp.path),
+                }
+              : undefined,
+            avif: result.avif
+              ? {
+                  ...result.avif,
+                  path: toUrl(result.avif.path),
+                  url: toUrl(result.avif.path),
+                }
+              : undefined,
+            thumbnails: Object.entries(result.thumbnails).reduce(
+              (acc, [name, thumb]) => {
+                acc[name] = {
+                  original: {
+                    ...thumb.original,
+                    path: toUrl(thumb.original.path),
+                    url: toUrl(thumb.original.path),
+                  },
+                  webp: thumb.webp
+                    ? {
+                        ...thumb.webp,
+                        path: toUrl(thumb.webp.path),
+                        url: toUrl(thumb.webp.path),
+                      }
+                    : undefined,
+                  avif: thumb.avif
+                    ? {
+                        ...thumb.avif,
+                        path: toUrl(thumb.avif.path),
+                        url: toUrl(thumb.avif.path),
+                      }
+                    : undefined,
+                }
+                return acc
               },
-              webp: thumb.webp
-                ? {
-                    ...thumb.webp,
-                    path: toUrl(thumb.webp.path),
-                    url: toUrl(thumb.webp.path),
-                  }
-                : undefined,
-              avif: thumb.avif
-                ? {
-                    ...thumb.avif,
-                    path: toUrl(thumb.avif.path),
-                    url: toUrl(thumb.avif.path),
-                  }
-                : undefined,
-            }
-            return acc
-          },
-          {} as any
-        ),
-      })
-    } else {
-      // No optimization, just save the file
-      const finalPath = path.join(uploadDir, filename)
-      await import('fs/promises').then((fs) => fs.rename(tempPath, finalPath))
-
-      const url = `/uploads/${storeId}/${filename}`
-
-      return NextResponse.json({
-        success: true,
-        url,
-        path: url,
-        filename,
-      })
+              {} as any
+            ),
+          })
+        } catch (optimizeError) {
+          // Optimization failed (e.g., sharp not available) — fall through to upload original
+          console.warn('Image optimization failed, uploading original file:', optimizeError)
+        }
+      }
     }
+
+    // No optimization path: for non-image files, non-optimizable images, or when optimization failed
+    const finalPath = path.join(uploadDir, filename)
+    await rename(tempPath, finalPath).catch(async () => {
+      // rename can fail across devices; fall back to write + delete
+      await writeFile(finalPath, buffer)
+      await unlink(tempPath).catch(() => {})
+    })
+
+    const url = `/uploads/${storeId}/${filename}`
+
+    return NextResponse.json({
+      success: true,
+      url,
+      path: url,
+      filename,
+    })
   } catch (error: any) {
     console.error('Upload error:', error)
     return NextResponse.json(

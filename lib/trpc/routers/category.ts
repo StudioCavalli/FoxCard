@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { router, publicProcedure, adminProcedure } from '../trpc'
+import { withCache } from '@/lib/cache'
 
 export const categoryRouter = router({
   getAll: publicProcedure
@@ -10,28 +11,32 @@ export const categoryRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.category.findMany({
-        where: {
-          ...(input.storeId && { storeId: input.storeId }), // Only filter by storeId if provided
-          ...(input.parentId !== undefined && { parentId: input.parentId }),
-        },
-        include: {
-          children: true,
-          store: { // Include store info for "All Stores" mode
-            select: {
-              id: true,
-              name: true,
-              slug: true,
+      const cacheKey = `categories:${input.storeId || 'all'}:${input.parentId ?? 'root'}`
+
+      return withCache(cacheKey, 60_000, () =>
+        ctx.prisma.category.findMany({
+          where: {
+            ...(input.storeId && { storeId: input.storeId }),
+            ...(input.parentId !== undefined && { parentId: input.parentId }),
+          },
+          include: {
+            children: true,
+            store: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+            _count: {
+              select: { products: true },
             },
           },
-          _count: {
-            select: { products: true },
+          orderBy: {
+            name: 'asc',
           },
-        },
-        orderBy: {
-          name: 'asc',
-        },
-      })
+        })
+      )
     }),
 
   getById: publicProcedure

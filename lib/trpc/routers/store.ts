@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { router, publicProcedure, protectedProcedure, requireStoreAccess } from '../trpc'
 import { TRPCError } from '@trpc/server'
 import { getMaxStoresPerUser } from '@/lib/platform/settings'
+import { withCache } from '@/lib/cache'
 
 export const storeRouter = router({
   // Get store directory with pagination and filters
@@ -189,20 +190,22 @@ export const storeRouter = router({
   }),
 
   getPublicStores: publicProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.store.findMany({
-      where: {
-        status: 'ACTIVE',
-        showOnDirectory: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        logo: true,
-        description: true,
-      },
-      orderBy: { name: 'asc' },
-    })
+    return withCache('stores:public', 60_000, () =>
+      ctx.prisma.store.findMany({
+        where: {
+          status: 'ACTIVE',
+          showOnDirectory: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logo: true,
+          description: true,
+        },
+        orderBy: { name: 'asc' },
+      })
+    )
   }),
 
   // Get stores for explore page with map support

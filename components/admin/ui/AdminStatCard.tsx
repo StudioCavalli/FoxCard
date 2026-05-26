@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { cn } from '@/lib/utils'
 import { LucideIcon, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
@@ -54,7 +55,7 @@ const variantStyles: Record<StatVariant, { bg: string; icon: string; trend: stri
   },
 }
 
-export function AdminStatCard({
+export const AdminStatCard = memo(function AdminStatCard({
   title,
   value,
   icon: Icon,
@@ -131,4 +132,6 @@ export function AdminStatCard({
   }
 
   return content
-}
+})
+
+AdminStatCard.displayName = 'AdminStatCard'

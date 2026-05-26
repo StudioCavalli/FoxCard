@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -48,7 +49,7 @@ const colorStyles = {
   },
 }
 
-export function EnhancedStatCard({
+export const EnhancedStatCard = memo(function EnhancedStatCard({
   title,
   value,
   change,
@@ -118,4 +119,6 @@ export function EnhancedStatCard({
   }
 
   return content
-}
+})
+
+EnhancedStatCard.displayName = 'EnhancedStatCard'

@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
@@ -30,7 +31,7 @@ interface ProductCardProps {
   colorVariant?: 'teal' | 'pink' | 'yellow' | 'blue' | 'green' | 'purple' | 'orange'
 }
 
-export function ProductCard({ product, storeSlug, showStoreName = false }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, storeSlug, showStoreName = false }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const t = useTranslations()
 
@@ -185,4 +186,6 @@ export function ProductCard({ product, storeSlug, showStoreName = false }: Produ
       </article>
     </Link>
   )
-}
+})
+
+ProductCard.displayName = 'ProductCard'

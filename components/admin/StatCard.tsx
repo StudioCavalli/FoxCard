@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 
@@ -12,7 +13,7 @@ interface StatCardProps {
   colorVariant?: 'teal' | 'pink' | 'yellow' | 'blue' | 'green' | 'purple' | 'orange'
 }
 
-export function StatCard({ title, value, icon: Icon, trend, colorVariant = 'teal' }: StatCardProps) {
+export const StatCard = memo(function StatCard({ title, value, icon: Icon, trend, colorVariant = 'teal' }: StatCardProps) {
   return (
     <Card variant={colorVariant} className="p-6">
       <div className="flex items-center justify-between">
@@ -37,4 +38,6 @@ export function StatCard({ title, value, icon: Icon, trend, colorVariant = 'teal
       </div>
     </Card>
   )
-}
+})
+
+StatCard.displayName = 'StatCard'
