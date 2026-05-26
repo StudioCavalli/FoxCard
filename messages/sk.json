@@ -395,6 +395,7 @@
   },
   "checkout": {
     "title": "Pokladňa",
+    "donation": "Zaokruhlit pre GoldenEra Charity",
     "completeInfo": "Vyplňte svoje údaje pre dokončenie nákupu",
     "shippingAddress": "Doručovacia adresa",
     "billingAddress": "Fakturačná adresa",
@@ -2743,6 +2744,24 @@
         "api": "Pripojenie API",
         "mainnet": "Spustenie na mainnet"
       }
+    },
+    "charity": {
+      "title": "GoldenEra Charity",
+      "description": "Humanitarna nadacia ekosystemu GoldenEra, podporujuca komunity po celom svete prostrednictvom Medzinarodnych kooperativ a cielených programov.",
+      "food": {
+        "title": "Potravinove balicky",
+        "description": "Nas pociatocny fokus: poskytovanie zakladnych potravinovych balickov komunitam v nudzi po celom svete."
+      },
+      "community": {
+        "title": "Rozvoj komunity",
+        "description": "Financovanie lokalnych projektov a infrastruktury prostrednictvom siete Medzinarodnych kooperativ."
+      },
+      "education": {
+        "title": "Vzdelavanie",
+        "description": "Podpora vzdelavacich iniciativ a pristupu k vedomostiam prostrednictvom GoldenEra Academy."
+      },
+      "donateButton": "Darovat",
+      "comingSoon": "Coskoro dostupne"
     },
     "cta": {
       "title": "Pridajte sa k ekosystemu GoldenEra",

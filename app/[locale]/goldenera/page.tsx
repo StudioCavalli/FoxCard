@@ -17,6 +17,10 @@ import {
   Search,
   ArrowLeftRight,
   MessageCircle,
+  Heart,
+  UtensilsCrossed,
+  Users,
+  GraduationCap,
 } from 'lucide-react'
 
 export async function generateMetadata({
@@ -459,6 +463,74 @@ export default async function GoldenEraPage({
                   )
                 })}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* GoldenEra Charity */}
+      <section className="relative bg-gradient-to-b from-amber-50/60 to-white border-t border-amber-100/60">
+        <div
+          className="mx-auto px-6 lg:px-8 py-20 lg:py-28"
+          style={{ maxWidth: 'var(--theme-container-max-width)' }}
+        >
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200/60 mb-6">
+              <Heart className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-700">GEC</span>
+            </div>
+            <h2
+              className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 flex items-center justify-center gap-3"
+              style={{ fontFamily: 'var(--theme-font-heading)', letterSpacing: '-0.02em' }}
+            >
+              <Heart className="w-8 h-8 text-amber-500" />
+              {t('charity.title')}
+            </h2>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              {t('charity.description')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {[
+              { key: 'food', icon: UtensilsCrossed },
+              { key: 'community', icon: Users },
+              { key: 'education', icon: GraduationCap },
+            ].map(({ key, icon: Icon }) => (
+              <div
+                key={key}
+                className="group relative p-8 bg-gradient-to-b from-amber-50/80 to-white border border-amber-100 rounded-2xl hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-400 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-amber-400/20">
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+                <h3
+                  className="text-xl font-bold text-slate-900 mb-3"
+                  style={{ fontFamily: 'var(--theme-font-heading)' }}
+                >
+                  {t(`charity.${key}.title`)}
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  {t(`charity.${key}.description`)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex flex-col items-center gap-2">
+              <button
+                disabled
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-400 to-orange-400 text-white font-semibold rounded-xl shadow-lg shadow-amber-400/20 opacity-60 cursor-not-allowed"
+                style={{ fontFamily: 'var(--theme-font-heading)' }}
+              >
+                <Heart className="w-5 h-5" />
+                {t('charity.donateButton')}
+              </button>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-amber-100 text-amber-700 border-amber-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                {t('charity.comingSoon')}
+              </span>
             </div>
           </div>
         </div>

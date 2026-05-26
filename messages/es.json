@@ -395,6 +395,7 @@
   },
   "checkout": {
     "title": "Pago",
+    "donation": "Redondear para GoldenEra Charity",
     "completeInfo": "Complete su información para finalizar su compra",
     "shippingAddress": "Dirección de envío",
     "billingAddress": "Dirección de facturación",
@@ -2743,6 +2744,24 @@
         "api": "Conexion API",
         "mainnet": "En vivo en mainnet"
       }
+    },
+    "charity": {
+      "title": "GoldenEra Charity",
+      "description": "La fundacion humanitaria del ecosistema GoldenEra, apoyando comunidades en todo el mundo a traves de Cooperativas Internacionales y programas especificos.",
+      "food": {
+        "title": "Paquetes de alimentos",
+        "description": "Nuestro enfoque inicial: proporcionar paquetes de alimentos esenciales a comunidades necesitadas en todo el mundo."
+      },
+      "community": {
+        "title": "Desarrollo comunitario",
+        "description": "Financiacion de proyectos locales e infraestructura a traves de una red de Cooperativas Internacionales."
+      },
+      "education": {
+        "title": "Educacion",
+        "description": "Apoyo a iniciativas de aprendizaje y acceso al conocimiento a traves de GoldenEra Academy."
+      },
+      "donateButton": "Donar",
+      "comingSoon": "Proximamente"
     },
     "cta": {
       "title": "Unase al ecosistema GoldenEra",

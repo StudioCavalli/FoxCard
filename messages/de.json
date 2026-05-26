@@ -395,6 +395,7 @@
   },
   "checkout": {
     "title": "Kasse",
+    "donation": "Aufrunden fuer GoldenEra Charity",
     "completeInfo": "Vervollständigen Sie Ihre Informationen, um Ihren Einkauf abzuschließen",
     "shippingAddress": "Lieferadresse",
     "billingAddress": "Rechnungsadresse",
@@ -2743,6 +2744,24 @@
         "api": "API-Verbindung",
         "mainnet": "Live auf Mainnet"
       }
+    },
+    "charity": {
+      "title": "GoldenEra Charity",
+      "description": "Die humanitaere Stiftung des GoldenEra-Oekosystems, die Gemeinschaften weltweit durch Internationale Kooperativen und gezielte Programme unterstuetzt.",
+      "food": {
+        "title": "Lebensmittelpakete",
+        "description": "Unser erster Schwerpunkt: Bereitstellung wichtiger Lebensmittelpakete fuer beduerftige Gemeinschaften weltweit."
+      },
+      "community": {
+        "title": "Gemeindeentwicklung",
+        "description": "Finanzierung lokaler Projekte und Infrastruktur durch ein Netzwerk Internationaler Kooperativen."
+      },
+      "education": {
+        "title": "Bildung",
+        "description": "Unterstuetzung von Lerninitiativen und Zugang zu Wissen ueber die GoldenEra Academy."
+      },
+      "donateButton": "Spenden",
+      "comingSoon": "Demnachst verfuegbar"
     },
     "cta": {
       "title": "Werden Sie Teil des GoldenEra-Oekosystems",

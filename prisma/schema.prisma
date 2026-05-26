@@ -4440,6 +4440,10 @@ model SunPayConfig {
   minAmount       Float?
   displayName     String   @default("SunCoin (SCGE)")
 
+  charityEnabled    Boolean  @default(false)
+  charityAddress    String?
+  charityPercentage Float    @default(0)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

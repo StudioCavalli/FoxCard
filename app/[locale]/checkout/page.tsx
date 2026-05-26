@@ -6,7 +6,7 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatPrice } from '@/lib/utils'
 import { trpc } from '@/lib/trpc/client'
 import Image from 'next/image'
-import { ShoppingBag, CreditCard, MapPin, Mail, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift, Calendar, Download } from 'lucide-react'
+import { ShoppingBag, CreditCard, MapPin, Mail, Lock, CheckCircle, Percent, X, ArrowLeft, ArrowRight, AlertCircle, Check, Star, Gift, Calendar, Download, Coins, Copy, Clock, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { analyzeCartForCheckout, type CheckoutFlowConfig } from '@/lib/checkout/checkout-flow'
 import { useSession } from 'next-auth/react'
@@ -15,6 +15,8 @@ import { BookingStep, type BookingData } from '@/components/checkout/BookingStep
 import { AlcoholCheckoutVerification } from '@/components/alcohol'
 import { type CommerceType } from '@/lib/commerce-types'
 import { useTranslations } from 'next-intl'
+import { formatSCGE, fiatToSCGE } from '@/lib/sunpay/utils'
+import { MOCK_EXCHANGE_RATES } from '@/lib/sunpay/config'
 
 // Icon mapping for dynamic steps
 const STEP_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -41,7 +43,7 @@ export default function CheckoutPage() {
     currentStep: 1,
     isProcessing: false,
     error: '',
-    paymentMethod: 'card' as 'card' | 'paypal' | 'bank_transfer',
+    paymentMethod: 'card' as 'card' | 'paypal' | 'bank_transfer' | 'sunpay',
   })
 
   // Booking data for booking-type checkouts
@@ -103,13 +105,15 @@ export default function CheckoutPage() {
             bankTransferEnabled: settings.bankTransferEnabled ?? true,
           })
           // Set default payment method to first available
-          let defaultMethod: 'card' | 'paypal' | 'bank_transfer' = 'card'
+          let defaultMethod: 'card' | 'paypal' | 'bank_transfer' | 'sunpay' = 'card'
           if (settings.stripeEnabled) {
             defaultMethod = 'card'
           } else if (settings.paypalEnabled) {
             defaultMethod = 'paypal'
           } else if (settings.bankTransferEnabled) {
             defaultMethod = 'bank_transfer'
+          } else if (sunpayEnabled?.enabled) {
+            defaultMethod = 'sunpay'
           }
           setCheckoutState(prev => ({ ...prev, paymentMethod: defaultMethod }))
         }
@@ -199,7 +203,30 @@ export default function CheckoutPage() {
         // For multi-store orders, use first order for payment redirect
         const primaryOrder = orders[0]
 
-        if (paymentMethod === 'bank_transfer') {
+        if (paymentMethod === 'sunpay') {
+          // Create SunPay payment for the primary order
+          try {
+            const sunpayResult = await createSunPayment.mutateAsync({
+              storeId: primaryOrder.storeId,
+              orderId: primaryOrder.id,
+              amountFiat: total,
+              fiatCurrency: 'EUR',
+            })
+            setSunpayState({
+              transactionId: sunpayResult.transactionId,
+              paymentAddress: sunpayResult.paymentAddress,
+              amountSCGE: sunpayResult.amountSCGE,
+              expiresAt: sunpayResult.expiresAt,
+              status: 'pending',
+              orderNumber: primaryOrder.orderNumber,
+            })
+            setCheckoutState(prev => ({ ...prev, isProcessing: false }))
+          } catch (err) {
+            console.error('SunPay payment creation failed:', err)
+            setCheckoutState(prev => ({ ...prev, error: 'Failed to create SunPay payment', isProcessing: false }))
+          }
+          return // Don't redirect — show the payment modal inline
+        } else if (paymentMethod === 'bank_transfer') {
           // Generate bank transfer for each store
           await Promise.all(
             orders.map(order =>
@@ -245,6 +272,73 @@ export default function CheckoutPage() {
   const createCheckoutSession = trpc.payment.createCheckoutSession.useMutation()
   const createPayPalOrder = trpc.payment.createPayPalOrder.useMutation()
   const generateBankTransferInstructions = trpc.payment.generateBankTransferInstructions.useMutation()
+
+  // SunPay (SCGE) payment
+  const { data: sunpayEnabled } = trpc.sunpay.isEnabled.useQuery(
+    { storeId: currentStoreId },
+    { enabled: !!currentStoreId }
+  )
+  const createSunPayment = trpc.sunpay.createPayment.useMutation()
+  const [sunpayState, setSunpayState] = useState<{
+    transactionId: string | null
+    paymentAddress: string | null
+    amountSCGE: number | null
+    expiresAt: Date | null
+    status: 'idle' | 'pending' | 'confirming' | 'confirmed' | 'expired' | 'failed'
+    orderNumber: string | null
+  }>({
+    transactionId: null,
+    paymentAddress: null,
+    amountSCGE: null,
+    expiresAt: null,
+    status: 'idle',
+    orderNumber: null,
+  })
+
+  // SunPay payment status polling
+  const { data: sunpayStatusData } = trpc.sunpay.checkPaymentStatus.useQuery(
+    { transactionId: sunpayState.transactionId! },
+    {
+      enabled: !!sunpayState.transactionId && ['pending', 'confirming'].includes(sunpayState.status),
+      refetchInterval: 10_000, // Poll every 10 seconds
+    }
+  )
+
+  // React to status changes from polling
+  useEffect(() => {
+    if (!sunpayStatusData) return
+    const status = sunpayStatusData.status.toLowerCase() as typeof sunpayState.status
+    if (status === 'confirmed') {
+      setSunpayState(prev => ({ ...prev, status: 'confirmed' }))
+      localStorage.removeItem('foxcard-checkout')
+      // Redirect to confirmation page after a brief delay
+      if (sunpayState.orderNumber) {
+        setTimeout(() => {
+          router.push(`/order-confirmation/${sunpayState.orderNumber}?sunpay=true&email=${encodeURIComponent(formData.email)}`)
+        }, 2000)
+      }
+    } else if (status === 'confirming') {
+      setSunpayState(prev => ({ ...prev, status: 'confirming' }))
+    } else if (status === 'expired') {
+      setSunpayState(prev => ({ ...prev, status: 'expired' }))
+    } else if (status === 'failed') {
+      setSunpayState(prev => ({ ...prev, status: 'failed' }))
+    }
+  }, [sunpayStatusData])
+
+  // SunPay countdown timer
+  const [sunpayTimeLeft, setSunpayTimeLeft] = useState<number>(0)
+  useEffect(() => {
+    if (!sunpayState.expiresAt || !['pending', 'confirming'].includes(sunpayState.status)) return
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, new Date(sunpayState.expiresAt!).getTime() - Date.now())
+      setSunpayTimeLeft(remaining)
+      if (remaining === 0) {
+        setSunpayState(prev => ({ ...prev, status: 'expired' }))
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [sunpayState.expiresAt, sunpayState.status])
 
   const validateDiscount = trpc.discount.validateCode.useQuery(
     {
@@ -864,6 +958,12 @@ export default function CheckoutPage() {
                         <path d="M8.32 21.97a.546.546 0 01-.5-.33L4.88 12.15a.577.577 0 01.5-.71h4.76l2.3-7.69C12.6 3.11 13.18 2 14.48 2h4.85c2.89 0 5.45 1.64 5.45 4.98 0 3.34-2.69 6.34-6.34 6.34H15.7l-.61 2.04-1.31 4.38a2.14 2.14 0 01-2.02 1.49H8.78c-.23 0-.46-.16-.46-.26z"/>
                       </svg>
                     </div>
+                    {sunpayEnabled?.enabled && (
+                      <div className="px-3 py-2 bg-amber-500/10 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
+                        <Coins className="w-4 h-4 text-amber-500" />
+                        <span className="text-xs font-medium text-amber-700">SCGE</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -938,8 +1038,52 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
+                  {/* SunCoin (SCGE) payment option */}
+                  {sunpayEnabled?.enabled && (
+                    <div
+                      onClick={() => setCheckoutState(prev => ({ ...prev, paymentMethod: 'sunpay' }))}
+                      className={`group p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        paymentMethod === 'sunpay'
+                          ? 'border-theme-primary bg-theme-primary/5 shadow-lg shadow-theme-primary/10'
+                          : 'border-theme-border hover:border-theme-border-light hover:bg-theme-background'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Coins className="w-5 h-5 text-amber-500" />
+                          <div>
+                            <span className="font-semibold text-theme-text block">
+                              {sunpayEnabled.displayName || 'SunCoin (SCGE)'}
+                            </span>
+                            <span className="text-xs text-theme-text-muted">
+                              GoldenEra Blockchain
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {paymentMethod === 'sunpay' && (
+                            <CheckCircle className="w-5 h-5 text-theme-primary" />
+                          )}
+                        </div>
+                      </div>
+                      {paymentMethod === 'sunpay' && total > 0 && (
+                        <div className="mt-3 pt-3 border-t border-theme-border">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-theme-text-secondary">Estimated amount:</span>
+                            <span className="font-bold text-amber-600">
+                              {formatSCGE(fiatToSCGE(total, MOCK_EXCHANGE_RATES.EUR))} SCGE
+                            </span>
+                          </div>
+                          <p className="text-xs text-theme-text-muted mt-1">
+                            Rate: 1 SCGE = ~{MOCK_EXCHANGE_RATES.EUR} EUR
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* No payment methods available warning */}
-                  {!paymentSettings.stripeEnabled && !paymentSettings.paypalEnabled && !paymentSettings.bankTransferEnabled && (
+                  {!paymentSettings.stripeEnabled && !paymentSettings.paypalEnabled && !paymentSettings.bankTransferEnabled && !sunpayEnabled?.enabled && (
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-red-600">
@@ -963,7 +1107,159 @@ export default function CheckoutPage() {
               </>
             )}
 
-            {/* Navigation Buttons */}
+            {/* SunPay Payment Modal */}
+            {sunpayState.status !== 'idle' && sunpayState.paymentAddress && (
+              <div className="p-6 bg-theme-surface border-2 border-amber-500/30 rounded-2xl animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
+                    <Coins className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <div>
+                    <h2
+                      className="text-2xl font-bold text-theme-text"
+                      style={{ fontFamily: 'var(--theme-font-heading)' }}
+                    >
+                      SunCoin Payment
+                    </h2>
+                    <p className="text-sm text-theme-text-secondary">
+                      Send SCGE to the address below
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status indicator */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    {sunpayState.status === 'pending' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                        <span className="text-sm font-semibold text-yellow-700">Waiting for payment</span>
+                      </div>
+                    )}
+                    {sunpayState.status === 'confirming' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                        <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                        <span className="text-sm font-semibold text-blue-700">
+                          Confirming ({sunpayStatusData?.confirmations ?? 0}/6 confirmations)
+                        </span>
+                      </div>
+                    )}
+                    {sunpayState.status === 'confirmed' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-semibold text-green-700">Payment confirmed</span>
+                      </div>
+                    )}
+                    {sunpayState.status === 'expired' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <span className="text-sm font-semibold text-red-700">Payment expired</span>
+                      </div>
+                    )}
+                    {sunpayState.status === 'failed' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <span className="text-sm font-semibold text-red-700">Payment failed</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Countdown timer */}
+                {['pending', 'confirming'].includes(sunpayState.status) && sunpayTimeLeft > 0 && (
+                  <div className="mb-6 flex items-center gap-2 text-sm text-theme-text-secondary">
+                    <Clock className="w-4 h-4" />
+                    <span>
+                      Time remaining: {Math.floor(sunpayTimeLeft / 60000)}:{String(Math.floor((sunpayTimeLeft % 60000) / 1000)).padStart(2, '0')}
+                    </span>
+                  </div>
+                )}
+
+                {/* Payment details */}
+                {['pending', 'confirming'].includes(sunpayState.status) && (
+                  <div className="space-y-4">
+                    {/* Amount */}
+                    <div className="p-4 bg-theme-background border border-theme-border rounded-xl">
+                      <p className="text-sm text-theme-text-secondary mb-1">Amount to send</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-amber-600" style={{ fontFamily: 'var(--theme-font-heading)' }}>
+                          {formatSCGE(sunpayState.amountSCGE!)} SCGE
+                        </span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(formatSCGE(sunpayState.amountSCGE!))}
+                          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-surface rounded-lg transition-all"
+                          title="Copy amount"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-theme-text-muted mt-1">
+                        = {formatPrice(total)} EUR
+                      </p>
+                    </div>
+
+                    {/* Address */}
+                    <div className="p-4 bg-theme-background border border-theme-border rounded-xl">
+                      <p className="text-sm text-theme-text-secondary mb-1">Payment address</p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 text-sm font-mono text-theme-text bg-theme-surface px-3 py-2 rounded-lg border border-theme-border break-all">
+                          {sunpayState.paymentAddress}
+                        </code>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(sunpayState.paymentAddress!)}
+                          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-surface rounded-lg transition-all flex-shrink-0"
+                          title="Copy address"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-800">
+                      <p className="font-semibold mb-1">Important:</p>
+                      <ul className="list-disc list-inside space-y-1 text-amber-700">
+                        <li>Send exactly <strong>{formatSCGE(sunpayState.amountSCGE!)} SCGE</strong> to the address above</li>
+                        <li>Payment will be detected automatically</li>
+                        <li>6 confirmations required (~3 minutes)</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirmed: show success */}
+                {sunpayState.status === 'confirmed' && (
+                  <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
+                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                    <p className="text-lg font-bold text-green-800 mb-1">Payment received!</p>
+                    <p className="text-sm text-green-700">Redirecting to order confirmation...</p>
+                  </div>
+                )}
+
+                {/* Expired/Failed: show retry */}
+                {(sunpayState.status === 'expired' || sunpayState.status === 'failed') && (
+                  <div className="text-center">
+                    <p className="text-sm text-theme-text-secondary mb-4">
+                      {sunpayState.status === 'expired'
+                        ? 'The payment window has expired. Please try again.'
+                        : 'The payment could not be verified. Please try again.'}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSunpayState({ transactionId: null, paymentAddress: null, amountSCGE: null, expiresAt: null, status: 'idle', orderNumber: null })
+                        setCheckoutState(prev => ({ ...prev, isProcessing: false, error: '' }))
+                      }}
+                      className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold transition-all duration-200"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Navigation Buttons (hidden during active SunPay payment) */}
+            {sunpayState.status === 'idle' && (
             <div className="flex items-center justify-between gap-4">
               {currentStep > 1 ? (
                 <button
@@ -1015,6 +1311,7 @@ export default function CheckoutPage() {
                 </button>
               )}
             </div>
+            )}
           </div>
 
           {/* Order Summary */}

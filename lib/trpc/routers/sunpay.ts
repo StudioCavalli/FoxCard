@@ -16,6 +16,31 @@ import { isValidGEBAddress, fiatToSCGE } from '@/lib/sunpay/utils'
 
 export const sunpayRouter = router({
   // ==========================================
+  // PUBLIC
+  // ==========================================
+
+  /**
+   * Check if SunPay is enabled for a store (public, used by checkout)
+   */
+  isEnabled: publicProcedure
+    .input(
+      z.object({
+        storeId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const config = await prisma.sunPayConfig.findUnique({
+        where: { storeId: input.storeId },
+        select: { isEnabled: true, walletAddress: true, displayName: true },
+      })
+
+      return {
+        enabled: !!config?.isEnabled && !!config?.walletAddress,
+        displayName: config?.displayName ?? 'SunCoin (SCGE)',
+      }
+    }),
+
+  // ==========================================
   // CONFIGURATION (store owner/member only)
   // ==========================================
 
