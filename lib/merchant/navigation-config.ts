@@ -60,6 +60,16 @@ export interface NavGroup {
 
 export type NavigationConfig = (NavItem | NavGroup)[]
 
+// SunPay payment group — shared across all commerce types
+const sunPayGroup: NavGroup = {
+  key: 'payments',
+  labelKey: 'merchant.navigation.payments',
+  icon: CreditCard,
+  items: [
+    { key: 'sunpay', href: '/sunpay', icon: Coins, labelKey: 'merchant.navigation.sunpay' },
+  ],
+}
+
 // Base navigation items shared across commerce types
 const baseNavigation: NavigationConfig = [
   {
@@ -186,6 +196,7 @@ const hotelNavigation: NavigationConfig = [
       { key: 'revenue', href: '/analytics/revenue', icon: BarChart3, labelKey: 'merchant.navigation.revenue' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
@@ -249,6 +260,7 @@ const restaurantNavigation: NavigationConfig = [
       { key: 'reports', href: '/reports', icon: FileText, labelKey: 'merchant.navigation.reports' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
@@ -303,6 +315,7 @@ const travelNavigation: NavigationConfig = [
       { key: 'reports', href: '/reports', icon: FileText, labelKey: 'merchant.navigation.reports' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
@@ -356,6 +369,7 @@ const digitalNavigation: NavigationConfig = [
       { key: 'revenue', href: '/analytics', icon: TrendingUp, labelKey: 'merchant.navigation.revenue' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
@@ -400,6 +414,7 @@ const recreationNavigation: NavigationConfig = [
       { key: 'revenue', href: '/analytics', icon: TrendingUp, labelKey: 'merchant.navigation.revenue' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
@@ -453,6 +468,7 @@ const alcoholNavigation: NavigationConfig = [
       { key: 'inventory', href: '/analytics/inventory', icon: Warehouse, labelKey: 'merchant.navigation.inventory' },
     ],
   },
+  sunPayGroup,
   {
     key: 'settings',
     labelKey: 'merchant.navigation.settings',
