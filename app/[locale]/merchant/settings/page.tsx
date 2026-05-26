@@ -130,7 +130,7 @@ export default function MerchantSettingsPage() {
                 </div>
 
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
-                  <h3 className="font-medium text-slate-900 dark:text-white mb-4">{t('reports')}</h3>
+                  <h3 className="font-medium text-slate-900 dark:text-white mb-4">{t('reports.title')}</h3>
 
                   <div className="space-y-3">
                     <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
