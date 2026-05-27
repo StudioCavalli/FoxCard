@@ -458,7 +458,41 @@
     "estimatedDelivery": "Delivery: {days} days",
     "errorPaymentSession": "Error creating payment session",
     "errorCreateOrder": "An error occurred while creating the order",
-    "createPaymentSession": "Create payment session"
+    "createPaymentSession": "Create payment session",
+    "sunpay": {
+      "defaultName": "SunCoin (SCGE)",
+      "blockchain": "GoldenEra Blockchain",
+      "estimatedAmount": "Estimated amount:",
+      "rate": "Rate: 1 SCGE = ~{rate} EUR",
+      "paymentTitle": "SunCoin Payment",
+      "paymentSubtitle": "Send SCGE to the address below",
+      "waitingForPayment": "Waiting for payment",
+      "confirming": "Confirming ({current}/6 confirmations)",
+      "paymentConfirmed": "Payment confirmed",
+      "paymentExpired": "Payment expired",
+      "paymentFailed": "Payment failed",
+      "timeRemaining": "Time remaining:",
+      "amountToSend": "Amount to send",
+      "copyAmount": "Copy amount",
+      "copyAddress": "Copy address",
+      "paymentAddress": "Payment address",
+      "important": "Important:",
+      "sendExactly": "Send exactly {amount} SCGE to the address above",
+      "autoDetected": "Payment will be detected automatically",
+      "confirmationsRequired": "6 confirmations required (~3 minutes)",
+      "paymentReceived": "Payment received!",
+      "redirecting": "Redirecting to order confirmation...",
+      "expiredMessage": "The payment window has expired. Please try again.",
+      "failedMessage": "The payment could not be verified. Please try again.",
+      "tryAgain": "Try Again"
+    },
+    "form": {
+      "emailPlaceholder": "your@email.com",
+      "firstNamePlaceholder": "John",
+      "lastNamePlaceholder": "Doe",
+      "addressPlaceholder": "123 Main Street",
+      "postalCodePlaceholder": "10001"
+    }
   },
   "account": {
     "title": "My Account",

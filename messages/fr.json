@@ -457,7 +457,41 @@
     "freeShipping": "Gratuite",
     "estimatedDelivery": "Délai: {days} jours",
     "errorPaymentSession": "Erreur lors de la création de la session de paiement",
-    "errorCreateOrder": "Une erreur est survenue lors de la création de la commande"
+    "errorCreateOrder": "Une erreur est survenue lors de la création de la commande",
+    "sunpay": {
+      "defaultName": "SunCoin (SCGE)",
+      "blockchain": "GoldenEra Blockchain",
+      "estimatedAmount": "Montant estimé :",
+      "rate": "Taux : 1 SCGE = ~{rate} EUR",
+      "paymentTitle": "Paiement SunCoin",
+      "paymentSubtitle": "Envoyez des SCGE à l’adresse ci-dessous",
+      "waitingForPayment": "En attente du paiement",
+      "confirming": "Confirmation ({current}/6 confirmations)",
+      "paymentConfirmed": "Paiement confirmé",
+      "paymentExpired": "Paiement expiré",
+      "paymentFailed": "Paiement échoué",
+      "timeRemaining": "Temps restant :",
+      "amountToSend": "Montant à envoyer",
+      "copyAmount": "Copier le montant",
+      "copyAddress": "Copier l’adresse",
+      "paymentAddress": "Adresse de paiement",
+      "important": "Important :",
+      "sendExactly": "Envoyez exactement {amount} SCGE à l’adresse ci-dessus",
+      "autoDetected": "Le paiement sera détecté automatiquement",
+      "confirmationsRequired": "6 confirmations requises (~3 minutes)",
+      "paymentReceived": "Paiement reçu !",
+      "redirecting": "Redirection vers la confirmation de commande...",
+      "expiredMessage": "Le délai de paiement a expiré. Veuillez réessayer.",
+      "failedMessage": "Le paiement n’a pas pu être vérifié. Veuillez réessayer.",
+      "tryAgain": "Réessayer"
+    },
+    "form": {
+      "emailPlaceholder": "votre@email.com",
+      "firstNamePlaceholder": "Jean",
+      "lastNamePlaceholder": "Dupont",
+      "addressPlaceholder": "123 Rue de la Paix",
+      "postalCodePlaceholder": "75001"
+    }
   },
   "account": {
     "title": "Mon compte",

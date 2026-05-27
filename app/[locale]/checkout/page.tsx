@@ -16,6 +16,7 @@ import { AlcoholCheckoutVerification } from '@/components/alcohol'
 import { type CommerceType } from '@/lib/commerce-types'
 import { useTranslations } from 'next-intl'
 import { formatSCGE, fiatToSCGE } from '@/lib/sunpay/utils'
+// TODO: Replace MOCK_EXCHANGE_RATES with a real-time rate fetch when the SunPay API is connected
 import { MOCK_EXCHANGE_RATES } from '@/lib/sunpay/config'
 
 // Icon mapping for dynamic steps
@@ -744,7 +745,7 @@ export default function CheckoutPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="votre@email.com"
+                      placeholder={t('checkout.form.emailPlaceholder')}
                     />
                     <p className="text-xs text-theme-text-muted mt-1.5">
                       {t('checkout.emailHint')}
@@ -812,7 +813,7 @@ export default function CheckoutPage() {
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                        placeholder="Jean"
+                        placeholder={t('checkout.form.firstNamePlaceholder')}
                       />
                     </div>
                     <div>
@@ -828,7 +829,7 @@ export default function CheckoutPage() {
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                        placeholder="Dupont"
+                        placeholder={t('checkout.form.lastNamePlaceholder')}
                       />
                     </div>
                   </div>
@@ -846,7 +847,7 @@ export default function CheckoutPage() {
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                      placeholder="123 Rue de la Paix"
+                      placeholder={t('checkout.form.addressPlaceholder')}
                     />
                   </div>
 
@@ -880,7 +881,7 @@ export default function CheckoutPage() {
                         value={formData.postalCode}
                         onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                         className="w-full px-4 py-3.5 rounded-xl bg-theme-background border border-theme-border text-theme-text placeholder:text-theme-text-muted focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 outline-none transition-all"
-                        placeholder="75001"
+                        placeholder={t('checkout.form.postalCodePlaceholder')}
                       />
                     </div>
                   </div>
@@ -1053,10 +1054,10 @@ export default function CheckoutPage() {
                           <Coins className="w-5 h-5 text-amber-500" />
                           <div>
                             <span className="font-semibold text-theme-text block">
-                              {sunpayEnabled.displayName || 'SunCoin (SCGE)'}
+                              {sunpayEnabled.displayName || t('checkout.sunpay.defaultName')}
                             </span>
                             <span className="text-xs text-theme-text-muted">
-                              GoldenEra Blockchain
+                              {t('checkout.sunpay.blockchain')}
                             </span>
                           </div>
                         </div>
@@ -1069,13 +1070,14 @@ export default function CheckoutPage() {
                       {paymentMethod === 'sunpay' && total > 0 && (
                         <div className="mt-3 pt-3 border-t border-theme-border">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-theme-text-secondary">Estimated amount:</span>
+                            <span className="text-theme-text-secondary">{t('checkout.sunpay.estimatedAmount')}</span>
                             <span className="font-bold text-amber-600">
                               {formatSCGE(fiatToSCGE(total, MOCK_EXCHANGE_RATES.EUR))} SCGE
                             </span>
                           </div>
                           <p className="text-xs text-theme-text-muted mt-1">
-                            Rate: 1 SCGE = ~{MOCK_EXCHANGE_RATES.EUR} EUR
+                            {/* TODO: Replace MOCK_EXCHANGE_RATES with real rate fetch when the SunPay API is connected */}
+                            {t('checkout.sunpay.rate', { rate: MOCK_EXCHANGE_RATES.EUR })}
                           </p>
                         </div>
                       )}
@@ -1119,10 +1121,10 @@ export default function CheckoutPage() {
                       className="text-2xl font-bold text-theme-text"
                       style={{ fontFamily: 'var(--theme-font-heading)' }}
                     >
-                      SunCoin Payment
+                      {t('checkout.sunpay.paymentTitle')}
                     </h2>
                     <p className="text-sm text-theme-text-secondary">
-                      Send SCGE to the address below
+                      {t('checkout.sunpay.paymentSubtitle')}
                     </p>
                   </div>
                 </div>
@@ -1133,33 +1135,33 @@ export default function CheckoutPage() {
                     {sunpayState.status === 'pending' && (
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                        <span className="text-sm font-semibold text-yellow-700">Waiting for payment</span>
+                        <span className="text-sm font-semibold text-yellow-700">{t('checkout.sunpay.waitingForPayment')}</span>
                       </div>
                     )}
                     {sunpayState.status === 'confirming' && (
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
                         <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
                         <span className="text-sm font-semibold text-blue-700">
-                          Confirming ({sunpayStatusData?.confirmations ?? 0}/6 confirmations)
+                          {t('checkout.sunpay.confirming', { current: sunpayStatusData?.confirmations ?? 0 })}
                         </span>
                       </div>
                     )}
                     {sunpayState.status === 'confirmed' && (
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
                         <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span className="text-sm font-semibold text-green-700">Payment confirmed</span>
+                        <span className="text-sm font-semibold text-green-700">{t('checkout.sunpay.paymentConfirmed')}</span>
                       </div>
                     )}
                     {sunpayState.status === 'expired' && (
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
                         <AlertCircle className="w-4 h-4 text-red-500" />
-                        <span className="text-sm font-semibold text-red-700">Payment expired</span>
+                        <span className="text-sm font-semibold text-red-700">{t('checkout.sunpay.paymentExpired')}</span>
                       </div>
                     )}
                     {sunpayState.status === 'failed' && (
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
                         <AlertCircle className="w-4 h-4 text-red-500" />
-                        <span className="text-sm font-semibold text-red-700">Payment failed</span>
+                        <span className="text-sm font-semibold text-red-700">{t('checkout.sunpay.paymentFailed')}</span>
                       </div>
                     )}
                   </div>
@@ -1170,7 +1172,7 @@ export default function CheckoutPage() {
                   <div className="mb-6 flex items-center gap-2 text-sm text-theme-text-secondary">
                     <Clock className="w-4 h-4" />
                     <span>
-                      Time remaining: {Math.floor(sunpayTimeLeft / 60000)}:{String(Math.floor((sunpayTimeLeft % 60000) / 1000)).padStart(2, '0')}
+                      {t('checkout.sunpay.timeRemaining')} {Math.floor(sunpayTimeLeft / 60000)}:{String(Math.floor((sunpayTimeLeft % 60000) / 1000)).padStart(2, '0')}
                     </span>
                   </div>
                 )}
@@ -1180,7 +1182,7 @@ export default function CheckoutPage() {
                   <div className="space-y-4">
                     {/* Amount */}
                     <div className="p-4 bg-theme-background border border-theme-border rounded-xl">
-                      <p className="text-sm text-theme-text-secondary mb-1">Amount to send</p>
+                      <p className="text-sm text-theme-text-secondary mb-1">{t('checkout.sunpay.amountToSend')}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-amber-600" style={{ fontFamily: 'var(--theme-font-heading)' }}>
                           {formatSCGE(sunpayState.amountSCGE!)} SCGE
@@ -1188,7 +1190,7 @@ export default function CheckoutPage() {
                         <button
                           onClick={() => navigator.clipboard.writeText(formatSCGE(sunpayState.amountSCGE!))}
                           className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-surface rounded-lg transition-all"
-                          title="Copy amount"
+                          title={t('checkout.sunpay.copyAmount')}
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -1200,7 +1202,7 @@ export default function CheckoutPage() {
 
                     {/* Address */}
                     <div className="p-4 bg-theme-background border border-theme-border rounded-xl">
-                      <p className="text-sm text-theme-text-secondary mb-1">Payment address</p>
+                      <p className="text-sm text-theme-text-secondary mb-1">{t('checkout.sunpay.paymentAddress')}</p>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 text-sm font-mono text-theme-text bg-theme-surface px-3 py-2 rounded-lg border border-theme-border break-all">
                           {sunpayState.paymentAddress}
@@ -1208,7 +1210,7 @@ export default function CheckoutPage() {
                         <button
                           onClick={() => navigator.clipboard.writeText(sunpayState.paymentAddress!)}
                           className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-surface rounded-lg transition-all flex-shrink-0"
-                          title="Copy address"
+                          title={t('checkout.sunpay.copyAddress')}
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -1217,11 +1219,11 @@ export default function CheckoutPage() {
 
                     {/* Instructions */}
                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-800">
-                      <p className="font-semibold mb-1">Important:</p>
+                      <p className="font-semibold mb-1">{t('checkout.sunpay.important')}</p>
                       <ul className="list-disc list-inside space-y-1 text-amber-700">
-                        <li>Send exactly <strong>{formatSCGE(sunpayState.amountSCGE!)} SCGE</strong> to the address above</li>
-                        <li>Payment will be detected automatically</li>
-                        <li>6 confirmations required (~3 minutes)</li>
+                        <li>{t('checkout.sunpay.sendExactly', { amount: formatSCGE(sunpayState.amountSCGE!) })}</li>
+                        <li>{t('checkout.sunpay.autoDetected')}</li>
+                        <li>{t('checkout.sunpay.confirmationsRequired')}</li>
                       </ul>
                     </div>
                   </div>
@@ -1231,8 +1233,8 @@ export default function CheckoutPage() {
                 {sunpayState.status === 'confirmed' && (
                   <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
                     <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                    <p className="text-lg font-bold text-green-800 mb-1">Payment received!</p>
-                    <p className="text-sm text-green-700">Redirecting to order confirmation...</p>
+                    <p className="text-lg font-bold text-green-800 mb-1">{t('checkout.sunpay.paymentReceived')}</p>
+                    <p className="text-sm text-green-700">{t('checkout.sunpay.redirecting')}</p>
                   </div>
                 )}
 
@@ -1241,8 +1243,8 @@ export default function CheckoutPage() {
                   <div className="text-center">
                     <p className="text-sm text-theme-text-secondary mb-4">
                       {sunpayState.status === 'expired'
-                        ? 'The payment window has expired. Please try again.'
-                        : 'The payment could not be verified. Please try again.'}
+                        ? t('checkout.sunpay.expiredMessage')
+                        : t('checkout.sunpay.failedMessage')}
                     </p>
                     <button
                       onClick={() => {
@@ -1251,7 +1253,7 @@ export default function CheckoutPage() {
                       }}
                       className="px-6 py-3 bg-theme-primary hover:bg-theme-primary/90 text-theme-background rounded-xl font-semibold transition-all duration-200"
                     >
-                      Try Again
+                      {t('checkout.sunpay.tryAgain')}
                     </button>
                   </div>
                 )}

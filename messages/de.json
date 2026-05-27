@@ -457,7 +457,41 @@
     "freeShipping": "Kostenlos",
     "estimatedDelivery": "Lieferzeit: {days} Tage",
     "errorPaymentSession": "Fehler beim Erstellen der Zahlungssitzung",
-    "errorCreateOrder": "Beim Erstellen der Bestellung ist ein Fehler aufgetreten"
+    "errorCreateOrder": "Beim Erstellen der Bestellung ist ein Fehler aufgetreten",
+    "sunpay": {
+      "defaultName": "SunCoin (SCGE)",
+      "blockchain": "GoldenEra Blockchain",
+      "estimatedAmount": "Geschätzter Betrag:",
+      "rate": "Kurs: 1 SCGE = ~{rate} EUR",
+      "paymentTitle": "SunCoin-Zahlung",
+      "paymentSubtitle": "Senden Sie SCGE an die untenstehende Adresse",
+      "waitingForPayment": "Warten auf Zahlung",
+      "confirming": "Bestätigung ({current}/6 Bestätigungen)",
+      "paymentConfirmed": "Zahlung bestätigt",
+      "paymentExpired": "Zahlung abgelaufen",
+      "paymentFailed": "Zahlung fehlgeschlagen",
+      "timeRemaining": "Verbleibende Zeit:",
+      "amountToSend": "Zu sendender Betrag",
+      "copyAmount": "Betrag kopieren",
+      "copyAddress": "Adresse kopieren",
+      "paymentAddress": "Zahlungsadresse",
+      "important": "Wichtig:",
+      "sendExactly": "Senden Sie genau {amount} SCGE an die obige Adresse",
+      "autoDetected": "Die Zahlung wird automatisch erkannt",
+      "confirmationsRequired": "6 Bestätigungen erforderlich (~3 Minuten)",
+      "paymentReceived": "Zahlung erhalten!",
+      "redirecting": "Weiterleitung zur Bestellbestätigung...",
+      "expiredMessage": "Das Zahlungsfenster ist abgelaufen. Bitte versuchen Sie es erneut.",
+      "failedMessage": "Die Zahlung konnte nicht verifiziert werden. Bitte versuchen Sie es erneut.",
+      "tryAgain": "Erneut versuchen"
+    },
+    "form": {
+      "emailPlaceholder": "ihre@email.de",
+      "firstNamePlaceholder": "Max",
+      "lastNamePlaceholder": "Mustermann",
+      "addressPlaceholder": "Musterstraße 123",
+      "postalCodePlaceholder": "10115"
+    }
   },
   "account": {
     "title": "Mein Konto",

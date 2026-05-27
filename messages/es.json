@@ -457,7 +457,41 @@
     "freeShipping": "Gratis",
     "estimatedDelivery": "Entrega: {days} días",
     "errorPaymentSession": "Error al crear la sesión de pago",
-    "errorCreateOrder": "Se produjo un error al crear el pedido"
+    "errorCreateOrder": "Se produjo un error al crear el pedido",
+    "sunpay": {
+      "defaultName": "SunCoin (SCGE)",
+      "blockchain": "GoldenEra Blockchain",
+      "estimatedAmount": "Monto estimado:",
+      "rate": "Tasa: 1 SCGE = ~{rate} EUR",
+      "paymentTitle": "Pago con SunCoin",
+      "paymentSubtitle": "Envíe SCGE a la dirección de abajo",
+      "waitingForPayment": "Esperando el pago",
+      "confirming": "Confirmando ({current}/6 confirmaciones)",
+      "paymentConfirmed": "Pago confirmado",
+      "paymentExpired": "Pago expirado",
+      "paymentFailed": "Pago fallido",
+      "timeRemaining": "Tiempo restante:",
+      "amountToSend": "Monto a enviar",
+      "copyAmount": "Copiar monto",
+      "copyAddress": "Copiar dirección",
+      "paymentAddress": "Dirección de pago",
+      "important": "Importante:",
+      "sendExactly": "Envíe exactamente {amount} SCGE a la dirección de arriba",
+      "autoDetected": "El pago se detectará automáticamente",
+      "confirmationsRequired": "6 confirmaciones requeridas (~3 minutos)",
+      "paymentReceived": "¡Pago recibido!",
+      "redirecting": "Redirigiendo a la confirmación del pedido...",
+      "expiredMessage": "La ventana de pago ha expirado. Por favor, inténtelo de nuevo.",
+      "failedMessage": "No se pudo verificar el pago. Por favor, inténtelo de nuevo.",
+      "tryAgain": "Intentar de nuevo"
+    },
+    "form": {
+      "emailPlaceholder": "su@email.com",
+      "firstNamePlaceholder": "Juan",
+      "lastNamePlaceholder": "García",
+      "addressPlaceholder": "Calle Mayor 123",
+      "postalCodePlaceholder": "28001"
+    }
   },
   "account": {
     "title": "Mi Cuenta",

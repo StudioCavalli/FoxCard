@@ -457,7 +457,41 @@
     "freeShipping": "Zadarmo",
     "estimatedDelivery": "Dodanie: {days} dní",
     "errorPaymentSession": "Chyba pri vytváraní platobnej relácie",
-    "errorCreateOrder": "Pri vytváraní objednávky nastala chyba"
+    "errorCreateOrder": "Pri vytváraní objednávky nastala chyba",
+    "sunpay": {
+      "defaultName": "SunCoin (SCGE)",
+      "blockchain": "GoldenEra Blockchain",
+      "estimatedAmount": "Odhadovaná suma:",
+      "rate": "Kurz: 1 SCGE = ~{rate} EUR",
+      "paymentTitle": "Platba SunCoin",
+      "paymentSubtitle": "Pošlite SCGE na adresu nižšie",
+      "waitingForPayment": "Čaká sa na platbu",
+      "confirming": "Potvrdzovanie ({current}/6 potvrdení)",
+      "paymentConfirmed": "Platba potvrdená",
+      "paymentExpired": "Platba vypršala",
+      "paymentFailed": "Platba zlyhala",
+      "timeRemaining": "Zostávajúci čas:",
+      "amountToSend": "Suma na odoslanie",
+      "copyAmount": "Kopírovať sumu",
+      "copyAddress": "Kopírovať adresu",
+      "paymentAddress": "Platobná adresa",
+      "important": "Dôležité:",
+      "sendExactly": "Pošlite presne {amount} SCGE na adresu vyššie",
+      "autoDetected": "Platba bude zistená automaticky",
+      "confirmationsRequired": "Vyžaduje sa 6 potvrdení (~3 minúty)",
+      "paymentReceived": "Platba prijatá!",
+      "redirecting": "Presmerovanie na potvrdenie objednávky...",
+      "expiredMessage": "Časové okno platby vypršalo. Skúste to znova.",
+      "failedMessage": "Platbu sa nepodarilo overiť. Skúste to znova.",
+      "tryAgain": "Skúsiť znova"
+    },
+    "form": {
+      "emailPlaceholder": "vas@email.sk",
+      "firstNamePlaceholder": "Ján",
+      "lastNamePlaceholder": "Novák",
+      "addressPlaceholder": "Hlavná ulica 123",
+      "postalCodePlaceholder": "81101"
+    }
   },
   "account": {
     "title": "Môj účet",
