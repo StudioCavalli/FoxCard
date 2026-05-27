@@ -71,6 +71,7 @@ export default function RoomTypesPage() {
     if (editingId) {
       await updateCategory.mutateAsync({
         id: editingId,
+        storeId,
         name: formData.name,
         description: formData.description || undefined,
       })
@@ -235,7 +236,7 @@ export default function RoomTypesPage() {
                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                       onClick={() => {
                         if (confirm('Supprimer ce type ?')) {
-                          deleteCategory.mutate({ id: category.id })
+                          deleteCategory.mutate({ id: category.id, storeId: storeId! })
                         }
                       }}
                     >

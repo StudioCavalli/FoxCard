@@ -3,7 +3,7 @@
  * API interne pour le système de paiement crsdpay
  */
 
-import { router, protectedProcedure } from '../../trpc'
+import { router, protectedProcedure, requireStoreAccess } from '../../trpc'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { prisma } from '@/lib/prisma'
@@ -27,7 +27,7 @@ export const crsdpayRouter = router({
   /**
    * Récupère la configuration crsdpay d'un store
    */
-  getConfig: protectedProcedure
+  getConfig: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -44,7 +44,7 @@ export const crsdpayRouter = router({
   /**
    * Met à jour la configuration crsdpay
    */
-  updateConfig: protectedProcedure
+  updateConfig: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -89,7 +89,7 @@ export const crsdpayRouter = router({
   /**
    * Tokenize une carte
    */
-  tokenizeCard: protectedProcedure
+  tokenizeCard: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -175,7 +175,7 @@ export const crsdpayRouter = router({
   /**
    * Crée un payment intent
    */
-  createPayment: protectedProcedure
+  createPayment: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -321,7 +321,7 @@ export const crsdpayRouter = router({
   /**
    * Liste les transactions d'un store
    */
-  listTransactions: protectedProcedure
+  listTransactions: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -488,7 +488,7 @@ export const crsdpayRouter = router({
   /**
    * Crée ou récupère un customer crsdpay
    */
-  getOrCreateCustomer: protectedProcedure
+  getOrCreateCustomer: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -569,7 +569,7 @@ export const crsdpayRouter = router({
   /**
    * Liste les customers d'un store
    */
-  listCustomers: protectedProcedure
+  listCustomers: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -621,7 +621,7 @@ export const crsdpayRouter = router({
   /**
    * Récupère les statistiques de paiement
    */
-  getStats: protectedProcedure
+  getStats: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -669,7 +669,7 @@ export const crsdpayRouter = router({
   /**
    * Récupère les données pour les graphiques (revenue, transactions par jour)
    */
-  getChartData: protectedProcedure
+  getChartData: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -730,7 +730,7 @@ export const crsdpayRouter = router({
   /**
    * Récupère les statistiques par méthode de paiement
    */
-  getPaymentMethodStats: protectedProcedure
+  getPaymentMethodStats: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -814,7 +814,7 @@ export const crsdpayRouter = router({
   /**
    * Crée un paiement cryptocurrency
    */
-  createCryptoPayment: protectedProcedure
+  createCryptoPayment: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -891,7 +891,7 @@ export const crsdpayRouter = router({
   /**
    * Liste les paiements crypto d'un store
    */
-  listCryptoPayments: protectedProcedure
+  listCryptoPayments: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),
@@ -910,7 +910,7 @@ export const crsdpayRouter = router({
   /**
    * Effectue la réconciliation automatique des transactions
    */
-  performReconciliation: protectedProcedure
+  performReconciliation: requireStoreAccess
     .input(
       z.object({
         storeId: z.string(),

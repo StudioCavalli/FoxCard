@@ -646,7 +646,16 @@
     "dashboard": "Dashboard",
     "store": "Mein Geschäft",
     "products": "Produkte",
-    "orders": "Bestellungen",
+    "orders": {
+      "status": {
+        "pending": "Ausstehend",
+        "processing": "In Bearbeitung",
+        "shipped": "Versendet",
+        "delivered": "Geliefert",
+        "cancelled": "Storniert"
+      },
+      "cancel": "Stornieren"
+    },
     "customers": "Kunden",
     "analytics": "Analysen",
     "reports": {
@@ -905,6 +914,22 @@
       "inventory": "Inventory",
       "compliance": "Compliance",
       "sunpay": "SunPay"
+    },
+    "camera": {
+      "title": "Foto aufnehmen",
+      "capture": "Aufnehmen",
+      "retake": "Erneut aufnehmen",
+      "use": "Dieses Foto verwenden",
+      "switchCamera": "Kamera wechseln",
+      "flash": "Blitz",
+      "permissionDenied": "Kamerazugriff verweigert",
+      "error": "Kamerafehler"
+    },
+    "common": {
+      "viewAll": "Alle anzeigen",
+      "remaining": "verbleibend",
+      "retry": "Erneut versuchen",
+      "close": "Schließen"
     },
     "stats": {
       "occupancyRate": "Auslastung",

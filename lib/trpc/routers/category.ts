@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure, adminProcedure } from '../trpc'
+import { router, publicProcedure, adminProcedure, requireStoreAccess } from '../trpc'
 import { withCache } from '@/lib/cache'
 
 export const categoryRouter = router({
@@ -96,10 +96,11 @@ export const categoryRouter = router({
       })
     }),
 
-  update: adminProcedure
+  update: requireStoreAccess
     .input(
       z.object({
         id: z.string(),
+        storeId: z.string(),
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
         description: z.string().optional(),
@@ -108,18 +109,18 @@ export const categoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input
+      const { id, storeId, ...data } = input
       return ctx.prisma.category.update({
-        where: { id },
+        where: { id, storeId },
         data,
       })
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+  delete: requireStoreAccess
+    .input(z.object({ id: z.string(), storeId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.prisma.category.delete({
-        where: { id: input.id },
+        where: { id: input.id, storeId: input.storeId },
       })
     }),
 })

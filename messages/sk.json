@@ -646,7 +646,16 @@
     "dashboard": "Prehľad",
     "store": "Môj obchod",
     "products": "Produkty",
-    "orders": "Objednávky",
+    "orders": {
+      "status": {
+        "pending": "Čakajúca",
+        "processing": "Spracováva sa",
+        "shipped": "Odoslaná",
+        "delivered": "Doručená",
+        "cancelled": "Zrušená"
+      },
+      "cancel": "Zrušiť"
+    },
     "customers": "Zákazníci",
     "analytics": "Analytika",
     "reports": {
@@ -905,6 +914,22 @@
       "inventory": "Inventory",
       "compliance": "Compliance",
       "sunpay": "SunPay"
+    },
+    "camera": {
+      "title": "Odfotiť",
+      "capture": "Zachytiť",
+      "retake": "Znova odfotiť",
+      "use": "Použiť túto fotku",
+      "switchCamera": "Prepnúť kameru",
+      "flash": "Blesk",
+      "permissionDenied": "Prístup ku kamere zamietnutý",
+      "error": "Chyba kamery"
+    },
+    "common": {
+      "viewAll": "Zobraziť všetko",
+      "remaining": "zostáva",
+      "retry": "Skúsiť znova",
+      "close": "Zavrieť"
     },
     "stats": {
       "occupancyRate": "Obsadenosť",

@@ -34,6 +34,11 @@ export async function createPaymentRequest(params: {
   merchantWallet: string
 }): Promise<PaymentRequest> {
   if (IS_MOCK) {
+    // Block mock mode in production — real API credentials must be configured
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SunPay API not configured')
+    }
+
     const rate = MOCK_EXCHANGE_RATES[params.fiatCurrency] ?? MOCK_EXCHANGE_RATES.EUR
     const amountSCGE = fiatToSCGE(params.amountFiat, rate)
 
@@ -86,6 +91,16 @@ export async function createPaymentRequest(params: {
  */
 export async function verifyTransaction(txHash: string): Promise<TransactionVerification> {
   if (IS_MOCK) {
+    // In production, mock verification must never return CONFIRMED
+    if (process.env.NODE_ENV === 'production') {
+      return {
+        status: 'PENDING',
+        confirmations: 0,
+        blockHeight: null,
+        isMock: true,
+      }
+    }
+
     return {
       status: 'CONFIRMED',
       confirmations: MIN_CONFIRMATIONS,

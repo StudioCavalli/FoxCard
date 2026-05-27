@@ -226,11 +226,13 @@ export function useOfflineDetector() {
 
     setIsOffline(!navigator.onLine)
 
+    let bannerTimer: NodeJS.Timeout | undefined
+
     const handleOnline = () => {
       setIsOffline(false)
       // Show brief "back online" message
       setShowOfflineBanner(true)
-      setTimeout(() => setShowOfflineBanner(false), 3000)
+      bannerTimer = setTimeout(() => setShowOfflineBanner(false), 3000)
     }
 
     const handleOffline = () => {
@@ -244,6 +246,7 @@ export function useOfflineDetector() {
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      if (bannerTimer) clearTimeout(bannerTimer)
     }
   }, [])
 

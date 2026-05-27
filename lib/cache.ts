@@ -34,4 +34,4 @@ setInterval(() => {
   for (const [key, entry] of cache) {
     if (now > entry.expiresAt) cache.delete(key)
   }
-}, 120_000)
+}, 120_000).unref()

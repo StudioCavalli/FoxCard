@@ -646,7 +646,16 @@
     "dashboard": "Panel de control",
     "store": "Mi Tienda",
     "products": "Productos",
-    "orders": "Pedidos",
+    "orders": {
+      "status": {
+        "pending": "Pendiente",
+        "processing": "En proceso",
+        "shipped": "Enviado",
+        "delivered": "Entregado",
+        "cancelled": "Cancelado"
+      },
+      "cancel": "Cancelar"
+    },
     "customers": "Clientes",
     "analytics": "Analítica",
     "reports": {
@@ -905,6 +914,22 @@
       "inventory": "Inventory",
       "compliance": "Compliance",
       "sunpay": "SunPay"
+    },
+    "camera": {
+      "title": "Tomar una foto",
+      "capture": "Capturar",
+      "retake": "Volver a tomar",
+      "use": "Usar esta foto",
+      "switchCamera": "Cambiar cámara",
+      "flash": "Flash",
+      "permissionDenied": "Acceso a la cámara denegado",
+      "error": "Error de cámara"
+    },
+    "common": {
+      "viewAll": "Ver todo",
+      "remaining": "restante",
+      "retry": "Reintentar",
+      "close": "Cerrar"
     },
     "stats": {
       "occupancyRate": "Tasa de ocupación",

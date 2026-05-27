@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { User, Store, Wallet, Blocks, Building2 } from 'lucide-react'
 
 interface SunPayFlowDiagramProps {
@@ -31,9 +31,15 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
   const [confirmCount, setConfirmCount] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
 
+  const timersRef = useRef<NodeJS.Timeout[]>([])
+
   useEffect(() => {
     let step = -1
-    let timer: NodeJS.Timeout
+
+    const track = (id: NodeJS.Timeout) => {
+      timersRef.current.push(id)
+      return id
+    }
 
     const advance = () => {
       step++
@@ -47,22 +53,26 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
             setConfirmCount(count)
             if (count >= 6) clearInterval(ci)
           }, 180)
+          track(ci)
         }
-        timer = setTimeout(advance, STEP_DELAY)
+        track(setTimeout(advance, STEP_DELAY))
       } else {
         setShowSuccess(true)
-        timer = setTimeout(() => {
+        track(setTimeout(() => {
           step = -1
           setActiveStep(-1)
           setConfirmCount(0)
           setShowSuccess(false)
-          timer = setTimeout(advance, 600)
-        }, PAUSE)
+          track(setTimeout(advance, 600))
+        }, PAUSE))
       }
     }
 
-    timer = setTimeout(advance, 800)
-    return () => clearTimeout(timer)
+    track(setTimeout(advance, 800))
+    return () => {
+      timersRef.current.forEach(id => { clearTimeout(id); clearInterval(id) })
+      timersRef.current = []
+    }
   }, [])
 
   const steps = [

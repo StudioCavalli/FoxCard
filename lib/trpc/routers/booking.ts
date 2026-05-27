@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { TRPCError } from '@trpc/server'
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc'
 import { BookingStatus, CancellationPolicy } from '@prisma/client'
 import {
@@ -97,13 +98,35 @@ export const bookingRouter = router({
         guestNames: z.array(z.string()).optional(),
         options: z.record(z.string(), z.any()).optional(),
         specialRequests: z.string().optional(),
-        basePrice: z.number(),
-        totalPrice: z.number(),
         cancellationPolicy: z.nativeEnum(CancellationPolicy).default(CancellationPolicy.FREE_24H),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const date = new Date(input.date)
+
+      // Fetch the product to determine the authoritative price server-side
+      const product = await ctx.prisma.product.findUnique({
+        where: { id: input.productId },
+        select: { price: true, storeId: true },
+      })
+
+      if (!product) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Product not found',
+        })
+      }
+
+      if (product.storeId !== input.storeId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Product does not belong to this store',
+        })
+      }
+
+      // Calculate prices server-side — never trust client-supplied prices
+      const basePrice = product.price
+      const totalPrice = basePrice * input.guestCount
 
       // Check availability if time-based
       if (input.startTime) {
@@ -151,8 +174,8 @@ export const bookingRouter = router({
           endTime,
           guestCount: input.guestCount,
           guestNames: input.guestNames || [],
-          basePrice: input.basePrice,
-          totalPrice: input.totalPrice,
+          basePrice,
+          totalPrice,
           options: input.options || {},
           specialRequests: input.specialRequests,
           cancellationPolicy: input.cancellationPolicy,

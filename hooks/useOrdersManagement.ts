@@ -39,6 +39,11 @@ export function useOrdersManagement(storeId: string | null) {
     const isPartial = refundAmount && parseFloat(refundAmount) > 0
     const amount = isPartial ? parseFloat(refundAmount) : undefined
 
+    if (isPartial && isNaN(amount!)) {
+      alert('Invalid refund amount')
+      return
+    }
+
     if (isPartial && amount! > selectedOrder.total) {
       alert('Le montant du remboursement ne peut pas dépasser le total de la commande')
       return

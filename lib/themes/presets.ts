@@ -207,6 +207,14 @@ export function getThemeNames(): string[] {
 }
 
 /**
+ * Sanitize a CSS value to prevent injection attacks.
+ * Strips semicolons, braces, backslashes, url(), and expression() patterns.
+ */
+function sanitizeCSSValue(value: string): string {
+  return value.replace(/[;{}\\]|url\s*\(|expression\s*\(/gi, '')
+}
+
+/**
  * Generate CSS variables from theme config
  */
 export function generateThemeCSS(config: any): string {
@@ -250,32 +258,32 @@ export function generateThemeCSS(config: any): string {
 
   return `
     /* Theme Colors */
-    --theme-primary: ${colors.primary};
-    --theme-secondary: ${colors.secondary};
-    --theme-accent: ${colors.accent};
-    --theme-background: ${colors.background};
-    --theme-surface: ${colors.surface || colors.background};
-    --theme-text: ${colors.text};
-    --theme-text-secondary: ${colors.textSecondary};
-    --theme-text-muted: ${colors.textMuted || colors.textSecondary};
-    --theme-border: ${colors.border};
-    --theme-border-light: ${colors.borderLight || colors.border};
+    --theme-primary: ${sanitizeCSSValue(colors.primary)};
+    --theme-secondary: ${sanitizeCSSValue(colors.secondary)};
+    --theme-accent: ${sanitizeCSSValue(colors.accent)};
+    --theme-background: ${sanitizeCSSValue(colors.background)};
+    --theme-surface: ${sanitizeCSSValue(colors.surface || colors.background)};
+    --theme-text: ${sanitizeCSSValue(colors.text)};
+    --theme-text-secondary: ${sanitizeCSSValue(colors.textSecondary)};
+    --theme-text-muted: ${sanitizeCSSValue(colors.textMuted || colors.textSecondary)};
+    --theme-border: ${sanitizeCSSValue(colors.border)};
+    --theme-border-light: ${sanitizeCSSValue(colors.borderLight || colors.border)};
 
     /* Theme Fonts */
-    --theme-font-heading: ${fonts.heading}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --theme-font-body: ${fonts.body}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --theme-font-heading: ${sanitizeCSSValue(fonts.heading)}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --theme-font-body: ${sanitizeCSSValue(fonts.body)}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
     /* Theme Spacing */
-    --theme-container-max-width: ${spacing.containerMaxWidth};
-    --theme-section-padding: ${spacing.sectionPadding};
+    --theme-container-max-width: ${sanitizeCSSValue(spacing.containerMaxWidth)};
+    --theme-section-padding: ${sanitizeCSSValue(spacing.sectionPadding)};
 
     /* Theme Border Radius */
-    --theme-border-radius: ${borderRadius};
+    --theme-border-radius: ${sanitizeCSSValue(borderRadius)};
 
     /* Theme Shadows */
-    --theme-shadow-sm: ${shadows.sm};
-    --theme-shadow-md: ${shadows.md};
-    --theme-shadow-lg: ${shadows.lg};
-    --theme-shadow-xl: ${shadows.xl};
+    --theme-shadow-sm: ${sanitizeCSSValue(shadows.sm)};
+    --theme-shadow-md: ${sanitizeCSSValue(shadows.md)};
+    --theme-shadow-lg: ${sanitizeCSSValue(shadows.lg)};
+    --theme-shadow-xl: ${sanitizeCSSValue(shadows.xl)};
   `.trim()
 }

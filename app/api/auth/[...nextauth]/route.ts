@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getClientInfo(req: Request) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -30,6 +31,20 @@ async function handler(
 
   // For POST requests to credentials callback, we intercept to log login events
   if (req.method === 'POST' && url.pathname.includes('callback/credentials')) {
+    // Rate limit login attempts: 10 per 15 minutes per IP
+    const rateLimitKey = `login:${ip || 'unknown'}`
+    const { allowed } = checkRateLimit(rateLimitKey, 10, 15 * 60 * 1000)
+
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many login attempts. Please try again later.' }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', 'Retry-After': '900' },
+        }
+      )
+    }
+
     // Clone the request to read body without consuming it
     const clonedReq = req.clone()
 

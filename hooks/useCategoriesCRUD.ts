@@ -52,6 +52,7 @@ export function useCategoriesCRUD(storeId: string | null) {
     if (editingId) {
       updateCategory.mutate({
         id: editingId,
+        storeId: storeId!,
         name: formData.name,
         slug: formData.slug || generateSlug(formData.name),
         description: formData.description || undefined,
@@ -84,7 +85,7 @@ export function useCategoriesCRUD(storeId: string | null) {
 
   const handleDelete = (categoryId: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-      deleteCategory.mutate({ id: categoryId })
+      deleteCategory.mutate({ id: categoryId, storeId: storeId! })
     }
   }
 

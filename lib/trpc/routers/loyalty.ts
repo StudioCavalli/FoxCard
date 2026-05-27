@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure, adminProcedure } from '../trpc'
+import { router, protectedProcedure, adminProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
 
 /**
@@ -23,7 +23,7 @@ const TIER_THRESHOLDS = {
 
 export const loyaltyRouter = router({
   // Get customer's loyalty balance and tier info
-  getBalance: publicProcedure
+  getBalance: protectedProcedure
     .input(
       z.object({
         customerId: z.string(),
@@ -38,6 +38,22 @@ export const loyaltyRouter = router({
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Customer not found',
+        })
+      }
+
+      // Verify the caller is associated with this customer or is the store owner
+      const sessionEmail = ctx.session.user.email
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: customer.storeId },
+        select: { ownerId: true },
+      })
+      const isStoreOwner = store?.ownerId === ctx.session.user.id
+      const isAdmin = ctx.session.user.role === 'ADMIN' || ctx.session.user.role === 'SUPER_ADMIN'
+
+      if (customer.email !== sessionEmail && !isStoreOwner && !isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have access to this customer\'s loyalty data',
         })
       }
 
@@ -102,7 +118,7 @@ export const loyaltyRouter = router({
     }),
 
   // Get transaction history
-  getHistory: publicProcedure
+  getHistory: protectedProcedure
     .input(
       z.object({
         customerId: z.string(),
@@ -111,6 +127,34 @@ export const loyaltyRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      // Verify the caller is associated with this customer or is the store owner
+      const customer = await ctx.prisma.customer.findUnique({
+        where: { id: input.customerId },
+        select: { email: true, storeId: true },
+      })
+
+      if (!customer) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Customer not found',
+        })
+      }
+
+      const sessionEmail = ctx.session.user.email
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: customer.storeId },
+        select: { ownerId: true },
+      })
+      const isStoreOwner = store?.ownerId === ctx.session.user.id
+      const isAdmin = ctx.session.user.role === 'ADMIN' || ctx.session.user.role === 'SUPER_ADMIN'
+
+      if (customer.email !== sessionEmail && !isStoreOwner && !isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have access to this customer\'s loyalty data',
+        })
+      }
+
       const transactions = await ctx.prisma.loyaltyTransaction.findMany({
         where: {
           customerId: input.customerId,
@@ -136,7 +180,7 @@ export const loyaltyRouter = router({
     }),
 
   // Redeem points for discount (called during checkout)
-  redeemPoints: publicProcedure
+  redeemPoints: protectedProcedure
     .input(
       z.object({
         customerId: z.string(),
@@ -153,6 +197,22 @@ export const loyaltyRouter = router({
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Customer not found',
+        })
+      }
+
+      // Verify the caller is associated with this customer or is the store owner
+      const sessionEmail = ctx.session.user.email
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: customer.storeId },
+        select: { ownerId: true },
+      })
+      const isStoreOwner = store?.ownerId === ctx.session.user.id
+      const isAdmin = ctx.session.user.role === 'ADMIN' || ctx.session.user.role === 'SUPER_ADMIN'
+
+      if (customer.email !== sessionEmail && !isStoreOwner && !isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to redeem points for this customer',
         })
       }
 
@@ -198,7 +258,7 @@ export const loyaltyRouter = router({
     }),
 
   // Award signup bonus (called when customer creates account)
-  awardSignupBonus: publicProcedure
+  awardSignupBonus: protectedProcedure
     .input(
       z.object({
         customerId: z.string(),
@@ -221,6 +281,22 @@ export const loyaltyRouter = router({
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Customer not found',
+        })
+      }
+
+      // Verify the caller is associated with this customer or is the store owner
+      const sessionEmail = ctx.session.user.email
+      const store = await ctx.prisma.store.findUnique({
+        where: { id: customer.storeId },
+        select: { ownerId: true },
+      })
+      const isStoreOwner = store?.ownerId === ctx.session.user.id
+      const isAdmin = ctx.session.user.role === 'ADMIN' || ctx.session.user.role === 'SUPER_ADMIN'
+
+      if (customer.email !== sessionEmail && !isStoreOwner && !isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to award bonus for this customer',
         })
       }
 

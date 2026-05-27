@@ -157,12 +157,42 @@ export const sunpayRouter = router({
         })
       }
 
+      // If an orderId is provided, verify the payment amount matches the order total
+      if (input.orderId) {
+        const order = await prisma.order.findUnique({
+          where: { id: input.orderId },
+          select: { total: true },
+        })
+
+        if (!order) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Order not found',
+          })
+        }
+
+        if (order.total !== input.amountFiat) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Payment amount (${input.amountFiat}) does not match order total (${order.total})`,
+          })
+        }
+      }
+
       // Create payment request via provider
       const paymentRequest = await createPaymentRequest({
         amountFiat: input.amountFiat,
         fiatCurrency: input.fiatCurrency,
         merchantWallet: config.walletAddress,
       })
+
+      // Block mock payments in production
+      if (paymentRequest.isMock && process.env.NODE_ENV === 'production') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'SunPay is not configured for this store',
+        })
+      }
 
       // Store transaction in database
       const transaction = await prisma.sunPayTransaction.create({
@@ -253,12 +283,15 @@ export const sunpayRouter = router({
             blockHeight: verification.blockHeight,
           }
 
-          if (verification.status === 'CONFIRMED' && verification.confirmations >= 6) {
+          // Never confirm a mock transaction in production
+          const isMockInProduction = verification.isMock && process.env.NODE_ENV === 'production'
+
+          if (verification.status === 'CONFIRMED' && verification.confirmations >= 6 && !isMockInProduction) {
             updateData.status = 'CONFIRMED'
             updateData.confirmedAt = new Date()
           } else if (verification.status === 'FAILED') {
             updateData.status = 'FAILED'
-          } else if (verification.confirmations > 0) {
+          } else if (verification.confirmations > 0 && !isMockInProduction) {
             updateData.status = 'CONFIRMING'
           }
 
