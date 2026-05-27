@@ -2692,6 +2692,22 @@
       "step3": {
         "title": "Bestellung bestaetigt",
         "description": "Die Transaktion wird on-chain bestaetigt und die Bestellung sofort validiert."
+      },
+      "flow": {
+        "customer": "Kunde",
+        "customerDesc": "Wählt SunPay beim Checkout",
+        "marketplace": "Marktplatz",
+        "marketplaceDesc": "Erstellt Zahlungsanfrage",
+        "wallet": "GoldenEra Wallet",
+        "walletDesc": "Sendet SCGE an den Händler",
+        "blockchain": "Blockchain",
+        "blockchainDesc": "Transaktion on-chain bestätigt",
+        "merchant": "Händler",
+        "merchantDesc": "Erhält SCGE sofort",
+        "amount": "2,50 SCGE",
+        "equivalent": "≈ 50,00 €",
+        "confirmed": "Bestätigt",
+        "confirmations": "Bestätigungen"
       }
     },
     "benefits": {

@@ -2692,6 +2692,22 @@
       "step3": {
         "title": "Objednavka potvrdena",
         "description": "Transakcia je potvrdena on-chain a objednavka je okamzite overena."
+      },
+      "flow": {
+        "customer": "Zákazník",
+        "customerDesc": "Zvolí SunPay pri pokladni",
+        "marketplace": "Trhovisko",
+        "marketplaceDesc": "Vytvorí platobnú požiadavku",
+        "wallet": "GoldenEra Wallet",
+        "walletDesc": "Pošle SCGE obchodníkovi",
+        "blockchain": "Blockchain",
+        "blockchainDesc": "Transakcia potvrdená on-chain",
+        "merchant": "Obchodník",
+        "merchantDesc": "Dostane SCGE okamžite",
+        "amount": "2,50 SCGE",
+        "equivalent": "≈ 50,00 €",
+        "confirmed": "Potvrdené",
+        "confirmations": "potvrdení"
       }
     },
     "benefits": {

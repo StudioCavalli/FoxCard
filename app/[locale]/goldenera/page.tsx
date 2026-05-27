@@ -22,6 +22,7 @@ import {
   Users,
   GraduationCap,
 } from 'lucide-react'
+import SunPayFlowDiagram from './SunPayFlowDiagram'
 
 export async function generateMetadata({
   params,
@@ -228,68 +229,25 @@ export default async function GoldenEraPage({
             </p>
           </div>
 
-          {/* 3-Step Flow */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="relative text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/20">
-                <Wallet className="w-10 h-10 text-white" />
-              </div>
-              <div className="absolute top-10 left-[60%] right-0 hidden md:block">
-                <div className="border-t-2 border-dashed border-amber-300 w-full" />
-              </div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold text-sm mb-4">
-                1
-              </span>
-              <h3
-                className="text-lg font-bold text-slate-900 mb-2"
-                style={{ fontFamily: 'var(--theme-font-heading)' }}
-              >
-                {t('sunpay.step1.title')}
-              </h3>
-              <p className="text-slate-600 text-sm">
-                {t('sunpay.step1.description')}
-              </p>
-            </div>
-
-            <div className="relative text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/20">
-                <Coins className="w-10 h-10 text-white" />
-              </div>
-              <div className="absolute top-10 left-[60%] right-0 hidden md:block">
-                <div className="border-t-2 border-dashed border-amber-300 w-full" />
-              </div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold text-sm mb-4">
-                2
-              </span>
-              <h3
-                className="text-lg font-bold text-slate-900 mb-2"
-                style={{ fontFamily: 'var(--theme-font-heading)' }}
-              >
-                {t('sunpay.step2.title')}
-              </h3>
-              <p className="text-slate-600 text-sm">
-                {t('sunpay.step2.description')}
-              </p>
-            </div>
-
-            <div className="relative text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/20">
-                <CheckCircle2 className="w-10 h-10 text-white" />
-              </div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold text-sm mb-4">
-                3
-              </span>
-              <h3
-                className="text-lg font-bold text-slate-900 mb-2"
-                style={{ fontFamily: 'var(--theme-font-heading)' }}
-              >
-                {t('sunpay.step3.title')}
-              </h3>
-              <p className="text-slate-600 text-sm">
-                {t('sunpay.step3.description')}
-              </p>
-            </div>
-          </div>
+          {/* Animated Flow Diagram */}
+          <SunPayFlowDiagram
+            labels={{
+              customer: t('sunpay.flow.customer'),
+              customerDesc: t('sunpay.flow.customerDesc'),
+              marketplace: t('sunpay.flow.marketplace'),
+              marketplaceDesc: t('sunpay.flow.marketplaceDesc'),
+              wallet: t('sunpay.flow.wallet'),
+              walletDesc: t('sunpay.flow.walletDesc'),
+              blockchain: t('sunpay.flow.blockchain'),
+              blockchainDesc: t('sunpay.flow.blockchainDesc'),
+              merchant: t('sunpay.flow.merchant'),
+              merchantDesc: t('sunpay.flow.merchantDesc'),
+              amount: t('sunpay.flow.amount'),
+              equivalent: t('sunpay.flow.equivalent'),
+              confirmed: t('sunpay.flow.confirmed'),
+              confirmations: t('sunpay.flow.confirmations'),
+            }}
+          />
         </div>
       </section>
 
