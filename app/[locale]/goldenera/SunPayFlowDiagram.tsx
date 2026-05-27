@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { User, Store, Wallet, Blocks, Building2 } from 'lucide-react'
 
 interface SunPayFlowDiagramProps {
   labels: {
@@ -65,11 +66,11 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
   }, [])
 
   const steps = [
-    { icon: '👤', label: labels.customer, desc: labels.customerDesc },
-    { icon: '🏪', label: labels.marketplace, desc: labels.marketplaceDesc },
-    { icon: '💳', label: labels.wallet, desc: labels.walletDesc },
-    { icon: '⛓️', label: labels.blockchain, desc: labels.blockchainDesc },
-    { icon: '🏦', label: labels.merchant, desc: labels.merchantDesc },
+    { Icon: User, label: labels.customer, desc: labels.customerDesc },
+    { Icon: Store, label: labels.marketplace, desc: labels.marketplaceDesc },
+    { Icon: Wallet, label: labels.wallet, desc: labels.walletDesc },
+    { Icon: Blocks, label: labels.blockchain, desc: labels.blockchainDesc },
+    { Icon: Building2, label: labels.merchant, desc: labels.merchantDesc },
   ]
 
   return (
@@ -103,7 +104,7 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
                     : 'bg-slate-100'
                 }`}
               >
-                {step.icon}
+                <step.Icon className={`w-7 h-7 ${activeStep >= i || showSuccess ? 'text-white' : 'text-slate-400'}`} />
               </div>
 
               {/* Label */}
@@ -148,48 +149,31 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
 
             {/* Arrow between cards */}
             {i < STEPS - 1 && (
-              <div className="flex flex-col items-center justify-center pt-12 px-1 w-16">
-                <div className="relative w-full h-[2px]">
-                  {/* Track */}
+              <div className="flex items-center self-center mt-[-40px] w-12">
+                <div className="relative flex-1 h-[2px]">
                   <div className="absolute inset-0 bg-slate-200 rounded-full" />
-                  {/* Fill */}
                   <div
                     className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 ${
                       showSuccess ? 'bg-emerald-400' : 'bg-amber-400'
                     }`}
                     style={{ width: activeStep > i ? '100%' : '0%' }}
                   />
-                  {/* Traveling dot */}
                   {activeStep === i + 1 && !showSuccess && (
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-amber-400 rounded-full shadow-md shadow-amber-400/50"
+                      className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-400 rounded-full shadow-sm shadow-amber-400/50"
                       style={{ animation: 'travelDot 0.7s ease-out forwards' }}
                     />
                   )}
                 </div>
-                {/* Arrow head */}
                 <div
-                  className={`w-0 h-0 mt-[-1px] border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent transition-colors duration-500 ${
+                  className={`w-0 h-0 flex-shrink-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent transition-colors duration-500 ${
                     activeStep > i
                       ? showSuccess
-                        ? 'border-l-[6px] border-l-emerald-400'
-                        : 'border-l-[6px] border-l-amber-400'
-                      : 'border-l-[6px] border-l-slate-200'
+                        ? 'border-l-[7px] border-l-emerald-400'
+                        : 'border-l-[7px] border-l-amber-400'
+                      : 'border-l-[7px] border-l-slate-200'
                   }`}
-                  style={{ marginLeft: 'auto' }}
                 />
-                {/* Amount badge on arrow 2→3 */}
-                {i === 1 && activeStep >= 2 && (
-                  <div
-                    className={`absolute mt-5 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-500 ${
-                      showSuccess
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {labels.amount}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -212,7 +196,7 @@ export default function SunPayFlowDiagram({ labels }: SunPayFlowDiagramProps) {
                     : 'bg-slate-100'
                 }`}
               >
-                {step.icon}
+                <step.Icon className={`w-7 h-7 ${activeStep >= i || showSuccess ? 'text-white' : 'text-slate-400'}`} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
